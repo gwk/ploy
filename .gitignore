@@ -1,0 +1,14 @@
+# Finder.
+.DS_Store
+
+# Python.
+__pycache__
+
+# Xcode.
+xcuserdata
+profile
+project.xcworkspace
+
+# Ploy.
+_bld
+_misc
