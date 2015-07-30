@@ -12,3 +12,4 @@ project.xcworkspace
 # Ploy.
 _bld
 _misc
+_repro.ploy
