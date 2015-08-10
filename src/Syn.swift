@@ -36,16 +36,16 @@ class Syn {
   let pos: Pos
   let visEnd: Pos // position past the last visible character.
   let end: Pos // position past the last member character, including whitespace.
-  let subs: Array<Syn>
+  let subs: [Syn]
   
-  var visRange: Range<Int> { return Range(start: pos.idx, end: visEnd.idx) }
-  var range: Range<Int> { return Range(start: pos.idx, end: end.idx) }
+  var visRange: Range<String.CharacterView.Index> { return Range(start: pos.idx, end: visEnd.idx) }
+  var range: Range<String.CharacterView.Index> { return Range(start: pos.idx, end: end.idx) }
   
   var visString: String { return String(src.text[visRange]) }
   var string: String { return String(src.text[range]) }
   
   
-  init(kind: SynKind, src: Src, pos: Pos, visEnd: Pos, end: Pos, subs: Array<Syn>) {
+  init(kind: SynKind, src: Src, pos: Pos, visEnd: Pos, end: Pos, subs: [Syn]) {
     self.kind = kind
     self.src = src
     self.pos = pos

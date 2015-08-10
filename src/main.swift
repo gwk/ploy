@@ -3,7 +3,7 @@
 
 var outPath = ""
 var mainPath = ""
-var modulePaths: Array<String> = []
+var modulePaths: [String] = []
 
 
 check(Process.arguments.count >= 3, "usage: output_path, main_src_path, module_paths….")
@@ -21,12 +21,14 @@ let tmpPath = outPath + ".tmp"
 let tmpFile = OutFile(path: tmpPath, create: 0o666)
 
 let mainSyn = parseFileAtPath(mainPath)
-let mainObj = compileMain(mainSyn)
+let main = compileMain(mainSyn)
 
 let modules = modulePaths.map {
   (path: String) -> Module in
   let syn = parseFileAtPath(path)
   return compileModule(syn)
 }
+
+emitProgram(tmpFile, main: main, modules: modules)
 
 copy(fromPath: tmpPath, toPath: outPath, create: 0o777)

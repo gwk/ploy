@@ -2,15 +2,9 @@
 
 
 struct Pos: CustomStringConvertible {
-  let idx: Int
+  let idx: String.CharacterView.Index
   let line: Int
   let col: Int
   
   var description: String { return "Pos(\(idx), \(line), \(col))" }
-  
-  func adv(dist: Int = 1) -> Pos { return Pos(idx: idx + 1, line: line, col: col) }
-  
-  func advLine() -> Pos { return Pos(idx: idx + 1, line: line + 1, col: 0) }
-  
-  func dist(end: Pos) -> Int { return end.idx - idx }
 }
