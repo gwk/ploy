@@ -68,11 +68,14 @@ class InFile: File {
   
   func read() -> String {
     let len = self.len
-    let buffer = malloc(len)
-    check(buffer != nil, "File.read: malloc failed for size: \(len); '\(desc)'.")
+    let bufferLen = len + 1
+    let buffer = malloc(bufferLen)
+    check(buffer != nil, "File.read: malloc failed for size: \(bufferLen); '\(desc)'.")
     let len_act = read(offset: 0, len: len, ptr: buffer)
     check(len_act == len, "File.read: expected read length: \(len); actually read \(len_act).")
-    let (s, _) = String.fromCStringRepairingIllFormedUTF8(unsafeBitCast(buffer, UnsafePointer<CChar>.self))
+    let charBuffer = unsafeBitCast(buffer, UnsafeMutablePointer<CChar>.self)
+    charBuffer[len] = 0
+    let (s, _) = String.fromCStringRepairingIllFormedUTF8(charBuffer)
     free(buffer)
     check(s != nil, "File.read: UTF8 error could not be repaired: '\(desc)'.")
     return s!
@@ -117,10 +120,21 @@ var std_out = OutFile(fd: STDOUT_FILENO, desc: "std_out")
 var std_err = OutFile(fd: STDERR_FILENO, desc: "std_err")
 
 
-func out<T>(item: T) { print(item,  &std_out, appendNewline: false) }
+func out<T>(item: T)  { print(item, &std_out, appendNewline: false) }
 func outL<T>(item: T) { print(item, &std_out, appendNewline: true) }
 
-func err<T>(item: T) { print(item, &std_err, appendNewline: false) }
+func err1<T>(item: T)  { print(item, &std_err, appendNewline: false) }
 func errL<T>(item: T) { print(item, &std_err, appendNewline: true) }
 
+func err(items: Any...) {
+  for item in items {
+    err1(item)
+  }
+}
 
+func errSL(items: Any...) {
+  for item in items {
+    err(item)
+  }
+  err("\n")
+}

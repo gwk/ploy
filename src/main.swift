@@ -20,14 +20,9 @@ for (i, arg) in Process.arguments.enumerate() {
 let tmpPath = outPath + ".tmp"
 let tmpFile = OutFile(path: tmpPath, create: 0o666)
 
-let mainSyn = parseFileAtPath(mainPath)
-let main = compileMain(mainSyn)
+let main = Src(path: mainPath).parseMain(verbose: true)
 
-let modules = modulePaths.map {
-  (path: String) -> Module in
-  let syn = parseFileAtPath(path)
-  return compileModule(syn)
-}
+let modules = modulePaths.map { Src(path: $0).parseModule(verbose: true) }
 
 emitProgram(tmpFile, main: main, modules: modules)
 
