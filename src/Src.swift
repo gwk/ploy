@@ -1,6 +1,7 @@
-// Copyright © 2015 gwk. Permission to use this file is granted in ploy/license.txt.
+// Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 import Darwin
+
 
 let ployDigitChars = Set("0123456789ABCDEFabcdef".characters)
 let ploySymHeadChars = Set("_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".characters)

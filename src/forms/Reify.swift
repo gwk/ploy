@@ -1,4 +1,4 @@
-// Copyright © 2015 gwk. Permission to use this file is granted in ploy/license.txt.
+// Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
 class Reify: _Form, TypeExpr { // type reification:  `T^A`.
