@@ -34,6 +34,7 @@ class _Form : Streamable {
     writeTo(&target, 0)
   }
 
+  func emit(em: Emit, _ depth: Int) { fatalError() }
 }
 
 

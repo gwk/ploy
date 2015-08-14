@@ -18,5 +18,28 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     target.write(val) // TODO: escape properly.
     target.write("\"\n")
   }
+  
+  override func emit(em: Emit, _ depth: Int) {
+    var s = "\""
+    for code in val.codes {
+      switch code {
+      case "\0":    s.extend("\\0")
+      case "\u{8}": s.extend("\\b")
+      case "\t":    s.extend("\\t")
+      case "\n":    s.extend("\\n")
+      case "\r":    s.extend("\\r")
+      case "\"":    s.extend("\\\"")
+      case "\\":    s.extend("\\\\")
+      default:
+        if code < " " || code > "~" {
+          s.extend("\\u{\(Int(code.value).hex)}")
+        } else {
+          s.append(Character(code))
+        }
+      }
+    }
+    s.append(Character("\""))
+    em.str(depth, s)
+  }
 }
 

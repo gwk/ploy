@@ -472,31 +472,29 @@ struct Src: CustomStringConvertible {
     return Do(Syn(src: self, pos: pos, visEnd: visEnd, end: end), stmts: stmts, expr: expr)
   }
   
-  func parseMain(verbose verbose: Bool = false) -> Main {
-    let do_ = parseBodyToImplicitDo(startPos)
-    if hasSome(do_.syn.end) {
-      parseFail(do_.syn.end, nil, "unexpected terminator character: '\(char(do_.syn.end))'")
+  func parseMain(verbose verbose: Bool = false) -> Do {
+    let main = parseBodyToImplicitDo(startPos)
+    if hasSome(main.syn.end) {
+      parseFail(main.syn.end, nil, "unexpected terminator character: '\(char(main.syn.end))'")
     }
-    let main = Main(body: do_)
     if verbose {
-      main.body.writeTo(&std_err)
+      main.writeTo(&std_err)
     }
     return main
   }
   
-  func parseModule(verbose verbose: Bool = false) -> Module {
+  func parseModule(verbose verbose: Bool = false) -> [In] {
     var ins: [In] = []
     let end = parseForms(&ins, startPos, "module", "`in` statement")
     if hasSome(end) {
       parseFail(end, nil, "unexpected terminator character: '\(char(end))'")
     }
-    let module = Module(ins: ins)
     if verbose {
-      for i in module.ins {
+      for i in ins {
         i.writeTo(&std_err)
       }
     }
-    return module
+    return ins
   }
 }
 
