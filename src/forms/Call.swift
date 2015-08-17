@@ -22,5 +22,17 @@ class Call : _Form, Expr {
     callee.writeTo(&target, depth + 1)
     arg.writeTo(&target, depth + 1)
   }
+  
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    em.str(depth, "((")
+    let fnType = callee.compile(em, depth + 1, scope, anySigReturning(expType)) as! TypeValSig
+    em.append(")(")
+    arg.compile(em, depth + 1, scope, fnType.par)
+    em.append("))")
+    return fnType.ret
+  }
 }
 
+
+// function call implied by adjacency to Cmpd: `f(a b)`.
+class CallAdj: Call {}

@@ -32,7 +32,7 @@
 		EC6523991B7BD2BF00CAA454 /* Do.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523811B7BD2BF00CAA454 /* Do.swift */; };
 		EC65239A1B7BD2BF00CAA454 /* Enum.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523821B7BD2BF00CAA454 /* Enum.swift */; };
 		EC65239B1B7BD2BF00CAA454 /* Fn.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523831B7BD2BF00CAA454 /* Fn.swift */; };
-		EC65239C1B7BD2BF00CAA454 /* HostDecl.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523841B7BD2BF00CAA454 /* HostDecl.swift */; };
+		EC65239C1B7BD2BF00CAA454 /* HostVal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523841B7BD2BF00CAA454 /* HostVal.swift */; };
 		EC65239D1B7BD2BF00CAA454 /* If.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523851B7BD2BF00CAA454 /* If.swift */; };
 		EC65239E1B7BD2BF00CAA454 /* In.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523861B7BD2BF00CAA454 /* In.swift */; };
 		EC65239F1B7BD2BF00CAA454 /* LitNum.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523871B7BD2BF00CAA454 /* LitNum.swift */; };
@@ -47,12 +47,12 @@
 		EC8E68981B6986F00080F316 /* Pos.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E68971B6986F00080F316 /* Pos.swift */; };
 		EC8E689A1B698B660080F316 /* Src.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E68991B698B660080F316 /* Src.swift */; };
 		EC8E689C1B698C110080F316 /* Syn.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E689B1B698C110080F316 /* Syn.swift */; };
-		EC8E68A01B69A4B80080F316 /* compile.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E689F1B69A4B80080F316 /* compile.swift */; };
 		EC98DE811B7E23B500557D35 /* Scope.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC98DE801B7E23B500557D35 /* Scope.swift */; };
 		EC98DE831B7E277D00557D35 /* OutputStreamType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC98DE821B7E277D00557D35 /* OutputStreamType.swift */; };
 		EC98DE851B7E848E00557D35 /* TypeVal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC98DE841B7E848E00557D35 /* TypeVal.swift */; };
 		ECAE89171B693B46002AE9B9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAE89161B693B46002AE9B9 /* main.swift */; };
 		ECDA37151B7EB16200939000 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37141B7EB16200939000 /* File.swift */; };
+		ECDA37171B80FE5200939000 /* HostType.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37161B80FE5200939000 /* HostType.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -94,7 +94,7 @@
 		EC6523811B7BD2BF00CAA454 /* Do.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Do.swift; sourceTree = "<group>"; };
 		EC6523821B7BD2BF00CAA454 /* Enum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enum.swift; sourceTree = "<group>"; };
 		EC6523831B7BD2BF00CAA454 /* Fn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Fn.swift; sourceTree = "<group>"; };
-		EC6523841B7BD2BF00CAA454 /* HostDecl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HostDecl.swift; sourceTree = "<group>"; };
+		EC6523841B7BD2BF00CAA454 /* HostVal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HostVal.swift; sourceTree = "<group>"; };
 		EC6523851B7BD2BF00CAA454 /* If.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = If.swift; sourceTree = "<group>"; };
 		EC6523861B7BD2BF00CAA454 /* In.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = In.swift; sourceTree = "<group>"; };
 		EC6523871B7BD2BF00CAA454 /* LitNum.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LitNum.swift; sourceTree = "<group>"; };
@@ -109,13 +109,13 @@
 		EC8E68971B6986F00080F316 /* Pos.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pos.swift; sourceTree = "<group>"; };
 		EC8E68991B698B660080F316 /* Src.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Src.swift; sourceTree = "<group>"; };
 		EC8E689B1B698C110080F316 /* Syn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Syn.swift; sourceTree = "<group>"; };
-		EC8E689F1B69A4B80080F316 /* compile.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = compile.swift; sourceTree = "<group>"; };
 		EC98DE801B7E23B500557D35 /* Scope.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scope.swift; sourceTree = "<group>"; };
 		EC98DE821B7E277D00557D35 /* OutputStreamType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OutputStreamType.swift; path = qk/src/std/OutputStreamType.swift; sourceTree = "<group>"; };
 		EC98DE841B7E848E00557D35 /* TypeVal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeVal.swift; sourceTree = "<group>"; };
 		ECAE89051B69391F002AE9B9 /* ploy-swift */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ploy-swift"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECAE89161B693B46002AE9B9 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ECDA37141B7EB16200939000 /* File.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = File.swift; path = qk/src/core/File.swift; sourceTree = "<group>"; };
+		ECDA37161B80FE5200939000 /* HostType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HostType.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -164,7 +164,8 @@
 				EC6523811B7BD2BF00CAA454 /* Do.swift */,
 				EC6523821B7BD2BF00CAA454 /* Enum.swift */,
 				EC6523831B7BD2BF00CAA454 /* Fn.swift */,
-				EC6523841B7BD2BF00CAA454 /* HostDecl.swift */,
+				ECDA37161B80FE5200939000 /* HostType.swift */,
+				EC6523841B7BD2BF00CAA454 /* HostVal.swift */,
 				EC6523851B7BD2BF00CAA454 /* If.swift */,
 				EC6523861B7BD2BF00CAA454 /* In.swift */,
 				EC6523871B7BD2BF00CAA454 /* LitNum.swift */,
@@ -202,7 +203,6 @@
 			isa = PBXGroup;
 			children = (
 				EC6523771B7BD2BF00CAA454 /* forms */,
-				EC8E689F1B69A4B80080F316 /* compile.swift */,
 				EC1FE8F31B6BE31200112BB0 /* Emit.swift */,
 				EC5BDF1D1B7A40EC00054159 /* Form.swift */,
 				ECAE89161B693B46002AE9B9 /* main.swift */,
@@ -284,6 +284,7 @@
 				EC6523951B7BD2BF00CAA454 /* Case.swift in Sources */,
 				EC6523A41B7BD2BF00CAA454 /* Scoped.swift in Sources */,
 				EC1FE8F11B6BE20C00112BB0 /* SequenceType.swift in Sources */,
+				ECDA37171B80FE5200939000 /* HostType.swift in Sources */,
 				EC1FE8EB1B6BE20C00112BB0 /* Character.swift in Sources */,
 				EC6523A71B7BD2BF00CAA454 /* Sym.swift in Sources */,
 				EC6523A01B7BD2BF00CAA454 /* LitStr.swift in Sources */,
@@ -308,13 +309,12 @@
 				EC1FE8ED1B6BE20C00112BB0 /* Dictionary.swift in Sources */,
 				EC1FE8EE1B6BE20C00112BB0 /* Int.swift in Sources */,
 				EC65239A1B7BD2BF00CAA454 /* Enum.swift in Sources */,
-				EC8E68A01B69A4B80080F316 /* compile.swift in Sources */,
 				EC6523A31B7BD2BF00CAA454 /* Reify.swift in Sources */,
 				EC5BDF1E1B7A40EC00054159 /* Form.swift in Sources */,
 				EC1FE8EC1B6BE20C00112BB0 /* CollectionType.swift in Sources */,
 				EC1FE8EF1B6BE20C00112BB0 /* Optional.swift in Sources */,
 				EC6523921B7BD2BF00CAA454 /* Ann.swift in Sources */,
-				EC65239C1B7BD2BF00CAA454 /* HostDecl.swift in Sources */,
+				EC65239C1B7BD2BF00CAA454 /* HostVal.swift in Sources */,
 				EC98DE831B7E277D00557D35 /* OutputStreamType.swift in Sources */,
 				EC49BCFB1B750C3200660AF0 /* check.swift in Sources */,
 			);

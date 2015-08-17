@@ -22,9 +22,17 @@ class Reify: _Form, TypeExpr { // type reification:  `T^A`.
     callee.writeTo(&target, depth + 1)
     arg.writeTo(&target, depth + 1)
   }
+
+  func typeVal(scope: Scope, _ subj: String) -> TypeVal {
+    fatalError()
+  }
+
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    fatalError()
+  }
 }
 
-class ReifyAdj: Reify { // type reification implied by adjacency to tuple: `T<A B>`.
-  
-}
+
+/// type reification implied by adjacency to CmpdType: `T<A B>`.
+class ReifyAdj: Reify {}
 

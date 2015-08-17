@@ -18,7 +18,7 @@ func emitProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   let em = Emit()
   em.str(0, "#!/usr/bin/env iojs")
   em.str(0, "\"use strict\";\n")
-  em.str(0, "function() { // ploy namespace.")
+  em.str(0, "(function(){ // ploy namespace.")
   em.str(0, "// host.js.\n")
   let host_src = InFile(path: hostPath).read()
   em.str(0, host_src)
@@ -26,11 +26,11 @@ func emitProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
 
   for i in ins {
     em.str(0, "// in \(i.name.string)")
-    i.emit(em, 0)
+    i.compile(em, 0, globalScope, typeVoid)
     em.str(0, "")
   }
-  main.emit(em, 0)
-  em.str(0, "}()")
+  main.compile(em, 0, globalScope, typeInt)
+  em.str(0, "})()")
 
   for l in em.lines {
     file.write(l)

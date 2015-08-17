@@ -24,7 +24,7 @@ for (i, arg) in Process.arguments.enumerate() {
 check(hostPath.characters.count > 0, "host.ploy must be specified in the modules list")
 
 let tmpPath = outPath + ".tmp"
-let tmpFile = OutFile(path: tmpPath, create: 0o666)
+let tmpFile = OutFile(path: tmpPath, create: 0o644)
 
 let main = Src(path: mainPath).parseMain(verbose: true)
 
@@ -32,4 +32,5 @@ let modules = modulePaths.flatMap { Src(path: $0).parseModule(verbose: true) }
 
 emitProgram(tmpFile, hostPath: hostPath, main: main, ins: modules)
 
-copy(fromPath: tmpPath, toPath: outPath, create: 0o777)
+copy(fromPath: tmpPath, toPath: outPath, create: 0o644)
+OutFile(path: outPath).setPermissions(0o755)

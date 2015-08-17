@@ -22,5 +22,13 @@ class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
     par.writeTo(&target, depth + 1)
     ret.writeTo(&target, depth + 1)
   }
+
+  func typeVal(scope: Scope, _ subj: String) -> TypeVal {
+    return TypeValSig(par: par.typeVal(scope, "signature"), ret: par.typeVal(scope, "signature"))
+  }
+
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    fatalError()
+  }
 }
 

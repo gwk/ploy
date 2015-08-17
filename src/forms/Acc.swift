@@ -22,5 +22,9 @@ class Acc: _Form, Expr { // accessor: `field@val`.
     name.writeTo(&target, depth + 1)
     val.writeTo(&target, depth + 1)
   }
+
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    fatalError()
+  }
 }
 

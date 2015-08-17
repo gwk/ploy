@@ -22,5 +22,9 @@ class Alias: _Form, Stmt, Def { // type alias: `TypeName := TypeExpr`.
     name.writeTo(&target, depth + 1)
     type.writeTo(&target, depth + 1)
   }
+  
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    fatalError()
+  }
 }
 

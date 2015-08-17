@@ -1,15 +1,18 @@
 # © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-in HOST
+in host
 
-PLOY-HOST std-out Int;
-PLOY-HOST std-err Int;
+host-type Int;
+host-type Str;
 
-PLOY-HOST exit Int%<>;
+host-val std-out Int;
+host-val std-err Int;
 
-PLOY-HOST write-Bool <FileDescriptor Bool>%<>;
-PLOY-HOST write-Int <FileDescriptor Int>%<>;
-PLOY-HOST write-Str <FileDescriptor Str>%<>;
+host-val exit Int%<>;
+
+#host-val write-Bool <FileDescriptor Bool>%<>;
+#host-val write-Int <FileDescriptor Int>%<>;
+#host-val write-Str <FileDescriptor Str>%<>;
 
 ;

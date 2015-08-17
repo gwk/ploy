@@ -4,11 +4,13 @@
 class If: _Form, Expr { // if statement: `if cases… default;`.
   let cases: [Case]
   let dflt: Expr?
+
   init(_ syn: Syn, cases: [Case], dflt: Expr?) {
     self.cases = cases
     self.dflt = dflt
     super.init(syn)
   }
+
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
     for c in cases {
@@ -19,5 +21,8 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
     }
   }
   
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    fatalError()
+  }
 }
 

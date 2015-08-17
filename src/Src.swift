@@ -1,7 +1,5 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
-import Darwin
-
 
 let ployDigitChars = Set("0123456789ABCDEFabcdef".characters)
 let ploySymHeadChars = Set("_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".characters)
@@ -9,13 +7,18 @@ let ploySymTailChars = ployDigitChars.union(ploySymHeadChars).union(["-"])
 let ployTerminatorChars = Set(")>]};".characters)
 
 
-struct Src: CustomStringConvertible {
+class Src: CustomStringConvertible {
   let path: String
   let text: String
   
   init(path: String) {
     self.path = path
     self.text = InFile(path: path).read()
+  }
+  
+  init(name: String) {
+    self.path = name
+    self.text = ""
   }
   
   var description: String { return "Src(\(path))" }
@@ -100,10 +103,10 @@ struct Src: CustomStringConvertible {
 
   @noreturn func fail(pos: Pos, _ end: Pos?, _ prefix: String, _ msg: String) {
     errPos(pos, end: end, prefix: prefix, msg: msg)
-    exit(1)
+    Process.exit(1)
   }
 
-  @noreturn func parseFail(pos: Pos, _ end: Pos?, _ msg: String) { fail(pos, end, "parse error", msg) }
+  @noreturn func failParse(pos: Pos, _ end: Pos?, _ msg: String) { fail(pos, end, "parse error", msg) }
 
   func parseSpace(pos: Pos) -> Pos {
     var p = pos
@@ -148,7 +151,7 @@ struct Src: CustomStringConvertible {
       let c = char(p)
       if c == "." {
         if foundDot {
-          parseFail(pos, adv(p), "repeated '.' in number literal.")
+          failParse(pos, adv(p), "repeated '.' in number literal.")
         }
         foundDot = true
       } else if !ployDigitChars.contains(c) {
@@ -184,25 +187,25 @@ struct Src: CustomStringConvertible {
         case "x":   ordPos = adv(p); ordCount = 2
         case "u":   ordPos = adv(p); ordCount = 4
         case "U":   ordPos = adv(p); ordCount = 6
-        default:    parseFail(p, nil, "invalid escape character")
+        default:    failParse(p, nil, "invalid escape character")
         }
         if let e = e {
           res.append(e)
         }
       } else if ordCount > 0 {
         if !ployDigitChars.contains(c) {
-          parseFail(p, nil, "escape ordinal must be a hexadecimal digit")
+          failParse(p, nil, "escape ordinal must be a hexadecimal digit")
         }
         ordCount--
       } else {
         if let op = ordPos {
           if let ord = Int(slice(op, p), radix: 16) {
             if ord > 0x10ffff {
-              parseFail(op, p, "escaped unicode ordinal exceeds maximum value of 0x10ffff")
+              failParse(op, p, "escaped unicode ordinal exceeds maximum value of 0x10ffff")
             }
             res.append(Character(UnicodeScalar(ord)))
           } else {
-            parseFail(op, p, "escaped unicode ordinal is invalid")
+            failParse(op, p, "escaped unicode ordinal is invalid")
           }
           ordPos = nil
         }
@@ -217,7 +220,7 @@ struct Src: CustomStringConvertible {
       }
       p = adv(p)
     }
-    parseFail(pos, p, "unterminated string literal")
+    failParse(pos, p, "unterminated string literal")
   }
   
   // MARK: compound helpers.
@@ -225,7 +228,7 @@ struct Src: CustomStringConvertible {
   func synForTerminator(pos: Pos, _ p: Pos, _ terminator: Character, _ formName: String) -> Syn {
     let c = char(p)
     if !hasSome(p) || c != terminator {
-      parseFail(pos, p, "`\(formName)` form expects '\(terminator)' terminator; received '\(c)'.")
+      failParse(pos, p, "`\(formName)` form expects '\(terminator)' terminator; received '\(c)'.")
     }
     let visEnd = adv(p)
     return Syn(src: self, pos: pos, visEnd: visEnd, end: parseSpace(visEnd))
@@ -285,7 +288,7 @@ struct Src: CustomStringConvertible {
       } else if i == forms.lastIndex {
         dflt = castForm(f, "`if` form", "default expression")
       } else {
-        f.syn.syntaxFail("`if` form expects `?` case but received \(f.syntaxName).")
+        f.failSyntax("`if` form expects `?` case but received \(f.syntaxName).")
       }
     }
     return If(synForSemicolon(sym.syn.pos, end, "`if` form"), cases: cases, dflt: dflt)
@@ -310,10 +313,15 @@ struct Src: CustomStringConvertible {
     return Struct(synForSemicolon(sym.syn.pos, end, "enum"), name: name, fields: fields)
   }
   
-  func parseHostDecl(sym: Sym) -> Form {
+  func parseHostType(sym: Sym) -> Form {
     let name: Sym = parseForm(sym.syn.end, "`PLOY-HOST` form", "name symbol")
-    let type: TypeExpr = parseForm(name.syn.end, "`PLOY-HOST` form", "type expression")
-    return HostDecl(synForSemicolon(sym.syn.pos, type.syn.end, "PLOY-HOST"), name: name, type: type)
+    return HostType(synForSemicolon(sym.syn.pos, name.syn.end, "host-type"), name: name)
+  }
+  
+  func parseHostVal(sym: Sym) -> Form {
+    let name: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
+    let type: TypeExpr = parseForm(name.syn.end, "`host-val` form", "type expression")
+    return HostVal(synForSemicolon(sym.syn.pos, type.syn.end, "host-val"), name: name, type: type)
   }
   
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
@@ -323,7 +331,8 @@ struct Src: CustomStringConvertible {
     "in"        : parseIn,
     "pub"       : parsePub,
     "struct"    : parseStruct,
-    "PLOY-HOST" : parseHostDecl,
+    "host-type" : parseHostType,
+    "host-val"  : parseHostVal,
   ]
   
   func parsePoly(pos: Pos) -> Form {
@@ -347,7 +356,7 @@ struct Src: CustomStringConvertible {
     case "(": return parseCmpd(pos, p)
     case "<": return parseCmpdType(pos, p)
     case "{": return parseDo(pos, p)
-    default: parseFail(pos, nil, "unexpected character: '\(c)'.")
+    default: failParse(pos, nil, "unexpected character: '\(c)'.")
     }
   }
   
@@ -377,8 +386,8 @@ struct Src: CustomStringConvertible {
   }()
   
   let adjacency_operators: [(Character, (Form, Form)->Form)] = [
-    ("(", Call.mk),
-    ("^", Reify.mk)
+    ("(", CallAdj.mk),
+    ("^", ReifyAdj.mk)
   ]
   
   func parsePhrase(pos: Pos, precedence: Int = 0) -> Form {
@@ -421,7 +430,7 @@ struct Src: CustomStringConvertible {
         break
       }
       if !prevSpace {
-        parseFail(p, nil, "adjacent expressions require a separating space.")
+        failParse(p, nil, "adjacent expressions require a separating space.")
       }
       let form = parsePhrase(p)
       p = form.syn.end
@@ -461,7 +470,7 @@ struct Src: CustomStringConvertible {
         stmts.append(s)
       } else {
         let exp = isLast ? "tail form to be either a statement or an expression" : "non-tail form to be a statement";
-        f.syn.syntaxFail("body expects \(exp); received \(f.syntaxName).")
+        f.failSyntax("body expects \(exp); received \(f.syntaxName).")
       }
     }
     return (stmts, expr, visEnd, end)
@@ -475,7 +484,7 @@ struct Src: CustomStringConvertible {
   func parseMain(verbose verbose: Bool = false) -> Do {
     let main = parseBodyToImplicitDo(startPos)
     if hasSome(main.syn.end) {
-      parseFail(main.syn.end, nil, "unexpected terminator character: '\(char(main.syn.end))'")
+      failParse(main.syn.end, nil, "unexpected terminator character: '\(char(main.syn.end))'")
     }
     if verbose {
       main.writeTo(&std_err)
@@ -487,7 +496,7 @@ struct Src: CustomStringConvertible {
     var ins: [In] = []
     let end = parseForms(&ins, startPos, "module", "`in` statement")
     if hasSome(end) {
-      parseFail(end, nil, "unexpected terminator character: '\(char(end))'")
+      failParse(end, nil, "unexpected terminator character: '\(char(end))'")
     }
     if verbose {
       for i in ins {

@@ -21,8 +21,20 @@ class Do: _Form, Expr { // do block: `{…}`.
     }
   }
   
-  override func emit(em: Emit, _ depth: Int) {
-    
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    em.str(depth, "(function(){")
+    for stmt in stmts {
+      stmt.compile(em, depth + 1, scope, typeVoid)
+    }
+    var ret: TypeVal = typeVoid
+    if let expr = expr {
+      em.str(depth + 1, "return")
+      ret = expr.compile(em, depth + 1, scope, expType)
+    } else if expType != typeVoid {
+      self.fail("type error", "expected type \(expType); body has no return expression.")
+    }
+    em.append("})();")
+    return ret
   }
 }
 

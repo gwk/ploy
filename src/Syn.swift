@@ -37,9 +37,4 @@ class Syn: CustomStringConvertible {
     }
     return "\(pos.line + 1):\(pos.col + 1)\(endStr)"
   }
-  
-  @noreturn func fail(prefix: String, _ msg: String) { src.fail(pos, visEnd, prefix, msg) }
-  
-  @noreturn func syntaxFail(msg: String) { fail("syntax error", msg) }
-  
 }

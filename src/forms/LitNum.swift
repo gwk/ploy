@@ -18,5 +18,11 @@ class LitNum: _Form, Expr { // numeric literal: `0`.
     target.write(String(val))
     target.write("\n")
   }
+
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    // TODO: typecheck.
+    em.str(depth, val.dec)
+    return typeInt
+  }
 }
 

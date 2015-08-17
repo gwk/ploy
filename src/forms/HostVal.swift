@@ -1,31 +1,24 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class In: _Form, Form { // in statement: `in module-name statements…;`.
+class HostVal: _Form, Def { // host value declaration: `host-val name Type;`.
   let name: Sym
-  let defs: [Def]
+  let type: TypeExpr
 
-  init(_ syn: Syn, name: Sym, defs: [Def]) {
+  init(_ syn: Syn, name: Sym, type: TypeExpr) {
     self.name = name
-    self.defs = defs
+    self.type = type
     super.init(syn)
   }
-  
+
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
     name.writeTo(&target, depth + 1)
-    for d in defs {
-      d.writeTo(&target, depth + 1)
-    }
+    type.writeTo(&target, depth + 1)
   }
   
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    // TODO: module scope.
-    for d in defs {
-      d.compile(em, depth + 1, scope, typeVoid)
-    }
+    scope.addRec(name, .Val, type.typeVal(scope, "host value declaration")) // host declarations are never lazy.
     return typeVoid
   }
 }
-
-

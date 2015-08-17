@@ -19,7 +19,7 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     target.write("\"\n")
   }
   
-  override func emit(em: Emit, _ depth: Int) {
+  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     var s = "\""
     for code in val.codes {
       switch code {
@@ -40,6 +40,8 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     }
     s.append(Character("\""))
     em.str(depth, s)
+    return typeStr
   }
 }
+
 
