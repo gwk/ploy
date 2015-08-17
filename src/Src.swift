@@ -1,9 +1,11 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-let ployDigitChars = Set("0123456789ABCDEFabcdef".characters)
-let ploySymHeadChars = Set("_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".characters)
-let ploySymTailChars = ployDigitChars.union(ploySymHeadChars).union(["-"])
+let ployOctChars = Set("01234567".characters)
+let ployDecChars = Set("0123456789".characters)
+let ployHexChars = Set("0123456789ABCDEFabcdef".characters)
+let ploySymHeadChars = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".characters)
+let ploySymTailChars = ploySymHeadChars.union(ployDecChars).union(["-"])
 let ployTerminatorChars = Set(")>]};".characters)
 
 
@@ -71,10 +73,11 @@ class Src: CustomStringConvertible {
     let indent = String(count: pos.col, repeatedValue: Character(" "))
     if let end = end {
       assert(pos.line == end.line)
-      return indent + String(count: end.col - pos.col, repeatedValue: Character("~"))
-    } else {
-      return indent + "^"
+      if pos.idx < end.idx {
+        return indent + String(count: end.col - pos.col, repeatedValue: Character("~"))
+      }
     }
+    return indent + "^"
   }
   
   func underlines(pos: Pos, _ end: Pos, lineLen: Int) -> (String, String) {
@@ -145,7 +148,7 @@ class Src: CustomStringConvertible {
   }
   
   func parseLitNum(pos: Pos, var foundDot: Bool = false) -> LitNum {
-    assert(ployDigitChars.contains(char(pos)))
+    assert(ployDecChars.contains(char(pos)) || char(pos) == ".")
     var p = adv(pos)
     while hasSome(p) {
       let c = char(p)
@@ -154,13 +157,19 @@ class Src: CustomStringConvertible {
           failParse(pos, adv(p), "repeated '.' in number literal.")
         }
         foundDot = true
-      } else if !ployDigitChars.contains(c) {
+      } else if !ployDecChars.contains(c) {
         break
       }
       p = adv(p)
     }
     let string = slice(pos, p)
-    return LitNum(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), val: Int(string, radix: 10)!)
+    if foundDot {
+      failParse(pos, p, "floating point literals are not yet supported.")
+    }
+    guard let val = Int(string, radix: 10) else {
+      failParse(pos, p, "invalid number literal (INTERNAL ERROR).")
+    }
+    return LitNum(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), val: val)
   }
   
   func parseLitStr(pos: Pos) -> LitStr {
@@ -193,7 +202,7 @@ class Src: CustomStringConvertible {
           res.append(e)
         }
       } else if ordCount > 0 {
-        if !ployDigitChars.contains(c) {
+        if !ployHexChars.contains(c) {
           failParse(p, nil, "escape ordinal must be a hexadecimal digit")
         }
         ordCount--
@@ -335,6 +344,8 @@ class Src: CustomStringConvertible {
     "host-val"  : parseHostVal,
   ]
   
+  // MARK: parse dispatch.
+  
   func parsePoly(pos: Pos) -> Form {
     let c = char(pos)
     if ploySymHeadChars.contains(c) {
@@ -344,7 +355,7 @@ class Src: CustomStringConvertible {
       }
       return sym
     }
-    if ployDigitChars.contains(c) {
+    if ployDecChars.contains(c) {
       return parseLitNum(pos)
     }
     if c == "\"" || c == "'" {
@@ -352,6 +363,7 @@ class Src: CustomStringConvertible {
     }
     let p = parseSpace(adv(pos))
     switch c {
+    case ".": return parseLitNum(pos, foundDot: true)
     case "$": return parseBling(pos, p)
     case "(": return parseCmpd(pos, p)
     case "<": return parseCmpdType(pos, p)

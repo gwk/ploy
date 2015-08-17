@@ -1,0 +1,8 @@
+{
+  'compile-code': 1,
+  'compile-err': '''\
+type error: test/2-error/empty.ploy:1:1-0: expected type Int; body has no return expression.
+  
+  ^
+'''
+}

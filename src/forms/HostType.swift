@@ -15,7 +15,7 @@ class HostType: _Form, Def { // host type declaration: `host-type name;`.
   }
   
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    scope.addRec(name, .Type, TypeValPrim(name: name))
+    scope.addRec(name, .Type, TypeValPrim(sym: name))
     return typeVoid
   }
 }

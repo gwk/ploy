@@ -28,12 +28,12 @@ class Do: _Form, Expr { // do block: `{…}`.
     }
     var ret: TypeVal = typeVoid
     if let expr = expr {
-      em.str(depth + 1, "return")
+      em.str(depth + 1, "return (")
       ret = expr.compile(em, depth + 1, scope, expType)
     } else if expType != typeVoid {
       self.fail("type error", "expected type \(expType); body has no return expression.")
     }
-    em.append("})();")
+    em.append(")})()")
     return ret
   }
 }

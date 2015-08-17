@@ -1,0 +1,8 @@
+{
+  'compile-err': '''\
+parse error: test/2-error/bare-semicolon.ploy:1:1: unexpected terminator character: ';'
+  ;
+  ^
+''',
+  'compile-code': 1
+}

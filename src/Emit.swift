@@ -29,8 +29,11 @@ func emitProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
     i.compile(em, 0, globalScope, typeVoid)
     em.str(0, "")
   }
+  em.str(0, "// main")
+  em.str(0, "exit(")
   main.compile(em, 0, globalScope, typeInt)
-  em.str(0, "})()")
+  em.str(0, ") // main exit.")
+  em.str(0, "})() // ploy namespace.")
 
   for l in em.lines {
     file.write(l)
