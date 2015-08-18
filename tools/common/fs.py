@@ -84,6 +84,10 @@ def remove_dir(path): return _os.rmdir(path)
 
 def remove_dirs(path): return _os.removedirs(path)
 
+def remove_file_if_exists(path):
+  if is_file(path):
+    remove_file(path)
+
 
 def current_dir(): return abs_path('.')
 

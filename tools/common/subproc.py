@@ -37,7 +37,7 @@ def _decode(s):
   return s if s is None else s.decode('utf-8')
 
 
-def run_cmd(cmd, stdin=None, out=None, err=None, env=None, exp=0):
+def run_cmd(cmd, cwd=None, stdin=None, out=None, err=None, env=None, exp=0):
   '''
   run a command and return (exit_code, std_out, std_err).
   the underlying Subprocess shell option is not supported
@@ -60,6 +60,7 @@ def run_cmd(cmd, stdin=None, out=None, err=None, env=None, exp=0):
 
   p = _sp.Popen(
     cmd,
+    cwd=cwd,
     stdin=f_in,
     stdout=_special_or_file(out),
     stderr=_special_or_file(err),

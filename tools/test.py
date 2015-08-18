@@ -21,7 +21,6 @@ results_dir = '_bld'
 
 arg_parser = argparse.ArgumentParser(description='test harness for ploy.')
 arg_parser.add_argument('-compiler', help='compiler command string')
-arg_parser.add_argument('-interpreter', help='interpreter command string')
 arg_parser.add_argument('-timeout', type=int, help='subprocess timeout')
 arg_parser.add_argument('-parse', action='store_true', help='parse test cases and exit'),
 arg_parser.add_argument('-fast',  action='store_true', help='exit on first error'),
@@ -51,7 +50,6 @@ def jsq(words):
   return quote(words) if isinstance(words, str) else ' '.join(quote(w) for w in words)
 
 compiler_dflt = lex(args.compiler) if args.compiler else None
-interpreter_dflt = lex(args.interpreter) if args.interpreter else None
 
 # file checks.
 
@@ -92,7 +90,6 @@ case_defaults = {
   # files is a dict mapping file path to either an expectation string or (file-check-mode, expectation).
   'ignore'          : False, # ignore this test case.
   'in'              : None, # std in text.
-  'interpreter'     : interpreter_dflt,
   'libs'            : [], # list of library files.
   'main'            : None, # main file; defaults to file in test directory matching test name.
   'out'             : '', # std out expectation.
@@ -110,18 +107,19 @@ case_non_cmd_keys = { # keys that only make since in the absence of a custom cmd
   'main',
 }
 
-def run_cmd(cmd, timeout, exp_code, in_path, out_path, err_path, env):
+def run_cmd(cmd, timeout, exp_code, cwd, in_path, out_path, err_path, env):
   'run a subprocess; return True if process completed and exit code matched expectation.'
 
   # print verbose command info formatted as shell commands for manual repro.
   if dbg:
+    logSL('cmd:', *(cmd + ['<{} # 1>{} 2>{}'.format(in_path, out_path, err_path)]))
+    logSL('cwd:', cwd)
     if env:
       logSL('env:', *['{}={};'.format(*p) for p in env.items()])
-    logSL('cmd:', *(cmd + ['<{} # 1>{} 2>{}'.format(in_path, out_path, err_path)]))
   
   # open outputs, create subprocess.
   with open(in_path, 'r') as i, open(out_path, 'w') as o, open(err_path, 'w') as e:
-    proc = subprocess.Popen(cmd, stdin=i, stdout=o, stderr=e, env=env)
+    proc = subprocess.Popen(cmd, cwd=cwd, stdin=i, stdout=o, stderr=e, env=env)
     # timeout alarm handler.
     # since signal handlers carry reentrancy concerns, do not do any IO within the handler.
     timed_out = False
@@ -179,9 +177,9 @@ def check_file_exp(path, mode, exp):
   return False
 
 
-def check_cmd(cmd, timeout, exp_code, exp_triples, in_path, out_path, err_path, env):
+def check_cmd(cmd, timeout, exp_code, exp_triples, cwd, in_path, out_path, err_path, env):
   'run a command and check against file expectations; return True if all expectations matched.'
-  code_ok = run_cmd(cmd, timeout, exp_code, in_path, out_path, err_path, env)
+  code_ok = run_cmd(cmd, timeout, exp_code, cwd, in_path, out_path, err_path, env)
   # use a list comprehension to force evaluation of all triples; avoids break on first failure.
   files_ok = all([check_file_exp(*t) for t in exp_triples])
   return code_ok and files_ok
@@ -194,10 +192,17 @@ def run_case(case_path, case):
   if case_path.find('..') != -1: raiseS("case path cannot contain '..':", case_path)
   src_dir, file_name = split_dir(case_path)
   case_name = split_ext(file_name)[0]
-  exe_path = path_join(results_dir, src_dir, case_name) # compiled exe path, if any.
+  exe_rel = '../' + case_name
+  exe_path = path_join(results_dir, src_dir, case_name) # compiled exe path.
   test_dir = path_join(results_dir, src_dir, case_name + '-test') # test output directory.
+  prof_cwd_path = 'default.profraw' # llvm name is fixed; always outputs to cwd.
+  prof_path = exe_path + '.profraw'
+
+  # remove old files.
+  remove_file_if_exists(prof_cwd_path)
+  remove_file_if_exists(exe_path)
+  remove_file_if_exists(prof_path)
   # set up directory.
-  if dbg: logSL("setting up test directory:", test_dir)
   if path_exists(test_dir):
     remove_dir_contents(test_dir)
   else:
@@ -224,12 +229,10 @@ def run_case(case_path, case):
   compile_timeout = checked_timeout('compile-timeout')
 
   compiler = case['compiler']
-  interpreter = case['interpreter']
 
   test_env_vars = {    
     'SRC_DIR' : src_dir,
     'COMPILER' : jsq(compiler or 'NO-COMPILER'),
-    'INTERPRETER' : jsq(interpreter or 'NO-INTERPRETER'),
   }
   if dbg:
     logLSSL('test env vars:', *('{}: {!r}'.format(*kv) for kv in sorted(test_env_vars.items())))
@@ -270,8 +273,7 @@ def run_case(case_path, case):
     for k in non_cmd_keys:
       if case[k] is not None: raiseS('case specifies cmd, as well as irrelevant property:', k)
 
-  else: # not cmd.
-
+  elif compiler:
     if rel_main is None: # find default main source.
       all_files = os.listdir(src_dir)
       def is_src(n):
@@ -281,30 +283,27 @@ def run_case(case_path, case):
       if len(dflt_mains) != 1: raiseF('test case name matches multiple source files: {}', dflt_mains)
       rel_main = dflt_mains[0]
       if dbg: logSL('default main:', rel_main)
-
-    if compiler:
-      libs = [path_join(src_dir, l) for l in rel_libs]
-      compile_cmd = compiler + libs + ['-main', path_join(src_dir, rel_main), '-o', exe_path]
-      ok = check_cmd(
-        compile_cmd,
-        compile_timeout,
-        compile_code,
-        exp_triples=make_exp_triples('compile-out', 'compile-err', 'compile-files'),
-        in_path='/dev/null',
-        out_path=path_join(test_dir, 'compile-out.txt'),
-        err_path=path_join(test_dir, 'compile-err.txt'),
-        env=env
-      )
-      if not ok or compile_code != 0:
-        return ok
-      cmd = [exe_path]
+    libs = [path_join(src_dir, l) for l in rel_libs]
+    compile_cmd = compiler + libs + ['-main', path_join(src_dir, rel_main), '-o', exe_path]
+    ok = check_cmd(
+      compile_cmd,
+      compile_timeout,
+      compile_code,
+      exp_triples=make_exp_triples('compile-out', 'compile-err', 'compile-files'),
+      cwd=None,
+      in_path='/dev/null',
+      out_path=path_join(test_dir, 'compile-out.txt'),
+      err_path=path_join(test_dir, 'compile-err.txt'),
+      env=env
+    )
+    if path_exists(prof_cwd_path):
+      move_file(prof_cwd_path, prof_path)
+    if not ok or compile_code != 0:
+      return ok
+    cmd = [exe_rel]
     
-    elif interpreter:
-      if len(src_list) != 1: raiseS('multiple interpreted sources:', src_list)
-      cmd = [interpreter, src_list[0]]
-
-    else:
-      raiseS('no cmd, compiler, or interpreter specified.')
+  else:
+    raiseS('no cmd or compiler specified.')
   
   if case['in']:
     in_string = case['in']
@@ -320,6 +319,7 @@ def run_case(case_path, case):
     timeout,
     code,
     exp_triples=make_exp_triples('out', 'err', 'files'),
+    cwd=test_dir,
     in_path=in_path,
     out_path=path_join(test_dir, 'out.txt'),
     err_path=path_join(test_dir, 'err.txt'),

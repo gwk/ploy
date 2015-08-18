@@ -4,23 +4,7 @@
 set -e
 cd $(dirname $0)/..
 
-sources=$(ls \
-src/*.swift \
-src/forms/*.swift \
-qk/src/core/ArithmeticType.swift \
-qk/src/core/check.swift \
-qk/src/core/File.swift \
-qk/src/std/Array.swift \
-qk/src/std/Character.swift \
-qk/src/std/CollectionType.swift \
-qk/src/std/Dictionary.swift \
-qk/src/std/Int.swift \
-qk/src/std/Optional.swift \
-qk/src/std/OutputStreamType.swift \
-qk/src/std/Process.swift \
-qk/src/std/SequenceType.swift \
-qk/src/std/String.swift \
-)
+sources=$(sh/sources.sh)
 
 mkdir -p _bld
 
@@ -37,6 +21,7 @@ swiftc \
 -Onone \
 -sdk /Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
 -target x86_64-apple-macosx10.10 \
+-profile-coverage-mapping \
+-profile-generate \
 $sources \
 -o _bld/ploy \
-
