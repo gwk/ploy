@@ -47,5 +47,5 @@ let modules = modulePaths.flatMap { Src(path: $0).parseModule(verbose: false) }
 
 emitProgram(tmpFile, hostPath: hostPath, main: main, ins: modules)
 
-copy(fromPath: tmpPath, toPath: outPath, create: 0o644)
+rename(tmpPath, toPath: outPath)
 File.setPerms(outPath, 0o755)
