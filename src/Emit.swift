@@ -25,7 +25,7 @@ func emitProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   em.str(0, "")
 
   for i in ins {
-    em.str(0, "// in \(i.name.string)")
+    em.str(0, "// in \(i.sym.name)")
     i.compile(em, 0, globalScope, typeVoid)
     em.str(0, "")
   }

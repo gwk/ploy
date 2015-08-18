@@ -144,7 +144,7 @@ class Src: CustomStringConvertible {
       if !ploySymTailChars.contains(char(p)) { break }
       p = adv(p)
     }
-    return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), string: slice(pos, p))
+    return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: slice(pos, p))
   }
   
   func parseLitNum(pos: Pos, var foundDot: Bool = false) -> LitNum {
@@ -251,7 +251,7 @@ class Src: CustomStringConvertible {
   
   func parseBling(pos: Pos, _ p: Pos) -> Form {
     // in the future bling will also be a prefix.
-    return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), string: "$")
+    return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: "$")
   }
   
   // MARK: nesting sentences.
@@ -274,10 +274,10 @@ class Src: CustomStringConvertible {
   // MARK: keyword sentences.
   
   func parseEnum(sym: Sym) -> Form {
-    let name: Sym = parseForm(sym.syn.end, "`enum` form", "name symbol")
+    let nameSym: Sym = parseForm(sym.syn.end, "`enum` form", "name symbol")
     var variants: [Par] = []
-    let end = parseForms(&variants, name.syn.end, "`enum` form", "variant parameter")
-    return Enum(synForSemicolon(sym.syn.pos, end, "enum"), name: name, variants: variants)
+    let end = parseForms(&variants, nameSym.syn.end, "`enum` form", "variant parameter")
+    return Enum(synForSemicolon(sym.syn.pos, end, "enum"), sym: nameSym, variants: variants)
   }
   
   func parseFn(sym: Sym) -> Form {
@@ -304,10 +304,10 @@ class Src: CustomStringConvertible {
   }
   
   func parseIn(sym: Sym) -> Form {
-    let name: Sym = parseForm(sym.syn.end, "`in` form", "module name symbol")
+    let nameSym: Sym = parseForm(sym.syn.end, "`in` form", "module name symbol")
     var defs: [Def] = []
-    let end = parseForms(&defs, name.syn.end, "`in` form", "definition")
-    return In(synForSemicolon(sym.syn.pos, end, "`in` form"), name: name, defs: defs)
+    let end = parseForms(&defs, nameSym.syn.end, "`in` form", "definition")
+    return In(synForSemicolon(sym.syn.pos, end, "`in` form"), sym: nameSym, defs: defs)
   }
   
   func parsePub(sym: Sym) -> Form {
@@ -316,21 +316,21 @@ class Src: CustomStringConvertible {
   }
   
   func parseStruct(sym: Sym) -> Form {
-    let name: Sym = parseForm(sym.syn.end, "`struct` form", "name symbol")
+    let nameSym: Sym = parseForm(sym.syn.end, "`struct` form", "name symbol")
     var fields: [Par] = []
-    let end = parseForms(&fields, name.syn.end, "`struct` form", "field parameter")
-    return Struct(synForSemicolon(sym.syn.pos, end, "enum"), name: name, fields: fields)
+    let end = parseForms(&fields, nameSym.syn.end, "`struct` form", "field parameter")
+    return Struct(synForSemicolon(sym.syn.pos, end, "enum"), sym: nameSym, fields: fields)
   }
   
   func parseHostType(sym: Sym) -> Form {
-    let name: Sym = parseForm(sym.syn.end, "`PLOY-HOST` form", "name symbol")
-    return HostType(synForSemicolon(sym.syn.pos, name.syn.end, "host-type"), name: name)
+    let nameSym: Sym = parseForm(sym.syn.end, "`host-type` form", "name symbol")
+    return HostType(synForSemicolon(sym.syn.pos, nameSym.syn.end, "host-type"), sym: nameSym)
   }
   
   func parseHostVal(sym: Sym) -> Form {
-    let name: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
-    let type: TypeExpr = parseForm(name.syn.end, "`host-val` form", "type expression")
-    return HostVal(synForSemicolon(sym.syn.pos, type.syn.end, "host-val"), name: name, type: type)
+    let nameSym: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
+    let type: TypeExpr = parseForm(nameSym.syn.end, "`host-val` form", "type expression")
+    return HostVal(synForSemicolon(sym.syn.pos, type.syn.end, "host-val"), sym: nameSym, type: type)
   }
   
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
@@ -350,7 +350,7 @@ class Src: CustomStringConvertible {
     let c = char(pos)
     if ploySymHeadChars.contains(c) {
       let sym = parseSym(pos)
-      if let handler = Src.keywordSentenceHandlers[sym.string] {
+      if let handler = Src.keywordSentenceHandlers[sym.name] {
         return handler(self)(sym)
       }
       return sym

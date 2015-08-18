@@ -3,9 +3,6 @@
 
 in host
 
-host-type Int;
-host-type Str;
-
 host-val std-out Int;
 host-val std-err Int;
 

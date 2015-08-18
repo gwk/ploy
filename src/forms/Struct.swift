@@ -2,18 +2,18 @@
 
 
 class Struct: _Form, Expr { // struct declaration: `struct S fields…;`.
-  let name: Sym
+  let sym: Sym
   let fields: [Par]
   
-  init(_ syn: Syn, name: Sym, fields: [Par]) {
-    self.name = name
+  init(_ syn: Syn, sym: Sym, fields: [Par]) {
+    self.sym = sym
     self.fields = fields
     super.init(syn)
   }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
-    name.writeTo(&target, depth + 1)
+    sym.writeTo(&target, depth + 1)
     for f in fields {
       f.writeTo(&target, depth + 1)
     }

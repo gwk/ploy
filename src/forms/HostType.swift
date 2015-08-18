@@ -1,21 +1,21 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class HostType: _Form, Def { // host type declaration: `host-type name;`.
-  let name: Sym
+class HostType: _Form, Def { // host type declaration: `host-type sym;`.
+  let sym: Sym
 
-  init(_ syn: Syn, name: Sym) {
-    self.name = name
+  init(_ syn: Syn, sym: Sym) {
+    self.sym = sym
     super.init(syn)
   }
 
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
-    name.writeTo(&target, depth + 1)
+    sym.writeTo(&target, depth + 1)
   }
   
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    scope.addRec(name, .Type, TypeValPrim(sym: name))
+    scope.addRec(sym, .Type, TypeValHost(sym: sym))
     return typeVoid
   }
 }

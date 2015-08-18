@@ -8,7 +8,7 @@ struct ScopeRec {
     case Lazy
   }
   
-  let name: Sym
+  let sym: Sym?
   let kind: Kind
   let typeVal: TypeVal
 }
@@ -24,15 +24,15 @@ class Scope {
     self.isModule = isModule
   }
   
-  func addRec(name: Sym, _ kind: ScopeRec.Kind, _ typeVal: TypeVal) {
-    if let existing = bindings[name.string] {
-      name.failRedef(existing.name)
+  func addRec(sym: Sym, _ kind: ScopeRec.Kind, _ typeVal: TypeVal) {
+    if let existing = bindings[sym.name] {
+      sym.failRedef(existing.sym)
     }
-    bindings[name.string] = ScopeRec(name: name, kind: kind, typeVal: typeVal)
+    bindings[sym.name] = ScopeRec(sym: sym, kind: kind, typeVal: typeVal)
   }
   
   func getRec(sym: Sym) -> ScopeRec {
-    if let rec = bindings[sym.string] {
+    if let rec = bindings[sym.name] {
       return rec
     }
     if let parent = parent {
@@ -47,19 +47,11 @@ class GlobalScope: Scope {
   
   init() {
     super.init(parent: nil, isModule: false)
-    bindings["Void"] = ScopeRec(name: typeVoid.sym, kind: .Type, typeVal: typeVoid)
+    for prim in [typeVoid, typeBool, typeInt, typeStr] {
+      bindings[prim.name] = ScopeRec(sym: nil, kind: .Type, typeVal: prim)
+    }
   }
 }
-
-
-let intrinsicSrc = Src(name: "<intrinsic>")
-let intrinsicPos = intrinsicSrc.startPos
-let intrinsicSyn = Syn(src: intrinsicSrc, pos: intrinsicPos, visEnd: intrinsicPos, end: intrinsicPos)
-
-let typeVoid = TypeValPrim(sym: Sym(intrinsicSyn, string: "Void"))
-
-let typeInt = globalScope.bindings["Int"]!.typeVal
-let typeStr = globalScope.bindings["Str"]!.typeVal
 
 let globalScope = GlobalScope()
 

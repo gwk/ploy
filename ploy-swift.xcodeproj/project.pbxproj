@@ -53,6 +53,7 @@
 		ECAE89171B693B46002AE9B9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAE89161B693B46002AE9B9 /* main.swift */; };
 		ECDA37151B7EB16200939000 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37141B7EB16200939000 /* File.swift */; };
 		ECDA37171B80FE5200939000 /* HostType.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37161B80FE5200939000 /* HostType.swift */; };
+		ECDA37191B82D6F500939000 /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37181B82D6F500939000 /* Path.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -116,6 +117,7 @@
 		ECAE89161B693B46002AE9B9 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ECDA37141B7EB16200939000 /* File.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = File.swift; path = qk/src/core/File.swift; sourceTree = "<group>"; };
 		ECDA37161B80FE5200939000 /* HostType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HostType.swift; sourceTree = "<group>"; };
+		ECDA37181B82D6F500939000 /* Path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -171,6 +173,7 @@
 				EC6523871B7BD2BF00CAA454 /* LitNum.swift */,
 				EC6523881B7BD2BF00CAA454 /* LitStr.swift */,
 				EC6523891B7BD2BF00CAA454 /* Par.swift */,
+				ECDA37181B82D6F500939000 /* Path.swift */,
 				EC65238A1B7BD2BF00CAA454 /* Pub.swift */,
 				EC65238B1B7BD2BF00CAA454 /* Reify.swift */,
 				EC65238C1B7BD2BF00CAA454 /* Scoped.swift */,
@@ -282,6 +285,7 @@
 				EC98DE811B7E23B500557D35 /* Scope.swift in Sources */,
 				EC6523961B7BD2BF00CAA454 /* Cmpd.swift in Sources */,
 				EC6523951B7BD2BF00CAA454 /* Case.swift in Sources */,
+				ECDA37191B82D6F500939000 /* Path.swift in Sources */,
 				EC6523A41B7BD2BF00CAA454 /* Scoped.swift in Sources */,
 				EC1FE8F11B6BE20C00112BB0 /* SequenceType.swift in Sources */,
 				ECDA37171B80FE5200939000 /* HostType.swift in Sources */,

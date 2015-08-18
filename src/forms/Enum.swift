@@ -2,18 +2,18 @@
 
 
 class Enum: _Form, Stmt, Def { // enum declaration: `enum E variants…;`.
-  let name: Sym
+  let sym: Sym
   let variants: [Par]
 
-  init(_ syn: Syn, name: Sym, variants: [Par]) {
-    self.name = name
+  init(_ syn: Syn, sym: Sym, variants: [Par]) {
+    self.sym = sym
     self.variants = variants
     super.init(syn)
   }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
-    name.writeTo(&target, depth + 1)
+    sym.writeTo(&target, depth + 1)
     for v in variants {
       v.writeTo(&target, depth + 1)
     }

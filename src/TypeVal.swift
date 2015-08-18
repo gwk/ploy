@@ -7,7 +7,7 @@ class TypeVal: Hashable, CustomStringConvertible {
 
   var description: String { fatalError() }
   
-  func accepts(actual: TypeVal) -> Bool { fatalError() }
+  func accepts(actual: TypeVal) -> Bool { return actual === self }
 }
 
 func ==(l: TypeVal, r: TypeVal) -> Bool { return l === r }
@@ -22,6 +22,18 @@ class TypeValAny: TypeVal {
 
 
 class TypeValPrim: TypeVal {
+  let name: String
+  
+  init(name: String) {
+    self.name = name
+    super.init()
+  }
+  
+  override var description: String { return name }
+}
+
+
+class TypeValHost: TypeVal {
   let sym: Sym
   
   init(sym: Sym) {
@@ -29,9 +41,7 @@ class TypeValPrim: TypeVal {
     super.init()
   }
   
-  override var description: String { return sym.string }
-  
-  override func accepts(actual: TypeVal) -> Bool { return actual === self }
+  override var description: String { return sym.name }
 }
 
 
@@ -55,6 +65,12 @@ class TypeValSig: TypeVal {
   }
 }
 
+
+let typeVoid  = TypeValPrim(name: "Void")
+let typeBool  = TypeValPrim(name: "Bool")
+let typeInt   = TypeValPrim(name: "Int")
+let typeStr   = TypeValPrim(name: "Str")
+let typeType  = TypeValPrim(name: "Type")
 
 let typeAny = TypeValAny()
 

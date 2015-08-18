@@ -2,10 +2,10 @@
 
 
 class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
-  let string: String
+  let name: String
 
-  init(_ syn: Syn, string: String) {
-    self.string = string
+  init(_ syn: Syn, name: String) {
+    self.name = name
     super.init(syn)
   }
   
@@ -15,7 +15,7 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
     target.write(" ")
     target.write(String(syn))
     target.write(": ")
-    target.write(string)
+    target.write(name)
     target.write("\n")
   }
 
@@ -23,24 +23,24 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
     let rec = scope.getRec(self)
     switch rec.kind {
     case .Type: return rec.typeVal
-    default: fail("scope error", "\(subj) expected a type; `\(string)` refers to a value.")
+    default: fail("scope error", "\(subj) expected a type; `\(name)` refers to a value.")
     }
   }
 
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     let rec = scope.getRec(self)
     switch rec.kind {
-    case .Val: em.str(depth, string)
-    case .Lazy: em.str(depth, "\(string)__acc()")
-    case .Type: fail("scope error", "expected a value; `\(string)` refers to a type.") // TODO: eventually this will return a runtime type.
+    case .Val: em.str(depth, name)
+    case .Lazy: em.str(depth, "\(name)__acc()")
+    case .Type: fail("scope error", "expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
     return rec.typeVal
   }
 
-  @noreturn func failUndef() { fail("scope error", "`\(string)` is not defined in this scope") }
+  @noreturn func failUndef() { fail("scope error", "`\(name)` is not defined in this scope") }
   
   @noreturn func failRedef(original: Sym?) {
-    fail("scope error", "redefinition of `\(string)`", original.map { ($0, "original definition here") })
+    fail("scope error", "redefinition of `\(name)`", original.map { ($0, "original definition here") })
   }
 }
 
