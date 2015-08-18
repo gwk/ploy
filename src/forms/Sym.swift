@@ -34,6 +34,9 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
     case .Lazy: em.str(depth, "\(name)__acc()")
     case .Type: fail("scope error", "expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
+    if !expType.accepts(rec.typeVal) {
+      fail("type error", "expected type `\(expType)`; `\(name)` has type `\(rec.typeVal)`")
+    }
     return rec.typeVal
   }
 
