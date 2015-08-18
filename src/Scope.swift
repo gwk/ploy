@@ -47,8 +47,8 @@ class GlobalScope: Scope {
   
   init() {
     super.init(parent: nil, isModule: false)
-    for prim in [typeVoid, typeBool, typeInt, typeStr] {
-      bindings[prim.name] = ScopeRec(sym: nil, kind: .Type, typeVal: prim)
+    for t in intrinsicTypes {
+      bindings[t.description] = ScopeRec(sym: nil, kind: .Type, typeVal: t)
     }
   }
 }

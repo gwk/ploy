@@ -66,13 +66,24 @@ class TypeValSig: TypeVal {
 }
 
 
-let typeVoid  = TypeValPrim(name: "Void")
-let typeBool  = TypeValPrim(name: "Bool")
-let typeInt   = TypeValPrim(name: "Int")
-let typeStr   = TypeValPrim(name: "Str")
-let typeType  = TypeValPrim(name: "Type")
+let typeAny     = TypeValAny()
+let typeBool    = TypeValPrim(name: "Bool")
+let typeInt     = TypeValPrim(name: "Int")
+let typeModule  = TypeValPrim(name: "Module")
+let typeStr     = TypeValPrim(name: "Str")
+let typeType    = TypeValPrim(name: "Type")
+let typeVoid    = TypeValPrim(name: "Void")
 
-let typeAny = TypeValAny()
+let intrinsicTypes = [
+  typeAny,
+  typeBool,
+  typeInt,
+  typeModule,
+  typeStr,
+  typeType,
+  typeVoid,
+]
+
 
 func anySigReturning(ret: TypeVal) -> TypeVal {
   return TypeValSig(par: typeAny, ret: ret)
