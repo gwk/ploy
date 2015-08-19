@@ -80,13 +80,13 @@ def make_dirs(path, mode=0o777, exist_ok=True): return _os.makedirs(path, mode, 
 
 def remove_file(path): return _os.remove(path)
 
-def remove_dir(path): return _os.rmdir(path)
-
-def remove_dirs(path): return _os.removedirs(path)
-
 def remove_file_if_exists(path):
   if is_file(path):
     remove_file(path)
+
+def remove_dir(path): return _os.rmdir(path)
+
+def remove_dirs(path): return _os.removedirs(path)
 
 
 def current_dir(): return abs_path('.')
