@@ -14,26 +14,34 @@ class Emit {
 }
 
 
-func emitProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
+func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   let em = Emit()
   em.str(0, "#!/usr/bin/env iojs")
   em.str(0, "\"use strict\";\n")
-  em.str(0, "(function(){ // ploy namespace.")
+  em.str(0, "(function(){ // ploy space.")
   em.str(0, "// host.js.\n")
   let host_src = InFile(path: hostPath).read()
   em.str(0, host_src)
   em.str(0, "")
-
+  
   for i in ins {
-    em.str(0, "// in \(i.sym.name)")
-    i.compile(em, 0, globalScope, typeVoid)
-    em.str(0, "")
+    let space = global.getOrCreateSpace([i.sym])
+    i.define(space)
   }
+  
+  let mainScope = Scope(pathNames: [], parent: global)
   em.str(0, "// main")
-  em.str(0, "exit(")
-  main.compile(em, 0, globalScope, typeInt)
+  em.str(0, "PROC__exit(")
+  main.compile(em, 0, mainScope, typeInt)
   em.str(0, ") // main exit.")
-  em.str(0, "})() // ploy namespace.")
+
+  for space in global.spaces {
+    em.str(0, "\n// in \(space.name)")
+    for def in space.usedDefs {
+      def.compile(em, 0, space, typeAny)
+    }
+  }
+  em.str(0, "\n})() // ploy space.")
 
   for l in em.lines {
     file.write(l)

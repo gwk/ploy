@@ -21,6 +21,19 @@ class TypeValAny: TypeVal {
 }
 
 
+/// Type value for a declared type (enum, host, struct).
+class TypeValDecl: TypeVal {
+  let sym: Sym
+  
+  init(sym: Sym) {
+    self.sym = sym
+    super.init()
+  }
+  
+  override var description: String { return sym.name }
+}
+
+
 class TypeValPrim: TypeVal {
   let name: String
   
@@ -30,18 +43,6 @@ class TypeValPrim: TypeVal {
   }
   
   override var description: String { return name }
-}
-
-
-class TypeValHost: TypeVal {
-  let sym: Sym
-  
-  init(sym: Sym) {
-    self.sym = sym
-    super.init()
-  }
-  
-  override var description: String { return sym.name }
 }
 
 
@@ -66,19 +67,19 @@ class TypeValSig: TypeVal {
 }
 
 
-let typeAny     = TypeValAny()
-let typeBool    = TypeValPrim(name: "Bool")
-let typeInt     = TypeValPrim(name: "Int")
-let typeModule  = TypeValPrim(name: "Module")
-let typeStr     = TypeValPrim(name: "Str")
-let typeType    = TypeValPrim(name: "Type")
-let typeVoid    = TypeValPrim(name: "Void")
+let typeAny         = TypeValAny()
+let typeBool        = TypeValPrim(name: "Bool")
+let typeInt         = TypeValPrim(name: "Int")
+let typeNamespace   = TypeValPrim(name: "Namespace")
+let typeStr         = TypeValPrim(name: "Str")
+let typeType        = TypeValPrim(name: "Type")
+let typeVoid        = TypeValPrim(name: "Void")
 
 let intrinsicTypes = [
   typeAny,
   typeBool,
   typeInt,
-  typeModule,
+  typeNamespace,
   typeStr,
   typeType,
   typeVoid,

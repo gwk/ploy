@@ -20,26 +20,41 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
   }
 
   func typeVal(scope: Scope, _ subj: String) -> TypeVal {
-    let rec = scope.getRec(self)
-    switch rec.kind {
-    case .Type: return rec.typeVal
-    default: fail("scope error", "\(subj) expected a type; `\(name)` refers to a value.")
-    }
+    return typeVal(scope.rec(self), subj)
   }
 
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    let rec = scope.getRec(self)
-    switch rec.kind {
-    case .Val: em.str(depth, name)
-    case .Lazy: em.str(depth, "\(name)__acc()")
-    case .Type: fail("scope error", "expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
-    }
-    if !expType.accepts(rec.typeVal) {
-      fail("type error", "expected type `\(expType)`; `\(name)` has type `\(rec.typeVal)`")
-    }
-    return rec.typeVal
+    return compile(em, depth, scope.rec(self), expType)
   }
 
+  func typeVal(scopeRec: ScopeRec, _ subj: String) -> TypeVal {
+    switch scopeRec.kind {
+    case .Type(let typeVal): return typeVal
+    default: fail("scope error", "\(subj) expected a type; `\(name)` refers to a value.")
+    }
+  }
+  
+  func compile(em: Emit, _ depth: Int, _ scopeRec: ScopeRec, _ expType: TypeVal) -> TypeVal {
+    var typeVal: TypeVal! = nil
+    switch scopeRec.kind {
+    case .Val(let tv):
+      typeVal = tv
+      em.str(depth, scopeRec.hostString)
+    case .Lazy(let tv):
+      typeVal = tv
+      em.str(depth, "\(scopeRec.hostString)__acc()")
+    case .Space(_):
+      fail("scope error", "expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.
+    case .Type(_):
+      fail("scope error", "expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
+    }
+    if !expType.accepts(typeVal) {
+      fail("type error", "expected type `\(expType)`; `\(name)` has type `\(typeVal)`")
+    }
+    return typeVal
+  }
+  
+  
   @noreturn func failUndef() { fail("scope error", "`\(name)` is not defined in this scope") }
   
   @noreturn func failRedef(original: Sym?) {

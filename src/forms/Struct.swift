@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Struct: _Form, Expr { // struct declaration: `struct S fields…;`.
+class Struct: _Form, Def, Stmt { // struct declaration: `struct S fields…;`.
   let sym: Sym
   let fields: [Par]
   
@@ -21,6 +21,10 @@ class Struct: _Form, Expr { // struct declaration: `struct S fields…;`.
 
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     fatalError()
+  }
+  
+  func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
+    return .Type(TypeValDecl(sym: sym))
   }
 }
 

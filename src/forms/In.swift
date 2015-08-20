@@ -26,6 +26,17 @@ class In: _Form, Form { // in statement: `in module-name statements…;`.
     }
     return typeVoid
   }
+  
+  func define(space: Scope) {
+    for d in defs {
+      if let existing = space.defs[d.sym.name] {
+        sym.failRedef(existing.sym)
+      }
+      else {
+        space.defs[d.sym.name] = d
+      }
+    }
+  }
 }
 
 

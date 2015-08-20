@@ -349,11 +349,26 @@ class Src: CustomStringConvertible {
   func parsePoly(pos: Pos) -> Form {
     let c = char(pos)
     if ploySymHeadChars.contains(c) {
-      let sym = parseSym(pos)
+      var sym = parseSym(pos)
       if let handler = Src.keywordSentenceHandlers[sym.name] {
         return handler(self)(sym)
       }
-      return sym
+      // path parsing.
+      var syms = [sym]
+      var p = sym.syn.end
+      while !sym.syn.hasSpace && hasSome(p) && char(p) == "/" {
+        p = adv(p)
+        sym = parseSym(p)
+        if Src.keywordSentenceHandlers.contains(sym.name) {
+          sym.failSyntax("reserved keyword name cannot appear in path")
+        }
+        syms.append(sym)
+        p = sym.syn.end
+      }
+      if syms.count > 1 {
+        return Path(Syn(src: self, pos: pos, visEnd: sym.syn.visEnd, end: sym.syn.end), syms: syms)
+      }
+      return sym // regular sym.
     }
     if ployDecChars.contains(c) {
       return parseLitNum(pos)
@@ -504,7 +519,7 @@ class Src: CustomStringConvertible {
     return main
   }
   
-  func parseModule(verbose verbose: Bool = false) -> [In] {
+  func parseLib(verbose verbose: Bool = false) -> [In] {
     var ins: [In] = []
     let end = parseForms(&ins, startPos, "module", "`in` statement")
     if hasSome(end) {

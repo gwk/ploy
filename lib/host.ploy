@@ -1,12 +1,10 @@
 # © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
-
-in host
-
-host-val std-out Int;
-host-val std-err Int;
+in PROC
 
 host-val exit Int%<>;
+host-val std-out Int;
+host-val std-err Int;
 
 #host-val write-Bool <FileDescriptor Bool>%<>;
 #host-val write-Int <FileDescriptor Int>%<>;

@@ -18,7 +18,10 @@ protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
 
 protocol Stmt: Form {}
 
-protocol Def: Form {}
+protocol Def: Form {
+  var sym: Sym { get }
+  func scopeRecKind(scope: Scope) -> ScopeRec.Kind
+}
 
 
 class _Form : Streamable {
@@ -26,7 +29,7 @@ class _Form : Streamable {
   init(_ syn: Syn) { self.syn = syn }
   
   var syntaxName: String { return String(self.dynamicType) }
-  
+
   @noreturn func fail(prefix: String, _ msg: String, _ notes: (Form, String)?...) {
     syn.src.errPos(syn.pos, end: syn.end, prefix: prefix, msg: msg)
     for n in notes {
@@ -37,7 +40,9 @@ class _Form : Streamable {
     Process.exit(1)
   }
 
-  @noreturn func failSyntax(msg: String) { fail("syntax error", msg) }
+  @noreturn func failSyntax(msg: String) {
+    fail("syntax error", msg)
+  }
   
   func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     target.write(String(indent: depth))

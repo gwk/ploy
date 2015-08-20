@@ -17,5 +17,11 @@ class Pub: _Form, Def { // public modifier: `pub expr;`.
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     fatalError()
   }
+  
+  var sym: Sym { return def.sym }
+  
+  func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
+    return def.scopeRecKind(scope)
+  }
 }
 
