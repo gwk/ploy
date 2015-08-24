@@ -9,6 +9,8 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
     super.init(syn)
   }
   
+  var hostName: String { return name.dashToUnder }
+    
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     target.write(String(indent: depth))
     target.write(String(self.dynamicType))
@@ -30,7 +32,7 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
   func typeVal(scopeRec: ScopeRec, _ subj: String) -> TypeVal {
     switch scopeRec.kind {
     case .Type(let typeVal): return typeVal
-    default: fail("scope error", "\(subj) expected a type; `\(name)` refers to a value.")
+    default: failType("\(subj) expected a type; `\(name)` refers to a value.")
     }
   }
   
@@ -39,17 +41,17 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
     switch scopeRec.kind {
     case .Val(let tv):
       typeVal = tv
-      em.str(depth, scopeRec.hostString)
+      em.str(depth, scopeRec.hostName)
     case .Lazy(let tv):
       typeVal = tv
-      em.str(depth, "\(scopeRec.hostString)__acc()")
+      em.str(depth, "\(scopeRec.hostName)__acc()")
     case .Space(_):
-      fail("scope error", "expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.
+      failType("expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.
     case .Type(_):
-      fail("scope error", "expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
+      failType("expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
     if !expType.accepts(typeVal) {
-      fail("type error", "expected type `\(expType)`; `\(name)` has type `\(typeVal)`")
+      failType("expected type `\(expType)`; `\(name)` has type `\(typeVal)`")
     }
     return typeVal
   }

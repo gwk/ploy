@@ -21,6 +21,32 @@ class TypeValAny: TypeVal {
 }
 
 
+class TypeValCmpd: TypeVal {
+  let pars: [TypeValPar]
+  
+  init(pars: [TypeValPar]) {
+    self.pars = pars
+    super.init()
+  }
+  
+  override var description: String {
+    let s = " ".join(pars.map { String($0.typeVal.description) })
+    return "<\(s)>"
+  }
+  
+  override func accepts(actual: TypeVal) -> Bool {
+    guard let actual = actual as? TypeValCmpd else {
+      return false
+    }
+    for (exp, act) in zip(pars, actual.pars) {
+      if !exp.accepts(act) {
+        return false
+      }
+    }
+    return true
+  }
+}
+
 /// Type value for a declared type (enum, host, struct).
 class TypeValDecl: TypeVal {
   let sym: Sym
@@ -67,16 +93,17 @@ class TypeValSig: TypeVal {
 }
 
 
-let typeAny         = TypeValAny()
-let typeBool        = TypeValPrim(name: "Bool")
-let typeInt         = TypeValPrim(name: "Int")
-let typeNamespace   = TypeValPrim(name: "Namespace")
-let typeStr         = TypeValPrim(name: "Str")
-let typeType        = TypeValPrim(name: "Type")
-let typeVoid        = TypeValPrim(name: "Void")
+let typeAny = TypeValAny() // not currently available as an intrinsic type; only for 'accept' testing.
+
+let typeVoid = TypeValCmpd(pars: [])
+
+let typeBool      = TypeValPrim(name: "Bool")
+let typeInt       = TypeValPrim(name: "Int")
+let typeNamespace = TypeValPrim(name: "Namespace")
+let typeStr       = TypeValPrim(name: "Str")
+let typeType      = TypeValPrim(name: "Type")
 
 let intrinsicTypes = [
-  typeAny,
   typeBool,
   typeInt,
   typeNamespace,

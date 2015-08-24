@@ -8,7 +8,7 @@ class GlobalScope: Scope {
   init() {
     super.init(pathNames: [], parent: nil)
     for t in intrinsicTypes {
-      bindings[t.description] = ScopeRec(sym: nil, hostString: t.description, isFwd: false, kind: .Type(t))
+      bindings[t.description] = ScopeRec(sym: nil, hostName: t.description, isFwd: false, kind: .Type(t))
     }
   }
   
@@ -19,12 +19,12 @@ class GlobalScope: Scope {
         switch r.kind {
         case .Space(let next):
           space = next
-        default: sym.fail("scope error", "expected a space; found a \(r.kind.kindDesc)")
+        default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
         }
       } else { // create.
         let next = Scope(pathNames: syms[0...i].map { $0.name }, parent: self)
         spaces.append(next)
-        space.bindings[sym.name] = ScopeRec(sym: nil, hostString: space.hostPrefix + sym.name, isFwd: false, kind: .Space(next))
+        space.bindings[sym.name] = ScopeRec(sym: nil, hostName: space.hostPrefix + sym.hostName, isFwd: false, kind: .Space(next))
         space = next
       }
     }

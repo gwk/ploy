@@ -18,7 +18,7 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
   }
   
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    scope.addRec(sym, isFwd: false, kind: .Val(type.typeVal(scope, "host value declaration"))) // host declarations are never lazy.
+    scope.addRec(sym, isFwd: false, kind: .Val(type.typeVal(scope, "host value declaration")))
     return typeVoid
   }
   

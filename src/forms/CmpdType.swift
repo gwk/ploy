@@ -17,7 +17,7 @@ class CmpdType: _Form, TypeExpr { // compound type: `<A B>`.
   }
   
   func typeVal(scope: Scope, _ subj: String) -> TypeVal {
-    fail("unimplemented", "CmpdType.typeVal")
+    return TypeValCmpd(pars: pars.map { $0.typeValPar(scope) })
   }
 
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {

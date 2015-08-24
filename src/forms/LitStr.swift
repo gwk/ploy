@@ -20,6 +20,9 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
   }
   
   override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+    if !expType.accepts(typeStr) {
+      failType("string literal is not convertible to \(expType)")
+    }
     var s = "\""
     for code in val.codes {
       switch code {

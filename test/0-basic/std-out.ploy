@@ -1,0 +1,2 @@
+FS/write-Str(PROC/std-out 'this is std-out.\n')
+0

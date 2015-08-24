@@ -19,13 +19,13 @@ struct ScopeRec {
   }
   
   let sym: Sym?
-  let hostString: String
+  let hostName: String
   let isFwd: Bool
   let kind: Kind
   
-  init(sym: Sym?, hostString: String, isFwd: Bool, kind: Kind) {
+  init(sym: Sym?, hostName: String, isFwd: Bool, kind: Kind) {
     self.sym = sym
-    self.hostString = hostString
+    self.hostName = hostName
     self.isFwd = isFwd
     self.kind = kind
   }
@@ -60,7 +60,7 @@ class Scope {
         sym.failRedef(existing.sym)
       }
     }
-    let r = ScopeRec(sym: sym, hostString: hostPrefix + sym.name, isFwd: isFwd, kind: kind)
+    let r = ScopeRec(sym: sym, hostName: hostPrefix + sym.hostName, isFwd: isFwd, kind: kind)
     bindings[sym.name] = r
     return r
   }
@@ -97,7 +97,7 @@ class Scope {
       switch r.kind {
       case .Space(let space):
         scope = space
-      default: sym.fail("scope error", "expected a space; found a \(r.kind.kindDesc)")
+      default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
       }
     }
     fatalError()

@@ -7,7 +7,8 @@ protocol Form : Streamable {
   func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
   func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal
   @noreturn func fail(prefix: String, _ msg: String, _ notes: (Form, String)?...)
-  @noreturn func failSyntax(msg: String)
+  @noreturn func failSyntax(msg: String, _ notes: (Form, String)?...)
+  @noreturn func failType(msg: String, _ notes: (Form, String)?...)
 }
 
 protocol Expr: Form {}
@@ -30,7 +31,7 @@ class _Form : Streamable {
   
   var syntaxName: String { return String(self.dynamicType) }
 
-  @noreturn func fail(prefix: String, _ msg: String, _ notes: (Form, String)?...) {
+  @noreturn func fail(prefix: String, msg: String, notes: [(Form, String)?]) {
     syn.src.errPos(syn.pos, end: syn.end, prefix: prefix, msg: msg)
     for n in notes {
       if let (form, msg) = n {
@@ -39,9 +40,17 @@ class _Form : Streamable {
     }
     Process.exit(1)
   }
+  
+  @noreturn func fail(prefix: String, _ msg: String, _ notes: (Form, String)?...) {
+    fail(prefix, msg: msg, notes: notes)
+  }
 
-  @noreturn func failSyntax(msg: String) {
-    fail("syntax error", msg)
+  @noreturn func failSyntax(msg: String, _ notes: (Form, String)?...) {
+    fail("syntax error", msg: msg, notes: notes)
+  }
+  
+  @noreturn func failType(msg: String, _ notes: (Form, String)?...) {
+    fail("type error", msg: msg, notes: notes)
   }
   
   func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {

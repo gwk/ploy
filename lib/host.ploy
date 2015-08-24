@@ -1,13 +1,17 @@
 # © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
+in FS
+host-type File;
+host-val write-Bool <file:File bool:Bool>%Void;
+host-val write-Int  <file:File int:Int>%Void;
+host-val write-Str  <file:File str:Str>%Void;
+;
+
+in HOST
+;
+
 in PROC
-
 host-val exit Int%<>;
-host-val std-out Int;
-host-val std-err Int;
-
-#host-val write-Bool <FileDescriptor Bool>%<>;
-#host-val write-Int <FileDescriptor Int>%<>;
-#host-val write-Str <FileDescriptor Str>%<>;
-
+host-val std-out FS/File;
+host-val std-err FS/File;
 ;

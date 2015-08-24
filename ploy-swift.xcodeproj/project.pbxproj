@@ -48,6 +48,8 @@
 		EC8E689A1B698B660080F316 /* Src.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E68991B698B660080F316 /* Src.swift */; };
 		EC8E689C1B698C110080F316 /* Syn.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E689B1B698C110080F316 /* Syn.swift */; };
 		EC97D70D1B84F9A8001D9ABB /* Chain.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC97D70C1B84F9A8001D9ABB /* Chain.swift */; };
+		EC97D70F1B868009001D9ABB /* Arg.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC97D70E1B868009001D9ABB /* Arg.swift */; };
+		EC97D7111B879717001D9ABB /* TypeValPar.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC97D7101B879717001D9ABB /* TypeValPar.swift */; };
 		EC98DE811B7E23B500557D35 /* Scope.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC98DE801B7E23B500557D35 /* Scope.swift */; };
 		EC98DE831B7E277D00557D35 /* OutputStreamType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC98DE821B7E277D00557D35 /* OutputStreamType.swift */; };
 		EC98DE851B7E848E00557D35 /* TypeVal.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC98DE841B7E848E00557D35 /* TypeVal.swift */; };
@@ -114,6 +116,8 @@
 		EC8E68991B698B660080F316 /* Src.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Src.swift; sourceTree = "<group>"; };
 		EC8E689B1B698C110080F316 /* Syn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Syn.swift; sourceTree = "<group>"; };
 		EC97D70C1B84F9A8001D9ABB /* Chain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Chain.swift; path = qk/src/core/Chain.swift; sourceTree = "<group>"; };
+		EC97D70E1B868009001D9ABB /* Arg.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Arg.swift; sourceTree = "<group>"; };
+		EC97D7101B879717001D9ABB /* TypeValPar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeValPar.swift; sourceTree = "<group>"; };
 		EC98DE801B7E23B500557D35 /* Scope.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scope.swift; sourceTree = "<group>"; };
 		EC98DE821B7E277D00557D35 /* OutputStreamType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = OutputStreamType.swift; path = qk/src/std/OutputStreamType.swift; sourceTree = "<group>"; };
 		EC98DE841B7E848E00557D35 /* TypeVal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeVal.swift; sourceTree = "<group>"; };
@@ -165,6 +169,7 @@
 				EC6523781B7BD2BF00CAA454 /* Acc.swift */,
 				EC6523791B7BD2BF00CAA454 /* Alias.swift */,
 				EC65237A1B7BD2BF00CAA454 /* Ann.swift */,
+				EC97D70E1B868009001D9ABB /* Arg.swift */,
 				EC65237B1B7BD2BF00CAA454 /* Bind.swift */,
 				EC65237C1B7BD2BF00CAA454 /* Call.swift */,
 				EC65237D1B7BD2BF00CAA454 /* Case.swift */,
@@ -223,6 +228,7 @@
 				EC8E68991B698B660080F316 /* Src.swift */,
 				EC8E689B1B698C110080F316 /* Syn.swift */,
 				EC98DE841B7E848E00557D35 /* TypeVal.swift */,
+				EC97D7101B879717001D9ABB /* TypeValPar.swift */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -298,6 +304,7 @@
 				EC6523A41B7BD2BF00CAA454 /* Scoped.swift in Sources */,
 				EC1FE8F11B6BE20C00112BB0 /* SequenceType.swift in Sources */,
 				ECDA37171B80FE5200939000 /* HostType.swift in Sources */,
+				EC97D7111B879717001D9ABB /* TypeValPar.swift in Sources */,
 				EC1FE8EB1B6BE20C00112BB0 /* Character.swift in Sources */,
 				EC6523A71B7BD2BF00CAA454 /* Sym.swift in Sources */,
 				EC6523A01B7BD2BF00CAA454 /* LitStr.swift in Sources */,
@@ -324,6 +331,7 @@
 				EC1FE8ED1B6BE20C00112BB0 /* Dictionary.swift in Sources */,
 				EC1FE8EE1B6BE20C00112BB0 /* Int.swift in Sources */,
 				ECB639851B83D77000138A8C /* GlobalScope.swift in Sources */,
+				EC97D70F1B868009001D9ABB /* Arg.swift in Sources */,
 				EC65239A1B7BD2BF00CAA454 /* Enum.swift in Sources */,
 				EC6523A31B7BD2BF00CAA454 /* Reify.swift in Sources */,
 				EC5BDF1E1B7A40EC00054159 /* Form.swift in Sources */,

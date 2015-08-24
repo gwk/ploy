@@ -1,0 +1,2 @@
+FS/write-Str(PROC/std-err 'this is std-err.\n')
+0

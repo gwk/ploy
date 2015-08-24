@@ -139,9 +139,15 @@ class Src: CustomStringConvertible {
   
   func parseSym(pos: Pos) -> Sym {
     assert(ploySymHeadChars.contains(char(pos)))
+    var prev = char(pos)
     var p = adv(pos)
     while hasSome(p) {
-      if !ploySymTailChars.contains(char(p)) { break }
+      let c = char(p)
+      if !ploySymTailChars.contains(c) { break }
+      if prev == "-" && c == "-" {
+        failParse(p, nil, "symbols cannot contain repeated '-' characters.")
+      }
+      prev = c
       p = adv(p)
     }
     return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: slice(pos, p))
@@ -257,8 +263,8 @@ class Src: CustomStringConvertible {
   // MARK: nesting sentences.
   
   func parseCmpd(pos: Pos, _ p: Pos) -> Form {
-    let (pars, end) = parsePars(p, "compound value")
-    return Cmpd(synForTerminator(pos, end, ")", "compound value"), pars: pars)
+    let (args, end) = parseArgs(p, "compound value")
+    return Cmpd(synForTerminator(pos, end, ")", "compound value"), args: args)
   }
   
   func parseCmpdType(pos: Pos, _ p: Pos) -> Form {
@@ -475,8 +481,14 @@ class Src: CustomStringConvertible {
   
   func parsePars(pos: Pos, _ subj: String) -> ([Par], Pos) {
     let (forms, end) = parseRawForms(pos)
-    let pars = forms.map { Par.mk($0, subj) }
+    let pars = forms.enumerate().map { Par.mk(index: $0.index, form: $0.element, subj: subj) }
     return (pars, end)
+  }
+  
+  func parseArgs(pos: Pos, _ subj: String) -> ([Arg], Pos) {
+    let (forms, end) = parseRawForms(pos)
+    let args = forms.map { Arg.mk($0, subj) }
+    return (args, end)
   }
   
   func parseBody(pos: Pos) -> ([Stmt], Expr?, Pos, Pos) {

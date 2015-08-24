@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Call : _Form, Expr {
+class Call : _Form, Expr, Stmt {
   let callee: Expr
   let arg: Expr
   

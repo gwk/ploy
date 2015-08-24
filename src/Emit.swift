@@ -36,6 +36,9 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   em.str(0, ") // main exit.")
 
   for space in global.spaces {
+    if space.usedDefs.isEmpty {
+      continue
+    }
     em.str(0, "\n// in \(space.name)")
     for def in space.usedDefs {
       def.compile(em, 0, space, typeAny)
