@@ -394,8 +394,7 @@ class Src: CustomStringConvertible {
   }
   
   static let operator_groups: [[(String, (Form, Form)->Form)]] = [
-    [ (":=", Alias.mk),
-      ("=", Bind.mk)],
+    [ ("=", Bind.mk)],
     [ (":", Ann.mk)],
     [ ("@", Acc.mk),
       (".", Call.mk),

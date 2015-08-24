@@ -21,7 +21,6 @@
 		EC49BD3F1B7565E700660AF0 /* ArithmeticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC49BD3E1B7565E700660AF0 /* ArithmeticType.swift */; };
 		EC5BDF1E1B7A40EC00054159 /* Form.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5BDF1D1B7A40EC00054159 /* Form.swift */; };
 		EC6523901B7BD2BF00CAA454 /* Acc.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523781B7BD2BF00CAA454 /* Acc.swift */; };
-		EC6523911B7BD2BF00CAA454 /* Alias.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523791B7BD2BF00CAA454 /* Alias.swift */; };
 		EC6523921B7BD2BF00CAA454 /* Ann.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65237A1B7BD2BF00CAA454 /* Ann.swift */; };
 		EC6523931B7BD2BF00CAA454 /* Bind.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65237B1B7BD2BF00CAA454 /* Bind.swift */; };
 		EC6523941B7BD2BF00CAA454 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65237C1B7BD2BF00CAA454 /* Call.swift */; };
@@ -89,7 +88,6 @@
 		EC49BD3E1B7565E700660AF0 /* ArithmeticType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArithmeticType.swift; path = qk/src/core/ArithmeticType.swift; sourceTree = "<group>"; };
 		EC5BDF1D1B7A40EC00054159 /* Form.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Form.swift; sourceTree = "<group>"; };
 		EC6523781B7BD2BF00CAA454 /* Acc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Acc.swift; sourceTree = "<group>"; };
-		EC6523791B7BD2BF00CAA454 /* Alias.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Alias.swift; sourceTree = "<group>"; };
 		EC65237A1B7BD2BF00CAA454 /* Ann.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Ann.swift; sourceTree = "<group>"; };
 		EC65237B1B7BD2BF00CAA454 /* Bind.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Bind.swift; sourceTree = "<group>"; };
 		EC65237C1B7BD2BF00CAA454 /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
@@ -167,7 +165,6 @@
 			isa = PBXGroup;
 			children = (
 				EC6523781B7BD2BF00CAA454 /* Acc.swift */,
-				EC6523791B7BD2BF00CAA454 /* Alias.swift */,
 				EC65237A1B7BD2BF00CAA454 /* Ann.swift */,
 				EC97D70E1B868009001D9ABB /* Arg.swift */,
 				EC65237B1B7BD2BF00CAA454 /* Bind.swift */,
@@ -327,7 +324,6 @@
 				EC1FE8F41B6BE31200112BB0 /* Emit.swift in Sources */,
 				EC6523991B7BD2BF00CAA454 /* Do.swift in Sources */,
 				EC6523A21B7BD2BF00CAA454 /* Pub.swift in Sources */,
-				EC6523911B7BD2BF00CAA454 /* Alias.swift in Sources */,
 				EC1FE8ED1B6BE20C00112BB0 /* Dictionary.swift in Sources */,
 				EC1FE8EE1B6BE20C00112BB0 /* Int.swift in Sources */,
 				ECB639851B83D77000138A8C /* GlobalScope.swift in Sources */,
