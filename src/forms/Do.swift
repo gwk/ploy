@@ -25,6 +25,7 @@ class Do: _Form, Expr { // do block: `{…}`.
     em.str(depth, "(function(){")
     for stmt in stmts {
       stmt.compile(em, depth + 1, scope, typeVoid)
+      em.append(";")
     }
     var ret: TypeVal = typeVoid
     if let expr = expr {

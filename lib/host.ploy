@@ -7,6 +7,11 @@ host-val write-Int  <file:File int:Int>%Void;
 host-val write-Str  <file:File str:Str>%Void;
 ;
 
+in GLOBAL
+host-val true Bool;
+host-val false Bool;
+;
+
 in HOST
 ;
 

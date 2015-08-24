@@ -7,6 +7,7 @@ class GlobalScope: Scope {
   
   init() {
     super.init(pathNames: [], parent: nil)
+    bindings["GLOBAL"] = ScopeRec(sym: nil, hostName: "GLOBAL", isFwd: false, kind: .Space(self))
     for t in intrinsicTypes {
       bindings[t.description] = ScopeRec(sym: nil, hostName: t.description, isFwd: false, kind: .Type(t))
     }

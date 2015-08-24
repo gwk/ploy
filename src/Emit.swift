@@ -18,7 +18,7 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   let em = Emit()
   em.str(0, "#!/usr/bin/env iojs")
   em.str(0, "\"use strict\";\n")
-  em.str(0, "(function(){ // ploy space.")
+  em.str(0, "(function(){ // ploy.")
   em.str(0, "// host.js.\n")
   let host_src = InFile(path: hostPath).read()
   em.str(0, host_src)
@@ -30,7 +30,7 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   }
   
   let mainScope = Scope(pathNames: [], parent: global)
-  em.str(0, "// main")
+  em.str(0, "// main.")
   em.str(0, "PROC__exit(")
   main.compile(em, 0, mainScope, typeInt)
   em.str(0, ") // main exit.")
@@ -39,12 +39,12 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
     if space.usedDefs.isEmpty {
       continue
     }
-    em.str(0, "\n// in \(space.name)")
+    em.str(0, "\n// in \(space.name).")
     for def in space.usedDefs {
       def.compile(em, 0, space, typeAny)
     }
   }
-  em.str(0, "\n})() // ploy space.")
+  em.str(0, "\n})()")
 
   for l in em.lines {
     file.write(l)

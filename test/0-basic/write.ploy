@@ -1,0 +1,5 @@
+FS/write-Bool(PROC/std-out true)
+FS/write-Str(PROC/std-out ' ')
+FS/write-Int(PROC/std-out 0)
+FS/write-Str(PROC/std-out '\n')
+0
