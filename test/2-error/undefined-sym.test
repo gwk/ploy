@@ -1,0 +1,8 @@
+{
+  'compile-code': 1,
+  'compile-err': '''\
+scope error: test/2-error/undefined-sym.ploy:1:1-9: `undefined` is not defined in this scope
+  undefined
+  ~~~~~~~~~
+'''
+}

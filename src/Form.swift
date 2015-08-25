@@ -40,10 +40,10 @@ class _Form : Streamable {
   var syntaxName: String { return String(self.dynamicType) }
 
   @noreturn func fail(prefix: String, msg: String, notes: [(Form, String)?]) {
-    syn.src.errPos(syn.pos, end: syn.end, prefix: prefix, msg: msg)
+    syn.src.errPos(syn.pos, end: syn.visEnd, prefix: prefix, msg: msg)
     for n in notes {
       if let (form, msg) = n {
-        form.syn.src.errPos(form.syn.pos, end: form.syn.end, prefix: "note", msg: msg)
+        form.syn.src.errPos(form.syn.pos, end: form.syn.visEnd, prefix: "note", msg: msg)
       }
     }
     Process.exit(1)

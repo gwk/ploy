@@ -97,7 +97,7 @@ class Src: CustomStringConvertible {
         let endLine = line(end)
         let (underlinePos, underlineEnd) = underlines(pos, end, lineLen: posLine.characters.count)
         err("\(pos.col + 1):\n  \(posLine)\n  \(underlinePos)\n")
-        err("to: \(path):\(end.line + 1):\(end.col): \(msg)\n  \(endLine)\n  \(underlineEnd)")
+        err("to: \(path):\(end.line + 1):\(end.col): \(msg)\n  \(endLine)\n  \(underlineEnd)\n")
       }
     } else { // single line, single column.
       err("\(pos.col + 1): \(msg)\n  \(posLine)\n  \(underline(pos))\n")
