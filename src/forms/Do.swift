@@ -23,18 +23,24 @@ class Do: _Form, Expr { // do block: `{…}`.
   
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     em.str(depth, "(function(){")
+    let ret = compileBody(em, depth, scope, expType)
+    em.append("})()")
+    return ret
+  }
+  
+  func compileBody(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     for stmt in stmts {
       stmt.compileStmt(em, depth + 1, scope)
       em.append(";")
     }
     var ret: TypeVal = typeVoid
     if let expr = expr {
-      em.str(depth + 1, "return (")
+      em.str(depth, " return (")
       ret = expr.compileExpr(em, depth + 1, scope, expType)
-    } else if expType != typeVoid {
+      em.append(")")
+    } else if expType !== typeVoid {
       self.failType("expected type \(expType); body has no return expression.")
     }
-    em.append(")})()")
     return ret
   }
 }

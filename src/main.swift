@@ -41,11 +41,12 @@ guard let outPath = opts["-o"] else { fail("-o out-path argument is required.") 
 let tmpPath = outPath + ".tmp"
 let tmpFile = OutFile(path: tmpPath, create: 0o644)
 
-let main = Src(path: mainPath).parseMain(verbose: false)
+let (mainIns, mainDo) = Src(path: mainPath).parseMain(verbose: false)
 
-let ins = libPaths.flatMap { Src(path: $0).parseLib(verbose: false) }
+var ins = libPaths.flatMap { Src(path: $0).parseLib(verbose: false) }
+ins.appendContentsOf(mainIns)
 
-compileProgram(tmpFile, hostPath: hostPath, main: main, ins: ins)
+compileProgram(tmpFile, hostPath: hostPath, main: mainDo, ins: ins)
 
 rename(tmpPath, toPath: outPath)
 File.setPerms(outPath, 0o755)

@@ -19,13 +19,7 @@ class In: _Form, Form { // in statement: `in module-name statements…;`.
     }
   }
   
-  func compileIn(em: Emit, _ scope: Scope) {
-    for d in defs {
-      d.compileDef(em, scope)
-    }
-  }
-  
-  func define(space: Scope) {
+  func defineDefs(space: Scope) {
     for d in defs {
       if let existing = space.defs[d.sym.name] {
         sym.failRedef(existing.sym)

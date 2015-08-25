@@ -91,17 +91,21 @@ class Src: CustomStringConvertible {
     let posLine = line(pos)
     err("\(prefix): \(path):\(pos.line + 1):")
     if let end = end {
-      if pos.line == end.line { // single line, multiple columns.
-        err("\(pos.col + 1)-\(end.col): \(msg)\n  \(posLine)\n  \(underline(pos, end))\n")
+      if pos.line == end.line { // single line.
+        if pos.col < end.col { // multiple columns.
+          err("\(pos.col + 1)-\(end.col): \(msg)\n  \(posLine)\n  \(underline(pos, end))\n")
+          return
+        }
       } else { // multiline.
         let endLine = line(end)
         let (underlinePos, underlineEnd) = underlines(pos, end, lineLen: posLine.characters.count)
         err("\(pos.col + 1):\n  \(posLine)\n  \(underlinePos)\n")
         err("to: \(path):\(end.line + 1):\(end.col): \(msg)\n  \(endLine)\n  \(underlineEnd)\n")
+        return
       }
-    } else { // single line, single column.
-      err("\(pos.col + 1): \(msg)\n  \(posLine)\n  \(underline(pos))\n")
     }
+    // single line, single column.
+    err("\(pos.col + 1): \(msg)\n  \(posLine)\n  \(underline(pos))\n")
   }
 
   @noreturn func fail(pos: Pos, _ end: Pos?, _ prefix: String, _ msg: String) {
@@ -519,15 +523,37 @@ class Src: CustomStringConvertible {
     return Do(Syn(src: self, pos: pos, visEnd: visEnd, end: end), stmts: stmts, expr: expr)
   }
   
-  func parseMain(verbose verbose: Bool = false) -> Do {
-    let main = parseBodyToImplicitDo(startPos)
-    if hasSome(main.syn.end) {
-      failParse(main.syn.end, nil, "unexpected terminator character: '\(char(main.syn.end))'")
+  func parseMain(verbose verbose: Bool = false) -> ([In], Do) {
+    let (forms, end) = parseRawForms(startPos)
+    if hasSome(end) {
+      failParse(end, nil, "unexpected terminator character: '\(char(end))'")
     }
-    if verbose {
-      main.writeTo(&std_err)
+    guard let last = forms.last else {
+      fail(startPos, end, "syntax error", "empty main body; main requires a final Int exit code expression.")
     }
-    return main
+    guard let exitExpr = last as? Expr else {
+      last.failSyntax("main body requires final form to be an Int exit code expression.")
+    }
+    var ins: [In] = []
+    var stmts: [Stmt] = []
+    for (i, f) in forms.enumerate() {
+      if i == forms.lastIndex {
+        break
+      }
+      if let in_ = f as? In {
+        if stmts.count > 0 {
+          in_.failSyntax("`in` forms must precede all statements in main body.", (stmts.last!, "preceding statement here"))
+        }
+        ins.append(in_)
+      } else if let s = f as? Stmt {
+        stmts.append(s)
+      } else {
+        f.failSyntax("main body expects `in` forms and statements; received \(f.syntaxName).")
+      }
+    }
+    let bodyPos = (stmts.count > 0 ? stmts[0].syn.pos : exitExpr.syn.pos)
+    let bodyDo = Do(Syn(src: self, pos: bodyPos, visEnd: exitExpr.syn.visEnd, end: exitExpr.syn.end), stmts: stmts, expr: exitExpr)
+    return (ins, bodyDo)
   }
   
   func parseLib(verbose verbose: Bool = false) -> [In] {

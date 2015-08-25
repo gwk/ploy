@@ -30,7 +30,18 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
   }
   
   func compileDef(em: Emit, _ scope: Scope) {
-    fatalError()
+    let fullName = "\(scope.name)/\(sym.name)"
+    let hostName = "\(scope.hostPrefix)\(sym.hostName)"
+    // TODO: decide if lazy def is necessary.
+    em.str(0, "var \(hostName)__acc = function() {")
+    em.str(0, " \(hostName)__acc = function() {")
+    em.str(0, "  throw \"error: lazy value '\(fullName)' recursively referenced during initialization.\" };")
+    em.str(0, " let val =")
+    let typeVal = val.compileExpr(em, 1, scope, typeAny) // TODO: new scope?
+    em.append(";")
+    em.str(0, " \(hostName)__acc = function() { return val };")
+    em.str(0, " return val; }")
+    scope.addRec(sym, isFwd: false, kind: .Lazy(typeVal))
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {

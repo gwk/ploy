@@ -11,7 +11,7 @@ struct ScopeRec {
     var kindDesc: String {
       switch self {
       case Lazy:  return "lazy value"
-      case Space: return "space"
+      case Space: return "namespace"
       case Type:  return "type"
       case Val:   return "value"
       }

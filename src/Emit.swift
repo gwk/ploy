@@ -26,15 +26,14 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   
   for i in ins {
     let space = global.getOrCreateSpace([i.sym])
-    i.define(space)
+    i.defineDefs(space)
   }
   
   let mainScope = Scope(pathNames: [], parent: global)
-  em.str(0, "// main.")
-  em.str(0, "PROC__exit(")
-  main.compileExpr(em, 0, mainScope, typeInt)
-  em.str(0, ") // main exit.")
-
+  em.str(0, "let _main = function(){ // main.")
+  main.compileBody(em, 0, mainScope, typeInt)
+  em.append("};")
+  
   for space in global.spaces {
     if space.usedDefs.isEmpty {
       continue
@@ -42,9 +41,11 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
     em.str(0, "\n// in \(space.name).")
     for def in space.usedDefs {
       def.compileDef(em, space)
+      em.append(";")
     }
   }
-  em.str(0, "\n})()")
+
+  em.str(0, "\nPROC__exit(_main())})()")
 
   for l in em.lines {
     file.write(l)

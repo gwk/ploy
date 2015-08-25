@@ -1,16 +1,16 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class TypeVal: Hashable, CustomStringConvertible {
+class TypeVal: CustomStringConvertible { // TODO: Hashable?
   
-  var hashValue: Int { return ObjectIdentifier(self).hashValue }
+  //var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var description: String { fatalError() }
   
   func accepts(actual: TypeVal) -> Bool { return actual === self }
 }
 
-func ==(l: TypeVal, r: TypeVal) -> Bool { return l === r }
+//func ==(l: TypeVal, r: TypeVal) -> Bool { return l === r }
 
 
 class TypeValAny: TypeVal {
