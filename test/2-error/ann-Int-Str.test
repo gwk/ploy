@@ -1,0 +1,8 @@
+{
+  'compile-code': 1,
+  'compile-err': '''\
+type error: test/2-error/ann-Int-Str.ploy:1:1-5: expected type: Int; actual type: Str
+  0:Str
+  ~~~~~
+'''
+}
