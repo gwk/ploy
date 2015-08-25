@@ -32,7 +32,7 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   let mainScope = Scope(pathNames: [], parent: global)
   em.str(0, "// main.")
   em.str(0, "PROC__exit(")
-  main.compile(em, 0, mainScope, typeInt)
+  main.compileExpr(em, 0, mainScope, typeInt)
   em.str(0, ") // main exit.")
 
   for space in global.spaces {
@@ -41,7 +41,7 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
     }
     em.str(0, "\n// in \(space.name).")
     for def in space.usedDefs {
-      def.compile(em, 0, space, typeAny)
+      def.compileDef(em, space)
     }
   }
   em.str(0, "\n})()")

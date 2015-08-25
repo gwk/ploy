@@ -23,13 +23,17 @@ class Call : _Form, Expr, Stmt {
     arg.writeTo(&target, depth + 1)
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     em.str(depth, "((")
-    let fnType = callee.compile(em, depth + 1, scope, anySigReturning(expType)) as! TypeValSig
+    let fnType = callee.compileExpr(em, depth + 1, scope, anySigReturning(expType)) as! TypeValSig
     em.append(")(")
-    arg.compile(em, depth + 1, scope, fnType.par)
+    arg.compileExpr(em, depth + 1, scope, fnType.par)
     em.append("))")
     return fnType.ret
+  }
+  
+  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+    compileExpr(em, depth, scope, typeAny)
   }
 }
 

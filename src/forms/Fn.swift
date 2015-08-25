@@ -17,7 +17,7 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     body.writeTo(&target, depth + 1)
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     fatalError()
   }
 }

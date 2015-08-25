@@ -14,9 +14,8 @@ class HostType: _Form, Def { // host type declaration: `host-type sym;`.
     sym.writeTo(&target, depth + 1)
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileDef(em: Emit, _ scope: Scope) {
     scope.addRec(sym, isFwd: false, kind: .Type(TypeValDecl(sym: sym)))
-    return typeVoid
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {

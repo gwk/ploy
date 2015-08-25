@@ -29,7 +29,7 @@ class Path: _Form, Expr, TypeExpr { // symbol: `name`.
     return syms.last!.typeVal(scope.rec(self), subj)
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     return syms.last!.compile(em, depth, scope.rec(self), expType)
   }
 }

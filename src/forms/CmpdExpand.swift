@@ -16,7 +16,7 @@ class CmpdExpand: _Form { // compound macro expansion argument: `[a b]`.
     }
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileCmpdExpand(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     fatalError()
   }
 }

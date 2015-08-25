@@ -14,7 +14,7 @@ class Pub: _Form, Def { // public modifier: `pub expr;`.
     def.writeTo(&target, depth + 1)
   }
 
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileDef(em: Emit, _ scope: Scope) {
     fatalError()
   }
   

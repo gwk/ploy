@@ -23,9 +23,12 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     val.writeTo(&target, depth + 1)
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
     fatalError()
-    return typeVoid
+  }
+  
+  func compileDef(em: Emit, _ scope: Scope) {
+    fatalError()
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {

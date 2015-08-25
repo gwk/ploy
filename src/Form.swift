@@ -5,23 +5,31 @@ protocol Form : Streamable {
   var syn: Syn { get }
   var syntaxName: String { get }
   func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
-  func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal
   @noreturn func fail(prefix: String, _ msg: String, _ notes: (Form, String)?...)
   @noreturn func failSyntax(msg: String, _ notes: (Form, String)?...)
   @noreturn func failType(msg: String, _ notes: (Form, String)?...)
 }
 
-protocol Expr: Form {}
+
+protocol Expr: Form {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal
+}
+
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
   func typeVal(scope: Scope, _ subj: String) -> TypeVal
 }
 
-protocol Stmt: Form {}
+
+protocol Stmt: Form {
+  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope)
+}
+
 
 protocol Def: Form {
   var sym: Sym { get }
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind
+  func compileDef(em: Emit, _ scope: Scope)
 }
 
 
@@ -64,8 +72,6 @@ class _Form : Streamable {
   func writeTo<Target : OutputStreamType>(inout target: Target) {
     writeTo(&target, 0)
   }
-
-  func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal { fatalError() }
 }
 
 

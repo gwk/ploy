@@ -19,7 +19,7 @@ class LitNum: _Form, Expr { // numeric literal: `0`.
     target.write("\n")
   }
 
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     // TODO: typecheck.
     em.str(depth, val.dec)
     return typeInt

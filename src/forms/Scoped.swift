@@ -14,7 +14,7 @@ class Scoped: _Form, Expr { // local scope: `scoped body…;`.
     body.writeTo(&target, depth + 1)
   }
 
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     fatalError()
   }
 }

@@ -19,7 +19,11 @@ class Struct: _Form, Def, Stmt { // struct declaration: `struct S fields…;`.
     }
   }
 
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+    fatalError()
+  }
+  
+  func compileDef(em: Emit, _ scope: Scope) {
     fatalError()
   }
   

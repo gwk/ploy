@@ -26,10 +26,6 @@ class Reify: _Form, TypeExpr { // type reification:  `T^A`.
   func typeVal(scope: Scope, _ subj: String) -> TypeVal {
     fatalError()
   }
-
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    fatalError()
-  }
 }
 
 

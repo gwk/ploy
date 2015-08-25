@@ -19,8 +19,12 @@ class Enum: _Form, Def, Stmt { // enum declaration: `enum E variants…;`.
     }
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
     fatalError()
+  }
+  
+  func compileDef(em: Emit, _ scope: Scope) {
+    compileStmt(em, 0, scope)
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {

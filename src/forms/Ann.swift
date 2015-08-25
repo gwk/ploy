@@ -23,7 +23,7 @@ class Ann: _Form, Expr { // annotation: `val:Type`.
     type.writeTo(&target, depth + 1)
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     fatalError()
   }
 }

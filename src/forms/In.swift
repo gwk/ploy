@@ -19,12 +19,10 @@ class In: _Form, Form { // in statement: `in module-name statements…;`.
     }
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    // TODO: module scope.
+  func compileIn(em: Emit, _ scope: Scope) {
     for d in defs {
-      d.compile(em, depth + 1, scope, typeVoid)
+      d.compileDef(em, scope)
     }
-    return typeVoid
   }
   
   func define(space: Scope) {

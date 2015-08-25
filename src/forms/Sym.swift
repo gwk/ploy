@@ -25,7 +25,7 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
     return typeVal(scope.rec(self), subj)
   }
 
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     return compile(em, depth, scope.rec(self), expType)
   }
 

@@ -16,7 +16,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     }
   }
   
-  override func compile(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
     if let expCmpd = expType as? TypeValCmpd {
       em.str(depth, "{")
       var argIndex = 0
@@ -47,10 +47,10 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
           argLabel.failType("argument label does not match unlabeled parameter", (par.par, "parameter here"))
         }
       }
-      arg.compile(em, depth, scope, par.typeVal)
+      arg.compileArg(em, depth, scope, par.typeVal)
       argIndex++
     } else if let dflt = par.par.dflt {
-      dflt.compile(em, depth, scope, par.typeVal)
+      dflt.compileExpr(em, depth, scope, par.typeVal)
     } else {
       failType("missing argument for parameter", (par.par, "parameter here"))
     }
