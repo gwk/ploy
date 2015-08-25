@@ -43,11 +43,11 @@ class Scope {
   
   init(pathNames: [String], parent: Scope?) {
     self.pathNames = pathNames
-    self.hostPrefix = pathNames.isEmpty ? "" : ("__".join(pathNames) + "__")
+    self.hostPrefix = pathNames.isEmpty ? "" : (pathNames.joinWithSeparator("__") + "__")
     self.parent = parent
   }
   
-  var name: String { return "/".join(pathNames) }
+  var name: String { return pathNames.joinWithSeparator("/") }
 
   func addRec(sym: Sym, isFwd: Bool, kind: ScopeRec.Kind) -> ScopeRec {
     if let existing = bindings[sym.name] {

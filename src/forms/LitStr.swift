@@ -26,16 +26,16 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     var s = "\""
     for code in val.codes {
       switch code {
-      case "\0":    s.extend("\\0")
-      case "\u{8}": s.extend("\\b")
-      case "\t":    s.extend("\\t")
-      case "\n":    s.extend("\\n")
-      case "\r":    s.extend("\\r")
-      case "\"":    s.extend("\\\"")
-      case "\\":    s.extend("\\\\")
+      case "\0":    s.appendContentsOf("\\0")
+      case "\u{8}": s.appendContentsOf("\\b")
+      case "\t":    s.appendContentsOf("\\t")
+      case "\n":    s.appendContentsOf("\\n")
+      case "\r":    s.appendContentsOf("\\r")
+      case "\"":    s.appendContentsOf("\\\"")
+      case "\\":    s.appendContentsOf("\\\\")
       default:
         if code < " " || code > "~" {
-          s.extend("\\u{\(Int(code.value).hex)}")
+          s.appendContentsOf("\\u{\(Int(code.value).hex)}")
         } else {
           s.append(Character(code))
         }

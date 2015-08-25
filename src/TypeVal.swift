@@ -30,7 +30,7 @@ class TypeValCmpd: TypeVal {
   }
   
   override var description: String {
-    let s = " ".join(pars.map { String($0.typeVal.description) })
+    let s = pars.map({ String($0.typeVal.description) }).joinWithSeparator(" ")
     return "<\(s)>"
   }
   
