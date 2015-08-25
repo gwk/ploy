@@ -24,7 +24,9 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
   }
   
   func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
-    fatalError()
+    em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
+    let typeVal = val.compileExpr(em, depth + 1, scope, typeAny)
+    scope.addRec(sym, isFwd: false, kind: .Val(typeVal))
   }
   
   func compileDef(em: Emit, _ scope: Scope) {
