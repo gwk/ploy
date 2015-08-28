@@ -48,7 +48,11 @@ class Scope {
   }
   
   var name: String { return pathNames.joinWithSeparator("/") }
-
+  
+  func makeChild(bindings: [String:TypeVal] = [:]) -> Scope {
+    return Scope.init(pathNames: [], parent: self)
+  }
+  
   func addRec(sym: Sym, isFwd: Bool, kind: ScopeRec.Kind) -> ScopeRec {
     if let existing = bindings[sym.name] {
       if existing.isFwd {
@@ -63,6 +67,11 @@ class Scope {
     let r = ScopeRec(sym: sym, hostName: hostPrefix + sym.hostName, isFwd: isFwd, kind: kind)
     bindings[sym.name] = r
     return r
+  }
+  
+  func addValRec(key: String, typeVal: TypeVal) {
+    assert(!bindings.contains(key))
+    bindings[key] = ScopeRec(sym: nil, hostName: key, isFwd: false, kind: .Val(typeVal))
   }
   
   func getRec(sym: Sym) -> ScopeRec? {

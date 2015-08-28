@@ -29,9 +29,8 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
     i.defineDefs(space)
   }
   
-  let mainScope = Scope(pathNames: [], parent: global)
   em.str(0, "let _main = function(){ // main.")
-  main.compileBody(em, 0, mainScope, typeInt)
+  main.compileBody(em, 1, global.makeChild(), typeInt)
   em.append("};")
   
   for space in global.spaces {

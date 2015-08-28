@@ -35,7 +35,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
   }
   
   func compilePar(em: Emit, _ depth: Int, _ scope: Scope, par: TypeValPar, inout argIndex: Int) {
-    em.str(depth, "\(par.par.hostName):")
+    em.str(depth, " \(par.par.hostName):")
     if argIndex < args.count {
       let arg = args[argIndex]
       if let argLabel = arg.label {

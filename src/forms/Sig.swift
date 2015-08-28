@@ -13,8 +13,8 @@ class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
 
   static func mk(l: Form, _ r: Form) -> Form {
     return Sig(Syn(l.syn, r.syn),
-      par: castForm(l, "signature", "type expression"),
-      ret: castForm(r, "signature", "type expression"))
+      par: castForm(l, "signature parameter", "type expression"),
+      ret: castForm(r, "signature return", "type expression"))
   }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
@@ -24,6 +24,10 @@ class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
   }
 
   func typeVal(scope: Scope, _ subj: String) -> TypeVal {
+    return typeValSig(scope, subj)
+  }
+
+  func typeValSig(scope: Scope, _ subj: String) -> TypeValSig {
     return TypeValSig(par: par.typeVal(scope, "signature"), ret: par.typeVal(scope, "signature"))
   }
 }

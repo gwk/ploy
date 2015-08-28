@@ -39,7 +39,6 @@
 		EC6523A11B7BD2BF00CAA454 /* Par.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6523891B7BD2BF00CAA454 /* Par.swift */; };
 		EC6523A21B7BD2BF00CAA454 /* Pub.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238A1B7BD2BF00CAA454 /* Pub.swift */; };
 		EC6523A31B7BD2BF00CAA454 /* Reify.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238B1B7BD2BF00CAA454 /* Reify.swift */; };
-		EC6523A41B7BD2BF00CAA454 /* Scoped.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238C1B7BD2BF00CAA454 /* Scoped.swift */; };
 		EC6523A51B7BD2BF00CAA454 /* Sig.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238D1B7BD2BF00CAA454 /* Sig.swift */; };
 		EC6523A61B7BD2BF00CAA454 /* Struct.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238E1B7BD2BF00CAA454 /* Struct.swift */; };
 		EC6523A71B7BD2BF00CAA454 /* Sym.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238F1B7BD2BF00CAA454 /* Sym.swift */; };
@@ -106,7 +105,6 @@
 		EC6523891B7BD2BF00CAA454 /* Par.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Par.swift; sourceTree = "<group>"; };
 		EC65238A1B7BD2BF00CAA454 /* Pub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pub.swift; sourceTree = "<group>"; };
 		EC65238B1B7BD2BF00CAA454 /* Reify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Reify.swift; sourceTree = "<group>"; };
-		EC65238C1B7BD2BF00CAA454 /* Scoped.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Scoped.swift; sourceTree = "<group>"; };
 		EC65238D1B7BD2BF00CAA454 /* Sig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sig.swift; sourceTree = "<group>"; };
 		EC65238E1B7BD2BF00CAA454 /* Struct.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Struct.swift; sourceTree = "<group>"; };
 		EC65238F1B7BD2BF00CAA454 /* Sym.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sym.swift; sourceTree = "<group>"; };
@@ -186,7 +184,6 @@
 				ECDA37181B82D6F500939000 /* Path.swift */,
 				EC65238A1B7BD2BF00CAA454 /* Pub.swift */,
 				EC65238B1B7BD2BF00CAA454 /* Reify.swift */,
-				EC65238C1B7BD2BF00CAA454 /* Scoped.swift */,
 				EC65238D1B7BD2BF00CAA454 /* Sig.swift */,
 				EC65238E1B7BD2BF00CAA454 /* Struct.swift */,
 				EC65238F1B7BD2BF00CAA454 /* Sym.swift */,
@@ -298,7 +295,6 @@
 				EC6523961B7BD2BF00CAA454 /* Cmpd.swift in Sources */,
 				EC6523951B7BD2BF00CAA454 /* Case.swift in Sources */,
 				ECDA37191B82D6F500939000 /* Path.swift in Sources */,
-				EC6523A41B7BD2BF00CAA454 /* Scoped.swift in Sources */,
 				EC1FE8F11B6BE20C00112BB0 /* SequenceType.swift in Sources */,
 				ECDA37171B80FE5200939000 /* HostType.swift in Sources */,
 				EC97D7111B879717001D9ABB /* TypeValPar.swift in Sources */,
