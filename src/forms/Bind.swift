@@ -48,7 +48,7 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     if let ann = val as? Ann {
       return .Lazy(ann.type.typeVal(scope, "type annnotation"))
     } else {
-      val.fail("syntax error", "definition requires explicit type annotation")
+      val.failSyntax("definition requires explicit type annotation")
     }
   }
 }
