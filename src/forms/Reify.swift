@@ -5,14 +5,14 @@ class Reify: _Form, TypeExpr { // type reification:  `T^A`.
   let callee: TypeExpr
   let arg: TypeExpr
 
-  init(_ syn: Syn, callee: TypeExpr, arg: TypeExpr) {
+  required init(_ syn: Syn, callee: TypeExpr, arg: TypeExpr) {
     self.callee = callee
     self.arg = arg
     super.init(syn)
   }
 
   static func mk(l: Form, _ r: Form) -> Form {
-    return Reify(Syn(l.syn, r.syn),
+    return self.init(Syn(l.syn, r.syn),
       callee: castForm(l, "type reification", "type expression"),
       arg: castForm(r, "type reification", "type expression"))
   }

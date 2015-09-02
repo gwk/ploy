@@ -5,14 +5,14 @@ class Call : _Form, Expr, Stmt {
   let callee: Expr
   let arg: Expr
   
-  init(_ syn: Syn, callee: Expr, arg: Expr) {
+  required init(_ syn: Syn, callee: Expr, arg: Expr) {
     self.callee = callee
     self.arg = arg
     super.init(syn)
   }
   
   static func mk(l: Form, _ r: Form) -> Form {
-    return Call(Syn(l.syn, r.syn),
+    return self.init(Syn(l.syn, r.syn),
       callee: castForm(l, "call", "expression"),
       arg: castForm(r, "call", "expression"))
   }
