@@ -559,6 +559,12 @@ class Src: CustomStringConvertible {
     }
     let bodyPos = (stmts.count > 0 ? stmts[0].syn.pos : exitExpr.syn.pos)
     let bodyDo = Do(Syn(src: self, pos: bodyPos, visEnd: exitExpr.syn.visEnd, end: exitExpr.syn.end), stmts: stmts, expr: exitExpr)
+    if verbose {
+      for i in ins {
+        i.writeTo(&std_err)
+      }
+      bodyDo.writeTo(&std_err)
+    }
     return (ins, bodyDo)
   }
   
