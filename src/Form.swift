@@ -5,9 +5,9 @@ protocol Form : Streamable {
   var syn: Syn { get }
   var syntaxName: String { get }
   func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
-  @noreturn func failForm(prefix: String, _ msg: String, _ notes: (Form, String)?...)
-  @noreturn func failSyntax(msg: String, _ notes: (Form, String)?...)
-  @noreturn func failType(msg: String, _ notes: (Form, String)?...)
+  @noreturn func failForm(prefix: String, msg: String, notes: (Form?, String)...)
+  @noreturn func failSyntax(msg: String, notes: (Form?, String)...)
+  @noreturn func failType(msg: String, notes: (Form?, String)...)
 }
 
 
@@ -39,25 +39,25 @@ class _Form : Streamable {
   
   var syntaxName: String { return String(self.dynamicType) }
 
-  @noreturn func failForm(prefix: String, msg: String, notes: [(Form, String)?]) {
+  @noreturn func failForm(prefix: String, msg: String, notes: [(Form?, String)]) {
     syn.src.errPos(syn.pos, end: syn.visEnd, prefix: prefix, msg: msg)
-    for n in notes {
-      if let (form, msg) = n {
+    for (form, msg) in notes {
+      if let form = form {
         form.syn.src.errPos(form.syn.pos, end: form.syn.visEnd, prefix: "note", msg: msg)
       }
     }
     Process.exit(1)
   }
   
-  @noreturn func failForm(prefix: String, _ msg: String, _ notes: (Form, String)?...) {
+  @noreturn func failForm(prefix: String, msg: String, notes: (Form?, String)...) {
     failForm(prefix, msg: msg, notes: notes)
   }
 
-  @noreturn func failSyntax(msg: String, _ notes: (Form, String)?...) {
+  @noreturn func failSyntax(msg: String, notes: (Form?, String)...) {
     failForm("syntax error", msg: msg, notes: notes)
   }
   
-  @noreturn func failType(msg: String, _ notes: (Form, String)?...) {
+  @noreturn func failType(msg: String, notes: (Form?, String)...) {
     failForm("type error", msg: msg, notes: notes)
   }
   

@@ -41,10 +41,10 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
       if let argLabel = arg.label {
         if let parLabel = par.par.label {
           if argLabel.name != parLabel.name {
-            argLabel.failType("argument label does not match parameter label", (parLabel, "parameter label here"))
+            argLabel.failType("argument label does not match parameter label", notes: (parLabel, "parameter label here"))
           }
         } else {
-          argLabel.failType("argument label does not match unlabeled parameter", (par.par, "parameter here"))
+          argLabel.failType("argument label does not match unlabeled parameter", notes: (par.par, "parameter here"))
         }
       }
       arg.compileArg(em, depth, scope, par.typeVal)
@@ -52,7 +52,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     } else if let dflt = par.par.dflt {
       dflt.compileExpr(em, depth, scope, par.typeVal)
     } else {
-      failType("missing argument for parameter", (par.par, "parameter here"))
+      failType("missing argument for parameter", notes: (par.par, "parameter here"))
     }
     em.append(",")
   }

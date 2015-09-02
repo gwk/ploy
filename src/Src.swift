@@ -548,7 +548,7 @@ class Src: CustomStringConvertible {
       }
       if let in_ = f as? In {
         if stmts.count > 0 {
-          in_.failSyntax("`in` forms must precede all statements in main body.", (stmts.last!, "preceding statement here"))
+          in_.failSyntax("`in` forms must precede all statements in main body.", notes: (stmts.last, "preceding statement here"))
         }
         ins.append(in_)
       } else if let s = f as? Stmt {

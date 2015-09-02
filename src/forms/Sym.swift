@@ -70,10 +70,10 @@ class Sym: _Form, Expr, TypeExpr { // symbol: `name`.
     return typeVal
   }
   
-  @noreturn func failUndef() { failForm("scope error", "`\(name)` is not defined in this scope") }
+  @noreturn func failUndef() { failForm("scope error", msg: "`\(name)` is not defined in this scope") }
   
   @noreturn func failRedef(original: Sym?) {
-    failForm("scope error", "redefinition of `\(name)`", original.map { ($0, "original definition here") })
+    failForm("scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
   }
 }
 
