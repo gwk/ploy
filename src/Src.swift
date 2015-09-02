@@ -305,7 +305,8 @@ class Src: CustomStringConvertible {
       if let c = f as? Case {
         cases.append(c)
       } else if i == forms.lastIndex {
-        dflt = castForm(f, "`if` form", "default expression")
+        let d: Expr = castForm(f, "`if` form", "default expression")
+        dflt = d
       } else {
         f.failSyntax("`if` form expects `?` case but received \(f.syntaxName).")
       }
