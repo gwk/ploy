@@ -424,7 +424,7 @@ class Src: CustomStringConvertible {
   
   let adjacency_operators: [(Character, (Form, Form)->Form)] = [
     ("(", CallAdj.mk),
-    ("^", ReifyAdj.mk)
+    ("<", ReifyAdj.mk)
   ]
   
   func parsePhrase(pos: Pos, precedence: Int = 0) -> Form {
