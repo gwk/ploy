@@ -428,9 +428,9 @@ class Src: CustomStringConvertible {
   ]
   
   func parsePhrase(pos: Pos, precedence: Int = 0) -> Form {
-    let left = parsePoly(pos)
+    var left = parsePoly(pos)
     var p = left.syn.end
-    if hasSome(p) {
+    outer: while hasSome(p) {
       for i in precedence..<Src.operator_groups.count {
         let group = Src.operator_groups[i]
         for (string, handler) in group {
@@ -438,7 +438,9 @@ class Src: CustomStringConvertible {
             p = adv(p, count: string.characters.count)
             p = parseSpace(p)
             let right = parsePhrase(p, precedence: i)
-            return handler(left, right)
+            left = handler(left, right)
+            p = left.syn.end
+            continue outer
           }
         }
       }
@@ -447,10 +449,13 @@ class Src: CustomStringConvertible {
         for (c, handler) in adjacency_operators {
           if char(p) == c {
             let right = parsePhrase(p, precedence: Src.operator_groups.count) // TODO: decide if this should call parsePoly instead.
-            return handler(left, right)
+            left = handler(left, right)
+            p = left.syn.end
+            continue outer
           }
         }
       }
+      break
     }
     return left
   }
