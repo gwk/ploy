@@ -84,7 +84,7 @@ class Src: CustomStringConvertible {
     assert(pos.line < end.line)
     let spaces = String(count: pos.col, char: " ")
     let squigs = String(count: lineLen - pos.col, char: "~")
-    return ("\(spaces)\(squigs)-", String(count: end.col, char: "~"))
+    return ("\(spaces)\(squigs)", String(count: end.col, char: "~"))
   }
 
   func errPos(pos: Pos, end: Pos?, prefix: String, msg: String) {
@@ -99,8 +99,9 @@ class Src: CustomStringConvertible {
       } else { // multiline.
         let endLine = line(end)
         let (underlinePos, underlineEnd) = underlines(pos, end, lineLen: posLine.characters.count)
-        err("\(pos.col + 1):\n  \(posLine)\n  \(underlinePos)\n")
-        err("to: \(path):\(end.line + 1):\(end.col): \(msg)\n  \(endLine)\n  \(underlineEnd)\n")
+        err("\(pos.col + 1)-\(end.line + 1):\(end.col): \(msg)\n")
+        err("  \(posLine)\n  \(underlinePos)…\n")
+        err("  \(endLine)\n …\(underlineEnd)\n")
         return
       }
     }
