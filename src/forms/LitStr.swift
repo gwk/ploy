@@ -19,7 +19,7 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     target.write("\"\n")
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
     if !expType.accepts(typeStr) {
       failType("string literal is not convertible to \(expType)")
     }
@@ -42,7 +42,7 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
       }
     }
     s.append(Character("\""))
-    em.str(depth, s)
+    em.str(depth, isTail ? "{v:\(s)}" : s)
     return typeStr
   }
 }

@@ -22,9 +22,5 @@ class Case: _Form, Form { // conditional case: `condition ? consequence`.
     condition.writeTo(&target, depth + 1)
     consequence.writeTo(&target, depth + 1)
   }
-  
-  func compileCase(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    fatalError()
-  }
 }
 

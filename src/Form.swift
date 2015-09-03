@@ -11,8 +11,13 @@ protocol Form : Streamable {
 }
 
 
+protocol Accessor: Form, CustomStringConvertible {
+  var hostAccessor: String { get }
+  func compileAccess(em: Emit, _ depth: Int, accesseeType: TypeVal) -> TypeVal
+}
+
 protocol Expr: Form {
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal
 }
 
 
@@ -77,7 +82,7 @@ class _Form : Streamable {
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
 func castForm<T>(form: Form, _ subj: String, _ exp: String) -> T {
-  // TODO: should be able to parameterize as <T: Form> but 2.0b7 does not like that.
+  // TODO: should be able to parameterize as <T: Form> but 2.0b6 does not like that.
   if let form = form as? T {
     return form
   } else {

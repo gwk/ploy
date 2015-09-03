@@ -1,13 +1,16 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class LitNum: _Form, Expr { // numeric literal: `0`.
+class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   let val: Int
 
   init(_ syn: Syn, val: Int) {
+    assert(val >= 0)
     self.val = val
     super.init(syn)
   }
+  
+  var description: String { return String(val) }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     target.write(String(indent: depth))
@@ -19,9 +22,26 @@ class LitNum: _Form, Expr { // numeric literal: `0`.
     target.write("\n")
   }
 
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  var hostAccessor: String {
+    return "[\"\(val)\"]"
+  }
+  
+  func compileAccess(em: Emit, _ depth: Int, accesseeType: TypeVal) -> TypeVal {
+    em.str(depth, hostAccessor)
+    if let accesseeType = accesseeType as? TypeValCmpd {
+      if let par = accesseeType.pars.get(val) {
+        return par.typeVal
+      } else {
+        failType("numeric accessor is out of range for type: \(accesseeType)")
+      }
+    } else {
+      failType("numeric literal cannot access into value of type: \(accesseeType)")
+    }
+  }
+
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
     // TODO: typecheck.
-    em.str(depth, val.dec)
+    em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)
     return typeInt
   }
 }

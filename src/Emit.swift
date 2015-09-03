@@ -30,7 +30,7 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   }
   
   em.str(0, "let _main = function(){ // main.")
-  main.compileBody(em, 1, global.makeChild(), typeInt)
+  main.compileBody(em, 1, global.makeChild(), typeInt, isTail: true)
   em.append("};")
   
   for space in global.spaces {
@@ -44,7 +44,7 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
     }
   }
 
-  em.str(0, "\nPROC__exit(_main())})()")
+  em.str(0, "\nPROC__exit(_tramp(_main()))})()")
 
   for l in em.lines {
     file.write(l)

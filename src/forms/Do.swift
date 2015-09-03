@@ -21,22 +21,22 @@ class Do: _Form, Expr { // do block: `{…}`.
     }
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
     em.str(depth, "(function(){")
-    let ret = compileBody(em, depth + 1, scope.makeChild(), expType)
+    let ret = compileBody(em, depth + 1, scope.makeChild(), expType, isTail: isTail)
     em.append("})()")
     return ret
   }
   
-  func compileBody(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileBody(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
     for stmt in stmts {
       stmt.compileStmt(em, depth, scope)
       em.append(";")
     }
     var ret: TypeVal = typeVoid
     if let expr = expr {
-      em.str(depth, " return (")
-      ret = expr.compileExpr(em, depth, scope, expType)
+      em.str(depth, "return (")
+      ret = expr.compileExpr(em, depth, scope, expType, isTail: isTail)
       em.append(")")
     } else if expType !== typeVoid {
       self.failType("expected type \(expType); body has no return expression.")

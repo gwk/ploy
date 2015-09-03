@@ -2,19 +2,25 @@
 
 
 class TypeValPar: CustomStringConvertible {
-
-  let par: Par
-  let typeVal: TypeVal
   
-  init(par: Par, typeVal: TypeVal) {
-    self.par = par
+  let index: Int
+  let label: Sym?
+  let typeVal: TypeVal
+  let form: Par?
+  
+  init(index: Int, label: Sym?, typeVal: TypeVal, form: Par?) {
+    self.index = index
+    self.label = label
     self.typeVal = typeVal
+    self.form = form
   }
   
-  var description: String { return "\(par.hostName):\(typeVal)" } // TODO: do not use hostname.
+  var description: String { return "\((label?.name).or(index.description)):\(typeVal)" }
   
+  var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
+
   func accepts(actual: TypeValPar) -> Bool {
-    return par.hostName == actual.par.hostName && typeVal.accepts(actual.typeVal)
+    return index == actual.index && label?.name == actual.label?.name && typeVal.accepts(actual.typeVal)
   }
 }
 

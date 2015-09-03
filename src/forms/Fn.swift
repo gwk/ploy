@@ -17,7 +17,7 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     body.writeTo(&target, depth + 1)
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
     let typeVal = sig.typeValSig(scope, "signature")
     if !expType.accepts(typeVal) {
       sig.failType("expects \(expType)")
@@ -25,9 +25,9 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     let fnScope = scope.makeChild()
     fnScope.addValRec("$", typeVal: typeVal.par)
     fnScope.addValRec("self", typeVal: typeVal)
-    em.str(depth, "(function self($){")
-    body.compileBody(em, depth + 1, fnScope, typeVal.ret)
-    em.append("})")
+    em.str(depth, (isTail ? "{v:" : "") + "(function self($){")
+    body.compileBody(em, depth + 1, fnScope, typeVal.ret, isTail: true)
+    em.append("})" + (isTail ? "}" : ""))
     return typeVal
   }
 }

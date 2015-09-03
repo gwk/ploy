@@ -10,6 +10,7 @@ host-val write-Str  <file:File str:Str>%Void;
 in GLOBAL
 host-val true Bool;
 host-val false Bool;
+host-val eq-Int <Int Int>%Bool;
 ;
 
 in HOST

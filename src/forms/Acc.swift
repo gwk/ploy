@@ -2,29 +2,33 @@
 
 
 class Acc: _Form, Expr { // accessor: `field@val`.
-  let name: Sym
-  let val: Expr
+  let accessor: Accessor
+  let accessee: Expr
   
-  init(_ syn: Syn, name: Sym, val: Expr) {
-    self.name = name
-    self.val = val
+  init(_ syn: Syn, accessor: Accessor, accessee: Expr) {
+    self.accessor = accessor
+    self.accessee = accessee
     super.init(syn)
   }
 
   static func mk(l: Form, _ r: Form) -> Form {
     return Acc(Syn(l.syn, r.syn),
-      name: castForm(l, "accessor", "name symbol"),
-      val: castForm(r, "accessor", "accessee expression"))
+      accessor: castForm(l, "access", "accessor symbol or number literal"),
+      accessee: castForm(r, "access", "accessee expression"))
   }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
-    name.writeTo(&target, depth + 1)
-    val.writeTo(&target, depth + 1)
+    accessor.writeTo(&target, depth + 1)
+    accessee.writeTo(&target, depth + 1)
   }
 
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    fatalError()
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
+    em.str(depth, isTail ? "{v:" : "(")
+    let accesseeType = accessee.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
+    let retType = accessor.compileAccess(em, depth + 1, accesseeType: accesseeType)
+    em.append(isTail ? "}" : ")")
+    return retType
   }
 }
 

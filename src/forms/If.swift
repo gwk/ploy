@@ -21,8 +21,23 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
     }
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
-    fatalError()
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
+    em.str(depth, isTail ? "{v:" : "(")
+    for c in cases {
+      c.condition.compileExpr(em, depth + 1, scope, typeBool, isTail: false)
+      em.append(" ?")
+      c.consequence.compileExpr(em, depth + 1, scope, expType, isTail: isTail)
+      em.append(" :")
+    }
+    if let dflt = dflt {
+      dflt.compileExpr(em, depth + 1, scope, expType, isTail: isTail)
+    } else if expType !== typeVoid {
+      failType("expected type \(expType); `if` has no default")
+    } else {
+      em.str(depth + 1, "undefined")
+    }
+    em.append(isTail ? "}" : ")")
+    return expType
   }
 }
 
