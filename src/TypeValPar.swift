@@ -15,7 +15,13 @@ class TypeValPar: CustomStringConvertible {
     self.form = form
   }
   
-  var description: String { return "\((label?.name).or(index.description)):\(typeVal)" }
+  var description: String {
+    if let label = label {
+      return "\(label.name):\(typeVal)"
+    } else {
+      return typeVal.description
+    }
+  }
   
   var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
 

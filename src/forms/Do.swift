@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Do: _Form, Expr { // do block: `{…}`.
+class Do: _Form, Expr, Stmt { // do block: `{…}`.
   let stmts: [Stmt]
   let expr: Expr?
   
@@ -26,6 +26,10 @@ class Do: _Form, Expr { // do block: `{…}`.
     let ret = compileBody(em, depth + 1, scope.makeChild(), expType, isTail: isTail)
     em.append("})()")
     return ret
+  }
+  
+  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+    compileExpr(em, depth, scope, typeVoid, isTail: false)
   }
   
   func compileBody(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {

@@ -1,4 +1,4 @@
 f = fn Int%Int
-  if eq-Int(0 0) ? 0
-    self.dec.$;
-f(1000)
+  if eq-Int($ 0) ? 0
+    self.dec-Int.$;;
+f.100000

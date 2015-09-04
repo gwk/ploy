@@ -32,7 +32,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     } else if let expCmpd = expType as? TypeValCmpd {
       var argIndex = 0
       for par in expCmpd.pars {
-        self.compilePar(em, depth + 1, scope, par: par, argIndex: &argIndex)
+        self.compilePar(em, depth, scope, par: par, argIndex: &argIndex)
       }
       if argIndex != expCmpd.pars.count {
         failType("expected \(expCmpd.pars.count) arguments; received \(argIndex)")
@@ -57,10 +57,10 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
           argLabel.failType("argument label does not match unlabeled parameter", notes: (par.form, "unlabeled parameter"))
         }
       }
-      arg.compileArg(em, depth, scope, par.typeVal)
+      arg.compileArg(em, depth + 1, scope, par.typeVal)
       argIndex++
     } else if let dflt = par.form?.dflt {
-      dflt.compileExpr(em, depth, scope, par.typeVal, isTail: false)
+      dflt.compileExpr(em, depth + 1, scope, par.typeVal, isTail: false)
     } else {
       failType("missing argument for parameter", notes: (par.form, "parameter here"))
     }

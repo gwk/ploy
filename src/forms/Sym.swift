@@ -83,7 +83,7 @@ class Sym: _Form, Accessor, Expr, TypeExpr { // symbol: `name`.
     case .Lazy(let tv):
       typeVal = tv
       let s = "\(scopeRec.hostName)__acc()"
-      em.str(depth, isTail ? "{v:\(s)}" : "(\(s))")
+      em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
     case .Space(_):
       failType("expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.
     case .Type(_):

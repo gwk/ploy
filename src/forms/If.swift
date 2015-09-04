@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class If: _Form, Expr { // if statement: `if cases… default;`.
+class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
   let cases: [Case]
   let dflt: Expr?
 
@@ -22,7 +22,7 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
   }
   
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
-    em.str(depth, isTail ? "{v:" : "(")
+    em.str(depth, "(")
     for c in cases {
       c.condition.compileExpr(em, depth + 1, scope, typeBool, isTail: false)
       em.append(" ?")
@@ -36,8 +36,12 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
     } else {
       em.str(depth + 1, "undefined")
     }
-    em.append(isTail ? "}" : ")")
+    em.append(")")
     return expType
+  }
+  
+  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+    compileExpr(em, depth, scope, typeAny, isTail: false)
   }
 }
 

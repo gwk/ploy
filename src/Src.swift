@@ -25,14 +25,12 @@ class Src: CustomStringConvertible {
   
   var description: String { return "Src(\(path))" }
   
-  var chars: String.CharacterView { return text.characters }
-  
-  var startPos: Pos { return Pos(idx: text.characters.startIndex, line: 0, col: 0) }
+  var startPos: Pos { return Pos(idx: text.startIndex, line: 0, col: 0) }
   
   func adv(pos: Pos, count: Int = 1) -> Pos {
     var idx = pos.idx
     var c = count
-    while c > 0 && idx < chars.endIndex {
+    while c > 0 && idx < text.endIndex {
       idx = idx.successor()
       c--
     }
@@ -40,14 +38,14 @@ class Src: CustomStringConvertible {
   }
   
   func advLine(pos: Pos) -> Pos {
-    assert(pos.idx < chars.endIndex)
+    assert(pos.idx < text.endIndex)
     let idx = pos.idx.successor()
     return Pos(idx: idx, line: pos.line + 1, col: 0)
   }
   
-  func hasSome(pos: Pos) -> Bool { return pos.idx < chars.endIndex }
+  func hasSome(pos: Pos) -> Bool { return pos.idx < text.endIndex }
   
-  func hasString(pos: Pos, _ string: String) -> Bool { return chars.has(string.characters, atIndex: pos.idx) }
+  func hasString(pos: Pos, _ string: String) -> Bool { return text.has(string, atIndex: pos.idx) }
   
   func char(pos: Pos) -> Character { return text[pos.idx] }
   
@@ -56,13 +54,13 @@ class Src: CustomStringConvertible {
   /// returns the line of source text containing pos; always excludes newline for consistency.
   func line(pos: Pos) -> String {
     var s = pos.idx
-    while s > chars.startIndex {
+    while s > text.startIndex {
       let i = s.predecessor()
       if text[i] == "\n" { break }
       s = i
     }
     var e = pos.idx
-    while e < chars.endIndex {
+    while e < text.endIndex {
       if text[e] == "\n" { break }
       e = e.successor()
     }
@@ -84,7 +82,7 @@ class Src: CustomStringConvertible {
     assert(pos.line < end.line)
     let spaces = String(count: pos.col, char: " ")
     let squigs = String(count: lineLen - pos.col, char: "~")
-    return ("\(spaces)\(squigs)", String(count: end.col, char: "~"))
+    return ("\(spaces)\(squigs)", end.col > 0 ? String(count: end.col, char: "~") : "^")
   }
 
   func errPos(pos: Pos, end: Pos?, prefix: String, msg: String) {
@@ -246,8 +244,11 @@ class Src: CustomStringConvertible {
   // MARK: compound helpers.
   
   func synForTerminator(pos: Pos, _ p: Pos, _ terminator: Character, _ formName: String) -> Syn {
+    if !hasSome(p) {
+      failParse(pos, p, "`\(formName)` form expects '\(terminator)' terminator; reached end of source text.")
+    }
     let c = char(p)
-    if !hasSome(p) || c != terminator {
+    if c != terminator {
       failParse(pos, p, "`\(formName)` form expects '\(terminator)' terminator; received '\(c)'.")
     }
     let visEnd = adv(p)
@@ -260,24 +261,28 @@ class Src: CustomStringConvertible {
   
   // MARK: prefixes.
   
-  func parseBling(pos: Pos, _ p: Pos) -> Form {
+  func parseBling(pos: Pos) -> Form {
     // in the future bling will also be a prefix.
+    let p = adv(pos)
     return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: "$")
   }
   
   // MARK: nesting sentences.
   
-  func parseCmpd(pos: Pos, _ p: Pos) -> Form {
+  func parseCmpd(pos: Pos) -> Form {
+    let p = parseSpace(adv(pos))
     let (args, end) = parseArgs(p, "compound value")
     return Cmpd(synForTerminator(pos, end, ")", "compound value"), args: args)
   }
   
-  func parseCmpdType(pos: Pos, _ p: Pos) -> Form {
+  func parseCmpdType(pos: Pos) -> Form {
+    let p = parseSpace(adv(pos))
     let (pars, end) = parsePars(p, "compound type")
     return CmpdType(synForTerminator(pos, end, ">", "compound type"), pars: pars)
   }
   
-  func parseDo(pos: Pos, _ p: Pos) -> Form {
+  func parseDo(pos: Pos) -> Form {
+    let p = parseSpace(adv(pos))
     let (stmts, expr, _, end) = parseBody(p)
     return Do(synForTerminator(pos, end, "}", "do form"), stmts: stmts, expr: expr)
   }
@@ -388,13 +393,12 @@ class Src: CustomStringConvertible {
     if c == "\"" || c == "'" {
       return parseLitStr(pos)
     }
-    let p = parseSpace(adv(pos))
     switch c {
     case ".": return parseLitNum(pos, foundDot: true)
-    case "$": return parseBling(pos, p)
-    case "(": return parseCmpd(pos, p)
-    case "<": return parseCmpdType(pos, p)
-    case "{": return parseDo(pos, p)
+    case "$": return parseBling(pos)
+    case "(": return parseCmpd(pos)
+    case "<": return parseCmpdType(pos)
+    case "{": return parseDo(pos)
     default: failParse(pos, nil, "unexpected character: '\(c)'.")
     }
   }

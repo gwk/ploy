@@ -109,7 +109,6 @@ let intrinsicTypes = [
   typeNamespace,
   typeStr,
   typeType,
-  typeVoid,
 ]
 
 

@@ -28,7 +28,7 @@ class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
   }
 
   func typeValSig(scope: Scope, _ subj: String) -> TypeValSig {
-    return TypeValSig(par: par.typeVal(scope, "signature"), ret: par.typeVal(scope, "signature"))
+    return TypeValSig(par: par.typeVal(scope, "signature"), ret: ret.typeVal(scope, "signature"))
   }
 }
 
