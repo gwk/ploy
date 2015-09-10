@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EC1DDCA61BA0C433007C07EC /* Paren.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1DDCA51BA0C433007C07EC /* Paren.swift */; settings = {ASSET_TAGS = (); }; };
 		EC1FE8EA1B6BE20C00112BB0 /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8E11B6BE20C00112BB0 /* Array.swift */; };
 		EC1FE8EB1B6BE20C00112BB0 /* Character.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8E21B6BE20C00112BB0 /* Character.swift */; };
 		EC1FE8EC1B6BE20C00112BB0 /* CollectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8E31B6BE20C00112BB0 /* CollectionType.swift */; };
@@ -72,6 +73,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		EC1DDCA51BA0C433007C07EC /* Paren.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Paren.swift; sourceTree = "<group>"; };
 		EC1FE8DF1B6BDEF100112BB0 /* qk */ = {isa = PBXFileReference; lastKnownFileType = folder; path = qk; sourceTree = "<group>"; };
 		EC1FE8E11B6BE20C00112BB0 /* Array.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Array.swift; path = qk/src/std/Array.swift; sourceTree = "<group>"; };
 		EC1FE8E21B6BE20C00112BB0 /* Character.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Character.swift; path = qk/src/std/Character.swift; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 				EC6523871B7BD2BF00CAA454 /* LitNum.swift */,
 				EC6523881B7BD2BF00CAA454 /* LitStr.swift */,
 				EC6523891B7BD2BF00CAA454 /* Par.swift */,
+				EC1DDCA51BA0C433007C07EC /* Paren.swift */,
 				ECDA37181B82D6F500939000 /* Path.swift */,
 				EC65238A1B7BD2BF00CAA454 /* Pub.swift */,
 				EC65238B1B7BD2BF00CAA454 /* Reify.swift */,
@@ -316,6 +319,7 @@
 				EC1FE8EA1B6BE20C00112BB0 /* Array.swift in Sources */,
 				EC8E689C1B698C110080F316 /* Syn.swift in Sources */,
 				EC49BD3F1B7565E700660AF0 /* ArithmeticType.swift in Sources */,
+				EC1DDCA61BA0C433007C07EC /* Paren.swift in Sources */,
 				ECDA37151B7EB16200939000 /* File.swift in Sources */,
 				EC1FE8F41B6BE31200112BB0 /* Emit.swift in Sources */,
 				EC6523991B7BD2BF00CAA454 /* Do.swift in Sources */,
