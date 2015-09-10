@@ -12,7 +12,7 @@ THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH RE
 
 Information about the ISC License:
 
-The ISC license is a permissive open source license, deemed functionally equivalent to a two-term BSD license but with language removed that is made unnecessary by the Berne convention:
+The ISC license is a permissive open source license, deemed functionally equivalent to a two-clause BSD license but with language removed that is made unnecessary by the Berne convention:
 http://www.openbsd.org/policy.html
 
 The ISC license is approved by the Open Source Initiative (OSI):
