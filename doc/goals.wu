@@ -1,0 +1,104 @@
+writeup v0
+© 2015 George King.
+Permission to use this file is granted in ploy/license.txt.
+
+
+# Goals
+
+Ploy is an experiment, and broadly ambitious. Here are some of the topics that I'm interested in:
+
+
+# Namespaces and Generic Functions
+
+One major question is how generic function specialization and namespaces interact. An experiment in the works is to contain generic functions and their associated methods much more clearly within the namespaces in which they are defined. Furthermore, it may be possible to define type classes purely in terms of generic functions and their methods.
+
+In Swift, imagine a protocol P in a library L, which specifies some requirement for a method M. Importing L just makes P visible; to make your class C implement P, you must define C.M, either immediately in the class definition, or else in some extension.. Fundamentally, C.M is attached to C, not P. If two different libraries define extensions on C implementing M, then the compiler fails with a redefinition conflict. Similarly, if another protocol P1 specifies an unrelated requirement also named M, then the programmer cannot make C conform to both P and P1.
+
+Ploy proposes a solution. Take a library L, and generic function L/F defined in that library. Then in some other namespace N (it could be another library or the application main namespace), we create a type T for which we want to implement L/F. In N, we either `use` L and refer to L/F by its fully qualified name `L/F`, or `import` L and then refer to the unqualified `F`. When we add a method to F, it looks something like this:
+| in N
+| impl L/F T%R ...;; # the implementation takes T and returns some type R.
+
+While the generic function is declared in L, the implementation/method lives in N. In order to use the method in some other namespace N1, the programmer must `use` or `import` both L and N.
+
+This implies that method resolution is localized to each namespace. Conflicts are still possible, if a namespace imports conflicting method implementations, but this seems like the most desirable outcome; the compiler complains of the conflict, and the programmer then chooses the implementation they want by deporting all of the others.
+
+The extensive importing sounds somewhat cumbersome, but my hope is that if the import mechanism is well designed, it should be possible for any given project to define a common namespace into which are imported whatever 'conventional' that team agrees upon, while avoiding the namespacing problems above.
+
+## Type Classes
+
+I am curious to see if it makes sense to define type classes purely in terms of these namespaced functions, meaning that a class specification would consist of a set of type parameters and a set of generic functions, each with an associated parameterization. For example, the Mapping class could be defined roughly as:
+| generic-fn get (mapping:`T key:`K)%Opt^`V;
+| class Mapping<Key Val>
+|   impl get (mapping:This key:Key)%Opt^Val;;
+
+`This` refers to whatever type is implementing `Mapping`; `Opt^Val` is the parameterization of the option type with `Val`. Crucially, `get` is a generic function, which can be defined in a namespace separate from Mapping; the type signature of `get` is simply a constraint on implementing methods, indicating the intended shape of the function signature.
+
+Another consideration is to what extent can type conformance be implied/inferred. For example, should the Mapping class only include `get`, or should it also require a `set` method? Many would consider the class incomplete without `set`, but requiring it might force programmers to pointlessly implement `set` when they are really only interested in read-only behavior. This begins to sound like static duck typing (admittedly an ill-defined term); it would probably rely on a more serious type inference system. Even with inference, the language would probably also need some sort of notation for writing down anonymous class types as sets of implementation requirements, e.g.:
+| class <Key Val>
+|   impl get (mapping:This key:Key)%Opt^Val;
+|   impl set (mapping:This key:Key val:Val)%<>;;
+
+
+## Polymorphic Functions vs Generic Functions
+
+Suppose that generic function `f` takes an arbitrary argument of type `\`T` and returns an `Int`; `g` takes one parameter and calls `f` on it:
+| generic-fn f (`T)%Int;
+| g = fn (`T)%Int f.$; # `g` simply returns the result of applying `f` to `$`.
+
+This introduces an important distinction: `f` is a "generic function" in the sense that it is polymorphic and can have methods/overloads added to it; `g` on the other hand is a simple function that does whatever `f` does, and accepts whatever types `f` accepts. The mechanism by which the compiler achieves this is not yet defined.
+
+The compiler could calculate that the `g` accepts any type for which there exists an overload of `f`, but this requires type inference between functions. The alternative is to create a named `class` definition, or an anonymous class specification as described above.
+
+## Miscellaneous
+
+It would be nice if generic accessors defaulted to accessing the same-named field of any such structure, or compound type. 
+
+
+# Fine Grained Dependency Calculation and Versioning
+
+The scale of both software projects and programming language communities is continually growing. Managing dependencies is a cumbersome (sometimes intractible!) problem facing most professional developers today. One of the main appeals of functional programming is the emphasis on modularity, reducing interdependencies between various parts of the code. But apart from the internal algorithms of compilers, most tools are oblivious to the dependency structure of code. Version control has long been recognized as indespensible to professional programming, and yet the popular systems understand nothing of the actual program structure, only deltas between lines of text.
+
+One design priority of Ploy is to enable automatic, useful calculations about code dependencies. Here are a few possible applications:
+
+## Lazy Compilation
+
+The cost of compiling a program should depend on the amount of code actually used by the program, not the taxonomic structure of all the code in all the libraries that the program references. To this end, all top/module-level syntactic definitions map directly to individual symbols. This allows the compiler to assemble a mapping from symbols to syntactic forms, which in turn allows it to only emit code for those symbols that are actually used by the program.
+
+This design requires that global values have lazy initialization semantics, or else pure initializers free of side effects; Ploy currently uses lazy initialization for non-function values to fulfill this requirement. This should greatly reduce the time to compile; however currently all code in all source files must still be parsed. The grammar is simple, which should make the parser very fast; furthermore, it should be possible to cache parsing results to further reduce copmilation times.
+
+## Dependency Queries
+
+Given the above properties, it should be straightforward to ask the compiler to output structured information about which symbols depend on which other symbols. This could greatly facilitate reasoning about program architecture and studying unfamiliar codebases.
+
+## Relief from Dependency Conflicts
+
+Suppose a program A depends on libraries B and C, and that both B and C depend on a third library D. In most package management systems, if B and C specify incompatible version requirements for D, then the manager simply fails and A will not compile. Trying to include two different versions of D simultaneously leads to symbolic conflicts like redefinition and linker errors (note that some C libraries use prefix macro schemes to allow for the inclusion of multiple library versions in a single build). If the language versioned all public symbols by default then this sort of conflict would never occur.
+
+How this works exactly remains to be determined, but the obvious first step is that every import statement specifies a specific version of its dependency. This approach stands in stark contrast to traditional systems (in which the build system and/or release package, not the source code, is responsible for the version), and to the community trend towards "semantic versioning", in which library developers make declarations of compatibility implied by the major/minor/patch version number distinctions.
+
+
+## Generic Types
+
+This is a huge topic, fairly conventional but almost certainly necessary.
+
+
+## Metaprogramming
+
+The Lisp community values macros as a key productivity tool. I'm very interested to see how useful macros might be in a statically compiled language like Ploy, and how well they interact with other language features. However they may be deferred until the compiler is self-hosting.
+
+
+## Exceptions
+
+One place where I tend to question a lot of PL design is error handling. It seems to me that all instructions, starting with integer arithmetic, can cause failures, and that a fault-tolerant system must be prepared to handle these. Mainstream language design seems to be on a long, lumbering course towards acknowledging this truth; for example, Swift traps on integer arithmetic and out-of-bounds array access, but the handling of such failures is unrecoverable, and different than the main error handling mechanism.
+
+In contrast, high-level languages like Python make use of exceptions for regular control flow (e.g. StopIteration), which strikes me as an abuse of the very notion of an exceptional condition.
+
+More research required!
+
+
+## Effects System
+
+I think effects systems are a very promising field but it will be some time before I can begin to explore this in the implementation. If the compiler can reason about effects then it should be able to determine dependencies in a deeper, more accurate way.
+
+I'm looking for some comfortable middle ground that allows the programmer to use imperative techniques while still enabling the compiler to prove things about program safety. For example, debug logging to std-err should be allowed without mangling the type declaration of the function. Furthermore, if we concede that all code may raise exceptions, then exceptions should not be explicitly declared as part of the function type. Lastly, it seems reasonable that iterators be well-defined within the type system; it follows that exceptions should not be used for normal control flow (e.g. end-of-iterator).
+
