@@ -1,0 +1,230 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>doc/goals.wu</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
+  <style type="text/css">a { background-color: transparent; } a:active { outline: 0; } a:hover { outline: 0; } blockquote { border-left-color: #E0E0E0; border-left-style: solid; border-left-width: 0.333rem; margin: 0; padding: 0 0.677rem; } body { margin: 1rem; } body footer { border-top-color: #E8E8E8; border-top-style: solid; border-top-width: 1px; color: #606060; font-size: .875rem; margin: 1rem 0 0 0; } code { background-color: rgba(0, 0, 0, 0.1); border-radius: 3px; font-family: source code pro, menlo, terminal, monospace; } footer { display: block; } h1 { border-top-color: #E8E8E8; border-top-style: solid; border-top-width: 1px; } h1 { font-size: 2.0rem; margin: 1.4rem 0 0.6rem 0; } h2 { font-size: 1.6rem; margin: 1.2rem 0 0.5rem 0; } h3 { font-size: 1.4rem; margin: 1.1rem 0 0.5rem 0; } h4 { font-size: 1.2rem; margin: 1.0rem 0 0.5rem 0; } h5 { font-size: 1.1rem; margin: 1.0rem 0 0.5rem 0; } h6 { font-size: 1.0rem; margin: 1.0rem 0 0.5rem 0; } header { display: block; } html { background: white; color: black; font-family: source sans pro, sans-serif; font-size: 1rem; } section { display: block; } nav { display: block; } p { margin: 0.5rem 0; } pre { background: #F0F0F0; font-family: source code pro, menlo, terminal, monospace; font-size: 1rem; overflow: auto; padding: 0.1rem; } ul { line-height: 1.333rem; list-style-type: none; margin: 0rem; padding: 0rem; } ul > ul { padding-left: 0.667rem; }</style>
+  <script type="text/javascript"> "use strict";
+function scrollToElementId(id) {
+  window.scrollTo(0, document.getElementById(id).offsetTop);
+}
+
+var in_pres_mode = false;
+function togglePresentationMode() {
+  in_pres_mode = !in_pres_mode;
+  for (let sid of paging_ids) {
+    let section = document.getElementById(sid);
+    if (section.id == 'body') {
+      // skip; not actually a section.
+    } else {
+      section.style['margin'] = in_pres_mode ? '100vh 0 0 0' : '0';
+    }
+  }
+  let footer = document.getElementById('footer');
+  footer.style['margin'] = in_pres_mode ? '100vh 0 0 0' : '0';
+}
+
+var section_ids = null;
+var paging_ids = null;
+var paging_idx = 0;
+
+window.onkeydown = function(e) { 
+  if (e.keyCode === 37) { // left.
+    if (paging_idx > 0) {
+      paging_idx -= 1;
+    }
+    scrollToElementId(paging_ids[paging_idx]);
+  } else if (e.keyCode === 39) { // right.
+    if (paging_idx < paging_ids.length - 1) {
+      paging_idx += 1;
+    }
+    scrollToElementId(paging_ids[paging_idx]);
+  }
+};
+
+window.onkeypress = function(e) {
+  if (e.charCode === 112) { // 'p'.
+    togglePresentationMode();
+  }
+};
+</script>
+</head>
+<body id="body">
+<section class="S1" id="s1">
+  <h1 id="h1">Goals</h1>
+  <p>
+    Ploy is an experiment, and broadly ambitious. Here are some of the topics that I'm interested in:
+  </p>
+</section>
+<section class="S1" id="s2">
+  <h1 id="h2">Namespaces and Generic Functions</h1>
+  <p>
+    One major question is how generic functions work, and how they interact with namespaces interact. In particular I am interested in exploring the tension between extensibility of generic functions on the one hand, and static guarantees about correctness on the other. Furthermore, I am intrigued by the idea of defining type classes purely in terms of generic functions and their methods.
+  </p>
+  <p>
+    In Swift, imagine a protocol P in a library L, which specifies some requirement for a method M. Importing L just makes P visible; to make your class C implement P, you must define C.M, either immediately in the class definition, or else in some extension. Fundamentally, C.M is attached to C, not P. This presents several problems:
+  </p>
+  <ul class="L1">
+    <li>• If another protocol P1 specifies an unrelated requirement also named M, then the programmer cannot make C conform to both P and P1.</li>
+    <li>• If two different libraries define extensions on C implementing M, then the compiler fails with a redefinition conflict.</li>
+    <li>• Since the Swift type system employs inheritance, then adding implementations to intermediates in a typechain can cause subtle changes in behavior for subtypes. I believe that this concern applies to other subtyping mechanisms as well.</li>
+  </ul>
+  <section class="S2" id="s2.1">
+    <h2 id="h2.1">Multiple Meanings Problem</h2>
+    <p>
+      Here, the same name M has two different meanings and needs to be disambiguated. The most obvious solution is to connect methods to the full path (the qualified name), rather than just the unqualified name symbol. The path then serves as the anchorpoint for all of its methods; it represents the intended meaning of the generic behavior, and locates that meaning at a single point.
+    </p>
+  </section>
+  <section class="S2" id="s2.2">
+    <h2 id="h2.2">Multiple Implementations Problem</h2>
+    <p>
+      Here the function has multiple methods implemented for the same type. This is a problem when two different third parties implement a method for a preexisting type. At this point, I do not see a viable solution to this problem; it seems to be a fairly fundamental tension between extensibility and versus guarantees that code will be behave as originally intended. Here are two partial (probably unsatisfactory) solutions.
+    </p>
+    <p>
+      First, the language could provide a means for the application developer to "fix" the problem by explicitly deporting one of the implementations. However this only works if that deported implementation is non-critical to correctness (e.g., a custom description string formatter), and therefore is of only limited usefulness.
+    </p>
+    <p>
+      Second, the language could provide for some sort of "closed multifunction", meaning a overloaded/dispatched callable type that cannot be modified after definition. As a first approximation, a <code>multi-fn</code> would be defined simply as a set of functions, each with different argument type. For example:
+    </p>
+<pre>
+in L
+add = multi-fn # generic add function.
+  fn &lt;Int Int&gt;%Int ...; # Signed integer implementation.
+  fn &lt;Uns Uns&gt;%Uns ...; # Unsigned integer implementation.
+;</pre>
+    <p>
+      This looks a lot like a traditional pattern-matching function; the main difference would be that it could be used to build a new, "extended" version of the function.
+    </p>
+<pre>
+in M
+use L
+add = multi-fn # extend add.
+  L/add
+  fn &lt;Flt Flt&gt;%Flt ...; # support floats too.
+;</pre>
+    <p>
+      Essentially, <code>L/add</code> remains unaltered, while <code>M/add</code> combines the old and new methods (with whatever dispatch resolution rules the subtyping system might specify). Alternatively, we could make generic functions be extensible, but then have a form to produce a sealed version of a given function in order to guarantee correctness.
+    </p>
+    <p>
+      Either way, we end up with a compromise between regular, closed functions and open, extensible generic functions. I cannot think of a case where this actually buys the programmer anything useful; certainly the whole value of defining <code>add</code> as a generic is that it can be extended for unticipated data types.
+    </p>
+  </section>
+  <section class="S2" id="s2.3">
+    <h2 id="h2.3">Type Classes</h2>
+    <p>
+      I am curious to see if it makes sense to define type classes purely in terms of these namespaced functions, meaning that a class specification would consist of a set of type parameters and a set of polyfunctions, each with an associated parameterization. For example, the Mapping class could be defined roughly as:
+    </p>
+<pre>
+generic-fn get (mapping:`T key:`K)%Opt^`V;
+class Mapping&lt;Key Val&gt;
+  impl get (mapping:This key:Key)%Opt^Val;;</pre>
+    <p>
+      <code>This</code> refers to whatever type is implementing <code>Mapping</code>; <code>Opt^Val</code> is the parameterization of the option type with <code>Val</code>. Crucially, <code>get</code> is a generic function, which can be defined in a namespace separate from Mapping; the type signature of <code>get</code> is simply a constraint on implementing methods, indicating the intended shape of the function signature.
+    </p>
+    <p>
+      Another consideration is to what extent can type conformance be implied/inferred. For example, should the Mapping class only include <code>get</code>, or should it also require a <code>set</code> method? Many would consider the class incomplete without <code>set</code>, but requiring it might force programmers to pointlessly implement <code>set</code> when they are really only interested in read-only behavior. This begins to sound like static duck typing (admittedly an ill-defined term); it would probably rely on a more serious type inference system. Even with inference, the language would probably also need some sort of notation for writing down anonymous class types as sets of implementation requirements, e.g.:
+    </p>
+<pre>
+class &lt;Key Val&gt;
+  impl get (mapping:This key:Key)%Opt^Val;
+  impl set (mapping:This key:Key val:Val)%&lt;&gt;;;</pre>
+  </section>
+  <section class="S2" id="s2.4">
+    <h2 id="h2.4">Polymorphic Functions vs Generic Functions</h2>
+    <p>
+      Suppose that generic function <code>f</code> takes an arbitrary argument of type <code>`T</code> and returns an <code>Int</code>; <code>g</code> takes one parameter and calls <code>f</code> on it:
+    </p>
+<pre>
+generic-fn f (`T)%Int;
+g = fn (`T)%Int f.$; # `g` simply returns the result of applying `f` to `$`.</pre>
+    <p>
+      This introduces an important distinction: <code>f</code> is a "generic function" in the sense that it is polymorphic and can have methods/overloads added to it; <code>g</code> on the other hand is a simple function that does whatever <code>f</code> does, and accepts whatever types <code>f</code> accepts. The mechanism by which the compiler achieves this is not yet defined.
+    </p>
+    <p>
+      The compiler could calculate that the <code>g</code> accepts any type for which there exists an overload of <code>f</code>, but this requires type inference between functions. The alternative is to create a named <code>class</code> definition, or an anonymous class specification as described above.
+    </p>
+  </section>
+  <section class="S2" id="s2.5">
+    <h2 id="h2.5">Miscellaneous</h2>
+    <p>
+      It would be nice if generic accessors defaulted to accessing the same-named field of any such structure, or compound type.
+    </p>
+  </section>
+</section>
+<section class="S1" id="s3">
+  <h1 id="h3">Fine Grained Dependency Calculation and Versioning</h1>
+  <p>
+    The scale of both software projects and programming language communities is continually growing. Managing dependencies is a cumbersome (sometimes intractible!) problem facing most professional developers today. One of the main appeals of functional programming is the emphasis on modularity, reducing interdependencies between various parts of the code. But apart from the internal algorithms of compilers, most tools are oblivious to the dependency structure of code. Version control has long been recognized as indespensible to professional programming, and yet the popular systems understand nothing of the actual program structure, only deltas between lines of text.
+  </p>
+  <p>
+    One design priority of Ploy is to enable automatic, useful calculations about code dependencies. Here are a few possible applications:
+  </p>
+  <section class="S2" id="s3.1">
+    <h2 id="h3.1">Lazy Compilation</h2>
+    <p>
+      The cost of compiling a program should depend on the amount of code actually used by the program, not the taxonomic structure of all the code in all the libraries that the program references. To this end, all top/module-level syntactic definitions map directly to individual symbols. This allows the compiler to assemble a mapping from symbols to syntactic forms, which in turn allows it to only emit code for those symbols that are actually used by the program.
+    </p>
+    <p>
+      This design requires that global values have lazy initialization semantics, or else pure initializers free of side effects; Ploy currently uses lazy initialization for non-function values to fulfill this requirement. This should greatly reduce the time to compile; however currently all code in all source files must still be parsed. The grammar is simple, which should make the parser very fast; furthermore, it should be possible to cache parsing results to further reduce copmilation times.
+    </p>
+  </section>
+  <section class="S2" id="s3.2">
+    <h2 id="h3.2">Dependency Queries</h2>
+    <p>
+      Given the above properties, it should be straightforward to ask the compiler to output structured information about which symbols depend on which other symbols. This could greatly facilitate reasoning about program architecture and studying unfamiliar codebases.
+    </p>
+  </section>
+  <section class="S2" id="s3.3">
+    <h2 id="h3.3">Relief from Dependency Conflicts</h2>
+    <p>
+      Suppose a program A depends on libraries B and C, and that both B and C depend on a third library D. In most package management systems, if B and C specify incompatible version requirements for D, then the manager simply fails and A will not compile. Trying to include two different versions of D simultaneously leads to symbolic conflicts like redefinition and linker errors (note that some C libraries use prefix macro schemes to allow for the inclusion of multiple library versions in a single build). If the language versioned all public symbols by default then this sort of conflict would never occur.
+    </p>
+    <p>
+      How this works exactly remains to be determined, but the obvious first step is that every import statement specifies a specific version of its dependency. This approach stands in stark contrast to traditional systems (in which the build system and/or release package, not the source code, is responsible for the version), and to the community trend towards "semantic versioning", in which library developers make declarations of compatibility implied by the major/minor/patch version number distinctions.
+    </p>
+  </section>
+  <section class="S2" id="s3.4">
+    <h2 id="h3.4">Generic Types</h2>
+    <p>
+      This is a huge topic, fairly conventional but almost certainly necessary.
+    </p>
+  </section>
+  <section class="S2" id="s3.5">
+    <h2 id="h3.5">Metaprogramming</h2>
+    <p>
+      The Lisp community values macros as a key productivity tool. I'm very interested to see how useful macros might be in a statically compiled language like Ploy, and how well they interact with other language features. However they may be deferred until the compiler is self-hosting.
+    </p>
+  </section>
+  <section class="S2" id="s3.6">
+    <h2 id="h3.6">Exceptions</h2>
+    <p>
+      One place where I tend to question a lot of PL design is error handling. It seems to me that all instructions, starting with integer arithmetic, can cause failures, and that a fault-tolerant system must be prepared to handle these. Mainstream language design seems to be on a long, lumbering course towards acknowledging this truth; for example, Swift traps on integer arithmetic and out-of-bounds array access, but the handling of such failures is unrecoverable, and different than the main error handling mechanism.
+    </p>
+    <p>
+      In contrast, high-level languages like Python make use of exceptions for regular control flow (e.g. StopIteration), which strikes me as an abuse of the very notion of an exceptional condition.
+    </p>
+    <p>
+      More research required!
+    </p>
+  </section>
+  <section class="S2" id="s3.7">
+    <h2 id="h3.7">Effects System</h2>
+    <p>
+      I think effects systems are a very promising field but it will be some time before I can begin to explore this in the implementation. If the compiler can reason about effects then it should be able to determine dependencies in a deeper, more accurate way.
+    </p>
+    <p>
+      I'm looking for some comfortable middle ground that allows the programmer to use imperative techniques while still enabling the compiler to prove things about program safety. For example, debug logging to std-err should be allowed without mangling the type declaration of the function. Furthermore, if we concede that all code may raise exceptions, then exceptions should not be explicitly declared as part of the function type. Lastly, it seems reasonable that iterators be well-defined within the type system; it follows that exceptions should not be used for normal control flow (e.g. end-of-iterator).
+    </p>
+  </section>
+</section>
+<footer id="footer">
+© 2015 George King. Permission to use this file is granted in ploy/license.txt.
+</footer>
+<script type="text/javascript"> "use strict";
+section_ids = ['s1','s2','s2.1','s2.2','s2.3','s2.4','s2.5','s3','s3.1','s3.2','s3.3','s3.4','s3.5','s3.6','s3.7'];
+paging_ids = ['body', 's1','s2','s2.1','s2.2','s2.3','s2.4','s2.5','s3','s3.1','s3.2','s3.3','s3.4','s3.5','s3.6','s3.7'];
+</script>
+</body>
+</html>
