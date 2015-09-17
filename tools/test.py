@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/bin/env python3
 # Copyright 2015 George King.
 # Permission to use this file is granted in ploy/license.txt.
 
