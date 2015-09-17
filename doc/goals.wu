@@ -10,23 +10,41 @@ Ploy is an experiment, and broadly ambitious. Here are some of the topics that I
 
 # Namespaces and Generic Functions
 
-One major question is how generic function specialization and namespaces interact. An experiment in the works is to contain generic functions and their associated methods much more clearly within the namespaces in which they are defined. Furthermore, it may be possible to define type classes purely in terms of generic functions and their methods.
+One major question is how generic functions work, and how they interact with namespaces interact. In particular I am interested in exploring the tension between extensibility of generic functions on the one hand, and static guarantees about correctness on the other. Furthermore, I am intrigued by the idea of defining type classes purely in terms of generic functions and their methods.
 
-In Swift, imagine a protocol P in a library L, which specifies some requirement for a method M. Importing L just makes P visible; to make your class C implement P, you must define C.M, either immediately in the class definition, or else in some extension.. Fundamentally, C.M is attached to C, not P. If two different libraries define extensions on C implementing M, then the compiler fails with a redefinition conflict. Similarly, if another protocol P1 specifies an unrelated requirement also named M, then the programmer cannot make C conform to both P and P1.
+In Swift, imagine a protocol P in a library L, which specifies some requirement for a method M. Importing L just makes P visible; to make your class C implement P, you must define C.M, either immediately in the class definition, or else in some extension. Fundamentally, C.M is attached to C, not P. This presents several problems:
+- If another protocol P1 specifies an unrelated requirement also named M, then the programmer cannot make C conform to both P and P1.
+- If two different libraries define extensions on C implementing M, then the compiler fails with a redefinition conflict.
+- Since the Swift type system employs inheritance, then adding implementations to intermediates in a typechain can cause subtle changes in behavior for subtypes. I believe that this concern applies to other subtyping mechanisms as well.
 
-Ploy proposes a solution. Take a library L, and generic function L/F defined in that library. Then in some other namespace N (it could be another library or the application main namespace), we create a type T for which we want to implement L/F. In N, we either `use` L and refer to L/F by its fully qualified name `L/F`, or `import` L and then refer to the unqualified `F`. When we add a method to F, it looks something like this:
-| in N
-| impl L/F T%R ...;; # the implementation takes T and returns some type R.
+## Multiple Meanings Problem
+Here, the same name M has two different meanings and needs to be disambiguated. The most obvious solution is to connect methods to the full path (the qualified name), rather than just the unqualified name symbol. The path then serves as the anchorpoint for all of its methods; it represents the intended meaning of the generic behavior, and locates that meaning at a single point.
 
-While the generic function is declared in L, the implementation/method lives in N. In order to use the method in some other namespace N1, the programmer must `use` or `import` both L and N.
+## Multiple Implementations Problem
+Here the function has multiple methods implemented for the same type. This is a problem when two different third parties implement a method for a preexisting type. I see two possible solutions: first, the language could provide a means for the application developer to "fix" the problem by explicitly deporting one of the implementations. However this only works if that deported implementation is non-critical to correctness (e.g., a custom description string formatter). This seems to be of only limited usefulness.
 
-This implies that method resolution is localized to each namespace. Conflicts are still possible, if a namespace imports conflicting method implementations, but this seems like the most desirable outcome; the compiler complains of the conflict, and the programmer then chooses the implementation they want by deporting all of the others.
+Second, the language could provide for some sort of "closed multifunction", meaning a overloaded/dispatched callable type that cannot be modified after definition. As a first approximation, a `multi-fn` would be defined simply as a set of functions, each with different argument type. For example:
+| in L
+| add = multi-fn # generic add function.
+|   fn <Int Int>%Int ...; # Signed integer implementation.
+|   fn <Uns Uns>%Uns ...; # Unsigned integer implementation.
+| ;
 
-The extensive importing sounds somewhat cumbersome, but my hope is that if the import mechanism is well designed, it should be possible for any given project to define a common namespace into which are imported whatever 'conventional' that team agrees upon, while avoiding the namespacing problems above.
+This looks a lot like a traditional pattern-matching function; the main difference would be that it could be used to build a new, "extended" version of the function.
+| in M
+| use L
+| add = multi-fn # extend add.
+|   L/add
+|   fn <Flt Flt>%Flt ...; # support floats too.
+| ;
+
+Essentially, `L/add` remains unaltered, while `M/add` combines the old and new methods (with whatever dispatch resolution rules the subtyping system might specify). This provides something of a compromise between regular, closed functions and unrestricted open functions. Whether or not this middle ground is actually useful remains to be seen. An open "poly-fn" form would also be necessary; for example, it seems desirable to leave `add` open so that a generic function like `sum` (which reduces a list using add) could operate on unanticipated data types.
+
+An alternative approach would be to define generic functions like `add` as open, but then let code produce sealed versions of a given function in order to guarantee correctness. All of this is quite speculative, and better examples are in order. The high level goal is simply to minimize conflicts when integrating large numbers of libraries together.
 
 ## Type Classes
 
-I am curious to see if it makes sense to define type classes purely in terms of these namespaced functions, meaning that a class specification would consist of a set of type parameters and a set of generic functions, each with an associated parameterization. For example, the Mapping class could be defined roughly as:
+I am curious to see if it makes sense to define type classes purely in terms of these namespaced functions, meaning that a class specification would consist of a set of type parameters and a set of polyfunctions, each with an associated parameterization. For example, the Mapping class could be defined roughly as:
 | generic-fn get (mapping:`T key:`K)%Opt^`V;
 | class Mapping<Key Val>
 |   impl get (mapping:This key:Key)%Opt^Val;;
