@@ -21,7 +21,7 @@ class Do: _Form, Expr, Stmt { // do block: `{…}`.
     }
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     em.str(depth, "(function(){")
     let ret = compileBody(em, depth + 1, scope.makeChild(), expType, isTail: isTail)
     em.append("})()")
@@ -32,12 +32,12 @@ class Do: _Form, Expr, Stmt { // do block: `{…}`.
     compileExpr(em, depth, scope, typeVoid, isTail: false)
   }
   
-  func compileBody(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
+  func compileBody(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     for stmt in stmts {
       stmt.compileStmt(em, depth, scope)
       em.append(";")
     }
-    var ret: TypeVal = typeVoid
+    var ret: Type = typeVoid
     if let expr = expr {
       em.str(depth, "return (")
       ret = expr.compileExpr(em, depth, scope, expType, isTail: isTail)

@@ -25,11 +25,11 @@ class Path: _Form, Expr, TypeExpr { // symbol: `name`.
     target.write("\n")
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     return syms.last!.compileSym(em, depth, scope.rec(self), expType, isTail: isTail)
   }
 
-  func typeVal(scope: Scope, _ subj: String) -> TypeVal {
+  func typeVal(scope: Scope, _ subj: String) -> Type {
     return syms.last!.typeValRec(scope.rec(self), subj)
   }
 }

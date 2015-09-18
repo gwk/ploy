@@ -31,17 +31,17 @@ class Par: _Form, Form { // parameter.
   
   var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
   
-  func typeValPar(scope: Scope) -> TypeValPar {
-    var typeVal: TypeVal! = nil
+  func typeValPar(scope: Scope) -> TypePar {
+    var type: Type! = nil
     if let typeExpr = typeExpr {
-      typeVal = typeExpr.typeVal(scope, "parameter type")
+      type = typeExpr.typeVal(scope, "parameter type")
     } else if let dflt = dflt {
       let ann = dflt as! Ann // previously verified in mk; TEMPORARY.
-      typeVal = ann.typeExpr.typeVal(scope, "parameter default type")
+      type = ann.typeExpr.typeVal(scope, "parameter default type")
     } else {
       fatalError() // enforced by mk.
     }
-    return TypeValPar(index: index, label: label, typeVal: typeVal, form: self)
+    return TypePar(index: index, label: label, type: type, form: self)
   }
   
   static func mk(index index: Int, form: Form, subj: String) -> Par {

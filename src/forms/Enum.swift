@@ -28,7 +28,7 @@ class Enum: _Form, Def, Stmt { // enum declaration: `enum E variants…;`.
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
-    return .Type(TypeValDecl(sym: sym))
+    return .Type(TypeDecl(sym: sym))
   }
 }
 

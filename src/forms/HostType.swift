@@ -15,10 +15,10 @@ class HostType: _Form, Def { // host type declaration: `host-type sym;`.
   }
   
   func compileDef(em: Emit, _ scope: Scope) {
-    scope.addRec(sym, isFwd: false, kind: .Type(TypeValDecl(sym: sym)))
+    scope.addRec(sym, isFwd: false, kind: .Type(TypeDecl(sym: sym)))
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
-    return .Type(TypeValDecl(sym: sym))
+    return .Type(TypeDecl(sym: sym))
   }
 }

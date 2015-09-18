@@ -23,7 +23,7 @@ class Reify: _Form, TypeExpr { // type reification:  `T^A`.
     arg.writeTo(&target, depth + 1)
   }
 
-  func typeVal(scope: Scope, _ subj: String) -> TypeVal {
+  func typeVal(scope: Scope, _ subj: String) -> Type {
     fatalError()
   }
 }

@@ -23,10 +23,10 @@ class Call : _Form, Expr, Stmt {
     arg.writeTo(&target, depth + 1)
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     em.str(depth, isTail ? "{" : "_tramp({")
     em.str(depth, " c:")
-    let fnType = callee.compileExpr(em, depth + 1, scope, anySigReturning(expType), isTail: false) as! TypeValSig
+    let fnType = callee.compileExpr(em, depth + 1, scope, anySigReturning(expType), isTail: false) as! TypeSig
     em.append(",")
     em.str(depth, " v:")
     arg.compileExpr(em, depth + 1, scope, fnType.par, isTail: false)

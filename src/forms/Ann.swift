@@ -23,12 +23,12 @@ class Ann: _Form, Expr { // annotation: `val:Type`.
     typeExpr.writeTo(&target, depth + 1)
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
-    let typeVal = typeExpr.typeVal(scope, "annotation")
-    if !expType.accepts(typeVal) {
-      failType("expected type: \(expType); actual type: \(typeVal)")
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+    let type = typeExpr.typeVal(scope, "annotation")
+    if !expType.accepts(type) {
+      failType("expected type: \(expType); actual type: \(type)")
     }
-    return val.compileExpr(em, depth, scope, typeVal, isTail: isTail)
+    return val.compileExpr(em, depth, scope, type, isTail: isTail)
   }
 }
 

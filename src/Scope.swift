@@ -2,11 +2,12 @@
 
 
 struct ScopeRec {
+  typealias _Type = Type // Type type gets masked by the variant name.
   enum Kind {
-    case Lazy(TypeVal)
+    case Lazy(_Type)
     case Space(Scope)
-    case Type(TypeVal)
-    case Val(TypeVal)
+    case Type(_Type)
+    case Val(_Type)
     
     var kindDesc: String {
       switch self {
@@ -49,7 +50,7 @@ class Scope {
   
   var name: String { return pathNames.joinWithSeparator("/") }
   
-  func makeChild(bindings: [String:TypeVal] = [:]) -> Scope {
+  func makeChild(bindings: [String:Type] = [:]) -> Scope {
     return Scope.init(pathNames: [], parent: self)
   }
   
@@ -69,9 +70,9 @@ class Scope {
     return r
   }
   
-  func addValRec(key: String, typeVal: TypeVal) {
+  func addValRec(key: String, type: Type) {
     assert(!bindings.contains(key))
-    bindings[key] = ScopeRec(sym: nil, hostName: key, isFwd: false, kind: .Val(typeVal))
+    bindings[key] = ScopeRec(sym: nil, hostName: key, isFwd: false, kind: .Val(type))
   }
   
   func getRec(sym: Sym) -> ScopeRec? {

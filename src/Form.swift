@@ -13,16 +13,16 @@ protocol Form : Streamable {
 
 protocol Accessor: Form, CustomStringConvertible {
   var hostAccessor: String { get }
-  func compileAccess(em: Emit, _ depth: Int, accesseeType: TypeVal) -> TypeVal
+  func compileAccess(em: Emit, _ depth: Int, accesseeType: Type) -> Type
 }
 
 protocol Expr: Form {
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type
 }
 
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
-  func typeVal(scope: Scope, _ subj: String) -> TypeVal
+  func typeVal(scope: Scope, _ subj: String) -> Type
 }
 
 

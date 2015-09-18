@@ -17,7 +17,7 @@ class Arg: _Form { // parameter.
     expr.writeTo(&target, depth + 1)
   }
   
-  func compileArg(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal) -> TypeVal {
+  func compileArg(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type) -> Type {
     return expr.compileExpr(em, depth, scope, expType, isTail: false)
   }
   

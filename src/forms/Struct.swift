@@ -28,7 +28,7 @@ class Struct: _Form, Def, Stmt { // struct declaration: `struct S fields…;`.
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
-    return .Type(TypeValDecl(sym: sym))
+    return .Type(TypeDecl(sym: sym))
   }
 }
 

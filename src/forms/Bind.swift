@@ -25,8 +25,8 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
   
   func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
     em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
-    let typeVal = val.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
-    scope.addRec(sym, isFwd: false, kind: .Val(typeVal))
+    let type = val.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
+    scope.addRec(sym, isFwd: false, kind: .Val(type))
   }
   
   func compileDef(em: Emit, _ scope: Scope) {
@@ -37,16 +37,16 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     em.str(0, " \(hostName)__acc = function() {")
     em.str(0, "  throw \"error: lazy value '\(fullName)' recursively referenced during initialization.\" };")
     em.str(0, " let val =")
-    let typeVal = val.compileExpr(em, 1, scope, typeAny, isTail: false) // TODO: new scope?
+    let type = val.compileExpr(em, 1, scope, typeAny, isTail: false) // TODO: new scope?
     em.append(";")
     em.str(0, " \(hostName)__acc = function() { return val };")
     em.str(0, " return val; }")
-    scope.addRec(sym, isFwd: false, kind: .Lazy(typeVal))
+    scope.addRec(sym, isFwd: false, kind: .Lazy(type))
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
     if let ann = val as? Ann {
-      return .Lazy(ann.type.typeVal(scope, "type annnotation"))
+      return .Lazy(ann.typeExpr.typeVal(scope, "type annnotation"))
     } else {
       val.failSyntax("definition requires explicit type annotation")
     }

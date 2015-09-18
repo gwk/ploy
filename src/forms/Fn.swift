@@ -17,17 +17,17 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     body.writeTo(&target, depth + 1)
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
-    let typeVal = sig.typeValSig(scope, "signature")
-    if !expType.accepts(typeVal) {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+    let type = sig.typeValSig(scope, "signature")
+    if !expType.accepts(type) {
       sig.failType("expects \(expType)")
     }
     let fnScope = scope.makeChild()
-    fnScope.addValRec("$", typeVal: typeVal.par)
-    fnScope.addValRec("self", typeVal: typeVal)
+    fnScope.addValRec("$", type: type.par)
+    fnScope.addValRec("self", type: type)
     em.str(depth, (isTail ? "{v:" : "") + "(function self($){")
-    body.compileBody(em, depth + 1, fnScope, typeVal.ret, isTail: true)
+    body.compileBody(em, depth + 1, fnScope, type.ret, isTail: true)
     em.append("})" + (isTail ? "}" : ""))
-    return typeVal
+    return type
   }
 }

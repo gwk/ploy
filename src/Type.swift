@@ -1,30 +1,30 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class TypeVal: CustomStringConvertible { // TODO: Hashable?
+class Type: CustomStringConvertible { // TODO: Hashable?
   
   //var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var description: String { fatalError() }
   
-  func accepts(actual: TypeVal) -> Bool { return actual === self }
+  func accepts(actual: Type) -> Bool { return actual === self }
 }
 
-//func ==(l: TypeVal, r: TypeVal) -> Bool { return l === r }
+//func ==(l: Type, r: Type) -> Bool { return l === r }
 
 
-class TypeValAny: TypeVal {
+class TypeAny: Type {
   
   override var description: String { return "Any" }
 
-  override func accepts(actual: TypeVal) -> Bool { return true }
+  override func accepts(actual: Type) -> Bool { return true }
 }
 
 
-class TypeValCmpd: TypeVal {
-  let pars: [TypeValPar]
+class TypeCmpd: Type {
+  let pars: [TypePar]
   
-  init(pars: [TypeValPar]) {
+  init(pars: [TypePar]) {
     self.pars = pars
     super.init()
   }
@@ -34,8 +34,8 @@ class TypeValCmpd: TypeVal {
     return "<\(s)>"
   }
   
-  override func accepts(actual: TypeVal) -> Bool {
-    guard let actual = actual as? TypeValCmpd else {
+  override func accepts(actual: Type) -> Bool {
+    guard let actual = actual as? TypeCmpd else {
       return false
     }
     for (exp, act) in zip(pars, actual.pars) {
@@ -48,7 +48,7 @@ class TypeValCmpd: TypeVal {
 }
 
 /// Type value for a declared type (enum, host, struct).
-class TypeValDecl: TypeVal {
+class TypeDecl: Type {
   let sym: Sym
   
   init(sym: Sym) {
@@ -60,7 +60,7 @@ class TypeValDecl: TypeVal {
 }
 
 
-class TypeValPrim: TypeVal {
+class TypePrim: Type {
   let name: String
   
   init(name: String) {
@@ -72,11 +72,11 @@ class TypeValPrim: TypeVal {
 }
 
 
-class TypeValSig: TypeVal {
-  let par: TypeVal
-  let ret: TypeVal
+class TypeSig: Type {
+  let par: Type
+  let ret: Type
   
-  init(par: TypeVal, ret: TypeVal) {
+  init(par: Type, ret: Type) {
     self.par = par
     self.ret = ret
     super.init()
@@ -84,8 +84,8 @@ class TypeValSig: TypeVal {
   
   override var description: String { return "\(par)%\(ret)" }
 
-  override func accepts(actual: TypeVal) -> Bool {
-    if let a = actual as? TypeValSig {
+  override func accepts(actual: Type) -> Bool {
+    if let a = actual as? TypeSig {
       return par.accepts(a.par) && ret.accepts(a.ret)
     }
     return false
@@ -93,15 +93,15 @@ class TypeValSig: TypeVal {
 }
 
 
-let typeAny = TypeValAny() // not currently available as an intrinsic type; only for 'accept' testing.
+let typeAny = TypeAny() // not currently available as an intrinsic type; only for 'accept' testing.
 
-let typeVoid = TypeValCmpd(pars: [])
+let typeVoid = TypeCmpd(pars: [])
 
-let typeBool      = TypeValPrim(name: "Bool")
-let typeInt       = TypeValPrim(name: "Int")
-let typeNamespace = TypeValPrim(name: "Namespace")
-let typeStr       = TypeValPrim(name: "Str")
-let typeType      = TypeValPrim(name: "Type")
+let typeBool      = TypePrim(name: "Bool")
+let typeInt       = TypePrim(name: "Int")
+let typeNamespace = TypePrim(name: "Namespace")
+let typeStr       = TypePrim(name: "Str")
+let typeType      = TypePrim(name: "Type")
 
 let intrinsicTypes = [
   typeBool,
@@ -112,6 +112,6 @@ let intrinsicTypes = [
 ]
 
 
-func anySigReturning(ret: TypeVal) -> TypeVal {
-  return TypeValSig(par: typeAny, ret: ret)
+func anySigReturning(ret: Type) -> Type {
+  return TypeSig(par: typeAny, ret: ret)
 }

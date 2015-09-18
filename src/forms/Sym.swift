@@ -27,13 +27,13 @@ class Sym: _Form, Accessor, Expr, TypeExpr { // symbol: `name`.
     return ".\(hostName)"
   }
   
-  func compileAccess(em: Emit, _ depth: Int, accesseeType: TypeVal) -> TypeVal {
+  func compileAccess(em: Emit, _ depth: Int, accesseeType: Type) -> Type {
     em.str(depth, hostAccessor)
-    if let accesseeType = accesseeType as? TypeValCmpd {
+    if let accesseeType = accesseeType as? TypeCmpd {
       for par in accesseeType.pars {
         if let label = par.label {
           if name == label.name {
-            return par.typeVal
+            return par.type
           }
         }
       }
@@ -45,13 +45,13 @@ class Sym: _Form, Accessor, Expr, TypeExpr { // symbol: `name`.
   
   // MARK: Expr
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
+  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     return compileSym(em, depth, scope.rec(self), expType, isTail: isTail)
   }
   
   // MARK: TypeExpr
   
-  func typeVal(scope: Scope, _ subj: String) -> TypeVal {
+  func typeVal(scope: Scope, _ subj: String) -> Type {
     return typeValRec(scope.rec(self), subj)
   }
 
@@ -59,29 +59,29 @@ class Sym: _Form, Accessor, Expr, TypeExpr { // symbol: `name`.
   
   var hostName: String { return name.dashToUnder }
   
-  func typeValForExprRec(scopeRec: ScopeRec, _ subj: String) -> TypeVal {
+  func typeValForExprRec(scopeRec: ScopeRec, _ subj: String) -> Type {
     switch scopeRec.kind {
-    case .Val(let typeVal): return typeVal
-    case .Lazy(let typeVal): return typeVal
+    case .Val(let type): return type
+    case .Lazy(let type): return type
     default: failType("\(subj) expects a value; `\(name)` refers to a \(scopeRec.kind.kindDesc).")
     }
   }
   
-  func typeValRec(scopeRec: ScopeRec, _ subj: String) -> TypeVal {
+  func typeValRec(scopeRec: ScopeRec, _ subj: String) -> Type {
     switch scopeRec.kind {
-    case .Type(let typeVal): return typeVal
+    case .Type(let type): return type
     default: failType("\(subj) expects a type; `\(name)` refers to a \(scopeRec.kind.kindDesc).")
     }
   }
   
-  func compileSym(em: Emit, _ depth: Int, _ scopeRec: ScopeRec, _ expType: TypeVal, isTail: Bool) -> TypeVal {
-    var typeVal: TypeVal! = nil
+  func compileSym(em: Emit, _ depth: Int, _ scopeRec: ScopeRec, _ expType: Type, isTail: Bool) -> Type {
+    var type: Type! = nil
     switch scopeRec.kind {
-    case .Val(let tv):
-      typeVal = tv
+    case .Val(let t):
+      type = t
       em.str(depth, isTail ? "{v:\(scopeRec.hostName)}" : scopeRec.hostName)
-    case .Lazy(let tv):
-      typeVal = tv
+    case .Lazy(let t):
+      type = t
       let s = "\(scopeRec.hostName)__acc()"
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
     case .Space(_):
@@ -89,10 +89,10 @@ class Sym: _Form, Accessor, Expr, TypeExpr { // symbol: `name`.
     case .Type(_):
       failType("expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
-    if !expType.accepts(typeVal) {
+    if !expType.accepts(type) {
       failType("expected type `\(expType)`; `\(name)` has type `\(typeVal)`")
     }
-    return typeVal
+    return type
   }
   
   @noreturn func failUndef() { failForm("scope error", msg: "`\(name)` is not defined in this scope") }
