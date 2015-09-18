@@ -1,0 +1,204 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>doc/syntax.wu</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
+  <style type="text/css">a { background-color: transparent; } a:active { outline: 0; } a:hover { outline: 0; } blockquote { border-left-color: #E0E0E0; border-left-style: solid; border-left-width: 0.333rem; margin: 0; padding: 0 0.677rem; } body { margin: 1rem; } body footer { border-top-color: #E8E8E8; border-top-style: solid; border-top-width: 1px; color: #606060; font-size: .875rem; margin: 1rem 0 0 0; } code { background-color: rgba(0, 0, 0, 0.1); border-radius: 3px; font-family: source code pro, menlo, terminal, monospace; } footer { display: block; } h1 { border-top-color: #E8E8E8; border-top-style: solid; border-top-width: 1px; } h1 { font-size: 2.0rem; margin: 1.4rem 0 0.6rem 0; } h2 { font-size: 1.6rem; margin: 1.2rem 0 0.5rem 0; } h3 { font-size: 1.4rem; margin: 1.1rem 0 0.5rem 0; } h4 { font-size: 1.2rem; margin: 1.0rem 0 0.5rem 0; } h5 { font-size: 1.1rem; margin: 1.0rem 0 0.5rem 0; } h6 { font-size: 1.0rem; margin: 1.0rem 0 0.5rem 0; } header { display: block; } html { background: white; color: black; font-family: source sans pro, sans-serif; font-size: 1rem; } section { display: block; } nav { display: block; } p { margin: 0.5rem 0; } pre { background: #F0F0F0; font-family: source code pro, menlo, terminal, monospace; font-size: 1rem; overflow: auto; padding: 0.1rem; } ul { line-height: 1.333rem; list-style-type: none; margin: 0rem; padding: 0rem; } ul > ul { padding-left: 0.667rem; }</style>
+  <script type="text/javascript"> "use strict";
+function scrollToElementId(id) {
+  window.scrollTo(0, document.getElementById(id).offsetTop);
+}
+
+var in_pres_mode = false;
+function togglePresentationMode() {
+  in_pres_mode = !in_pres_mode;
+  for (let sid of paging_ids) {
+    let section = document.getElementById(sid);
+    if (section.id == 'body') {
+      // skip; not actually a section.
+    } else {
+      section.style['margin'] = in_pres_mode ? '100vh 0 0 0' : '0';
+    }
+  }
+  let footer = document.getElementById('footer');
+  footer.style['margin'] = in_pres_mode ? '100vh 0 0 0' : '0';
+}
+
+var section_ids = null;
+var paging_ids = null;
+var paging_idx = 0;
+
+window.onkeydown = function(e) { 
+  if (e.keyCode === 37) { // left.
+    if (paging_idx > 0) {
+      paging_idx -= 1;
+    }
+    scrollToElementId(paging_ids[paging_idx]);
+  } else if (e.keyCode === 39) { // right.
+    if (paging_idx < paging_ids.length - 1) {
+      paging_idx += 1;
+    }
+    scrollToElementId(paging_ids[paging_idx]);
+  }
+};
+
+window.onkeypress = function(e) {
+  if (e.charCode === 112) { // 'p'.
+    togglePresentationMode();
+  }
+};
+</script>
+</head>
+<body id="body">
+<section class="S1" id="s1">
+  <h1 id="h1">Ploy syntax glossary</h1>
+  <section class="S2" id="s1.1">
+    <h2 id="h1.1">Comments</h2>
+    <p>
+      <code>#</code>: line comment: the source text from the comment symbol until the end of the line is considered part of the trailing whitespace of the expression.
+    </p>
+  </section>
+  <section class="S2" id="s1.2">
+    <h2 id="h1.2">Nesting syntax</h2>
+    <p>
+      <code>(…)</code>: parantheses have several distinct but related meanings:
+    </p>
+    <ul class="L1">
+      <li>• "Group": surrounding a single expression, they simply clarify the associativity of infix operators within a complex phrase, e.g. <code>(a.b).c</code> vs <code>a.b.c</code>.</li>
+      <li>• "Compound Literal": surrounding multiple space-separated expressions, they aggregate contents into a compound (tuple) value, e.g. <code>(a&nbsp;b)</code>.</li>
+      <li>• "Implied Call": when a parenthesized expression immediately follows another expression without spaces, it implies a function call, e.g. <code>f(a&nbsp;b)</code>.</li>
+    </ul>
+    <p>
+      <code>[…]</code>: "Expand": expand a macro, analagous to f(a b). Unlike function calls, macro calls have a single syntax for both single and multiple arguments.
+    </p>
+<pre>
+m[a]
+m[a b]</pre>
+    <p>
+      <code>&lt;…&gt;</code>: Angle brackets are analagous to parantheses, but for type expressions:
+    </p>
+    <ul class="L1">
+      <li>• "Compound Type": surrounding multiple space-separated type expressions, they define a compound type , e.g. '&lt;A B&gt;'.</li>
+      <li>• "Implied Reify": reify an abstract type with multiple type arguments, analagous to <code>f(a&nbsp;b)</code>, e.g. <code>T&lt;A&nbsp;B&gt;</code>.</li>
+    </ul>
+    <p>
+      <code>{…}</code>: "Do": sequence multiple statements and/or variable bindings. The value of the Do block is the value of the final expression inside the block:
+    </p>
+<pre>
+{ a = 1
+  b = (inc a)
+  (add a b)}</pre>
+    <p>
+      <code>'…'</code>: single-quoted string literal.
+    </p>
+    <p>
+      <code>"…"</code>: double-quoted string literal.
+    </p>
+  </section>
+  <section class="S2" id="s1.3">
+    <h2 id="h1.3">Prefix operators</h2>
+    <p>
+      <code>-</code>: negation sign.
+    <br />
+      <code>`</code>: quote: syntax quoting for macro programming.
+    <br />
+      <code>~</code>: quasiquote: syntax quasiquoting for macro programming.
+    <br />
+      <code>,</code>: unquote: syntax unquoting for macro programming.
+    <br />
+      <code>&amp;</code>: variad: variadic parameter prefix.
+    <br />
+      <code>$</code>: unused (pass-by-value?); see also the infix operator below.
+    </p>
+  </section>
+  <section class="S2" id="s1.4">
+    <h2 id="h1.4">Infix operators</h2>
+    <p>
+      Infix operators have fixed precedence groups; operators in later groups bind expressions together more tightly than earlier groups. Within a group, all operators are right-associative. This means that for any chain of same-precedence operators, the expressions group from the right, and the leftmost operator becomes the root of the resulting syntactic tree. We can visualize the groupings as successive underlines, with the carrot pointing to the responsible operator:
+    <br />
+      a=b.c
+    <br />
+      ~^~
+    <br />
+      ~^~~~
+    <br />
+      ~~~~~
+    </p>
+    <p>
+      The operator groups are as follows:
+    </p>
+    <ul class="L1">
+      <li>• "=", "?".</li>
+      <li>• ":".</li>
+      <li>• all other explicit operators.</li>
+      <li>• implicit operators.</li>
+    </ul>
+    <p>
+      The expressions <code>f(a&nbsp;b)</code>, <code>T&lt;A&nbsp;B&gt;</code>, and <code>m[a&nbsp;b]</code> all denote implicit 'adjacency operators' equivalent to <code>f.(a&nbsp;b)</code>, <code>T^&lt;a&nbsp;b&gt;</code>, <code>m|[a&nbsp;b]</code>; the adjacency operators have higher precedence than the regular ones, so <code>g(a).b</code> is equivalent to <code>(g.a).b</code>, not <code>g.a.b</code>.
+    </p>
+    <p>
+      <code>:</code>: "Annotate": annotate an expression (left side) with a type (right side).
+    </p>
+<pre>
+x:Int</pre>
+    <p>
+      <code>=</code>: "Bind": Associate a name/symbol (left side) with the value of an expression (right side). Bind has the lowest operator precedence, meaning that in a chain of operators, a binding acts as the root of the resulting expression tree. We often use spaces around the <code>=</code> sign to visually hint at the low precedence, but it is not required.
+    </p>
+<pre>
+x:Int = inc.1</pre>
+    <p>
+      <code>.</code>: "Call": call a function with an argument:
+    </p>
+<pre>
+f.arg</pre>
+    <p>
+      <code>^</code>: "Reify": reify a type with a single argument.
+    </p>
+<pre>
+T^A</pre>
+    <p>
+      <code>@</code>: field accessor.
+    </p>
+<pre>
+field-name@struct-value</pre>
+    <p>
+      <code>%</code>: function signature.
+    </p>
+<pre>
+Int%Int</pre>
+  </section>
+  <section class="S2" id="s1.5">
+    <h2 id="h1.5">Other</h2>
+    <p>
+      <code>/</code>: path separator; this is not an infix operator, but instead parsed as part of the syntax for symbols.
+    </p>
+<pre>
+LIB/SUB/public-value</pre>
+    <p>
+      <code>;</code>: keyword sentence terminator.
+    </p>
+    <p>
+      <code>!</code>: unused.
+    <br />
+      <code>+</code>: unused.
+    <br />
+      `\`: unused.
+    <br />
+      <code>*</code>: unused.
+    </p>
+    <p>
+      <code>_</code>: unused; since many host languages use '_' instead of '-' as a legal character for identifiers, Ploy reserves '_' so that Ploy symbols can be easily translated to host language identifiers.
+    </p>
+  </section>
+</section>
+<footer id="footer">
+© 2015 George King. Permission to use this file is granted in ploy/license.txt.
+</footer>
+<script type="text/javascript"> "use strict";
+section_ids = ['s1','s1.1','s1.2','s1.3','s1.4','s1.5'];
+paging_ids = ['body', 's1','s1.1','s1.2','s1.3','s1.4','s1.5'];
+</script>
+</body>
+</html>
