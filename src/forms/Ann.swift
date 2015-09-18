@@ -3,28 +3,28 @@
 
 class Ann: _Form, Expr { // annotation: `val:Type`.
   let val: Expr
-  let type: TypeExpr
+  let typeExpr: TypeExpr
   
-  init(_ syn: Syn, val: Expr, type: TypeExpr) {
+  init(_ syn: Syn, val: Expr, typeExpr: TypeExpr) {
     self.val = val
-    self.type = type
+    self.typeExpr = typeExpr
     super.init(syn)
   }
   
   static func mk(l: Form, _ r: Form) -> Form {
     return Ann(Syn(l.syn, r.syn),
       val: castForm(l, "type annotation", "expression"),
-      type: castForm(r, "type annotation", "type expression"))
+      typeExpr: castForm(r, "type annotation", "type expression"))
   }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
     val.writeTo(&target, depth + 1)
-    type.writeTo(&target, depth + 1)
+    typeExpr.writeTo(&target, depth + 1)
   }
   
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: TypeVal, isTail: Bool) -> TypeVal {
-    let typeVal = type.typeVal(scope, "annotation")
+    let typeVal = typeExpr.typeVal(scope, "annotation")
     if !expType.accepts(typeVal) {
       failType("expected type: \(expType); actual type: \(typeVal)")
     }

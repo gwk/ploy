@@ -355,8 +355,8 @@ class Src: CustomStringConvertible {
   
   func parseHostVal(sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
-    let type: TypeExpr = parseForm(nameSym.syn.end, "`host-val` form", "type expression")
-    return HostVal(synForSemicolon(sym.syn.pos, type.syn.end, "host-val"), sym: nameSym, type: type)
+    let typeExpr: TypeExpr = parseForm(nameSym.syn.end, "`host-val` form", "type expression")
+    return HostVal(synForSemicolon(sym.syn.pos, typeExpr.syn.end, "host-val"), sym: nameSym, typeExpr: typeExpr)
   }
   
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [

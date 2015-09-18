@@ -3,25 +3,25 @@
 
 class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
   let sym: Sym
-  let type: TypeExpr
+  let typeExpr: TypeExpr
 
-  init(_ syn: Syn, sym: Sym, type: TypeExpr) {
+  init(_ syn: Syn, sym: Sym, typeExpr: TypeExpr) {
     self.sym = sym
-    self.type = type
+    self.typeExpr = typeExpr
     super.init(syn)
   }
 
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
     sym.writeTo(&target, depth + 1)
-    type.writeTo(&target, depth + 1)
+    typeExpr.writeTo(&target, depth + 1)
   }
   
   func compileDef(em: Emit, _ scope: Scope) {
-    scope.addRec(sym, isFwd: false, kind: .Val(type.typeVal(scope, "host value declaration")))
+    scope.addRec(sym, isFwd: false, kind: .Val(typeExpr.typeVal(scope, "host value declaration")))
   }
   
   func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
-    return .Val(type.typeVal(scope, "host value type"))
+    return .Val(typeExpr.typeVal(scope, "host value type"))
   }
 }
