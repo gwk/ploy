@@ -312,6 +312,17 @@ class Src: CustomStringConvertible {
     return Fn(synForSemicolon(pos, do_.syn.end, "fn"), sig: sig, body: do_)
   }
   
+  func parseHostType(sym: Sym) -> Form {
+    let nameSym: Sym = parseForm(sym.syn.end, "`host-type` form", "name symbol")
+    return HostType(synForSemicolon(sym.syn.pos, nameSym.syn.end, "host-type"), sym: nameSym)
+  }
+  
+  func parseHostVal(sym: Sym) -> Form {
+    let nameSym: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
+    let typeExpr: TypeExpr = parseForm(nameSym.syn.end, "`host-val` form", "type expression")
+    return HostVal(synForSemicolon(sym.syn.pos, typeExpr.syn.end, "host-val"), sym: nameSym, typeExpr: typeExpr)
+  }
+  
   func parseIf(sym: Sym) -> Form {
     let (forms, end) = parseRawForms(sym.syn.end)
     var cases: [Case] = []
@@ -348,26 +359,15 @@ class Src: CustomStringConvertible {
     return Struct(synForSemicolon(sym.syn.pos, end, "enum"), sym: nameSym, fields: fields)
   }
   
-  func parseHostType(sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`host-type` form", "name symbol")
-    return HostType(synForSemicolon(sym.syn.pos, nameSym.syn.end, "host-type"), sym: nameSym)
-  }
-  
-  func parseHostVal(sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
-    let typeExpr: TypeExpr = parseForm(nameSym.syn.end, "`host-val` form", "type expression")
-    return HostVal(synForSemicolon(sym.syn.pos, typeExpr.syn.end, "host-val"), sym: nameSym, typeExpr: typeExpr)
-  }
-  
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
     "enum"      : parseEnum,
     "fn"        : parseFn,
+    "host-type" : parseHostType,
+    "host-val"  : parseHostVal,
     "if"        : parseIf,
     "in"        : parseIn,
     "pub"       : parsePub,
     "struct"    : parseStruct,
-    "host-type" : parseHostType,
-    "host-val"  : parseHostVal,
   ]
   
   // MARK: parse dispatch.
