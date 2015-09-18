@@ -1,11 +1,15 @@
-Ploy syntax glossary:
+writeup v0
+© 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
-Comments:
+
+# Ploy syntax glossary
+
+## Comments
 
 `#`: line comment: the source text from the comment symbol until the end of the line is considered part of the trailing whitespace of the expression.
 
 
-Nesting syntax:
+## Nesting syntax
 
 `(…)`: parantheses have several distinct but related meanings:
 - "Group": surrounding a single expression, they simply clarify the associativity of infix operators within a complex phrase, e.g. `(a.b).c` vs `a.b.c`.
@@ -30,7 +34,7 @@ Nesting syntax:
 `"…"`: double-quoted string literal.
 
 
-Prefix operators:
+## Prefix operators
 
 `-`: negation sign.
 `\``: quote: syntax quoting for macro programming.
@@ -40,7 +44,7 @@ Prefix operators:
 `$`: unused (pass-by-value?); see also the infix operator below.
 
 
-Infix operators:
+## Infix operators
 
 Infix operators have fixed precedence groups; operators in later groups bind expressions together more tightly than earlier groups. Within a group, all operators are right-associative. This means that for any chain of same-precedence operators, the expressions group from the right, and the leftmost operator becomes the root of the resulting syntactic tree. We can visualize the groupings as successive underlines, with the carrot pointing to the responsible operator:
   a=b.c
@@ -58,30 +62,28 @@ The expressions `f(a b)`, `T<A B>`, and `m[a b]` all denote implicit 'adjacency 
 
 
 `:`: "Annotate": annotate an expression (left side) with a type (right side).
+| x:Int
 
 `=`: "Bind": Associate a name/symbol (left side) with the value of an expression (right side). Bind has the lowest operator precedence, meaning that in a chain of operators, a binding acts as the root of the resulting expression tree. We often use spaces around the `=` sign to visually hint at the low precedence, but it is not required.
 | x:Int = inc.1
 
 `.`: "Call": call a function with an argument:
-| f.a
+| f.arg
 
 `^`: "Reify": reify a type with a single argument.
 | T^A
 
-`|`: "Expand": expand a macro with a single argument.
-| m|e
-
 `@`: field accessor.
-| a@v
+| field-name@struct-value
 
 `%`: function signature.
 | Int%Int
 
 
-Other:
+## Other
 
 `/`: path separator; this is not an infix operator, but instead parsed as part of the syntax for symbols.
-| a/b/c
+| LIB/SUB/public-value
 
 `;`: keyword sentence terminator.
 

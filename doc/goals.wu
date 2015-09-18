@@ -1,6 +1,5 @@
 writeup v0
-© 2015 George King.
-Permission to use this file is granted in ploy/license.txt.
+© 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
 # Goals
@@ -21,7 +20,9 @@ In Swift, imagine a protocol P in a library L, which specifies some requirement 
 Here, the same name M has two different meanings and needs to be disambiguated. The most obvious solution is to connect methods to the full path (the qualified name), rather than just the unqualified name symbol. The path then serves as the anchorpoint for all of its methods; it represents the intended meaning of the generic behavior, and locates that meaning at a single point.
 
 ## Multiple Implementations Problem
-Here the function has multiple methods implemented for the same type. This is a problem when two different third parties implement a method for a preexisting type. I see two possible solutions: first, the language could provide a means for the application developer to "fix" the problem by explicitly deporting one of the implementations. However this only works if that deported implementation is non-critical to correctness (e.g., a custom description string formatter). This seems to be of only limited usefulness.
+Here the function has multiple methods implemented for the same type. This is a problem when two different third parties implement a method for a preexisting type. At this point, I do not see a viable solution to this problem; it seems to be a fairly fundamental tension between extensibility and versus guarantees that code will be behave as originally intended. Here are two partial (probably unsatisfactory) solutions.
+
+First, the language could provide a means for the application developer to "fix" the problem by explicitly deporting one of the implementations. However this only works if that deported implementation is non-critical to correctness (e.g., a custom description string formatter), and therefore is of only limited usefulness.
 
 Second, the language could provide for some sort of "closed multifunction", meaning a overloaded/dispatched callable type that cannot be modified after definition. As a first approximation, a `multi-fn` would be defined simply as a set of functions, each with different argument type. For example:
 | in L
@@ -38,9 +39,9 @@ This looks a lot like a traditional pattern-matching function; the main differen
 |   fn <Flt Flt>%Flt ...; # support floats too.
 | ;
 
-Essentially, `L/add` remains unaltered, while `M/add` combines the old and new methods (with whatever dispatch resolution rules the subtyping system might specify). This provides something of a compromise between regular, closed functions and unrestricted open functions. Whether or not this middle ground is actually useful remains to be seen. An open "poly-fn" form would also be necessary; for example, it seems desirable to leave `add` open so that a generic function like `sum` (which reduces a list using add) could operate on unanticipated data types.
+Essentially, `L/add` remains unaltered, while `M/add` combines the old and new methods (with whatever dispatch resolution rules the subtyping system might specify). Alternatively, we could make generic functions be extensible, but then have a form to produce a sealed version of a given function in order to guarantee correctness. 
 
-An alternative approach would be to define generic functions like `add` as open, but then let code produce sealed versions of a given function in order to guarantee correctness. All of this is quite speculative, and better examples are in order. The high level goal is simply to minimize conflicts when integrating large numbers of libraries together.
+Either way, we end up with a compromise between regular, closed functions and open, extensible generic functions. I cannot think of a case where this actually buys the programmer anything useful; certainly the whole value of defining `add` as a generic is that it can be extended for unticipated data types.
 
 ## Type Classes
 
