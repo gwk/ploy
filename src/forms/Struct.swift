@@ -27,7 +27,7 @@ class Struct: _Form, Def, Stmt { // struct declaration: `struct S fields…;`.
     fatalError()
   }
   
-  func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
     return .Type(TypeDecl(sym: sym))
   }
 }

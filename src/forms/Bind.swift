@@ -26,7 +26,7 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
   func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
     em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
     let type = val.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
-    scope.addRec(sym, isFwd: false, kind: .Val(type))
+    scope.addRecord(sym, isFwd: false, kind: .Val(type))
   }
   
   func compileDef(em: Emit, _ scope: Scope) {
@@ -41,10 +41,10 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     em.append(";")
     em.str(0, " \(hostName)__acc = function() { return val };")
     em.str(0, " return val; }")
-    scope.addRec(sym, isFwd: false, kind: .Lazy(type))
+    scope.addRecord(sym, isFwd: false, kind: .Lazy(type))
   }
   
-  func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
     if let ann = val as? Ann {
       return .Lazy(ann.typeExpr.typeVal(scope, "type annnotation"))
     } else {

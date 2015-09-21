@@ -20,8 +20,8 @@ class Pub: _Form, Def { // public modifier: `pub expr;`.
   
   var sym: Sym { return def.sym }
   
-  func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
-    return def.scopeRecKind(scope)
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+    return def.scopeRecordKind(scope)
   }
 }
 

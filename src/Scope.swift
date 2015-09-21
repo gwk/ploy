@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-struct ScopeRec {
+struct ScopeRecord {
   typealias _Type = Type // Type type gets masked by the variant name.
 
   enum Kind {
@@ -39,7 +39,7 @@ class Scope {
   let hostPrefix: String
   let parent: Scope?
   
-  var bindings: [String: ScopeRec] = [:]
+  var bindings: [String: ScopeRecord] = [:]
   var defs: [String: Def] = [:]
   var usedDefs: [Def] = []
   
@@ -55,7 +55,7 @@ class Scope {
     return Scope.init(pathNames: [], parent: self)
   }
   
-  func addRec(sym: Sym, isFwd: Bool, kind: ScopeRec.Kind) -> ScopeRec {
+  func addRecord(sym: Sym, isFwd: Bool, kind: ScopeRecord.Kind) -> ScopeRecord {
     if let existing = bindings[sym.name] {
       if existing.isFwd {
         assert(!isFwd)
@@ -66,30 +66,30 @@ class Scope {
         sym.failRedef(existing.sym)
       }
     }
-    let r = ScopeRec(sym: sym, hostName: hostPrefix + sym.hostName, isFwd: isFwd, kind: kind)
+    let r = ScopeRecord(sym: sym, hostName: hostPrefix + sym.hostName, isFwd: isFwd, kind: kind)
     bindings[sym.name] = r
     return r
   }
   
-  func addValRec(key: String, type: Type) {
+  func addValRecord(key: String, type: Type) {
     assert(!bindings.contains(key))
-    bindings[key] = ScopeRec(sym: nil, hostName: key, isFwd: false, kind: .Val(type))
+    bindings[key] = ScopeRecord(sym: nil, hostName: key, isFwd: false, kind: .Val(type))
   }
   
-  func getRec(sym: Sym) -> ScopeRec? {
+  func getRecord(sym: Sym) -> ScopeRecord? {
     if let r = bindings[sym.name] {
       return r
     }
     if let def = defs[sym.name] {
-      let r = addRec(def.sym, isFwd: true, kind: def.scopeRecKind(self))
+      let r = addRecord(def.sym, isFwd: true, kind: def.scopeRecordKind(self))
       usedDefs.append(def)
       return r
     }
     return nil
   }
   
-  func rec(sym: Sym) -> ScopeRec {
-    if let r = getRec(sym) {
+  func rec(sym: Sym) -> ScopeRecord {
+    if let r = getRecord(sym) {
       return r
     }
     if let parent = parent {
@@ -98,7 +98,7 @@ class Scope {
     sym.failUndef()
   }
   
-  func rec(path: Path) -> ScopeRec {
+  func rec(path: Path) -> ScopeRecord {
     var scope = self
     for (i, sym) in path.syms.enumerate() {
       let r = scope.rec(sym)

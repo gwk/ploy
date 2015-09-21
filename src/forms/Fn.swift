@@ -23,8 +23,8 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
       sig.failType("expects \(expType)")
     }
     let fnScope = scope.makeChild()
-    fnScope.addValRec("$", type: type.par)
-    fnScope.addValRec("self", type: type)
+    fnScope.addValRecord("$", type: type.par)
+    fnScope.addValRecord("self", type: type)
     em.str(depth, (isTail ? "{v:" : "") + "(function self($){")
     body.compileBody(em, depth + 1, fnScope, type.ret, isTail: true)
     em.append("})" + (isTail ? "}" : ""))

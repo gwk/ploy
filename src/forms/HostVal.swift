@@ -18,10 +18,10 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
   }
   
   func compileDef(em: Emit, _ scope: Scope) {
-    scope.addRec(sym, isFwd: false, kind: .Val(typeExpr.typeVal(scope, "host value declaration")))
+    scope.addRecord(sym, isFwd: false, kind: .Val(typeExpr.typeVal(scope, "host value declaration")))
   }
   
-  func scopeRecKind(scope: Scope) -> ScopeRec.Kind {
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
     return .Val(typeExpr.typeVal(scope, "host value type"))
   }
 }

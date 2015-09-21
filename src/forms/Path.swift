@@ -30,7 +30,7 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
   }
 
   func typeVal(scope: Scope, _ subj: String) -> Type {
-    return syms.last!.typeValRec(scope.rec(self), subj)
+    return syms.last!.typeValForTypeRecord(scope.rec(self), subj)
   }
 }
 

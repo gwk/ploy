@@ -52,37 +52,37 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   // MARK: TypeExpr
   
   func typeVal(scope: Scope, _ subj: String) -> Type {
-    return typeValRec(scope.rec(self), subj)
+    return typeValForTypeRecord(scope.rec(self), subj)
   }
 
   // MARK: Sym
   
   var hostName: String { return name.dashToUnder }
   
-  func typeValForExprRec(scopeRec: ScopeRec, _ subj: String) -> Type {
-    switch scopeRec.kind {
+  func typeValForExprRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
+    switch scopeRecord.kind {
     case .Val(let type): return type
     case .Lazy(let type): return type
-    default: failType("\(subj) expects a value; `\(name)` refers to a \(scopeRec.kind.kindDesc).")
+    default: failType("\(subj) expects a value; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
-  func typeValRec(scopeRec: ScopeRec, _ subj: String) -> Type {
-    switch scopeRec.kind {
+  func typeValForTypeRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
+    switch scopeRecord.kind {
     case .Type(let type): return type
-    default: failType("\(subj) expects a type; `\(name)` refers to a \(scopeRec.kind.kindDesc).")
+    default: failType("\(subj) expects a type; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
-  func compileSym(em: Emit, _ depth: Int, _ scopeRec: ScopeRec, _ expType: Type, isTail: Bool) -> Type {
+  func compileSym(em: Emit, _ depth: Int, _ scopeRecord: ScopeRecord, _ expType: Type, isTail: Bool) -> Type {
     var type: Type! = nil
-    switch scopeRec.kind {
+    switch scopeRecord.kind {
     case .Val(let t):
       type = t
-      em.str(depth, isTail ? "{v:\(scopeRec.hostName)}" : scopeRec.hostName)
+      em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
     case .Lazy(let t):
       type = t
-      let s = "\(scopeRec.hostName)__acc()"
+      let s = "\(scopeRecord.hostName)__acc()"
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
     case .Space(_):
       failType("expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.

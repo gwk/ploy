@@ -7,9 +7,9 @@ class GlobalScope: Scope {
   
   init() {
     super.init(pathNames: [], parent: nil)
-    bindings["GLOBAL"] = ScopeRec(sym: nil, hostName: "GLOBAL", isFwd: false, kind: .Space(self))
+    bindings["GLOBAL"] = ScopeRecord(sym: nil, hostName: "GLOBAL", isFwd: false, kind: .Space(self))
     for t in intrinsicTypes {
-      bindings[t.description] = ScopeRec(sym: nil, hostName: t.description, isFwd: false, kind: .Type(t))
+      bindings[t.description] = ScopeRecord(sym: nil, hostName: t.description, isFwd: false, kind: .Type(t))
     }
   }
   
@@ -25,7 +25,7 @@ class GlobalScope: Scope {
       } else { // create.
         let next = Scope(pathNames: syms[0...i].map { $0.name }, parent: self)
         spaces.append(next)
-        space.bindings[sym.name] = ScopeRec(sym: nil, hostName: space.hostPrefix + sym.hostName, isFwd: false, kind: .Space(next))
+        space.bindings[sym.name] = ScopeRecord(sym: nil, hostName: space.hostPrefix + sym.hostName, isFwd: false, kind: .Space(next))
         space = next
       }
     }

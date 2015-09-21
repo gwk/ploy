@@ -36,12 +36,12 @@ protocol Stmt: Form {
 
 protocol Def: Form {
   var sym: Sym { get }
-  func scopeRecKind(scope: Scope) -> ScopeRec.Kind
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind
   func compileDef(em: Emit, _ scope: Scope)
 }
 
 
-class _Form : Form, Hashable {
+class _Form : Form {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
   
@@ -84,7 +84,6 @@ class _Form : Form, Hashable {
   }
 }
 
-func ==(l: _Form, r: _Form) -> Bool { return ObjectIdentifier(l) == ObjectIdentifier(r) }
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
 func castForm<T>(form: Form, _ subj: String, _ exp: String) -> T {
