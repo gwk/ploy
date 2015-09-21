@@ -255,8 +255,8 @@ class Src: CustomStringConvertible {
     return Syn(src: self, pos: pos, visEnd: visEnd, end: parseSpace(visEnd))
   }
   
-  func synForSemicolon(pos: Pos, _ p: Pos, _ formName: String) -> Syn {
-    return synForTerminator(pos, p, ";", formName)
+  func synForSemicolon(sym: Sym, _ p: Pos, _ formName: String) -> Syn {
+    return synForTerminator(sym.syn.pos, p, ";", formName)
   }
   
   // MARK: prefixes.
@@ -302,25 +302,24 @@ class Src: CustomStringConvertible {
     let nameSym: Sym = parseForm(sym.syn.end, "`enum` form", "name symbol")
     var variants: [Par] = []
     let end = parseForms(&variants, nameSym.syn.end, "`enum` form", "variant parameter")
-    return Enum(synForSemicolon(sym.syn.pos, end, "enum"), sym: nameSym, variants: variants)
+    return Enum(synForSemicolon(sym, end, "enum"), sym: nameSym, variants: variants)
   }
   
   func parseFn(sym: Sym) -> Form {
-    let pos = sym.syn.pos
     let sig: Sig = parseForm(sym.syn.end, "`fn` form", "function signature")
     let do_ = parseBodyToImplicitDo(sig.syn.end)
-    return Fn(synForSemicolon(pos, do_.syn.end, "fn"), sig: sig, body: do_)
+    return Fn(synForSemicolon(sym, do_.syn.end, "fn"), sig: sig, body: do_)
   }
   
   func parseHostType(sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`host-type` form", "name symbol")
-    return HostType(synForSemicolon(sym.syn.pos, nameSym.syn.end, "host-type"), sym: nameSym)
+    return HostType(synForSemicolon(sym, nameSym.syn.end, "host-type"), sym: nameSym)
   }
   
   func parseHostVal(sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
     let typeExpr: TypeExpr = parseForm(nameSym.syn.end, "`host-val` form", "type expression")
-    return HostVal(synForSemicolon(sym.syn.pos, typeExpr.syn.end, "host-val"), sym: nameSym, typeExpr: typeExpr)
+    return HostVal(synForSemicolon(sym, typeExpr.syn.end, "host-val"), sym: nameSym, typeExpr: typeExpr)
   }
   
   func parseIf(sym: Sym) -> Form {
@@ -337,14 +336,32 @@ class Src: CustomStringConvertible {
         f.failSyntax("`if` form expects `?` case but received \(f.syntaxName).")
       }
     }
-    return If(synForSemicolon(sym.syn.pos, end, "`if` form"), cases: cases, dflt: dflt)
+    return If(synForSemicolon(sym, end, "`if` form"), cases: cases, dflt: dflt)
   }
   
   func parseIn(sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`in` form", "module name symbol")
     var defs: [Def] = []
     let end = parseForms(&defs, nameSym.syn.end, "`in` form", "definition")
-    return In(synForSemicolon(sym.syn.pos, end, "`in` form"), sym: nameSym, defs: defs)
+    return In(synForSemicolon(sym, end, "`in` form"), sym: nameSym, defs: defs)
+  }
+  
+  func parseMethod(sym: Sym) -> Form {
+    let identifier: Identifier = parseForm(sym.syn.end, "`method` form", "poly-fn name or path identifier")
+    let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature signature")
+    let body = parseBodyToImplicitDo(sig.syn.end)
+    return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
+  }
+
+  func parseMethods(sym: Sym) -> Form {
+    let identifier: Identifier = parseForm(sym.syn.end, "`methods` form", "poly-fn name or path identifier")
+    var fns: [Expr] = []
+    let end = parseForms(&fns, identifier.syn.end, "`methods` form", "function value")
+    return Methods(synForSemicolon(sym, end, "`methods` form"), identifier: identifier, fns: fns)
+  }
+  
+  func parsePolyFn(sym: Sym) -> Form {
+    sym.failSyntax("unimplemented")
   }
   
   func parsePub(sym: Sym) -> Form {
@@ -356,7 +373,7 @@ class Src: CustomStringConvertible {
     let nameSym: Sym = parseForm(sym.syn.end, "`struct` form", "name symbol")
     var fields: [Par] = []
     let end = parseForms(&fields, nameSym.syn.end, "`struct` form", "field parameter")
-    return Struct(synForSemicolon(sym.syn.pos, end, "enum"), sym: nameSym, fields: fields)
+    return Struct(synForSemicolon(sym, end, "enum"), sym: nameSym, fields: fields)
   }
   
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
@@ -366,6 +383,8 @@ class Src: CustomStringConvertible {
     "host-val"  : parseHostVal,
     "if"        : parseIf,
     "in"        : parseIn,
+    "method"    : parseMethod,
+    "poly-fn"   : parsePolyFn,
     "pub"       : parsePub,
     "struct"    : parseStruct,
   ]

@@ -20,6 +20,9 @@ protocol Expr: Form {
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type
 }
 
+protocol Identifier: Form {
+  
+}
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
   func typeVal(scope: Scope, _ subj: String) -> Type
@@ -38,10 +41,12 @@ protocol Def: Form {
 }
 
 
-class _Form : Streamable {
+class _Form : Form, Hashable {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
   
+  var hashValue: Int { return ObjectIdentifier(self).hashValue }
+
   var syntaxName: String { return String(self.dynamicType) }
 
   @noreturn func failForm(prefix: String, msg: String, notes: [(Form?, String)]) {
@@ -79,6 +84,7 @@ class _Form : Streamable {
   }
 }
 
+func ==(l: _Form, r: _Form) -> Bool { return ObjectIdentifier(l) == ObjectIdentifier(r) }
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
 func castForm<T>(form: Form, _ subj: String, _ exp: String) -> T {

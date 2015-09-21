@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Path: _Form, Expr, TypeExpr { // symbol: `name`.
+class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
   let syms: [Sym]
   
   init(_ syn: Syn, syms: [Sym]) {

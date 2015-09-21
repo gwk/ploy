@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Par: _Form, Form { // parameter.
+class Par: _Form { // parameter.
   
   let index: Int
   let label: Sym?

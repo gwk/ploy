@@ -3,6 +3,7 @@
 
 struct ScopeRec {
   typealias _Type = Type // Type type gets masked by the variant name.
+
   enum Kind {
     case Lazy(_Type)
     case Space(Scope)
