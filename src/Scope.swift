@@ -88,20 +88,20 @@ class Scope {
     return nil
   }
   
-  func rec(sym: Sym) -> ScopeRecord {
+  func record(sym: Sym) -> ScopeRecord {
     if let r = getRecord(sym) {
       return r
     }
     if let parent = parent {
-      return parent.rec(sym)
+      return parent.record(sym)
     }
     sym.failUndef()
   }
   
-  func rec(path: Path) -> ScopeRecord {
+  func record(path: Path) -> ScopeRecord {
     var scope = self
     for (i, sym) in path.syms.enumerate() {
-      let r = scope.rec(sym)
+      let r = scope.record(sym)
       if i == path.syms.lastIndex! {
         return r
       }

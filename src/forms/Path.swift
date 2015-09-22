@@ -26,11 +26,11 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
   }
   
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
-    return syms.last!.compileSym(em, depth, scope.rec(self), expType, isTail: isTail)
+    return syms.last!.compileSym(em, depth, scope.record(self), expType, isTail: isTail)
   }
 
   func typeVal(scope: Scope, _ subj: String) -> Type {
-    return syms.last!.typeValForTypeRecord(scope.rec(self), subj)
+    return syms.last!.typeValForTypeRecord(scope.record(self), subj)
   }
 }
 

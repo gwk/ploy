@@ -46,13 +46,13 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   // MARK: Expr
   
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
-    return compileSym(em, depth, scope.rec(self), expType, isTail: isTail)
+    return compileSym(em, depth, scope.record(self), expType, isTail: isTail)
   }
   
   // MARK: TypeExpr
   
   func typeVal(scope: Scope, _ subj: String) -> Type {
-    return typeValForTypeRecord(scope.rec(self), subj)
+    return typeValForTypeRecord(scope.record(self), subj)
   }
 
   // MARK: Sym
