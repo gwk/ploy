@@ -20,7 +20,7 @@ class PolyFn: _Form, Def {
     return .PolyFn(PolyFnRecord())
   }
 
-  func compileDef(em: Emit, _ scope: Scope) {
+  func compileDef(em: Emitter, _ scope: Scope) {
     
   }
 

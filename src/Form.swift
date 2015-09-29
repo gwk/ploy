@@ -13,19 +13,19 @@ protocol Form : Streamable {
 
 protocol Accessor: Form, CustomStringConvertible {
   var hostAccessor: String { get }
-  func compileAccess(em: Emit, _ depth: Int, accesseeType: Type) -> Type
+  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type
 }
 
 
 protocol Def: Form {
   var sym: Sym { get }
   func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind
-  func compileDef(em: Emit, _ scope: Scope)
+  func compileDef(em: Emitter, _ scope: Scope)
 }
 
 
 protocol Expr: Form {
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type
 }
 
 
@@ -40,7 +40,7 @@ protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
 
 
 protocol Stmt: Form {
-  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope)
+  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope)
 }
 
 

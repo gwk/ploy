@@ -16,7 +16,7 @@ class HostType: _Form, Def { // host type declaration: `host-type sym;`.
 
   // MARK: Def
 
-  func compileDef(em: Emit, _ scope: Scope) {
+  func compileDef(em: Emitter, _ scope: Scope) {
     scope.addRecord(sym, isFwd: false, kind: .Type(TypeDecl(sym: sym)))
   }
   

@@ -24,7 +24,7 @@ class Method: _Form, Def { // method definition.
 
   var sym: Sym { fatalError() } // a method is not an independent definition; handled specially.
 
-  func compileDef(em: Emit, _ scope: Scope) {
+  func compileDef(em: Emitter, _ scope: Scope) {
     fatalError()
   }
 

@@ -19,13 +19,13 @@ class Struct: _Form, Def, Stmt { // struct declaration: `struct S fields…;`.
     }
   }
 
-  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
     fatalError()
   }
 
   // MARK: Def
 
-  func compileDef(em: Emit, _ scope: Scope) {
+  func compileDef(em: Emitter, _ scope: Scope) {
     fatalError()
   }
   

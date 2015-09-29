@@ -27,7 +27,7 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
 
   // MARK: Expr
 
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     return syms.last!.compileSym(em, depth, scope.record(self), expType, isTail: isTail)
   }
 

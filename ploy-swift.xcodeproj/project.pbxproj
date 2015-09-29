@@ -17,7 +17,7 @@
 		EC1FE8F01B6BE20C00112BB0 /* Process.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8E71B6BE20C00112BB0 /* Process.swift */; };
 		EC1FE8F11B6BE20C00112BB0 /* SequenceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8E81B6BE20C00112BB0 /* SequenceType.swift */; };
 		EC1FE8F21B6BE20C00112BB0 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8E91B6BE20C00112BB0 /* String.swift */; };
-		EC1FE8F41B6BE31200112BB0 /* Emit.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8F31B6BE31200112BB0 /* Emit.swift */; };
+		EC1FE8F41B6BE31200112BB0 /* Emitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC1FE8F31B6BE31200112BB0 /* Emitter.swift */; };
 		EC40E46D1BACFAB600FF3215 /* PolyFn.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40E46C1BACFAB600FF3215 /* PolyFn.swift */; };
 		EC49BCFB1B750C3200660AF0 /* check.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC49BCFA1B750C3200660AF0 /* check.swift */; };
 		EC49BD3F1B7565E700660AF0 /* ArithmeticType.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC49BD3E1B7565E700660AF0 /* ArithmeticType.swift */; };
@@ -89,7 +89,7 @@
 		EC1FE8E71B6BE20C00112BB0 /* Process.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Process.swift; path = qk/src/std/Process.swift; sourceTree = "<group>"; };
 		EC1FE8E81B6BE20C00112BB0 /* SequenceType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SequenceType.swift; path = qk/src/std/SequenceType.swift; sourceTree = "<group>"; };
 		EC1FE8E91B6BE20C00112BB0 /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = String.swift; path = qk/src/std/String.swift; sourceTree = "<group>"; };
-		EC1FE8F31B6BE31200112BB0 /* Emit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Emit.swift; sourceTree = "<group>"; };
+		EC1FE8F31B6BE31200112BB0 /* Emitter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Emitter.swift; sourceTree = "<group>"; };
 		EC40E46C1BACFAB600FF3215 /* PolyFn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PolyFn.swift; sourceTree = "<group>"; };
 		EC49BCFA1B750C3200660AF0 /* check.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = check.swift; path = qk/src/core/check.swift; sourceTree = "<group>"; };
 		EC49BD3E1B7565E700660AF0 /* ArithmeticType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArithmeticType.swift; path = qk/src/core/ArithmeticType.swift; sourceTree = "<group>"; };
@@ -228,7 +228,7 @@
 			isa = PBXGroup;
 			children = (
 				EC6523771B7BD2BF00CAA454 /* forms */,
-				EC1FE8F31B6BE31200112BB0 /* Emit.swift */,
+				EC1FE8F31B6BE31200112BB0 /* Emitter.swift */,
 				EC5BDF1D1B7A40EC00054159 /* Form.swift */,
 				ECB639841B83D77000138A8C /* GlobalSpace.swift */,
 				ECAE89161B693B46002AE9B9 /* main.swift */,
@@ -341,7 +341,7 @@
 				EC49BD3F1B7565E700660AF0 /* ArithmeticType.swift in Sources */,
 				EC1DDCA61BA0C433007C07EC /* Paren.swift in Sources */,
 				ECDA37151B7EB16200939000 /* File.swift in Sources */,
-				EC1FE8F41B6BE31200112BB0 /* Emit.swift in Sources */,
+				EC1FE8F41B6BE31200112BB0 /* Emitter.swift in Sources */,
 				EC6523991B7BD2BF00CAA454 /* Do.swift in Sources */,
 				EC6523A21B7BD2BF00CAA454 /* Pub.swift in Sources */,
 				EC1FE8ED1B6BE20C00112BB0 /* Dictionary.swift in Sources */,

@@ -21,7 +21,7 @@ class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
     }
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     em.str(depth, "(")
     for c in cases {
       c.condition.compileExpr(em, depth + 1, scope, typeBool, isTail: false)
@@ -40,7 +40,7 @@ class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
     return expType
   }
   
-  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
     compileExpr(em, depth, scope, typeAny, isTail: false)
   }
 }

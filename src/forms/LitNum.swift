@@ -26,7 +26,7 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
     return "[\"\(val)\"]"
   }
   
-  func compileAccess(em: Emit, _ depth: Int, accesseeType: Type) -> Type {
+  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type {
     em.str(depth, hostAccessor)
     if let accesseeType = accesseeType as? TypeCmpd {
       if let par = accesseeType.pars.get(val) {
@@ -39,7 +39,7 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
     }
   }
 
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     // TODO: typecheck.
     em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)
     return typeInt

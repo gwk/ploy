@@ -27,7 +27,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     return ".\(hostName)"
   }
   
-  func compileAccess(em: Emit, _ depth: Int, accesseeType: Type) -> Type {
+  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type {
     em.str(depth, hostAccessor)
     if let accesseeType = accesseeType as? TypeCmpd {
       for par in accesseeType.pars {
@@ -45,7 +45,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   
   // MARK: Expr
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     return compileSym(em, depth, scope.record(self), expType, isTail: isTail)
   }
 
@@ -78,7 +78,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     }
   }
   
-  func compileSym(em: Emit, _ depth: Int, _ scopeRecord: ScopeRecord, _ expType: Type, isTail: Bool) -> Type {
+  func compileSym(em: Emitter, _ depth: Int, _ scopeRecord: ScopeRecord, _ expType: Type, isTail: Bool) -> Type {
     var type: Type! = nil
     switch scopeRecord.kind {
     case .Val(let t):

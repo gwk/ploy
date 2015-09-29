@@ -17,7 +17,7 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     body.writeTo(&target, depth + 1)
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     let type = sig.typeValSig(scope, "signature")
     if !expType.accepts(type) {
       sig.failType("expects \(expType)")

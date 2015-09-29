@@ -23,7 +23,7 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     val.writeTo(&target, depth + 1)
   }
   
-  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
     em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
     let type = val.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
     scope.addRecord(sym, isFwd: false, kind: .Val(type))
@@ -39,7 +39,7 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     }
   }
 
-  func compileDef(em: Emit, _ scope: Scope) {
+  func compileDef(em: Emitter, _ scope: Scope) {
     let fullName = "\(scope.name)/\(sym.name)"
     let hostName = "\(scope.hostPrefix)\(sym.hostName)"
     // TODO: decide if lazy def is necessary.

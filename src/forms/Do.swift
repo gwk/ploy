@@ -21,18 +21,18 @@ class Do: _Form, Expr, Stmt { // do block: `{…}`.
     }
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     em.str(depth, "(function(){")
     let ret = compileBody(em, depth + 1, scope.makeChild(), expType, isTail: isTail)
     em.append("})()")
     return ret
   }
   
-  func compileStmt(em: Emit, _ depth: Int, _ scope: Scope) {
+  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
     compileExpr(em, depth, scope, typeVoid, isTail: false)
   }
   
-  func compileBody(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileBody(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     for stmt in stmts {
       stmt.compileStmt(em, depth, scope)
       em.append(";")

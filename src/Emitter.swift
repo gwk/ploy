@@ -1,9 +1,23 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Emit {
+class Emitter {
+  let parent: Emitter?
+  let file: OutFile
   var lines: [String] = []
-  
+
+  init(parent: Emitter?, file: OutFile) {
+    self.parent = parent
+    self.file = file
+  }
+
+  deinit {
+    for line in lines {
+      file.write(line)
+      file.write("\n")
+    }
+  }
+
   func str(depth: Int, _ string: String) {
     lines.append(String(indent: depth) + string)
   }
@@ -15,7 +29,7 @@ class Emit {
 
 
 func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
-  let em = Emit()
+  let em = Emitter(parent: nil, file: file)
   em.str(0, "#!/usr/bin/env iojs")
   em.str(0, "\"use strict\";\n")
   em.str(0, "(function(){ // ploy.")
@@ -42,9 +56,4 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   }
 
   em.str(0, "\nPROC__exit(_tramp(_main()))})()")
-
-  for l in em.lines {
-    file.write(l)
-    file.write("\n")
-  }
 }

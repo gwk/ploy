@@ -16,7 +16,7 @@ class Expand: _Form { // compound macro expansion argument: `[a b]`.
     }
   }
   
-  func compileExpand(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type) -> Type {
+  func compileExpand(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type) -> Type {
     fatalError()
   }
 }

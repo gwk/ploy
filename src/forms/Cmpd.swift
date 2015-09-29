@@ -16,7 +16,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     }
   }
   
-  func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     var retType = expType
     em.str(depth, isTail ? "{{v:" : "{")
     if expType === typeAny {
@@ -44,7 +44,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     return retType
   }
   
-  func compilePar(em: Emit, _ depth: Int, _ scope: Scope, par: TypePar, inout argIndex: Int) {
+  func compilePar(em: Emitter, _ depth: Int, _ scope: Scope, par: TypePar, inout argIndex: Int) {
     em.str(depth, " \(par.hostName):")
     if argIndex < args.count {
       let arg = args[argIndex]

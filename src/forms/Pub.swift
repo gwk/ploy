@@ -22,7 +22,7 @@ class Pub: _Form, Def { // public modifier: `pub expr;`.
     return def.scopeRecordKind(scope)
   }
 
-  func compileDef(em: Emit, _ scope: Scope) {
+  func compileDef(em: Emitter, _ scope: Scope) {
     fatalError()
   }
 }
