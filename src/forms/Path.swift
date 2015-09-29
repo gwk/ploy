@@ -24,10 +24,18 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
     }
     target.write("\n")
   }
-  
+
+  // MARK: Expr
+
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     return syms.last!.compileSym(em, depth, scope.record(self), expType, isTail: isTail)
   }
+
+  // MARK: Identifier
+
+  func record(sym: Sym, scope: Scope) -> ScopeRecord { return scope.record(self) }
+
+  // MARK: TypeExpr
 
   func typeVal(scope: Scope, _ subj: String) -> Type {
     return syms.last!.typeValForTypeRecord(scope.record(self), subj)

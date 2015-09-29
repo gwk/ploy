@@ -28,7 +28,17 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     let type = val.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
     scope.addRecord(sym, isFwd: false, kind: .Val(type))
   }
-  
+
+  // MARK: Def
+
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+    if let ann = val as? Ann {
+      return .Lazy(ann.typeExpr.typeVal(scope, "type annnotation"))
+    } else {
+      val.failSyntax("definition requires explicit type annotation")
+    }
+  }
+
   func compileDef(em: Emit, _ scope: Scope) {
     let fullName = "\(scope.name)/\(sym.name)"
     let hostName = "\(scope.hostPrefix)\(sym.hostName)"
@@ -42,14 +52,6 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     em.str(0, " \(hostName)__acc = function() { return val };")
     em.str(0, " return val; }")
     scope.addRecord(sym, isFwd: false, kind: .Lazy(type))
-  }
-  
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
-    if let ann = val as? Ann {
-      return .Lazy(ann.typeExpr.typeVal(scope, "type annnotation"))
-    } else {
-      val.failSyntax("definition requires explicit type annotation")
-    }
   }
 }
 

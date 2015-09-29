@@ -1,39 +1,6 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-struct ScopeRecord {
-  typealias _Type = Type // Type type gets masked by the variant name.
-
-  enum Kind {
-    case Lazy(_Type)
-    case Space(Scope)
-    case Type(_Type)
-    case Val(_Type)
-    
-    var kindDesc: String {
-      switch self {
-      case Lazy:  return "lazy value"
-      case Space: return "namespace"
-      case Type:  return "type"
-      case Val:   return "value"
-      }
-    }
-  }
-  
-  let sym: Sym?
-  let hostName: String
-  let isFwd: Bool
-  let kind: Kind
-  
-  init(sym: Sym?, hostName: String, isFwd: Bool, kind: Kind) {
-    self.sym = sym
-    self.hostName = hostName
-    self.isFwd = isFwd
-    self.kind = kind
-  }
-}
-
-
 class Scope {
   let pathNames: [String]
   let hostPrefix: String
@@ -41,6 +8,7 @@ class Scope {
   
   var bindings: [String: ScopeRecord] = [:]
   var defs: [String: Def] = [:]
+  var methods: [String: [Method]] = [:]
   var usedDefs: [Def] = []
   
   init(pathNames: [String], parent: Scope?) {
@@ -76,12 +44,19 @@ class Scope {
     bindings[key] = ScopeRecord(sym: nil, hostName: key, isFwd: false, kind: .Val(type))
   }
   
+  func extendRecord(record: ScopeRecord, method: Method) {
+    switch record.kind {
+    case .PolyFn: break
+    default: method.identifier.failType("definition is not extensible", notes: (record.sym, "definition is here"))
+    }
+  }
+  
   func getRecord(sym: Sym) -> ScopeRecord? {
     if let r = bindings[sym.name] {
       return r
     }
     if let def = defs[sym.name] {
-      let r = addRecord(def.sym, isFwd: true, kind: def.scopeRecordKind(self))
+      let r = addRecord(sym, isFwd: true, kind: def.scopeRecordKind(self))
       usedDefs.append(def)
       return r
     }

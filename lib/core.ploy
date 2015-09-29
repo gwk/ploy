@@ -1,0 +1,8 @@
+
+in GLOBAL
+
+#poly-fn add;
+
+#method add (Int Int)%Int add-Int.$;
+
+;

@@ -353,13 +353,6 @@ class Src: CustomStringConvertible {
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
   }
 
-  func parseMethods(sym: Sym) -> Form {
-    let identifier: Identifier = parseForm(sym.syn.end, "`methods` form", "poly-fn name or path identifier")
-    var fns: [Expr] = []
-    let end = parseForms(&fns, identifier.syn.end, "`methods` form", "function value")
-    return Methods(synForSemicolon(sym, end, "`methods` form"), identifier: identifier, fns: fns)
-  }
-  
   func parsePolyFn(sym: Sym) -> Form {
     sym.failSyntax("unimplemented")
   }

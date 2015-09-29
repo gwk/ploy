@@ -16,7 +16,9 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
     sym.writeTo(&target, depth + 1)
     typeExpr.writeTo(&target, depth + 1)
   }
-  
+
+  // MARK: Def
+
   func compileDef(em: Emit, _ scope: Scope) {
     scope.addRecord(sym, isFwd: false, kind: .Val(typeExpr.typeVal(scope, "host value declaration")))
   }

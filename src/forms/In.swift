@@ -20,15 +20,14 @@ class In: _Form { // in statement: `in module-name statements…;`.
   }
   
   func defineDefs(space: Scope) {
-    for d in defs {
-      if let existing = space.defs[d.sym.name] {
-        sym.failRedef(existing.sym)
-      }
-      else {
-        space.defs[d.sym.name] = d
+    for def in defs {
+      if let method = def as? Method {
+        fatalError("method definition not implemented: \(method)")
+      } else if let existing = space.defs[def.sym.name] {
+        def.sym.failRedef(existing.sym)
+      } else {
+        space.defs[def.sym.name] = def
       }
     }
   }
 }
-
-

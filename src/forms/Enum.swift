@@ -23,6 +23,8 @@ class Enum: _Form, Def, Stmt { // enum declaration: `enum E variants…;`.
     fatalError()
   }
   
+  // MARK: Def
+
   func compileDef(em: Emit, _ scope: Scope) {
     compileStmt(em, 0, scope)
   }

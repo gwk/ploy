@@ -48,7 +48,11 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
     return compileSym(em, depth, scope.record(self), expType, isTail: isTail)
   }
-  
+
+  // MARK: Identifier
+
+  func record(sym: Sym, scope: Scope) -> ScopeRecord { return scope.record(self) }
+
   // MARK: TypeExpr
   
   func typeVal(scope: Scope, _ subj: String) -> Type {
@@ -84,6 +88,8 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
       type = t
       let s = "\(scopeRecord.hostName)__acc()"
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
+    case .PolyFn(_):
+      failType("expected a value; `\(name)` refers to a poly-fn (UNIMPLEMENTD)")
     case .Space(_):
       failType("expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.
     case .Type(_):

@@ -13,7 +13,9 @@ class HostType: _Form, Def { // host type declaration: `host-type sym;`.
     super.writeTo(&target, depth)
     sym.writeTo(&target, depth + 1)
   }
-  
+
+  // MARK: Def
+
   func compileDef(em: Emit, _ scope: Scope) {
     scope.addRecord(sym, isFwd: false, kind: .Type(TypeDecl(sym: sym)))
   }

@@ -16,13 +16,23 @@ protocol Accessor: Form, CustomStringConvertible {
   func compileAccess(em: Emit, _ depth: Int, accesseeType: Type) -> Type
 }
 
+
+protocol Def: Form {
+  var sym: Sym { get }
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind
+  func compileDef(em: Emit, _ scope: Scope)
+}
+
+
 protocol Expr: Form {
   func compileExpr(em: Emit, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type
 }
 
+
 protocol Identifier: Form {
-  
+  func record(sym: Sym, scope: Scope) -> ScopeRecord
 }
+
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
   func typeVal(scope: Scope, _ subj: String) -> Type
@@ -31,13 +41,6 @@ protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
 
 protocol Stmt: Form {
   func compileStmt(em: Emit, _ depth: Int, _ scope: Scope)
-}
-
-
-protocol Def: Form {
-  var sym: Sym { get }
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind
-  func compileDef(em: Emit, _ scope: Scope)
 }
 
 

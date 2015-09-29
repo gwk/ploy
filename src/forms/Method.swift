@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Method: _Form { // single method definition.
+class Method: _Form, Def { // method definition.
   let identifier: Identifier
   let sig: Sig
   let body: Do
@@ -18,5 +18,17 @@ class Method: _Form { // single method definition.
     identifier.writeTo(&target, depth + 1)
     sig.writeTo(&target, depth + 1)
     body.writeTo(&target, depth + 1)
+  }
+
+  // MARK: Def
+
+  var sym: Sym { fatalError() } // a method is not an independent definition; handled specially.
+
+  func compileDef(em: Emit, _ scope: Scope) {
+    fatalError()
+  }
+
+  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+    fatalError()
   }
 }
