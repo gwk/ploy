@@ -23,17 +23,14 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   let host_src = InFile(path: hostPath).read()
   em.str(0, host_src)
   em.str(0, "")
-  
-  for i in ins {
-    let space = global.getOrCreateSpace([i.sym])
-    i.defineDefs(space)
-  }
+
+  globalSpace.defineAllDefs(ins)
   
   em.str(0, "let _main = function(){ // main.")
-  main.compileBody(em, 1, global.makeChild(), typeInt, isTail: true)
+  main.compileBody(em, 1, globalSpace.makeChild(), typeInt, isTail: true)
   em.append("};")
   
-  for space in global.spaces {
+  for space in globalSpace.spaces {
     if space.usedDefs.isEmpty {
       continue
     }

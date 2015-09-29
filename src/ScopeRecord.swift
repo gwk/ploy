@@ -3,12 +3,13 @@
 
 struct ScopeRecord {
   // types get masked by the variant names.
+  typealias _Space = Space
   typealias _Type = Type
-  
+
   enum Kind {
     case Lazy(_Type)
     case PolyFn(PolyFnRecord)
-    case Space(Scope)
+    case Space(_Space)
     case Type(_Type)
     case Val(_Type)
     

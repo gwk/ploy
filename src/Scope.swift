@@ -7,9 +7,6 @@ class Scope {
   let parent: Scope?
   
   var bindings: [String: ScopeRecord] = [:]
-  var defs: [String: Def] = [:]
-  var methods: [String: [Method]] = [:]
-  var usedDefs: [Def] = []
   
   init(pathNames: [String], parent: Scope?) {
     self.pathNames = pathNames
@@ -44,23 +41,8 @@ class Scope {
     bindings[key] = ScopeRecord(sym: nil, hostName: key, isFwd: false, kind: .Val(type))
   }
   
-  func extendRecord(record: ScopeRecord, method: Method) {
-    switch record.kind {
-    case .PolyFn: break
-    default: method.identifier.failType("definition is not extensible", notes: (record.sym, "definition is here"))
-    }
-  }
-  
   func getRecord(sym: Sym) -> ScopeRecord? {
-    if let r = bindings[sym.name] {
-      return r
-    }
-    if let def = defs[sym.name] {
-      let r = addRecord(sym, isFwd: true, kind: def.scopeRecordKind(self))
-      usedDefs.append(def)
-      return r
-    }
-    return nil
+    return bindings[sym.name]
   }
   
   func record(sym: Sym) -> ScopeRecord {

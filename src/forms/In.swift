@@ -18,16 +18,4 @@ class In: _Form { // in statement: `in module-name statements…;`.
       d.writeTo(&target, depth + 1)
     }
   }
-  
-  func defineDefs(space: Scope) {
-    for def in defs {
-      if let method = def as? Method {
-        fatalError("method definition not implemented: \(method)")
-      } else if let existing = space.defs[def.sym.name] {
-        def.sym.failRedef(existing.sym)
-      } else {
-        space.defs[def.sym.name] = def
-      }
-    }
-  }
 }

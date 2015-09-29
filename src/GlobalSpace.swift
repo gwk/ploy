@@ -1,9 +1,9 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class GlobalScope: Scope {
+class GlobalSpace: Space {
 
-  var spaces: [Scope] = []
+  var spaces: [Space] = []
   
   init() {
     super.init(pathNames: [], parent: nil)
@@ -13,8 +13,8 @@ class GlobalScope: Scope {
     }
   }
   
-  func getOrCreateSpace(syms: [Sym]) -> Scope {
-    var space: Scope = self
+  func getOrCreateSpace(syms: [Sym]) -> Space {
+    var space: Space = self
     for (i, sym) in syms.enumerate() {
       if let r = space.bindings[sym.name] {
         switch r.kind {
@@ -23,7 +23,7 @@ class GlobalScope: Scope {
         default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
         }
       } else { // create.
-        let next = Scope(pathNames: syms[0...i].map { $0.name }, parent: self)
+        let next = Space(pathNames: syms[0...i].map { $0.name }, parent: self)
         spaces.append(next)
         space.bindings[sym.name] = ScopeRecord(sym: nil, hostName: space.hostPrefix + sym.hostName, isFwd: false, kind: .Space(next))
         space = next
@@ -31,7 +31,16 @@ class GlobalScope: Scope {
     }
     return space
   }
+
+  func defineAllDefs(ins: [In]) {
+    for i in ins {
+      let space = getOrCreateSpace([i.sym])
+      for def in i.defs {
+        space.declare(def)
+      }
+    }
+  }
 }
 
 
-let global = GlobalScope()
+let globalSpace = GlobalSpace()

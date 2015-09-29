@@ -58,10 +58,11 @@
 		EC98DE851B7E848E00557D35 /* Type.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC98DE841B7E848E00557D35 /* Type.swift */; };
 		ECAE89171B693B46002AE9B9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECAE89161B693B46002AE9B9 /* main.swift */; };
 		ECB639831B83CA3600138A8C /* fs.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB639821B83CA3600138A8C /* fs.swift */; };
-		ECB639851B83D77000138A8C /* GlobalScope.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB639841B83D77000138A8C /* GlobalScope.swift */; };
+		ECB639851B83D77000138A8C /* GlobalSpace.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB639841B83D77000138A8C /* GlobalSpace.swift */; };
 		ECDA37151B7EB16200939000 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37141B7EB16200939000 /* File.swift */; };
 		ECDA37171B80FE5200939000 /* HostType.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37161B80FE5200939000 /* HostType.swift */; };
 		ECDA37191B82D6F500939000 /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37181B82D6F500939000 /* Path.swift */; };
+		ECFF3E591BBB35660086895D /* Space.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECFF3E581BBB35660086895D /* Space.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -130,10 +131,11 @@
 		ECAE89051B69391F002AE9B9 /* ploy-swift */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ploy-swift"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECAE89161B693B46002AE9B9 /* main.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		ECB639821B83CA3600138A8C /* fs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = fs.swift; path = qk/src/core/fs.swift; sourceTree = "<group>"; };
-		ECB639841B83D77000138A8C /* GlobalScope.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalScope.swift; sourceTree = "<group>"; };
+		ECB639841B83D77000138A8C /* GlobalSpace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalSpace.swift; sourceTree = "<group>"; };
 		ECDA37141B7EB16200939000 /* File.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = File.swift; path = qk/src/core/File.swift; sourceTree = "<group>"; };
 		ECDA37161B80FE5200939000 /* HostType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HostType.swift; sourceTree = "<group>"; };
 		ECDA37181B82D6F500939000 /* Path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
+		ECFF3E581BBB35660086895D /* Space.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Space.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -228,12 +230,13 @@
 				EC6523771B7BD2BF00CAA454 /* forms */,
 				EC1FE8F31B6BE31200112BB0 /* Emit.swift */,
 				EC5BDF1D1B7A40EC00054159 /* Form.swift */,
-				ECB639841B83D77000138A8C /* GlobalScope.swift */,
+				ECB639841B83D77000138A8C /* GlobalSpace.swift */,
 				ECAE89161B693B46002AE9B9 /* main.swift */,
 				EC6108311BB441B90022691F /* PolyFnRecord.swift */,
 				EC8E68971B6986F00080F316 /* Pos.swift */,
 				EC98DE801B7E23B500557D35 /* Scope.swift */,
 				EC61082F1BB441A80022691F /* ScopeRecord.swift */,
+				ECFF3E581BBB35660086895D /* Space.swift */,
 				EC8E68991B698B660080F316 /* Src.swift */,
 				EC8E689B1B698C110080F316 /* Syn.swift */,
 				EC98DE841B7E848E00557D35 /* Type.swift */,
@@ -300,6 +303,7 @@
 			files = (
 				EC6523981B7BD2BF00CAA454 /* CmpdType.swift in Sources */,
 				EC4CA8D71BB0ABC300DB50BC /* Method.swift in Sources */,
+				ECFF3E591BBB35660086895D /* Space.swift in Sources */,
 				EC65239E1B7BD2BF00CAA454 /* In.swift in Sources */,
 				EC6108301BB441A80022691F /* ScopeRecord.swift in Sources */,
 				EC6523A61B7BD2BF00CAA454 /* Struct.swift in Sources */,
@@ -342,7 +346,7 @@
 				EC6523A21B7BD2BF00CAA454 /* Pub.swift in Sources */,
 				EC1FE8ED1B6BE20C00112BB0 /* Dictionary.swift in Sources */,
 				EC1FE8EE1B6BE20C00112BB0 /* Int.swift in Sources */,
-				ECB639851B83D77000138A8C /* GlobalScope.swift in Sources */,
+				ECB639851B83D77000138A8C /* GlobalSpace.swift in Sources */,
 				EC97D70F1B868009001D9ABB /* Arg.swift in Sources */,
 				EC65239A1B7BD2BF00CAA454 /* Enum.swift in Sources */,
 				EC6523A31B7BD2BF00CAA454 /* Reify.swift in Sources */,
