@@ -16,7 +16,8 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     }
   }
   
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    let em = scope.em
     var retType = expType
     em.str(depth, isTail ? "{{v:" : "{")
     if expType === typeAny {
@@ -24,7 +25,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
       for (i, arg) in args.enumerate() {
         let hostName = (arg.label?.name.dashToUnder).or("\"\(i)\"")
         em.str(depth, " \(hostName):")
-        let type = arg.compileArg(em, depth + 1, scope, typeAny)
+        let type = arg.compileArg(depth + 1, scope, typeAny)
         em.append(",")
         pars.append(TypePar(index: i, label: arg.label, type: type, form: nil))
       }
@@ -32,7 +33,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     } else if let expCmpd = expType as? TypeCmpd {
       var argIndex = 0
       for par in expCmpd.pars {
-        self.compilePar(em, depth, scope, par: par, argIndex: &argIndex)
+        self.compilePar(depth, scope, par: par, argIndex: &argIndex)
       }
       if argIndex != expCmpd.pars.count {
         failType("expected \(expCmpd.pars.count) arguments; received \(argIndex)")
@@ -44,7 +45,8 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     return retType
   }
   
-  func compilePar(em: Emitter, _ depth: Int, _ scope: Scope, par: TypePar, inout argIndex: Int) {
+  func compilePar(depth: Int, _ scope: LocalScope, par: TypePar, inout argIndex: Int) {
+    let em = scope.em
     em.str(depth, " \(par.hostName):")
     if argIndex < args.count {
       let arg = args[argIndex]
@@ -57,10 +59,10 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
           argLabel.failType("argument label does not match unlabeled parameter", notes: (par.form, "unlabeled parameter"))
         }
       }
-      arg.compileArg(em, depth + 1, scope, par.type)
+      arg.compileArg(depth + 1, scope, par.type)
       argIndex++
     } else if let dflt = par.form?.dflt {
-      dflt.compileExpr(em, depth + 1, scope, par.type, isTail: false)
+      dflt.compileExpr(depth + 1, scope, par.type, isTail: false)
     } else {
       failType("missing argument for parameter", notes: (par.form, "parameter here"))
     }

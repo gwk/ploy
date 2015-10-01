@@ -16,12 +16,12 @@ class PolyFn: _Form, Def {
 
   // MARK: Def
 
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     return .PolyFn(PolyFnRecord())
   }
 
-  func compileDef(em: Emitter, _ scope: Scope) {
-    
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    return .PolyFn(PolyFnRecord())
   }
 
 }

@@ -2,18 +2,19 @@
 
 
 class Emitter {
-  let parent: Emitter?
   let file: OutFile
   var lines: [String] = []
 
-  init(parent: Emitter?, file: OutFile) {
-    self.parent = parent
+  init(file: OutFile) {
     self.file = file
   }
 
   deinit {
-    for line in lines {
-      file.write(line)
+    if !lines.isEmpty {
+      for line in lines {
+        file.write(line)
+        file.write("\n")
+      }
       file.write("\n")
     }
   }
@@ -29,31 +30,20 @@ class Emitter {
 
 
 func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
-  let em = Emitter(parent: nil, file: file)
-  em.str(0, "#!/usr/bin/env iojs")
-  em.str(0, "\"use strict\";\n")
-  em.str(0, "(function(){ // ploy.")
-  em.str(0, "// host.js.\n")
+  file.writeL("#!/usr/bin/env iojs")
+  file.writeL("\"use strict\";\n")
+  file.writeL("(function(){ // ploy.")
+  file.writeL("// host.js.\n")
   let host_src = InFile(path: hostPath).read()
-  em.str(0, host_src)
-  em.str(0, "")
+  file.writeL(host_src)
+  file.writeL("")
 
-  globalSpace.defineAllDefs(ins)
-  
-  em.str(0, "let _main = function(){ // main.")
-  main.compileBody(em, 1, globalSpace.makeChild(), typeInt, isTail: true)
-  em.append("};")
-  
-  for space in globalSpace.spaces {
-    if space.usedDefs.isEmpty {
-      continue
-    }
-    em.str(0, "\n// in \(space.name).")
-    for def in space.usedDefs {
-      def.compileDef(em, space)
-      em.append(";")
-    }
-  }
+  let globalSpace = Space(pathNames: ["GLOBAL"], parent: nil, file: file)
 
-  em.str(0, "\nPROC__exit(_tramp(_main()))})()")
+  globalSpace.setupGlobal(ins)
+  
+  file.writeL("let _main = function(){ // main.")
+  main.compileBody(1, LocalScope(parent: globalSpace, em: globalSpace.makeEm()), typeInt, isTail: true)
+  file.writeL("};")
+  file.writeL("\nPROC__exit(_tramp(_main()))})()")
 }

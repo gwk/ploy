@@ -19,18 +19,18 @@ protocol Accessor: Form, CustomStringConvertible {
 
 protocol Def: Form {
   var sym: Sym { get }
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind
-  func compileDef(em: Emitter, _ scope: Scope)
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind
+  func compileDef(space: Space) -> ScopeRecord.Kind
 }
 
 
 protocol Expr: Form {
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type
 }
 
 
 protocol Identifier: Form {
-  func record(sym: Sym, scope: Scope) -> ScopeRecord
+  func record(scope: Scope, _ sym: Sym) -> ScopeRecord
 }
 
 
@@ -40,7 +40,7 @@ protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
 
 
 protocol Stmt: Form {
-  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope)
+  func compileStmt(depth: Int, _ scope: LocalScope)
 }
 
 

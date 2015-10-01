@@ -19,17 +19,18 @@ class Enum: _Form, Def, Stmt { // enum declaration: `enum E variants…;`.
     }
   }
   
-  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
+  func compileStmt(depth: Int, _ scope: LocalScope) {
     fatalError()
   }
   
   // MARK: Def
 
-  func compileDef(em: Emitter, _ scope: Scope) {
-    compileStmt(em, 0, scope)
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    compileStmt(0, LocalScope(parent: space, em: space.makeEm()))
+    return .Type(TypeDecl(sym: sym))
   }
   
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     return .Type(TypeDecl(sym: sym))
   }
 }

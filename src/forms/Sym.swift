@@ -45,13 +45,15 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   
   // MARK: Expr
   
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
-    return compileSym(em, depth, scope.record(self), expType, isTail: isTail)
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    return compileSym(scope.em, depth, scope.record(self), expType, isTail: isTail)
   }
 
   // MARK: Identifier
 
-  func record(sym: Sym, scope: Scope) -> ScopeRecord { return scope.record(self) }
+  func record(scope: Scope, _ sym: Sym) -> ScopeRecord {
+    return scope.record(self)
+  }
 
   // MARK: TypeExpr
   
@@ -88,6 +90,8 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
       type = t
       let s = "\(scopeRecord.hostName)__acc()"
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
+    case .Fwd():
+      failType("expected a value; `\(name)` refers to a forward declaration (INTERNAL ERROR?)")
     case .PolyFn(_):
       failType("expected a value; `\(name)` refers to a poly-fn (UNIMPLEMENTD)")
     case .Space(_):

@@ -19,7 +19,8 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     target.write("\"\n")
   }
   
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    let em = scope.em
     if !expType.accepts(typeStr) {
       failType("string literal is not convertible to \(expType)")
     }

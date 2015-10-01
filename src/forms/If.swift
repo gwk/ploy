@@ -21,16 +21,17 @@ class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
     }
   }
   
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    let em = scope.em
     em.str(depth, "(")
     for c in cases {
-      c.condition.compileExpr(em, depth + 1, scope, typeBool, isTail: false)
+      c.condition.compileExpr(depth + 1, scope, typeBool, isTail: false)
       em.append(" ?")
-      c.consequence.compileExpr(em, depth + 1, scope, expType, isTail: isTail)
+      c.consequence.compileExpr(depth + 1, scope, expType, isTail: isTail)
       em.append(" :")
     }
     if let dflt = dflt {
-      dflt.compileExpr(em, depth + 1, scope, expType, isTail: isTail)
+      dflt.compileExpr(depth + 1, scope, expType, isTail: isTail)
     } else if expType !== typeVoid {
       failType("expected type \(expType); `if` has no default")
     } else {
@@ -40,8 +41,8 @@ class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
     return expType
   }
   
-  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
-    compileExpr(em, depth, scope, typeAny, isTail: false)
+  func compileStmt(depth: Int, _ scope: LocalScope) {
+    compileExpr(depth, scope, typeAny, isTail: false)
   }
 }
 

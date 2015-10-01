@@ -19,11 +19,11 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
 
   // MARK: Def
 
-  func compileDef(em: Emitter, _ scope: Scope) {
-    scope.addRecord(sym, isFwd: false, kind: .Val(typeExpr.typeVal(scope, "host value declaration")))
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    return .Val(typeExpr.typeVal(space, "host value declaration"))
   }
   
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
-    return .Val(typeExpr.typeVal(scope, "host value type"))
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
+    fatalError("internal error: HostVal cannot be recursive")
   }
 }

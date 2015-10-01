@@ -19,17 +19,17 @@ class Struct: _Form, Def, Stmt { // struct declaration: `struct S fields…;`.
     }
   }
 
-  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
+  func compileStmt(depth: Int, _ scope: LocalScope) {
     fatalError()
   }
 
   // MARK: Def
 
-  func compileDef(em: Emitter, _ scope: Scope) {
-    fatalError()
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    return .Type(TypeDecl(sym: sym))
   }
   
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     return .Type(TypeDecl(sym: sym))
   }
 }

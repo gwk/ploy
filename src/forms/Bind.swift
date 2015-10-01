@@ -23,35 +23,37 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     val.writeTo(&target, depth + 1)
   }
   
-  func compileStmt(em: Emitter, _ depth: Int, _ scope: Scope) {
+  func compileStmt(depth: Int, _ scope: LocalScope) {
+    let em = scope.em
     em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
-    let type = val.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
-    scope.addRecord(sym, isFwd: false, kind: .Val(type))
+    let type = val.compileExpr(depth + 1, scope, typeAny, isTail: false)
+    scope.addRecord(sym, kind: .Val(type))
   }
 
   // MARK: Def
 
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     if let ann = val as? Ann {
-      return .Lazy(ann.typeExpr.typeVal(scope, "type annnotation"))
+      return .Lazy(ann.typeExpr.typeVal(space, "type annnotation"))
     } else {
       val.failSyntax("definition requires explicit type annotation")
     }
   }
 
-  func compileDef(em: Emitter, _ scope: Scope) {
-    let fullName = "\(scope.name)/\(sym.name)"
-    let hostName = "\(scope.hostPrefix)\(sym.hostName)"
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    let em = space.makeEm()
+    let fullName = "\(space.name)/\(sym.name)"
+    let hostName = "\(space.hostPrefix)\(sym.hostName)"
     // TODO: decide if lazy def is necessary.
     em.str(0, "var \(hostName)__acc = function() {")
     em.str(0, " \(hostName)__acc = function() {")
     em.str(0, "  throw \"error: lazy value '\(fullName)' recursively referenced during initialization.\" };")
     em.str(0, " let val =")
-    let type = val.compileExpr(em, 1, scope, typeAny, isTail: false) // TODO: new scope?
+    let type = val.compileExpr(1, LocalScope(parent: space, em: em), typeAny, isTail: false)
     em.append(";")
     em.str(0, " \(hostName)__acc = function() { return val };")
     em.str(0, " return val; }")
-    scope.addRecord(sym, isFwd: false, kind: .Lazy(type))
+    return .Lazy(type)
   }
 }
 

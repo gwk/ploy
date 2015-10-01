@@ -23,9 +23,10 @@ class Acc: _Form, Expr { // accessor: `field@val`.
     accessee.writeTo(&target, depth + 1)
   }
 
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    let em = scope.em
     em.str(depth, isTail ? "{v:" : "(")
-    let accesseeType = accessee.compileExpr(em, depth + 1, scope, typeAny, isTail: false)
+    let accesseeType = accessee.compileExpr(depth + 1, scope, typeAny, isTail: false)
     let retType = accessor.compileAccess(em, depth + 1, accesseeType: accesseeType)
     em.append(isTail ? "}" : ")")
     return retType

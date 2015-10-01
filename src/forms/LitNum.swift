@@ -39,7 +39,8 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
     }
   }
 
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    let em = scope.em
     // TODO: typecheck.
     em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)
     return typeInt

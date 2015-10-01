@@ -7,6 +7,7 @@ struct ScopeRecord {
   typealias _Type = Type
 
   enum Kind {
+    case Fwd()
     case Lazy(_Type)
     case PolyFn(PolyFnRecord)
     case Space(_Space)
@@ -15,24 +16,23 @@ struct ScopeRecord {
     
     var kindDesc: String {
       switch self {
-      case Lazy:  return "lazy value"
+      case Fwd: return "forward"
+      case Lazy: return "lazy value"
       case PolyFn: return "polyfunction"
       case Space: return "namespace"
-      case Type:  return "type"
-      case Val:   return "value"
+      case Type: return "type"
+      case Val: return "value"
       }
     }
   }
   
-  let sym: Sym?
+  let sym: Sym? // bindings intrinsic to the language are not associated with any source location.
   let hostName: String
-  let isFwd: Bool
   let kind: Kind
   
-  init(sym: Sym?, hostName: String, isFwd: Bool, kind: Kind) {
+  init(sym: Sym?, hostName: String, kind: Kind) {
     self.sym = sym
     self.hostName = hostName
-    self.isFwd = isFwd
     self.kind = kind
   }
 }

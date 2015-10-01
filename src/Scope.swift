@@ -13,36 +13,36 @@ class Scope {
     self.hostPrefix = pathNames.isEmpty ? "" : (pathNames.joinWithSeparator("__") + "__")
     self.parent = parent
   }
-  
+
+  func getRecord(sym: Sym) -> ScopeRecord? { fatalError() }
+
   var name: String { return pathNames.joinWithSeparator("/") }
   
-  func makeChild(bindings: [String:Type] = [:]) -> Scope {
-    return Scope.init(pathNames: [], parent: self)
+  var globalSpace: Space {
+    var scope = self
+    while let p = scope.parent {
+      scope = p
+    }
+    return scope as! Space
   }
-  
-  func addRecord(sym: Sym, isFwd: Bool, kind: ScopeRecord.Kind) -> ScopeRecord {
+
+  func addRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
     if let existing = bindings[sym.name] {
-      if existing.isFwd {
-        assert(!isFwd)
+      if case .Fwd = existing.kind {
         assert(existing.sym!.name == sym.name)
-        //assert(existing.kind == kind) // would be nice to have, but equality of Kind enum is a pain to implement.
         bindings.removeValueForKey(sym.name)
       } else {
         sym.failRedef(existing.sym)
       }
     }
-    let r = ScopeRecord(sym: sym, hostName: hostPrefix + sym.hostName, isFwd: isFwd, kind: kind)
+    let r = ScopeRecord(sym: sym, hostName: hostPrefix + sym.hostName, kind: kind)
     bindings[sym.name] = r
     return r
   }
   
   func addValRecord(key: String, type: Type) {
     assert(!bindings.contains(key))
-    bindings[key] = ScopeRecord(sym: nil, hostName: key, isFwd: false, kind: .Val(type))
-  }
-  
-  func getRecord(sym: Sym) -> ScopeRecord? {
-    return bindings[sym.name]
+    bindings[key] = ScopeRecord(sym: nil, hostName: key, kind: .Val(type))
   }
   
   func record(sym: Sym) -> ScopeRecord {
@@ -56,16 +56,18 @@ class Scope {
   }
   
   func record(path: Path) -> ScopeRecord {
-    var scope = self
+    var space: Space = globalSpace
     for (i, sym) in path.syms.enumerate() {
-      let r = scope.record(sym)
+      guard let r = space.getRecord(sym) else {
+        sym.failUndef()
+      }
       if i == path.syms.lastIndex! {
         return r
       }
-      switch r.kind {
-      case .Space(let space):
-        scope = space
-      default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
+      if case .Space(let s) = r.kind {
+        space = s
+      } else {
+        sym.failType("expected a space; found a \(r.kind.kindDesc)")
       }
     }
     fatalError()

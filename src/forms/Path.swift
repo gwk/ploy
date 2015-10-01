@@ -27,13 +27,13 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
 
   // MARK: Expr
 
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
-    return syms.last!.compileSym(em, depth, scope.record(self), expType, isTail: isTail)
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    return syms.last!.compileSym(scope.em, depth, scope.record(self), expType, isTail: isTail)
   }
 
   // MARK: Identifier
 
-  func record(sym: Sym, scope: Scope) -> ScopeRecord { return scope.record(self) }
+  func record(scope: Scope, _ sym: Sym) -> ScopeRecord { return scope.record(self) }
 
   // MARK: TypeExpr
 

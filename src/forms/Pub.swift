@@ -18,12 +18,12 @@ class Pub: _Form, Def { // public modifier: `pub expr;`.
 
   var sym: Sym { return def.sym }
   
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
-    return def.scopeRecordKind(scope)
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
+    return def.scopeRecordKind(space)
   }
 
-  func compileDef(em: Emitter, _ scope: Scope) {
-    fatalError()
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    return def.scopeRecordKind(space)
   }
 }
 

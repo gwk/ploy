@@ -24,11 +24,11 @@ class Method: _Form, Def { // method definition.
 
   var sym: Sym { fatalError() } // a method is not an independent definition; handled specially.
 
-  func compileDef(em: Emitter, _ scope: Scope) {
+  func compileDef(space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
 
-  func scopeRecordKind(scope: Scope) -> ScopeRecord.Kind {
+  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
 }

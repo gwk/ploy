@@ -14,9 +14,10 @@ class Paren: _Form, Expr { // parenthesized expression: `(a)`.
     expr.writeTo(&target, depth + 1)
   }
   
-  func compileExpr(em: Emitter, _ depth: Int, _ scope: Scope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    let em = scope.em
     em.str(depth, "(")
-    let retType = expr.compileExpr(em, depth + 1, scope, expType, isTail: isTail)
+    let retType = expr.compileExpr(depth + 1, scope, expType, isTail: isTail)
     em.append(")")
     return retType
   }
