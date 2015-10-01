@@ -164,7 +164,8 @@ def check_file_exp(path, mode, exp):
     args = [exp_path, path]
     diff_cmd = 'git diff --histogram --no-index --no-prefix --no-renames --exit-code --color'.split() + args
     outSL(*diff_cmd)
-    runC(diff_cmd)
+    code = runC(diff_cmd, exp=None)
+    return code == 0
   else:
     outSL('cat', path)
     with open(path) as f:

@@ -37,12 +37,12 @@ def _decode(s):
   return s if s is None else s.decode('utf-8')
 
 
-def run_cmd(cmd, cwd=None, stdin=None, out=None, err=None, env=None, exp=0):
+def run_cmd(cmd, cwd, stdin, out, err, env, exp):
   '''
   run a command and return (exit_code, std_out, std_err).
   the underlying Subprocess shell option is not supported
   because the rules regarding splitting strings are complex.
-  user code is clearer by just specifying the complete sh command,
+  user code is made clearer by just specifying the complete sh command,
   which is always split by shlex.split.
   '''
   if isinstance(cmd, str):
@@ -82,54 +82,54 @@ def run_cmd(cmd, cwd=None, stdin=None, out=None, err=None, env=None, exp=0):
   return c, _decode(p_out), _decode(p_err)
 
 
-def runCOE(cmd, stdin=None, env=None, exp=0):
-  return run_cmd(cmd, stdin, PIPE, PIPE, env, exp)
+def runCOE(cmd, cwd=None, stdin=None, env=None, exp=0):
+  return run_cmd(cmd, cwd, stdin, PIPE, PIPE, env, exp)
 
 
-def runC(cmd, stdin=None, out=None, err=None, env=None, exp=None):
+def runC(cmd, cwd=None, stdin=None, out=None, err=None, env=None, exp=None):
   'run a command and return exit code.'
   assert out is not PIPE
   assert err is not PIPE
-  c, o, e = run_cmd(cmd, stdin, out, err, env, exp)
+  c, o, e = run_cmd(cmd, cwd, stdin, out, err, env, exp)
   assert o is None
   assert e is None
   return c
 
 
-def runCO(cmd, stdin=None, err=None, env=None, exp=None):
+def runCO(cmd, cwd=None, stdin=None, err=None, env=None, exp=None):
   'run a command and return exit code, std out.'
   assert err is not PIPE
-  c, o, e = run_cmd(cmd, stdin, PIPE, err, env, exp)
+  c, o, e = run_cmd(cmd, cwd, stdin, PIPE, err, env, exp)
   assert e is None
   return c, o
 
 
 
-def runCE(cmd, stdin=None, out=None, env=None, exp=None):
+def runCE(cmd, cwd=None, stdin=None, out=None, env=None, exp=None):
   'run a command and return exit code, std err.'
   assert out is not PIPE
-  c, o, e = run_cmd(cmd, stdin, out, PIPE, env, exp)
+  c, o, e = run_cmd(cmd, cwd, stdin, out, PIPE, env, exp)
   assert o is None
   return c, e
 
 
-def runOE(cmd, stdin=None, env=None, exp=0):
+def runOE(cmd, cwd=None, stdin=None, env=None, exp=0):
   'run a command and return (stdout, stderr) as strings.'
-  c, o, e = run_cmd(cmd, stdin, PIPE, PIPE, env, exp)
+  c, o, e = run_cmd(cmd, cwd, stdin, PIPE, PIPE, env, exp)
   return o, e
 
 
-def runO(cmd, stdin=None, err=None, env=None, exp=0):
+def runO(cmd, cwd=None, stdin=None, err=None, env=None, exp=0):
   'run a command and return stdout as a string.'
   assert err is not PIPE
-  c, o, e = run_cmd(cmd, stdin, PIPE, err, env, exp)
+  c, o, e = run_cmd(cmd, cwd, stdin, PIPE, err, env, exp)
   assert e is None
   return o
 
 
-def runE(cmd, stdin=None, out=None, env=None, exp=0):
+def runE(cmd, cwd=None, stdin=None, out=None, env=None, exp=0):
   'run a command and return stderr as a string.'
   assert out is not PIPE
-  c, o, e = run_cmd(cmd, stdin, out, PIPE, env, exp)
+  c, o, e = run_cmd(cmd, cwd, stdin, out, PIPE, env, exp)
   assert o is None
   return e
