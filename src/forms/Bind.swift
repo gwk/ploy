@@ -13,8 +13,8 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
   
   static func mk(l: Form, _ r: Form) -> Form {
     return Bind(Syn(l.syn, r.syn),
-      sym: castForm(l, "binding", ""),
-      val: castForm(r, "binding", ""))
+      sym: castForm(l, "binding", "name symbol"),
+      val: castForm(r, "binding", "value expression"))
   }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
