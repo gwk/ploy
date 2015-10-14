@@ -35,6 +35,6 @@ class Syn: CustomStringConvertible {
     } else {
       endStr = "-\(visEnd.line + 1):\(visEnd.col)"
     }
-    return "\(pos.line + 1):\(pos.col + 1)\(endStr)"
+    return "\(src.path.withoutPathDir.withoutPathExt):\(pos.line + 1):\(pos.col + 1)\(endStr)"
   }
 }

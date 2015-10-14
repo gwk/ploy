@@ -1,16 +1,16 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Type: CustomStringConvertible { // TODO: Hashable?
+class Type: CustomStringConvertible, Hashable {
   
-  //var hashValue: Int { return ObjectIdentifier(self).hashValue }
+  var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var description: String { fatalError() }
   
   func accepts(actual: Type) -> Bool { return actual === self }
 }
 
-//func ==(l: Type, r: Type) -> Bool { return l === r }
+func ==(l: Type, r: Type) -> Bool { return l === r }
 
 
 class TypeAny: Type {
@@ -115,3 +115,5 @@ let intrinsicTypes = [
 func anySigReturning(ret: Type) -> Type {
   return TypeSig(par: typeAny, ret: ret)
 }
+
+let typeAnySig = TypeSig(par: typeAny, ret: typeAny)

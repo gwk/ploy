@@ -10,7 +10,7 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
     super.init(syn)
   }
   
-  var description: String { return String(val) }
+  //var description: String { return String(val) }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     target.write(String(indent: depth))

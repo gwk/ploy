@@ -1,8 +1,8 @@
 
-in GLOBAL
+in ROOT
 
 #poly-fn add;
 
-#method add (Int Int)%Int add-Int.$;
+#method add <Int Int>%Int add-Int.$;
 
 ;

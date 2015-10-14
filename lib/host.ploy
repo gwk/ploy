@@ -7,14 +7,26 @@ host-val write-Int  <file:File int:Int>%<>;
 host-val write-Str  <file:File str:Str>%<>;
 ;
 
-in GLOBAL
+in ROOT
 host-val true Bool;
 host-val false Bool;
 
 host-val dec-Int Int%Int;
 host-val inc-Int Int%Int;
 
+host-val add-Int <Int Int>%Int;
+host-val sub-Int <Int Int>%Int;
+host-val mul-Int <Int Int>%Int;
+host-val div-Int <Int Int>%Int;
+host-val mod-Int <Int Int>%Int;
+host-val rem-Int <Int Int>%Int;
+
 host-val eq-Int <Int Int>%Bool;
+host-val ne-Int <Int Int>%Bool;
+host-val ge-Int <Int Int>%Bool;
+host-val gt-Int <Int Int>%Bool;
+host-val le-Int <Int Int>%Bool;
+host-val lt-Int <Int Int>%Bool;
 
 host-val errL-Bool Bool%<>;
 host-val errL-Int Int%<>;

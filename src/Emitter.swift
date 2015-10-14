@@ -34,16 +34,17 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   file.writeL("\"use strict\";\n")
   file.writeL("(function(){ // ploy.")
   file.writeL("// host.js.\n")
-  let host_src = InFile(path: hostPath).read()
+  let host_src = try! InFile(path: hostPath).readText()
   file.writeL(host_src)
   file.writeL("")
 
-  let globalSpace = Space(pathNames: ["GLOBAL"], parent: nil, file: file)
+  let globalSpace = Space(pathNames: ["ROOT"], parent: nil, file: file)
 
   globalSpace.setupGlobal(ins)
   
   file.writeL("let _main = function(){ // main.")
   main.compileBody(1, LocalScope(parent: globalSpace, em: globalSpace.makeEm()), typeInt, isTail: true)
+  // emitter gets flushed here when it gets released.
   file.writeL("};")
   file.writeL("\nPROC__exit(_tramp(_main()))})()")
 }

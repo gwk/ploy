@@ -1,11 +1,16 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
+class MethodList {
+  var pairs: [(space: Space, method: Method)] = []
+}
+
+
 class Space: Scope {
 
   let file: OutFile
   var defs: [String: Def] = [:]
-  var methods: [String: [Method]] = [:]
+  var methods: [String: MethodList] = [:]
 
   init(pathNames: [String], parent: Space?, file: OutFile) {
     self.file = file
@@ -34,8 +39,9 @@ class Space: Scope {
 
   func setupGlobal(ins: [In]) {
 
-    func getOrCreateSpace(syms: [Sym]) -> Space {
+    func getOrCreateSpace(identifier: Identifier) -> Space {
       var space: Space = self
+      let syms = identifier.syms
       for (i, sym) in syms.enumerate() {
         if let r = space.bindings[sym.name] {
           switch r.kind {
@@ -52,15 +58,18 @@ class Space: Scope {
       return space
     }
 
-    bindings["GLOBAL"] = ScopeRecord(sym: nil, hostName: "GLOBAL", kind: .Space(self))
+    bindings["ROOT"] = ScopeRecord(sym: nil, hostName: "ROOT", kind: .Space(self))
     for t in intrinsicTypes {
       bindings[t.description] = ScopeRecord(sym: nil, hostName: t.description, kind: .Type(t))
     }
     for i in ins {
-      let space = getOrCreateSpace([i.sym])
+      let space = getOrCreateSpace(i.identifier)
       for def in i.defs {
         if let method = def as? Method {
-          fatalError("method definition not implemented: \(method)")
+          let targetSpace = getOrCreateSpace(method.identifier)
+          let name = method.identifier.name
+          let methodList = targetSpace.methods.getDefault(name, dflt: { MethodList() })
+          methodList.pairs.append((space, method))
         } else if let existing = space.defs[def.sym.name] {
           def.sym.failRedef(existing.sym)
         } else {

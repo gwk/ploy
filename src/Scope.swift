@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Scope {
+class Scope: CustomStringConvertible {
   let pathNames: [String]
   let hostPrefix: String
   let parent: Scope?
@@ -12,6 +12,10 @@ class Scope {
     self.pathNames = pathNames
     self.hostPrefix = pathNames.isEmpty ? "" : (pathNames.joinWithSeparator("__") + "__")
     self.parent = parent
+  }
+
+  var description: String {
+    return "\(self.dynamicType):\(pathNames.joinWithSeparator("/"))"
   }
 
   func getRecord(sym: Sym) -> ScopeRecord? { fatalError() }

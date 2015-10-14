@@ -15,7 +15,7 @@ class Src: CustomStringConvertible {
   
   init(path: String) {
     self.path = path
-    self.text = InFile(path: path).read()
+    self.text = try! InFile(path: path).readText()
   }
   
   init(name: String) {
@@ -340,21 +340,23 @@ class Src: CustomStringConvertible {
   }
   
   func parseIn(sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`in` form", "module name symbol")
+    let identifier: Identifier = parseForm(sym.syn.end, "`in` form", "module name symbol")
     var defs: [Def] = []
-    let end = parseForms(&defs, nameSym.syn.end, "`in` form", "definition")
-    return In(synForSemicolon(sym, end, "`in` form"), sym: nameSym, defs: defs)
+    let end = parseForms(&defs, identifier.syn.end, "`in` form", "definition")
+    return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
   
   func parseMethod(sym: Sym) -> Form {
     let identifier: Identifier = parseForm(sym.syn.end, "`method` form", "poly-fn name or path identifier")
-    let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature signature")
+    let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature")
     let body = parseBodyToImplicitDo(sig.syn.end)
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
   }
 
   func parsePolyFn(sym: Sym) -> Form {
-    sym.failSyntax("unimplemented")
+    let nameSym = parseSym(sym.syn.end)
+    // TODO: type constraint.
+    return PolyFn(synForSemicolon(sym, nameSym.syn.end, "poly-fn"), sym: nameSym)
   }
   
   func parsePub(sym: Sym) -> Form {

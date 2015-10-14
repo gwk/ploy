@@ -39,7 +39,7 @@ guard let mainPath = opts["-main"] else { fail("-main main-src-path argument is 
 guard let outPath = opts["-o"] else { fail("-o out-path argument is required.") }
 
 let tmpPath = outPath + ".tmp"
-let tmpFile = OutFile(path: tmpPath, create: 0o644)
+let tmpFile = try! OutFile(path: tmpPath, create: 0o644)
 
 let (mainIns, mainDo) = Src(path: mainPath).parseMain(verbose: false)
 
@@ -48,5 +48,5 @@ ins.appendContentsOf(mainIns)
 
 compileProgram(tmpFile, hostPath: hostPath, main: mainDo, ins: ins)
 
-rename(tmpPath, toPath: outPath)
-File.setPerms(outPath, 0o755)
+renameFileAtPath(tmpPath, toPath: outPath)
+try! File.changePerms(outPath, 0o755)

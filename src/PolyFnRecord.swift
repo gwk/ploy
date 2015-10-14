@@ -2,7 +2,11 @@
 
 
 class PolyFnRecord {
-  var methods: [Method] = []
+  let sigs: [TypeSig]
+
+  init(sigs: [TypeSig]) {
+    self.sigs = sigs
+  }
 }
 
 

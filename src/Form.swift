@@ -1,17 +1,19 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-protocol Form : Streamable {
+protocol Form : Streamable, CustomStringConvertible {
   var syn: Syn { get }
   var syntaxName: String { get }
   func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
   @noreturn func failForm(prefix: String, msg: String, notes: (Form?, String)...)
   @noreturn func failSyntax(msg: String, notes: (Form?, String)...)
   @noreturn func failType(msg: String, notes: (Form?, String)...)
+
+  var description: String { get }
 }
 
 
-protocol Accessor: Form, CustomStringConvertible {
+protocol Accessor: Form {
   var hostAccessor: String { get }
   func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type
 }
@@ -19,7 +21,7 @@ protocol Accessor: Form, CustomStringConvertible {
 
 protocol Def: Form {
   var sym: Sym { get }
-  func scopeRecordKind(space: Space) -> ScopeRecord.Kind
+  //func scopeRecordKind(space: Space) -> ScopeRecord.Kind
   func compileDef(space: Space) -> ScopeRecord.Kind
 }
 
@@ -30,6 +32,8 @@ protocol Expr: Form {
 
 
 protocol Identifier: Form {
+  var name: String { get }
+  var syms: [Sym] { get }
   func record(scope: Scope, _ sym: Sym) -> ScopeRecord
 }
 
@@ -84,6 +88,12 @@ class _Form : Form {
   
   func writeTo<Target : OutputStreamType>(inout target: Target) {
     writeTo(&target, 0)
+  }
+
+  var description: String {
+    var s = ""
+    writeTo(&s, 0)
+    return s
   }
 }
 

@@ -9,8 +9,6 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     super.init(syn)
   }
   
-  var description: String { return name }
-
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     target.write(String(indent: depth))
     target.write(String(self.dynamicType))
@@ -51,6 +49,8 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
 
   // MARK: Identifier
 
+  var syms: [Sym] { return [self] }
+  
   func record(scope: Scope, _ sym: Sym) -> ScopeRecord {
     return scope.record(self)
   }
@@ -92,8 +92,17 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
     case .Fwd():
       failType("expected a value; `\(name)` refers to a forward declaration (INTERNAL ERROR?)")
-    case .PolyFn(_):
-      failType("expected a value; `\(name)` refers to a poly-fn (UNIMPLEMENTD)")
+    case .PolyFn(let polyFnRecord):
+      var index = -1
+      var sig: TypeSig? = nil
+      for (i, candidateSig) in polyFnRecord.sigs.enumerate() {
+        
+      }
+      //let index = 0
+      //let method =
+      let s = "\(scopeRecord.hostName)__\(index)"
+      em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
+
     case .Space(_):
       failType("expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.
     case .Type(_):

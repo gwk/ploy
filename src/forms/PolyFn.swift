@@ -17,11 +17,15 @@ class PolyFn: _Form, Def {
   // MARK: Def
 
   func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    return .PolyFn(PolyFnRecord())
+    fatalError()
   }
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
-    return .PolyFn(PolyFnRecord())
+    let methodList = space.methods.getDefault(sym.name, dflt: { MethodList() })
+    let sigs = methodList.pairs.enumerate().map() {
+      $1.method.compileMethod($1.space, expType: typeAnySig, hostName: "\(space.hostPrefix)\(sym.name)__\($0)")
+    }
+    return .PolyFn(PolyFnRecord(sigs: sigs))
   }
 
 }

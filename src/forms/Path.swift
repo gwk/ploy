@@ -13,6 +13,9 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     target.write(String(indent: depth))
     target.write(String(self.dynamicType))
+    target.write(" ")
+    target.write(String(syn))
+    target.write(": ")
     var first = true
     for s in syms {
       if first {
@@ -33,6 +36,8 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
 
   // MARK: Identifier
 
+  var name: String { return syms.map({$0.name}).joinWithSeparator("/") }
+  
   func record(scope: Scope, _ sym: Sym) -> ScopeRecord { return scope.record(self) }
 
   // MARK: TypeExpr

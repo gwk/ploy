@@ -31,4 +31,21 @@ class Method: _Form, Def { // method definition.
   func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
+
+  // MARK: Method
+
+  func compileMethod(space: Space, expType: Type, hostName: String) -> TypeSig {
+    let em = space.makeEm()
+    let type = sig.typeValSig(space, "signature")
+    if !expType.accepts(type) {
+      sig.failType("expects \(expType)")
+    }
+    let fnScope = LocalScope(parent: space, em: em)
+    fnScope.addValRecord("$", type: type.par)
+    fnScope.addValRecord("self", type: type)
+    em.str(0, "let \(hostName) = function self($){")
+    body.compileBody(1, fnScope, type.ret, isTail: true)
+    em.append("})")
+    return type
+  }
 }
