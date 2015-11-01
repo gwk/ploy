@@ -19,7 +19,7 @@ done
 
 swiftc \
 -Onone \
--sdk /Applications/Xcode-Beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
+-sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
 -target x86_64-apple-macosx10.11 \
 -profile-coverage-mapping \
 -profile-generate \

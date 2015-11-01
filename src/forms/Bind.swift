@@ -26,7 +26,7 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
   func compileStmt(depth: Int, _ scope: LocalScope) {
     let em = scope.em
     em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
-    let type = val.compileExpr(depth + 1, scope, typeAny, isTail: false)
+    let type = val.compileExpr(depth + 1, scope, typeObj, isTail: false)
     scope.addRecord(sym, kind: .Val(type))
   }
 
@@ -49,7 +49,7 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     em.str(0, " \(hostName)__acc = function() {")
     em.str(0, "  throw \"error: lazy value '\(fullName)' recursively referenced during initialization.\" };")
     em.str(0, " let val =")
-    let type = val.compileExpr(1, LocalScope(parent: space, em: em), typeAny, isTail: false)
+    let type = val.compileExpr(1, LocalScope(parent: space, em: em), typeObj, isTail: false)
     em.append(";")
     em.str(0, " \(hostName)__acc = function() { return val };")
     em.str(0, " return val; }")

@@ -20,12 +20,12 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     let em = scope.em
     var retType = expType
     em.str(depth, isTail ? "{{v:" : "{")
-    if expType === typeAny {
+    if expType === typeObj {
       var pars = [TypePar]()
       for (i, arg) in args.enumerate() {
         let hostName = (arg.label?.name.dashToUnder).or("\"\(i)\"")
         em.str(depth, " \(hostName):")
-        let type = arg.compileArg(depth + 1, scope, typeAny)
+        let type = arg.compileArg(depth + 1, scope, typeObj)
         em.append(",")
         pars.append(TypePar(index: i, label: arg.label, type: type, form: nil))
       }

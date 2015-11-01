@@ -1,21 +1,29 @@
-// Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
+// © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Type: CustomStringConvertible, Hashable {
+class Type: CustomStringConvertible, Hashable, Comparable {
   
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
-  var description: String { fatalError() }
+  let description: String
+
+  init(description: String) {
+    self.description = description
+  }
   
   func accepts(actual: Type) -> Bool { return actual === self }
 }
 
 func ==(l: Type, r: Type) -> Bool { return l === r }
 
+func <(l: Type, r: Type) -> Bool { return l.description < r.description }
 
-class TypeAny: Type {
-  
-  override var description: String { return "Any" }
+
+class TypeObj: Type {
+
+  init() {
+    super.init(description: "Obj")
+  }
 
   override func accepts(actual: Type) -> Bool { return true }
 }
@@ -26,14 +34,9 @@ class TypeCmpd: Type {
   
   init(pars: [TypePar]) {
     self.pars = pars
-    super.init()
+    super.init(description: "<\(pars.map({$0.description}).joinWithSeparator(" "))>")
   }
-  
-  override var description: String {
-    let s = pars.map({ $0.description }).joinWithSeparator(" ")
-    return "<\(s)>"
-  }
-  
+
   override func accepts(actual: Type) -> Bool {
     guard let actual = actual as? TypeCmpd else {
       return false
@@ -47,16 +50,15 @@ class TypeCmpd: Type {
   }
 }
 
+
 /// Type value for a declared type (enum, host, struct).
 class TypeDecl: Type {
   let sym: Sym
   
   init(sym: Sym) {
     self.sym = sym
-    super.init()
+    super.init(description: sym.name)
   }
-  
-  override var description: String { return sym.name }
 }
 
 
@@ -65,10 +67,8 @@ class TypePrim: Type {
   
   init(name: String) {
     self.name = name
-    super.init()
+    super.init(description: name)
   }
-  
-  override var description: String { return name }
 }
 
 
@@ -79,11 +79,9 @@ class TypeSig: Type {
   init(par: Type, ret: Type) {
     self.par = par
     self.ret = ret
-    super.init()
+    super.init(description: "\(par)%\(ret)")
   }
   
-  override var description: String { return "\(par)%\(ret)" }
-
   override func accepts(actual: Type) -> Bool {
     if let a = actual as? TypeSig {
       return par.accepts(a.par) && ret.accepts(a.ret)
@@ -93,7 +91,26 @@ class TypeSig: Type {
 }
 
 
-let typeAny = TypeAny() // not currently available as an intrinsic type; only for 'accept' testing.
+class TypeAny: Type {
+  let els: Set<Type>
+
+  init(els: Set<Type>) {
+    assert(els.isSorted)
+    self.els = els
+    super.init(description: "Any<\(els.map({$0.description}).sort().joinWithSeparator(" "))>")
+  }
+
+  override func accepts(actual: Type) -> Bool {
+    if let actual = actual as? TypeAny {
+      return els.isSupersetOf(actual.els)
+    } else {
+      return els.contains(actual)
+    }
+  }
+}
+
+
+let typeObj = TypeObj() // not currently available as an intrinsic type; only for 'accept' testing.
 
 let typeVoid = TypeCmpd(pars: [])
 
@@ -107,13 +124,14 @@ let intrinsicTypes = [
   typeBool,
   typeInt,
   typeNamespace,
+  typeObj,
   typeStr,
   typeType,
 ]
 
 
-func anySigReturning(ret: Type) -> Type {
-  return TypeSig(par: typeAny, ret: ret)
+func typeSigReturning(ret: Type) -> Type {
+  return TypeSig(par: typeObj, ret: ret)
 }
 
-let typeAnySig = TypeSig(par: typeAny, ret: typeAny)
+let typeObjSig = TypeSig(par: typeObj, ret: typeObj)

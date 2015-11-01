@@ -27,7 +27,7 @@ class Call : _Form, Expr, Stmt {
     let em = scope.em
     em.str(depth, isTail ? "{" : "_tramp({")
     em.str(depth, " c:")
-    let fnType = callee.compileExpr(depth + 1, scope, anySigReturning(expType), isTail: false) as! TypeSig
+    let fnType = callee.compileExpr(depth + 1, scope, typeSigReturning(expType), isTail: false) as! TypeSig
     em.append(",")
     em.str(depth, " v:")
     arg.compileExpr(depth + 1, scope, fnType.par, isTail: false)
@@ -36,7 +36,7 @@ class Call : _Form, Expr, Stmt {
   }
   
   func compileStmt(depth: Int, _ scope: LocalScope) {
-    compileExpr(depth, scope, typeAny, isTail: false)
+    compileExpr(depth, scope, typeObj, isTail: false)
   }
 }
 

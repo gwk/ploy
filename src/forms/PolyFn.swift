@@ -21,9 +21,9 @@ class PolyFn: _Form, Def {
   }
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
-    let methodList = space.methods.getDefault(sym.name, dflt: { MethodList() })
+    let methodList = space.methods.getDefault(sym.name, dflt: {MethodList()})
     let sigs = methodList.pairs.enumerate().map() {
-      $1.method.compileMethod($1.space, expType: typeAnySig, hostName: "\(space.hostPrefix)\(sym.name)__\($0)")
+      $1.method.compileMethod($1.space, expType: typeObjSig, hostName: "\(space.hostPrefix)\(sym.name)__\($0)")
     }
     return .PolyFn(PolyFnRecord(sigs: sigs))
   }

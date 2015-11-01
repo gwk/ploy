@@ -42,7 +42,7 @@ class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
   }
   
   func compileStmt(depth: Int, _ scope: LocalScope) {
-    compileExpr(depth, scope, typeAny, isTail: false)
+    compileExpr(depth, scope, typeObj, isTail: false)
   }
 }
 

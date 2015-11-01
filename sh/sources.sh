@@ -9,6 +9,7 @@ src/*.swift \
 src/forms/*.swift \
 qk/src/core/ArithmeticType.swift \
 qk/src/core/check.swift \
+qk/src/core/DefaultInitializable.swift \
 qk/src/core/Error.swift \
 qk/src/core/File.swift \
 qk/src/core/fs.swift \
