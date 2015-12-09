@@ -378,7 +378,7 @@ def try_case(path):
       ok = False
   if not ok:
     fail_count += 1
-    outL('=' * bar_width + '\n');
+    outL('=' * bar_width + '\n')
     if fail_fast:
       logFL('exiting fast.')
       sys.exit(1)
