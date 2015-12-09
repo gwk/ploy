@@ -18,6 +18,8 @@ def path_rel_to(base, path):
 
 def path_dir(path): return _path.dirname(path)
 
+def path_dir_or_dot(path): return path_dir(path) or '.'
+
 def is_path_abs(path): return _path.isabs(path)
 
 def path_join(*items): return _path.join(*items)
@@ -28,29 +30,23 @@ def split_dir(path): return _path.split(path)
 
 def split_ext(path): return _path.splitext(path)
 
-
-def dir_or_dot(path):
-  d = path_dir(path)
-  return d or '.'
-
-def path_base(path):
-  'the path without extension.'
+def path_stem(path):
+  'the path without the file extension.'
   return split_ext(path)[0]
 
 def path_ext(path):
   'the file extension of the path.'
   return split_ext(path)[1]
 
-def path_base_name(path):
+def path_name_stem(path):
   'the file name without extension.'
-  return path_base(path_name(path))
-
+  return path_stem(path_name(path))
 
 def split_dir_ext(path):
-  '(dir, base, ext) triple.'
-  d, ne = split_dir(path)
-  n, e = split_ext(ne)
-  return d, n, e
+  '(dir, stem, ext) triple.'
+  d, se = split_dir(path)
+  s, e = split_ext(ne)
+  return d, s, e
 
 
 
