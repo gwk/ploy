@@ -106,18 +106,19 @@ This is a huge topic, fairly conventional but almost certainly necessary.
 The Lisp community values macros as a key productivity tool. I'm very interested to see how useful macros might be in a statically compiled language like Ploy, and how well they interact with other language features. However they may be deferred until the compiler is self-hosting.
 
 
-## Exceptions
+## Fault Tolerance
 
-One place where I tend to question a lot of PL design is error handling. It seems to me that all instructions, starting with integer arithmetic, can cause failures, and that a fault-tolerant system must be prepared to handle these. Mainstream language design seems to be on a long, lumbering course towards acknowledging this truth; for example, Swift traps on integer arithmetic and out-of-bounds array access, but the handling of such failures is unrecoverable, and different than the main error handling mechanism.
+The LLVM community makes a strong distinction between programmer errors, which result in hard failures, and input errors, which can be recoverable. However the distinctions in practice often seem less-than-comprehensive. For example, in Swift an array out-of-bounds access is considered a programmer error, but a dictionary access with a missing key is guarded with an optional return value. While this decision seems fairly conventional, it means that these two collection types cannot be treated as instances of a more generic 'mapping' protocol. Thus the meaning of overloading the subscript operator is diminished, because the failure modes are not consistent. In other words, it seems that the failure behavior can also be an important, and often under-specified, aspect of generics.
+
+I do appreciate the distinction between programmer and input errors, but I question whether hard failure in a complex system is the appropriate behavior. If a concurrent web server suffers an integer overflow while serving a single request, should it immediately die? What if doing so causes other in-progess transactions to canceled or possibly corrupted?
 
 In contrast, high-level languages like Python make use of exceptions for regular control flow (e.g. StopIteration), which strikes me as an abuse of the very notion of an exceptional condition.
 
 More research required!
 
-
 ## Effects System
 
-I think effects systems are a very promising field but it will be some time before I can begin to explore this in the implementation. If the compiler can reason about effects then it should be able to determine dependencies in a deeper, more accurate way.
+Effects systems are an ineresting field but it will be some time before I can begin to explore this in the implementation.
 
-I'm looking for some comfortable middle ground that allows the programmer to use imperative techniques while still enabling the compiler to prove things about program safety. For example, debug logging to std-err should be allowed without mangling the type declaration of the function. Furthermore, if we concede that all code may raise exceptions, then exceptions should not be explicitly declared as part of the function type. Lastly, it seems reasonable that iterators be well-defined within the type system; it follows that exceptions should not be used for normal control flow (e.g. end-of-iterator).
+I'm looking for some comfortable middle ground that allows the programmer to use imperative techniques while still enabling the compiler to prove things about program safety. For example, should simply logging to std-err change the type signature of a function from pure to impure?
 
