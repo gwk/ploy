@@ -32,7 +32,7 @@ class Par: _Form { // parameter.
   var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
   
   func typeValPar(scope: Scope) -> TypePar {
-    var type: Type! = nil
+    var type: Type
     if let typeExpr = typeExpr {
       type = typeExpr.typeVal(scope, "parameter type")
     } else if let dflt = dflt {

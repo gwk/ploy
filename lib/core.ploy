@@ -1,8 +1,8 @@
 
 in ROOT
 
-#poly-fn add;
+poly-fn add;
 
-#method add <Int Int>%Int add-Int.$;
+method add <Int Int>%Int add-Int.$;
 
 ;

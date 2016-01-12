@@ -1,8 +1,9 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class MethodList {
-  var pairs: [(space: Space, method: Method)] = []
+final class MethodList: DefaultInitializable {
+  typealias Pair = (space: Space, method: Method)
+  var pairs: [Pair] = []
 }
 
 
@@ -22,7 +23,7 @@ class Space: Scope {
       return r
     }
     if let def = defs[sym.name] {
-      addRecord(sym, kind: .Fwd())
+      addRecord(sym, kind: .Fwd()) // the fwd def serves as a marker to prevent recursion.
       return addRecord(sym, kind: def.compileDef(self))
     }
     return nil
@@ -39,9 +40,8 @@ class Space: Scope {
 
   func setupGlobal(ins: [In]) {
 
-    func getOrCreateSpace(identifier: Identifier) -> Space {
+    func getOrCreateSpace(syms: [Sym]) -> Space {
       var space: Space = self
-      let syms = identifier.syms
       for (i, sym) in syms.enumerate() {
         if let r = space.bindings[sym.name] {
           switch r.kind {
@@ -63,12 +63,14 @@ class Space: Scope {
       bindings[t.description] = ScopeRecord(sym: nil, hostName: t.description, kind: .Type(t))
     }
     for i in ins {
-      let space = getOrCreateSpace(i.identifier)
+      let space = getOrCreateSpace(i.identifier.syms)
       for def in i.defs {
         if let method = def as? Method {
-          let targetSpace = getOrCreateSpace(method.identifier)
+          let syms = method.identifier.syms
+          let targetSpaceSyms = Array(syms[0..<(syms.count - 1)])
+          let targetSpace = getOrCreateSpace(targetSpaceSyms)
           let name = method.identifier.name
-          let methodList = targetSpace.methods.getDefault(name, dflt: { MethodList() })
+          let methodList = targetSpace.methods.getDefault(name)
           methodList.pairs.append((space, method))
         } else if let existing = space.defs[def.sym.name] {
           def.sym.failRedef(existing.sym)

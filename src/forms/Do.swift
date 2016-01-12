@@ -21,28 +21,28 @@ class Do: _Form, Expr, Stmt { // do block: `{…}`.
     }
   }
   
-  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
     let em = scope.em
     em.str(depth, "(function(){")
-    let ret = compileBody(depth + 1, LocalScope(parent: scope, em: em), expType, isTail: isTail)
+    let ret = compileBody(ctx, depth + 1, LocalScope(parent: scope, em: em), expType, isTail: isTail)
     em.append("})()")
     return ret
   }
   
-  func compileStmt(depth: Int, _ scope: LocalScope) {
-    compileExpr(depth, scope, typeVoid, isTail: false)
+  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
+    compileExpr(ctx, depth, scope, typeVoid, isTail: false)
   }
   
-  func compileBody(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+  func compileBody(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
     let em = scope.em
     for stmt in stmts {
-      stmt.compileStmt(depth, scope)
+      stmt.compileStmt(ctx, depth, scope)
       em.append(";")
     }
     var ret: Type = typeVoid
     if let expr = expr {
       em.str(depth, "return (")
-      ret = expr.compileExpr(depth, scope, expType, isTail: isTail)
+      ret = expr.compileExpr(ctx, depth, scope, expType, isTail: isTail)
       em.append(")")
     } else if expType !== typeVoid {
       self.failType("expected type \(expType); body has no return expression.")

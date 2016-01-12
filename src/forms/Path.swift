@@ -30,8 +30,8 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
 
   // MARK: Expr
 
-  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
-    return syms.last!.compileSym(scope.em, depth, scope.record(self), expType, isTail: isTail)
+  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    return syms.last!.compileSym(ctx, depth, scope.em, scope.record(self), expType, isTail: isTail)
   }
 
   // MARK: Identifier

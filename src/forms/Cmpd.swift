@@ -15,37 +15,50 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
       a.writeTo(&target, depth + 1)
     }
   }
-  
-  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+
+  func compileExprBodyWithNaturalType(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) -> Type {
     let em = scope.em
-    var retType = expType
+    var pars = [TypePar]()
+    for (i, arg) in args.enumerate() {
+      let hostName = (arg.label?.name.dashToUnder).or("\"\(i)\"")
+      em.str(depth, " \(hostName):")
+      let type = arg.compileArg(ctx, depth + 1, scope, typeEvery)
+      em.append(",")
+      pars.append(TypePar(index: i, label: arg.label, type: type, form: nil))
+    }
+    return Type.Cmpd(pars)
+  }
+
+  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    let em = scope.em
+    var actType = expType
     em.str(depth, isTail ? "{{v:" : "{")
-    if expType === typeObj {
-      var pars = [TypePar]()
-      for (i, arg) in args.enumerate() {
-        let hostName = (arg.label?.name.dashToUnder).or("\"\(i)\"")
-        em.str(depth, " \(hostName):")
-        let type = arg.compileArg(depth + 1, scope, typeObj)
-        em.append(",")
-        pars.append(TypePar(index: i, label: arg.label, type: type, form: nil))
+    switch expType.kind {
+    case .All(let members, _, _):
+      if members.count == 0 { // anything.
+        assert(expType === typeEvery)
+        actType = compileExprBodyWithNaturalType(ctx, depth, scope)
+      } else {
+        self.failType("expected type: \(expType); received compound value.")
       }
-      retType = TypeCmpd(pars: pars)
-    } else if let expCmpd = expType as? TypeCmpd {
+    case .Cmpd(let pars, _, _):
       var argIndex = 0
-      for par in expCmpd.pars {
-        self.compilePar(depth, scope, par: par, argIndex: &argIndex)
+      for par in pars {
+        self.compilePar(ctx, depth, scope, par: par, argIndex: &argIndex)
       }
-      if argIndex != expCmpd.pars.count {
-        failType("expected \(expCmpd.pars.count) arguments; received \(argIndex)")
+      if argIndex != pars.count {
+        failType("expected \(pars.count) arguments; received \(argIndex)")
       }
-    } else {
+    case .Free: // TODO: do not ignore free variable index; need to do real type inference.
+      actType = compileExprBodyWithNaturalType(ctx, depth, scope)
+    default:
       self.failType("expected type: \(expType); received compound value.")
     }
     em.append(isTail ? "}}" : "}")
-    return retType
+    return actType
   }
   
-  func compilePar(depth: Int, _ scope: LocalScope, par: TypePar, inout argIndex: Int) {
+  func compilePar(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, par: TypePar, inout argIndex: Int) {
     let em = scope.em
     em.str(depth, " \(par.hostName):")
     if argIndex < args.count {
@@ -59,10 +72,10 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
           argLabel.failType("argument label does not match unlabeled parameter", notes: (par.form, "unlabeled parameter"))
         }
       }
-      arg.compileArg(depth + 1, scope, par.type)
+      arg.compileArg(ctx, depth + 1, scope, par.type)
       argIndex++
     } else if let dflt = par.form?.dflt {
-      dflt.compileExpr(depth + 1, scope, par.type, isTail: false)
+      dflt.compileExpr(ctx, depth + 1, scope, par.type, isTail: false)
     } else {
       failType("missing argument for parameter", notes: (par.form, "parameter here"))
     }

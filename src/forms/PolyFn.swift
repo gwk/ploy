@@ -16,16 +16,38 @@ class PolyFn: _Form, Def {
 
   // MARK: Def
 
+  #if false
   func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
+  #endif
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
-    let methodList = space.methods.getDefault(sym.name, dflt: {MethodList()})
-    let sigs = methodList.pairs.enumerate().map() {
-      $1.method.compileMethod($1.space, expType: typeObjSig, hostName: "\(space.hostPrefix)\(sym.name)__\($0)")
+    let hostName = "\(space.hostPrefix)\(sym.name)"
+    let methodList = space.methods.getDefault(sym.name)
+    var sigsToPairs: [Type: MethodList.Pair]
+    do {
+      sigsToPairs = try methodList.pairs.mapUniquesToDict() {
+        (pair) in
+        (pair.method.methodSig(pair.space), pair)
+      }
+    } catch let e as DuplicateKeyError<Type, MethodList.Pair> {
+      failType("method has duplicate type: \(e.key)", notes:
+        (e.existing.method, "conflicting method definition"),
+        (e.incoming.method, "conflicting method definition"))
+    } catch { fatalError() }
+    let type = Type.All(Set(sigsToPairs.keys))
+    let em = space.makeEm()
+    em.str(0, "\(hostName)__table = {")
+    for (sig, pair) in sigsToPairs.pairsSortedByKey {
+      let ctx = TypeCtx()
+      pair.method.compileMethod(ctx, space: space, polyFnType: type, sigType: sig, hostName: hostName)
     }
-    return .PolyFn(PolyFnRecord(sigs: sigs))
-  }
 
+    em.str(0, "function \(hostName)($){")
+
+      em.append("}")
+
+      return .PolyFn(type)
+  }
 }

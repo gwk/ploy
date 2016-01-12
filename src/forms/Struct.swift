@@ -19,18 +19,21 @@ class Struct: _Form, Def, Stmt { // struct declaration: `struct S fields…;`.
     }
   }
 
-  func compileStmt(depth: Int, _ scope: LocalScope) {
+  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
     fatalError()
   }
 
   // MARK: Def
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
-    return .Type(TypeDecl(sym: sym))
+    // TODO.
+    return .Type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
   }
-  
+
+  #if false
   func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    return .Type(TypeDecl(sym: sym))
+    return .Type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
   }
+  #endif
 }
 

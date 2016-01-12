@@ -2,7 +2,7 @@
 
 
 class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
-  let par: TypeExpr
+  let par: TypeExpr // TODO: rename input.
   let ret: TypeExpr
 
   init(_ syn: Syn, par: TypeExpr, ret: TypeExpr) {
@@ -24,11 +24,7 @@ class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
   }
 
   func typeVal(scope: Scope, _ subj: String) -> Type {
-    return typeValSig(scope, subj)
-  }
-
-  func typeValSig(scope: Scope, _ subj: String) -> TypeSig {
-    return TypeSig(par: par.typeVal(scope, "signature"), ret: ret.typeVal(scope, "signature"))
+    return Type.Sig(par: par.typeVal(scope, "signature"), ret: ret.typeVal(scope, "signature"))
   }
 }
 

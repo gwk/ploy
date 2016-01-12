@@ -28,24 +28,26 @@ class Method: _Form, Def { // method definition.
     fatalError()
   }
 
+  #if false
   func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
+  #endif
 
   // MARK: Method
 
-  func compileMethod(space: Space, expType: Type, hostName: String) -> TypeSig {
+  func methodSig(space: Space) -> Type {
+    return sig.typeVal(space, "method signature")
+  }
+
+  func compileMethod(ctx: TypeCtx, space: Space, polyFnType: Type, sigType: Type, hostName: String) {
     let em = space.makeEm()
-    let type = sig.typeValSig(space, "signature")
-    if !expType.accepts(type) {
-      sig.failType("expects \(expType)")
-    }
     let fnScope = LocalScope(parent: space, em: em)
-    fnScope.addValRecord("$", type: type.par)
-    fnScope.addValRecord("self", type: type)
-    em.str(0, "let \(hostName) = function self($){")
-    body.compileBody(1, fnScope, type.ret, isTail: true)
-    em.append("})")
-    return type
+    fnScope.addValRecord("$", type: sigType.sigPar)
+    fnScope.addValRecord("self", type: polyFnType)
+    em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")
+    em.str(1, "let self = \(hostName)")
+    body.compileBody(ctx, 1, fnScope, sigType.sigRet, isTail: true)
+    em.append("}")
   }
 }

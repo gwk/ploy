@@ -27,8 +27,9 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   
   func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type {
     em.str(depth, hostAccessor)
-    if let accesseeType = accesseeType as? TypeCmpd {
-      for par in accesseeType.pars {
+    switch accesseeType.kind {
+    case .Cmpd(let pars, _, _):
+      for par in pars {
         if let label = par.label {
           if name == label.name {
             return par.type
@@ -36,15 +37,15 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
         }
       }
       failType("symbol accessor does not match any parameter label of compound type: \(accesseeType)")
-    } else {
+    default:
       failType("symbol cannot access into value of type: \(accesseeType)")
     }
   }
   
   // MARK: Expr
   
-  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
-    return compileSym(scope.em, depth, scope.record(self), expType, isTail: isTail)
+  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+    return compileSym(ctx, depth, scope.em, scope.record(self), expType, isTail: isTail)
   }
 
   // MARK: Identifier
@@ -80,7 +81,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     }
   }
   
-  func compileSym(em: Emitter, _ depth: Int, _ scopeRecord: ScopeRecord, _ expType: Type, isTail: Bool) -> Type {
+  func compileSym(ctx: TypeCtx, _ depth: Int, _ em: Emitter, _ scopeRecord: ScopeRecord, _ expType: Type, isTail: Bool) -> Type {
     var type: Type! = nil
     switch scopeRecord.kind {
     case .Val(let t):
@@ -92,25 +93,15 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
     case .Fwd():
       failType("expected a value; `\(name)` refers to a forward declaration (INTERNAL ERROR?)")
-    case .PolyFn(let polyFnRecord):
-      var index = -1
-      var sig: TypeSig? = nil
-      for (i, candidateSig) in polyFnRecord.sigs.enumerate() {
-        
-      }
-      //let index = 0
-      //let method =
-      let s = "\(scopeRecord.hostName)__\(index)"
-      em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
-
+    case .PolyFn(let t):
+      type = t
+      em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
     case .Space(_):
-      failType("expected a value; `\(name)` refers to a space.") // TODO: eventually this will return a runtime type.
+      failType("expected a value; `\(name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace?
     case .Type(_):
       failType("expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
-    if !expType.accepts(type) {
-      failType("expected type `\(expType)`; `\(name)` has type `\(typeVal)`")
-    }
+    refine(ctx, exp: expType, act: type)
     return type
   }
   

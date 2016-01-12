@@ -28,18 +28,19 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   
   func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type {
     em.str(depth, hostAccessor)
-    if let accesseeType = accesseeType as? TypeCmpd {
-      if let par = accesseeType.pars.get(val) {
+    switch accesseeType.kind {
+    case .Cmpd(let pars, _, _):
+      if let par = pars.get(val) {
         return par.type
       } else {
         failType("numeric accessor is out of range for type: \(accesseeType)")
       }
-    } else {
+    default:
       failType("numeric literal cannot access into value of type: \(accesseeType)")
     }
   }
 
-  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
     let em = scope.em
     // TODO: typecheck.
     em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)

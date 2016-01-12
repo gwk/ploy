@@ -19,20 +19,25 @@ class Enum: _Form, Def, Stmt { // enum declaration: `enum E variants…;`.
     }
   }
   
-  func compileStmt(depth: Int, _ scope: LocalScope) {
+  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
     fatalError()
   }
   
   // MARK: Def
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
-    compileStmt(0, LocalScope(parent: space, em: space.makeEm()))
-    return .Type(TypeDecl(sym: sym))
+    let ctx = TypeCtx()
+    compileStmt(ctx, 0, LocalScope(parent: space, em: space.makeEm()))
+    // TODO.
+    return .Type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
   }
-  
+
+  #if false
   func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    return .Type(TypeDecl(sym: sym))
+    return .Type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
   }
+  #endif
+  
 }
 
 

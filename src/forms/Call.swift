@@ -23,20 +23,20 @@ class Call : _Form, Expr, Stmt {
     arg.writeTo(&target, depth + 1)
   }
   
-  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
     let em = scope.em
     em.str(depth, isTail ? "{" : "_tramp({")
     em.str(depth, " c:")
-    let fnType = callee.compileExpr(depth + 1, scope, typeSigReturning(expType), isTail: false) as! TypeSig
+    let fnType = callee.compileExpr(ctx, depth + 1, scope, ctx.addFreeTypeSig(ret: expType), isTail: false)
     em.append(",")
     em.str(depth, " v:")
-    arg.compileExpr(depth + 1, scope, fnType.par, isTail: false)
+    arg.compileExpr(ctx, depth + 1, scope, fnType.sigPar, isTail: false)
     em.append(isTail ? "}" : "})")
-    return fnType.ret
+    return fnType.sigRet
   }
   
-  func compileStmt(depth: Int, _ scope: LocalScope) {
-    compileExpr(depth, scope, typeObj, isTail: false)
+  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
+    compileExpr(ctx, depth, scope, ctx.addFreeType(), isTail: false)
   }
 }
 

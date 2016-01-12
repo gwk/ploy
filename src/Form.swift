@@ -4,14 +4,15 @@
 protocol Form : Streamable, CustomStringConvertible {
   var syn: Syn { get }
   var syntaxName: String { get }
-  func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
+  var description: String { get }
+
   @noreturn func failForm(prefix: String, msg: String, notes: (Form?, String)...)
   @noreturn func failSyntax(msg: String, notes: (Form?, String)...)
   @noreturn func failType(msg: String, notes: (Form?, String)...)
 
-  var description: String { get }
+  func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
+  func refine(ctx: TypeCtx, exp: Type, act: Type)
 }
-
 
 protocol Accessor: Form {
   var hostAccessor: String { get }
@@ -27,7 +28,7 @@ protocol Def: Form {
 
 
 protocol Expr: Form {
-  func compileExpr(depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type
+  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type
 }
 
 
@@ -39,22 +40,28 @@ protocol Identifier: Form {
 
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
-  func typeVal(scope: Scope, _ subj: String) -> Type
+  func typeVal(scope: Scope, _ subj: String) -> Type // TODO: should this take a TypeCtx parameter to allow immediate refinement?
 }
 
 
 protocol Stmt: Form {
-  func compileStmt(depth: Int, _ scope: LocalScope)
+  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope)
 }
 
 
-class _Form : Form {
+class _Form : Form, Hashable {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
   
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var syntaxName: String { return String(self.dynamicType) }
+
+  var description: String {
+    var s = ""
+    writeTo(&s, 0)
+    return s
+  }
 
   @noreturn func failForm(prefix: String, msg: String, notes: [(Form?, String)]) {
     syn.src.errPos(syn.pos, end: syn.visEnd, prefix: prefix, msg: msg)
@@ -90,12 +97,14 @@ class _Form : Form {
     writeTo(&target, 0)
   }
 
-  var description: String {
-    var s = ""
-    writeTo(&s, 0)
-    return s
+  func refine(ctx: TypeCtx, exp: Type, act: Type) {
+    if !ctx._refine(exp, act: act) {
+      failType("expected type: `\(exp)`; actual type: `\(act)`")
+    }
   }
 }
+
+func ==(l: _Form, r: _Form) -> Bool { return l === r }
 
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.

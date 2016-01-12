@@ -9,7 +9,7 @@ struct ScopeRecord {
   enum Kind {
     case Fwd()
     case Lazy(_Type)
-    case PolyFn(PolyFnRecord)
+    case PolyFn(_Type)
     case Space(_Space)
     case Type(_Type)
     case Val(_Type)
