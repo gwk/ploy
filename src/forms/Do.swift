@@ -20,34 +20,47 @@ class Do: _Form, Expr, Stmt { // do block: `{…}`.
       expr.writeTo(&target, depth + 1)
     }
   }
-  
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    if let expr = expr {
+      return expr.typeForExpr(ctx, LocalScope(parent: scope, em: scope.em))
+    } else {
+      return typeVoid
+    }
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
     em.str(depth, "(function(){")
-    let ret = compileBody(ctx, depth + 1, LocalScope(parent: scope, em: em), expType, isTail: isTail)
+    compileBody(ctx, LocalScope(parent: scope, em: em), depth + 1, isTail: isTail)
     em.append("})()")
-    return ret
   }
-  
-  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
-    compileExpr(ctx, depth, scope, typeVoid, isTail: false)
+
+  // MARK: Stmt
+
+  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
+    typeForExpr(ctx, scope)
   }
+
+  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
+    compileExpr(ctx, scope, depth, isTail: false)
+  }
+
+  // MARK: Body
   
-  func compileBody(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+  func compileBody(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
     for stmt in stmts {
-      stmt.compileStmt(ctx, depth, scope)
+      stmt.compileStmt(ctx, scope, depth)
       em.append(";")
     }
-    var ret: Type = typeVoid
     if let expr = expr {
       em.str(depth, "return (")
-      ret = expr.compileExpr(ctx, depth, scope, expType, isTail: isTail)
+      expr.compileExpr(ctx, scope, depth, isTail: isTail)
       em.append(")")
-    } else if expType !== typeVoid {
-      self.failType("expected type \(expType); body has no return expression.")
     }
-    return ret
   }
 }
 

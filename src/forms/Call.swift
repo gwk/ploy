@@ -22,21 +22,36 @@ class Call : _Form, Expr, Stmt {
     callee.writeTo(&target, depth + 1)
     arg.writeTo(&target, depth + 1)
   }
-  
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    let calleeType = callee.typeForExpr(ctx, scope)
+    let argType = arg.typeForExpr(ctx, scope)
+    let retType = ctx.addFreeType()
+    ctx.addConstraint(calleeType, Type.Sig(par: argType, ret: retType))
+    return retType
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
     em.str(depth, isTail ? "{" : "_tramp({")
     em.str(depth, " c:")
-    let fnType = callee.compileExpr(ctx, depth + 1, scope, ctx.addFreeTypeSig(ret: expType), isTail: false)
+    callee.compileExpr(ctx, scope, depth + 1, isTail: false)
     em.append(",")
     em.str(depth, " v:")
-    arg.compileExpr(ctx, depth + 1, scope, fnType.sigPar, isTail: false)
+    arg.compileExpr(ctx, scope, depth + 1, isTail: false)
     em.append(isTail ? "}" : "})")
-    return fnType.sigRet
   }
-  
-  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
-    compileExpr(ctx, depth, scope, ctx.addFreeType(), isTail: false)
+
+  // MARK: Stmt
+
+  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
+    typeForExpr(ctx, scope)
+  }
+
+  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
+    compileExpr(ctx, scope, depth, isTail: false)
   }
 }
 

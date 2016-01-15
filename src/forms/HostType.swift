@@ -16,13 +16,7 @@ class HostType: _Form, Def { // host type declaration: `host-type sym;`.
 
   // MARK: Def
 
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
     return .Type(Type.Host(spacePathNames: space.pathNames, sym: sym))
   }
-
-  #if false
-  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    return .Type(Type.Host(spacePathNames: space.pathNames, sym: sym))
-  }
-  #endif
 }

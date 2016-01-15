@@ -18,10 +18,13 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     target.write(val) // TODO: escape properly.
     target.write("\"\n")
   }
-  
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    fatalError()
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
-    refine(ctx, exp: expType, act: typeStr)
     var s = "\""
     for code in val.codes {
       switch code {
@@ -42,7 +45,6 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     }
     s.append(Character("\""))
     em.str(depth, isTail ? "{v:\(s)}" : s)
-    return typeStr
   }
 }
 

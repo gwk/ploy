@@ -24,20 +24,14 @@ class Method: _Form, Def { // method definition.
 
   var sym: Sym { fatalError() } // a method is not an independent definition; handled specially.
 
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
-
-  #if false
-  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    fatalError()
-  }
-  #endif
 
   // MARK: Method
 
-  func methodSig(space: Space) -> Type {
-    return sig.typeVal(space, "method signature")
+  func methodSig(ctx: TypeCtx, _ space: Space) -> Type {
+    return sig.typeForTypeExpr(ctx, space, "method")
   }
 
   func compileMethod(ctx: TypeCtx, space: Space, polyFnType: Type, sigType: Type, hostName: String) {
@@ -47,7 +41,8 @@ class Method: _Form, Def { // method definition.
     fnScope.addValRecord("self", type: polyFnType)
     em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")
     em.str(1, "let self = \(hostName)")
-    body.compileBody(ctx, 1, fnScope, sigType.sigRet, isTail: true)
+    body.typeForExpr(ctx, fnScope) // TODO: what to do with the resulting type?
+    body.compileBody(ctx, fnScope, 1, isTail: true)
     em.append("}")
   }
 }

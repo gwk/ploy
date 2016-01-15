@@ -25,9 +25,8 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   var hostAccessor: String {
     return "[\"\(val)\"]"
   }
-  
-  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type {
-    em.str(depth, hostAccessor)
+
+  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type {
     switch accesseeType.kind {
     case .Cmpd(let pars, _, _):
       if let par = pars.get(val) {
@@ -40,7 +39,21 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
     }
   }
 
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) {
+    em.str(depth, hostAccessor)
+  }
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    fatalError()
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
+    fatalError()
+  }
+  
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) -> Type {
     let em = scope.em
     // TODO: typecheck.
     em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)

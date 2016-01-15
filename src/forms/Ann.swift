@@ -22,12 +22,18 @@ class Ann: _Form, Expr { // annotation: `val:Type`.
     val.writeTo(&target, depth + 1)
     typeExpr.writeTo(&target, depth + 1)
   }
-  
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
-    let type = typeExpr.typeVal(scope, "annotation")
-    refine(ctx, exp: expType, act: type)
-    return val.compileExpr(ctx, depth, scope, type, isTail: isTail)
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    let exprType = val.typeForExpr(ctx, scope)
+    let annType = typeExpr.typeForTypeExpr(ctx, scope, "type annotation")
+    ctx.addConstraint(exprType, annType)
+    return exprType
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
+    val.compileExpr(ctx, scope, depth, isTail: isTail)
   }
 }
-
 

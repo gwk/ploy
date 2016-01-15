@@ -31,13 +31,13 @@ class Par: _Form { // parameter.
   
   var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
   
-  func typeValPar(scope: Scope) -> TypePar {
+  func typeForPar(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> TypePar {
     var type: Type
     if let typeExpr = typeExpr {
-      type = typeExpr.typeVal(scope, "parameter type")
+      type = typeExpr.typeForTypeExpr(ctx, scope, "parameter type")
     } else if let dflt = dflt {
       let ann = dflt as! Ann // previously verified in mk; TEMPORARY.
-      type = ann.typeExpr.typeVal(scope, "parameter default type")
+      type = ann.typeExpr.typeForTypeExpr(ctx, scope, "parameter default type")
     } else {
       fatalError() // enforced by mk.
     }

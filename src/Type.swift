@@ -11,6 +11,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case Free(index: Int)
     case Host
     case Prim
+    case Prop(type: Type, name: String)
     case Sig(par: Type, ret: Type, frees: Set<Type>, vars: Set<Type>)
     case Struct // TODO: vars
     case Var(name: String)
@@ -110,6 +111,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .Free: return [self]
     case .Host: return []
     case .Prim: return []
+    case .Prop(let type, _): return type.frees
     case .Sig(_, _, let frees, _): return frees
     case .Struct: return []
     case .Var: return []
@@ -125,6 +127,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .Free: return []
     case .Host: return []
     case .Prim: return []
+    case .Prop(let type, _): return type.vars
     case .Sig(_, _, _, let vars): return vars
     case .Struct: return [] // TODO: vars.
     case .Var: return [self]

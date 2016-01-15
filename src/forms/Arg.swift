@@ -17,8 +17,8 @@ class Arg: _Form { // parameter.
     expr.writeTo(&target, depth + 1)
   }
   
-  func compileArg(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type) -> Type {
-    return expr.compileExpr(ctx, depth, scope, expType, isTail: false)
+  func compileArg(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
+    return expr.compileExpr(ctx, scope, depth, isTail: false)
   }
   
   static func mk(form: Form, _ subj: String) -> Arg {

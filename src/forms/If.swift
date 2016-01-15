@@ -20,29 +20,46 @@ class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
       dflt.writeTo(&target, depth + 1)
     }
   }
-  
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    let type = (dflt == nil) ? typeVoid: ctx.addFreeType() // all cases must return same type.
+    for c in cases {
+      ctx.addConstraint(typeBool, c.condition.typeForExpr(ctx, scope))
+      ctx.addConstraint(type, c.consequence.typeForExpr(ctx, scope))
+    }
+    if let dflt = dflt {
+      ctx.addConstraint(type, dflt.typeForExpr(ctx, scope))
+    }
+    return type
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
     em.str(depth, "(")
     for c in cases {
-      c.condition.compileExpr(ctx, depth + 1, scope, typeBool, isTail: false)
+      c.condition.compileExpr(ctx, scope, depth + 1, isTail: false)
       em.append(" ?")
-      c.consequence.compileExpr(ctx, depth + 1, scope, expType, isTail: isTail)
+      c.consequence.compileExpr(ctx, scope, depth + 1, isTail: isTail)
       em.append(" :")
     }
     if let dflt = dflt {
-      dflt.compileExpr(ctx, depth + 1, scope, expType, isTail: isTail)
-    } else if expType !== typeVoid {
-      failType("expected type \(expType); `if` has no default")
+      dflt.compileExpr(ctx, scope, depth + 1, isTail: isTail)
     } else {
       em.str(depth + 1, "undefined")
     }
     em.append(")")
-    return expType
   }
-  
-  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
-    compileExpr(ctx, depth, scope, ctx.addFreeType(), isTail: false)
+
+  // MARK: Stmt
+
+  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
+    typeForExpr(ctx, scope)
+  }
+
+  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
+    compileExpr(ctx, scope, depth, isTail: false)
   }
 }
 

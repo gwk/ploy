@@ -16,17 +16,25 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     sig.writeTo(&target, depth + 1)
     body.writeTo(&target, depth + 1)
   }
-  
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    let type = sig.typeForTypeExpr(ctx, scope, "signature")
+    let fnScope = LocalScope(parent: scope, em: scope.em)
+    fnScope.addValRecord("$", type: type.sigPar)
+    fnScope.addValRecord("self", type: type)
+    return body.typeForExpr(ctx, fnScope)
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
-    let type = sig.typeVal(scope, "signature")
-    refine(ctx, exp: expType, act: type)
     let fnScope = LocalScope(parent: scope, em: em)
+    let type = ctx.typeForForm(self)
     fnScope.addValRecord("$", type: type.sigPar)
     fnScope.addValRecord("self", type: type)
     em.str(depth, (isTail ? "{v:" : "") + "(function self($){")
-    body.compileBody(ctx, depth + 1, fnScope, type.sigRet, isTail: true)
+    body.compileBody(ctx, fnScope, depth + 1, isTail: true)
     em.append("})" + (isTail ? "}" : ""))
-    return type
   }
 }

@@ -13,13 +13,18 @@ class Paren: _Form, Expr { // parenthesized expression: `(a)`.
     super.writeTo(&target, depth)
     expr.writeTo(&target, depth + 1)
   }
-  
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    return expr.typeForExpr(ctx, scope)
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
     em.str(depth, "(")
-    let retType = expr.compileExpr(ctx, depth + 1, scope, expType, isTail: isTail)
+    expr.compileExpr(ctx, scope, depth + 1, isTail: isTail)
     em.append(")")
-    return retType
   }
 }
 

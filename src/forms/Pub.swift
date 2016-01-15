@@ -18,13 +18,7 @@ class Pub: _Form, Def { // public modifier: `pub expr;`.
 
   var sym: Sym { return def.sym }
 
-  #if false
-  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    fatalError()
-  }
-  #endif
-
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
 }

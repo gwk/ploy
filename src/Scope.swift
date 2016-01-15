@@ -34,7 +34,7 @@ class Scope: CustomStringConvertible {
     if let existing = bindings[sym.name] {
       if case .Fwd = existing.kind {
         assert(existing.sym!.name == sym.name)
-        bindings.removeValueForKey(sym.name)
+        bindings.removeValueForKey(sym.name) // TODO: unecessary - remove?
       } else {
         sym.failRedef(existing.sym)
       }
@@ -49,17 +49,17 @@ class Scope: CustomStringConvertible {
     bindings[key] = ScopeRecord(sym: nil, hostName: key, kind: .Val(type))
   }
   
-  func record(sym: Sym) -> ScopeRecord {
+  func record(sym sym: Sym) -> ScopeRecord {
     if let r = getRecord(sym) {
       return r
     }
     if let parent = parent {
-      return parent.record(sym)
+      return parent.record(sym: sym)
     }
     sym.failUndef()
   }
   
-  func record(path: Path) -> ScopeRecord {
+  func record(path path: Path) -> ScopeRecord {
     var space: Space = globalSpace
     for (i, sym) in path.syms.enumerate() {
       guard let r = space.getRecord(sym) else {

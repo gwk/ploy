@@ -22,27 +22,24 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     sym.writeTo(&target, depth + 1)
     val.writeTo(&target, depth + 1)
   }
-  
-  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope) {
+
+  // MARK: Stmt
+
+  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
+    let type = val.typeForExpr(ctx, scope)
+    scope.addRecord(sym, kind: .Val(type))
+    ctx.putForm(self, scope: scope)
+  }
+
+  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
     let em = scope.em
     em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
-    let type = val.compileExpr(ctx, depth + 1, scope, ctx.addFreeType(), isTail: false)
-    scope.addRecord(sym, kind: .Val(type))
+    val.compileExpr(ctx, scope, depth + 1, isTail: false)
   }
 
   // MARK: Def
   
-  #if false
-  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    if let ann = val as? Ann {
-      return .Lazy(ann.typeExpr.typeVal(space, "type annnotation"))
-    } else {
-      val.failSyntax("definition requires explicit type annotation")
-    }
-  }
-  #endif
-  
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
     let em = space.makeEm()
     let fullName = "\(space.name)/\(sym.name)"
     let hostName = "\(space.hostPrefix)\(sym.hostName)"
@@ -52,7 +49,9 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     em.str(0, "  throw \"error: lazy value '\(fullName)' recursively referenced during initialization.\" };")
     em.str(0, " let val =")
     let ctx = TypeCtx()
-    let type = val.compileExpr(ctx, 1, LocalScope(parent: space, em: em), ctx.addFreeType(), isTail: false)
+    let scope = LocalScope(parent: space, em: em)
+    let type = val.typeForExpr(ctx, scope)
+    val.compileExpr(ctx, scope, 1, isTail: false)
     em.append(";")
     em.str(0, " \(hostName)__acc = function() { return val };")
     em.str(0, " return val; }")

@@ -16,20 +16,14 @@ class PolyFn: _Form, Def {
 
   // MARK: Def
 
-  #if false
-  func scopeRecordKind(space: Space) -> ScopeRecord.Kind {
-    fatalError()
-  }
-  #endif
-
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
     let hostName = "\(space.hostPrefix)\(sym.name)"
     let methodList = space.methods.getDefault(sym.name)
     var sigsToPairs: [Type: MethodList.Pair]
     do {
       sigsToPairs = try methodList.pairs.mapUniquesToDict() {
         (pair) in
-        (pair.method.methodSig(pair.space), pair)
+        (pair.method.methodSig(ctx, pair.space), pair)
       }
     } catch let e as DuplicateKeyError<Type, MethodList.Pair> {
       failType("method has duplicate type: \(e.key)", notes:

@@ -24,9 +24,8 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   var hostAccessor: String {
     return ".\(hostName)"
   }
-  
-  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type {
-    em.str(depth, hostAccessor)
+
+  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type {
     switch accesseeType.kind {
     case .Cmpd(let pars, _, _):
       for par in pars {
@@ -41,11 +40,23 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
       failType("symbol cannot access into value of type: \(accesseeType)")
     }
   }
-  
+
+  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) {
+    em.str(depth, hostAccessor)
+  }
+
   // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    fatalError()
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
+    fatalError()
+  }
   
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
-    return compileSym(ctx, depth, scope.em, scope.record(self), expType, isTail: isTail)
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) -> Type {
+    return compileSym(ctx, depth, scope.em, scope.record(sym: self), isTail: isTail)
   }
 
   // MARK: Identifier
@@ -53,35 +64,35 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   var syms: [Sym] { return [self] }
   
   func record(scope: Scope, _ sym: Sym) -> ScopeRecord {
-    return scope.record(self)
+    return scope.record(sym: self)
   }
 
   // MARK: TypeExpr
-  
-  func typeVal(scope: Scope, _ subj: String) -> Type {
-    return typeValForTypeRecord(scope.record(self), subj)
+
+  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type {
+    return typeForTypeRecord(scope.record(sym: self), subj)
   }
 
   // MARK: Sym
   
   var hostName: String { return name.dashToUnder }
   
-  func typeValForExprRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
+  func typeForExprRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
     switch scopeRecord.kind {
-    case .Val(let type): return type
     case .Lazy(let type): return type
+    case .Val(let type): return type
     default: failType("\(subj) expects a value; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
-  func typeValForTypeRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
+  func typeForTypeRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
     switch scopeRecord.kind {
     case .Type(let type): return type
     default: failType("\(subj) expects a type; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
-  func compileSym(ctx: TypeCtx, _ depth: Int, _ em: Emitter, _ scopeRecord: ScopeRecord, _ expType: Type, isTail: Bool) -> Type {
+  func compileSym(ctx: TypeCtx, _ depth: Int, _ em: Emitter, _ scopeRecord: ScopeRecord, isTail: Bool) -> Type {
     var type: Type! = nil
     switch scopeRecord.kind {
     case .Val(let t):
@@ -91,8 +102,8 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
       type = t
       let s = "\(scopeRecord.hostName)__acc()"
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
-    case .Fwd():
-      failType("expected a value; `\(name)` refers to a forward declaration (INTERNAL ERROR?)")
+    case .Fwd(let t):
+      failType("expected a value; `\(name)` refers to a forward declaration: \(t); INTERNAL ERROR?")
     case .PolyFn(let t):
       type = t
       em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
@@ -101,7 +112,6 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     case .Type(_):
       failType("expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
-    refine(ctx, exp: expType, act: type)
     return type
   }
   

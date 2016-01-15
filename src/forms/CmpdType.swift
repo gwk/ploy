@@ -16,8 +16,8 @@ class CmpdType: _Form, TypeExpr { // compound type: `<A B>`.
     }
   }
   
-  func typeVal(scope: Scope, _ subj: String) -> Type {
-    return Type.Cmpd(pars.map { $0.typeValPar(scope) })
+  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type {
+    return Type.Cmpd(pars.map { $0.typeForPar(ctx, scope, subj) })
   }
 }
 

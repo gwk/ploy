@@ -23,8 +23,8 @@ class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
     ret.writeTo(&target, depth + 1)
   }
 
-  func typeVal(scope: Scope, _ subj: String) -> Type {
-    return Type.Sig(par: par.typeVal(scope, "signature"), ret: ret.typeVal(scope, "signature"))
+  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type {
+    return Type.Sig(par: par.typeForTypeExpr(ctx, scope, "signature input"), ret: ret.typeForTypeExpr(ctx, scope, "signature return"))
   }
 }
 

@@ -30,20 +30,24 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
 
   // MARK: Expr
 
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type {
-    return syms.last!.compileSym(ctx, depth, scope.em, scope.record(self), expType, isTail: isTail)
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    fatalError()
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
+    syms.last!.compileSym(ctx, depth, scope.em, scope.record(path: self), isTail: isTail)
   }
 
   // MARK: Identifier
 
   var name: String { return syms.map({$0.name}).joinWithSeparator("/") }
   
-  func record(scope: Scope, _ sym: Sym) -> ScopeRecord { return scope.record(self) }
+  func record(scope: Scope, _ sym: Sym) -> ScopeRecord { return scope.record(path: self) }
 
   // MARK: TypeExpr
 
-  func typeVal(scope: Scope, _ subj: String) -> Type {
-    return syms.last!.typeValForTypeRecord(scope.record(self), subj)
+  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type {
+    return syms.last!.typeForTypeRecord(scope.record(path: self), subj)
   }
 }
 

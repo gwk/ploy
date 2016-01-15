@@ -7,7 +7,7 @@ struct ScopeRecord {
   typealias _Type = Type
 
   enum Kind {
-    case Fwd()
+    case Fwd(_Type) // TODO: distinguish between fwd types and fwd vals? is this even possible?
     case Lazy(_Type)
     case PolyFn(_Type)
     case Space(_Space)
@@ -16,7 +16,7 @@ struct ScopeRecord {
     
     var kindDesc: String {
       switch self {
-      case Fwd: return "forward"
+      case Fwd: return "forward declaration"
       case Lazy: return "lazy value"
       case PolyFn: return "polyfunction"
       case Space: return "namespace"

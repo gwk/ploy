@@ -44,7 +44,7 @@ func compileProgram(file: OutFile, hostPath: String, main: Do, ins: [In]) {
   
   file.writeL("let _main = function(){ // main.")
   let ctx = TypeCtx()
-  main.compileBody(ctx, 1, LocalScope(parent: globalSpace, em: globalSpace.makeEm()), typeInt, isTail: true)
+  main.compileBody(ctx, LocalScope(parent: globalSpace, em: globalSpace.makeEm()), 1, isTail: true)
   // emitter gets flushed here when it gets released.
   file.writeL("};")
   file.writeL("\nPROC__exit(_tramp(_main()))})()")

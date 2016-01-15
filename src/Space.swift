@@ -23,8 +23,10 @@ class Space: Scope {
       return r
     }
     if let def = defs[sym.name] {
-      addRecord(sym, kind: .Fwd()) // the fwd def serves as a marker to prevent recursion.
-      return addRecord(sym, kind: def.compileDef(self))
+      let ctx = TypeCtx()
+      let type = ctx.addFreeType()
+      addRecord(sym, kind: .Fwd(type)) // the fwd def serves as a marker to prevent recursion.
+      return addRecord(sym, kind: def.compileDef(ctx, self))
     }
     return nil
   }

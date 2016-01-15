@@ -16,36 +16,43 @@ protocol Form : Streamable, CustomStringConvertible {
 
 protocol Accessor: Form {
   var hostAccessor: String { get }
-  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) -> Type
+  @warn_unused_result
+  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type
+  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type)
 }
 
 
 protocol Def: Form {
   var sym: Sym { get }
-  //func scopeRecordKind(space: Space) -> ScopeRecord.Kind
-  func compileDef(space: Space) -> ScopeRecord.Kind
+  @warn_unused_result
+  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind
 }
 
 
 protocol Expr: Form {
-  func compileExpr(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope, _ expType: Type, isTail: Bool) -> Type
+  @warn_unused_result
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool)
 }
 
 
 protocol Identifier: Form {
   var name: String { get }
   var syms: [Sym] { get }
+  @warn_unused_result
   func record(scope: Scope, _ sym: Sym) -> ScopeRecord
 }
 
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
-  func typeVal(scope: Scope, _ subj: String) -> Type // TODO: should this take a TypeCtx parameter to allow immediate refinement?
+  @warn_unused_result
+  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type
 }
 
 
 protocol Stmt: Form {
-  func compileStmt(ctx: TypeCtx, _ depth: Int, _ scope: LocalScope)
+  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope)
+  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int)
 }
 
 
@@ -108,6 +115,7 @@ func ==(l: _Form, r: _Form) -> Bool { return l === r }
 
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
+@warn_unused_result
 func castForm<T>(form: Form, _ subj: String, _ exp: String) -> T {
   // TODO: should be able to parameterize as <T: Form> but 2.0b6 does not like that.
   if let form = form as? T {
