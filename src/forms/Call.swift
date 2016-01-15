@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Call : _Form, Expr, Stmt {
+class Call : _Form, Expr {
   let callee: Expr
   let arg: Expr
   
@@ -42,16 +42,6 @@ class Call : _Form, Expr, Stmt {
     em.str(depth, " v:")
     arg.compileExpr(ctx, scope, depth + 1, isTail: false)
     em.append(isTail ? "}" : "})")
-  }
-
-  // MARK: Stmt
-
-  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
-    typeForExpr(ctx, scope)
-  }
-
-  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
-    compileExpr(ctx, scope, depth, isTail: false)
   }
 }
 

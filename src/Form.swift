@@ -50,12 +50,6 @@ protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
 }
 
 
-protocol Stmt: Form {
-  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope)
-  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int)
-}
-
-
 class _Form : Form, Hashable {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }

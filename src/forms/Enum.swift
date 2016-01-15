@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Enum: _Form, Def, Stmt { // enum declaration: `enum E variants…;`.
+class Enum: _Form, Def, Expr { // enum declaration: `enum E variants…;`.
   let sym: Sym
   let variants: [Par]
 
@@ -19,22 +19,22 @@ class Enum: _Form, Def, Stmt { // enum declaration: `enum E variants…;`.
     }
   }
 
-  // MARK: Stmt
-  
-  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
-    fatalError()
-  }
-
-  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
-    fatalError()
-  }
-  
   // MARK: Def
 
   func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
-    compileStmt(ctx, LocalScope(parent: space, em: space.makeEm()), 0)
+    compileExpr(ctx, LocalScope(parent: space, em: space.makeEm()), 0, isTail: false)
     // TODO.
     return .Type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
+  }
+
+  // MARK: Expr
+
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    fatalError()
+  }
+
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
+    fatalError()
   }
 }
 

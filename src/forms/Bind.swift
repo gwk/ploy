@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
+class Bind: _Form, Expr, Def { // value binding: `name=expr`.
   let sym: Sym
   let val: Expr
   
@@ -23,15 +23,16 @@ class Bind: _Form, Stmt, Def { // value binding: `name=expr`.
     val.writeTo(&target, depth + 1)
   }
 
-  // MARK: Stmt
+  // MARK: Expr
 
-  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
+  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = val.typeForExpr(ctx, scope)
     scope.addRecord(sym, kind: .Val(type))
     ctx.putForm(self, scope: scope)
+    return typeVoid
   }
 
-  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
+  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
     let em = scope.em
     em.str(depth, "let \(scope.hostPrefix)\(sym.hostName) =")
     val.compileExpr(ctx, scope, depth + 1, isTail: false)

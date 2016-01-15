@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
+class If: _Form, Expr { // if statement: `if cases… default;`.
   let cases: [Case]
   let dflt: Expr?
 
@@ -50,16 +50,6 @@ class If: _Form, Expr, Stmt { // if statement: `if cases… default;`.
       em.str(depth + 1, "undefined")
     }
     em.append(")")
-  }
-
-  // MARK: Stmt
-
-  func typecheckStmt(ctx: TypeCtx, _ scope: LocalScope) {
-    typeForExpr(ctx, scope)
-  }
-
-  func compileStmt(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
-    compileExpr(ctx, scope, depth, isTail: false)
   }
 }
 

@@ -292,8 +292,8 @@ class Src: CustomStringConvertible {
   
   func parseDo(pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
-    let (stmts, expr, _, end) = parseBody(p)
-    return Do(synForTerminator(pos, end, "}", "do form"), stmts: stmts, expr: expr)
+    let (exprs, _, end) = parseBody(p)
+    return Do(synForTerminator(pos, end, "}", "do form"), exprs: exprs)
   }
   
   // MARK: keyword sentences.
@@ -528,33 +528,16 @@ class Src: CustomStringConvertible {
     return (args, end)
   }
   
-  func parseBody(pos: Pos) -> ([Stmt], Expr?, Pos, Pos) {
+  func parseBody(pos: Pos) -> ([Expr], Pos, Pos) {
     let (forms, end) = parseRawForms(pos)
-    var visEnd = end
-    var stmts: [Stmt] = []
-    var expr: Expr? = nil
-    for (i, f) in forms.enumerate() {
-      let isLast = (i == forms.lastIndex)
-      if isLast {
-        visEnd = f.syn.end
-        if let e = f as? Expr {
-          expr = e
-          break
-        }
-      }
-      if let s = f as? Stmt {
-        stmts.append(s)
-      } else {
-        let exp = isLast ? "tail form to be either a statement or an expression" : "non-tail form to be a statement";
-        f.failSyntax("body expects \(exp); received \(f.syntaxName).")
-      }
-    }
-    return (stmts, expr, visEnd, end)
+    let exprs: [Expr] = forms.map { castForm($0, "body", "expression") }
+    let visEnd = (exprs.last?.syn.end).or(end)
+    return (exprs, visEnd, end)
   }
   
   func parseBodyToImplicitDo(pos: Pos) -> Do {
-    let (stmts, expr, visEnd, end) = parseBody(pos)
-    return Do(Syn(src: self, pos: pos, visEnd: visEnd, end: end), stmts: stmts, expr: expr)
+    let (exprs, visEnd, end) = parseBody(pos)
+    return Do(Syn(src: self, pos: pos, visEnd: visEnd, end: end), exprs: exprs)
   }
   
   func parseMain(verbose verbose: Bool = false) -> ([In], Do) {
@@ -562,31 +545,26 @@ class Src: CustomStringConvertible {
     if hasSome(end) {
       failParse(end, nil, "unexpected terminator character: '\(char(end))'")
     }
-    guard let last = forms.last else {
-      fail(startPos, end, "syntax error", "empty main body; main requires a final Int exit code expression.")
-    }
-    guard let exitExpr = last as? Expr else {
-      last.failSyntax("main body requires final form to be an Int exit code expression.")
-    }
     var ins: [In] = []
-    var stmts: [Stmt] = []
-    for (i, f) in forms.enumerate() {
-      if i == forms.lastIndex {
-        break
-      }
+    var exprs: [Expr] = []
+    for f in forms {
       if let in_ = f as? In {
-        if stmts.count > 0 {
-          in_.failSyntax("`in` forms must precede all statements in main body.", notes: (stmts.last, "preceding statement here"))
+        if exprs.count > 0 {
+          in_.failSyntax("`in` forms must precede all expressions in main body.",
+            notes: (exprs.last, "preceding expression here"))
         }
         ins.append(in_)
-      } else if let s = f as? Stmt {
-        stmts.append(s)
+      } else if let s = f as? Expr {
+        exprs.append(s)
       } else {
-        f.failSyntax("main body expects `in` forms and statements; received \(f.syntaxName).")
+        f.failSyntax("main body expects `in` forms and expressions; received \(f.syntaxName).")
       }
     }
-    let bodyPos = (stmts.count > 0 ? stmts[0].syn.pos : exitExpr.syn.pos)
-    let bodyDo = Do(Syn(src: self, pos: bodyPos, visEnd: exitExpr.syn.visEnd, end: exitExpr.syn.end), stmts: stmts, expr: exitExpr)
+    guard let last = exprs.last else {
+      fail(startPos, end, "syntax error", "empty main body; main requires a final Int exit code expression.")
+    }
+    let bodyPos = exprs[0].syn.pos
+    let bodyDo = Do(Syn(src: self, pos: bodyPos, visEnd: last.syn.visEnd, end: last.syn.end), exprs: exprs)
     if verbose {
       for i in ins {
         i.writeTo(&std_err)
