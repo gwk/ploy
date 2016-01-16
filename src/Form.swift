@@ -16,8 +16,7 @@ protocol Form : Streamable, CustomStringConvertible {
 
 protocol Accessor: Form {
   var hostAccessor: String { get }
-  @warn_unused_result
-  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type
+  var propAccessor: Type.PropAccessor { get }
   func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type)
 }
 

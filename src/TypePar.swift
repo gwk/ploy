@@ -6,13 +6,11 @@ class TypePar: CustomStringConvertible {
   let index: Int
   let label: Sym?
   let type: Type
-  let form: Par?
-  
-  init(index: Int, label: Sym?, type: Type, form: Par?) {
+
+  init(index: Int, label: Sym?, type: Type) {
     self.index = index
     self.label = label
     self.type = type
-    self.form = form
   }
   
   var description: String {

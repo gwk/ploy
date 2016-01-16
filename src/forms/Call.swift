@@ -29,7 +29,7 @@ class Call : _Form, Expr {
     let calleeType = callee.typeForExpr(ctx, scope)
     let argType = arg.typeForExpr(ctx, scope)
     let retType = ctx.addFreeType()
-    ctx.addConstraint(calleeType, Type.Sig(par: argType, ret: retType))
+    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: retType))
     return retType
   }
 

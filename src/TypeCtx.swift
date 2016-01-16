@@ -3,7 +3,7 @@
 
 class TypeCtx {
   private var freeTypes = [Type]()
-  private var constraints = [(Type, Type)]()
+  private var constraints = [(Form, Type, Form, Type)]()
   private var inferredTypes = [Type:Type]() // maps unrefined types to their partially or completely refined types.
   private var unrefinedTypes = SetDict<Type, Type>() // maps free instances to all types containing them.
   private var formTypes = [_Form:Type]() // maps forms to types.
@@ -35,8 +35,8 @@ class TypeCtx {
     formScopes[form as! _Form] = scope
   }
 
-  func addConstraint(a: Type, _ b: Type) {
-    constraints.append((a, b))
+  func constrain(actForm: Form, _ actType: Type, to expForm: Form, _ expType: Type) {
+    constraints.append((actForm, actType, expForm, expType))
   }
 
   func addFreeType() -> Type {

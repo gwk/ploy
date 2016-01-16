@@ -1,39 +1,39 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Ann: _Form, Expr { // annotation: `val:Type`.
-  let val: Expr
+class Ann: _Form, Expr { // annotation: `expr:Type`.
+  let expr: Expr
   let typeExpr: TypeExpr
   
-  init(_ syn: Syn, val: Expr, typeExpr: TypeExpr) {
-    self.val = val
+  init(_ syn: Syn, expr: Expr, typeExpr: TypeExpr) {
+    self.expr = expr
     self.typeExpr = typeExpr
     super.init(syn)
   }
   
   static func mk(l: Form, _ r: Form) -> Form {
     return Ann(Syn(l.syn, r.syn),
-      val: castForm(l, "type annotation", "expression"),
+      expr: castForm(l, "type annotation", "expression"),
       typeExpr: castForm(r, "type annotation", "type expression"))
   }
   
   override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
     super.writeTo(&target, depth)
-    val.writeTo(&target, depth + 1)
+    expr.writeTo(&target, depth + 1)
     typeExpr.writeTo(&target, depth + 1)
   }
 
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let exprType = val.typeForExpr(ctx, scope)
-    let annType = typeExpr.typeForTypeExpr(ctx, scope, "type annotation")
-    ctx.addConstraint(exprType, annType)
-    return exprType
+    let exprType = expr.typeForExpr(ctx, scope)
+    let type = typeExpr.typeForTypeExpr(ctx, scope, "type annotation")
+    ctx.constrain(expr, exprType, to: typeExpr, type)
+    return type
   }
 
   func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    val.compileExpr(ctx, scope, depth, isTail: isTail)
+    expr.compileExpr(ctx, scope, depth, isTail: isTail)
   }
 }
 

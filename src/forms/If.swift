@@ -25,12 +25,16 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = (dflt == nil) ? typeVoid: ctx.addFreeType() // all cases must return same type.
+    // TODO: much more to do here when default is missing;
+    // e.g. inferring complete case coverage without default, typeHalt support, etc.
     for c in cases {
-      ctx.addConstraint(typeBool, c.condition.typeForExpr(ctx, scope))
-      ctx.addConstraint(type, c.consequence.typeForExpr(ctx, scope))
+      let cond = c.condition
+      let cons = c.consequence
+      ctx.constrain(cond, cond.typeForExpr(ctx, scope), to: c, typeBool)
+      ctx.constrain(cons, cons.typeForExpr(ctx, scope), to: self, type)
     }
     if let dflt = dflt {
-      ctx.addConstraint(type, dflt.typeForExpr(ctx, scope))
+      ctx.constrain(dflt, dflt.typeForExpr(ctx, scope), to: self, type)
     }
     return type
   }

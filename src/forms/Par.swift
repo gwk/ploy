@@ -1,11 +1,11 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Par: _Form { // parameter.
+class Par: _Form { // compound parameter.
   
   let index: Int
   let label: Sym?
-  let typeExpr: TypeExpr? // type and dflt cannot both be set. // TODO: use Either enum?
+  let typeExpr: TypeExpr? // typeExpr and dflt cannot both be set. // TODO: use Either enum?
   let dflt: Expr?
 
   init(_ syn: Syn, index: Int, label: Sym?, typeExpr: TypeExpr?, dflt: Expr?) {
@@ -31,7 +31,7 @@ class Par: _Form { // parameter.
   
   var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
   
-  func typeForPar(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> TypePar {
+  func typeParForPar(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> TypePar {
     var type: Type
     if let typeExpr = typeExpr {
       type = typeExpr.typeForTypeExpr(ctx, scope, "parameter type")
@@ -41,7 +41,7 @@ class Par: _Form { // parameter.
     } else {
       fatalError() // enforced by mk.
     }
-    return TypePar(index: index, label: label, type: type, form: self)
+    return TypePar(index: index, label: label, type: type)
   }
   
   static func mk(index index: Int, form: Form, subj: String) -> Par {
@@ -49,8 +49,8 @@ class Par: _Form { // parameter.
     var typeExpr: TypeExpr? = nil
     var dflt: Expr? = nil
     if let ann = form as? Ann {
-      guard let sym = ann.val as? Sym else {
-        ann.val.failSyntax("annotated parameter requires a label symbol.")
+      guard let sym = ann.expr as? Sym else {
+        ann.expr.failSyntax("annotated parameter requires a label symbol.")
       }
       label = sym
       typeExpr = ann.typeExpr

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Arg: _Form { // parameter.
+class Arg: _Form { // compound argument.
   
   let expr: Expr
   let label: Sym?
@@ -16,7 +16,11 @@ class Arg: _Form { // parameter.
     super.writeTo(&target, depth)
     expr.writeTo(&target, depth + 1)
   }
-  
+
+  func typeParForArg(ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypePar {
+    return TypePar(index: index, label: label, type: expr.typeForExpr(ctx, scope))
+  }
+
   func compileArg(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
     return expr.compileExpr(ctx, scope, depth, isTail: false)
   }

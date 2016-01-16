@@ -25,7 +25,11 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     return ".\(hostName)"
   }
 
-  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type {
+  var propAccessor: Type.PropAccessor {
+    return .Name(name)
+  }
+
+  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
     case .Cmpd(let pars, _, _):
       for par in pars {
@@ -48,15 +52,11 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    fatalError()
+    return typeForExprRecord(scope.record(sym: self), "expression")
   }
 
   func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    fatalError()
-  }
-  
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) -> Type {
-    return compileSym(ctx, depth, scope.em, scope.record(sym: self), isTail: isTail)
+    compileSym(ctx, depth, scope.em, scope.record(sym: self), isTail: isTail)
   }
 
   // MARK: Identifier
@@ -92,27 +92,22 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     }
   }
   
-  func compileSym(ctx: TypeCtx, _ depth: Int, _ em: Emitter, _ scopeRecord: ScopeRecord, isTail: Bool) -> Type {
-    var type: Type! = nil
+  func compileSym(ctx: TypeCtx, _ depth: Int, _ em: Emitter, _ scopeRecord: ScopeRecord, isTail: Bool) {
     switch scopeRecord.kind {
-    case .Val(let t):
-      type = t
+    case .Val:
       em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
-    case .Lazy(let t):
-      type = t
+    case .Lazy:
       let s = "\(scopeRecord.hostName)__acc()"
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
-    case .Fwd(let t):
-      failType("expected a value; `\(name)` refers to a forward declaration: \(t); INTERNAL ERROR?")
-    case .PolyFn(let t):
-      type = t
+    case .Fwd:
+      failType("expected a value; `\(name)` refers to a forward declaration. INTERNAL ERROR?")
+    case .PolyFn:
       em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
     case .Space(_):
       failType("expected a value; `\(name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace?
     case .Type(_):
       failType("expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
-    return type
   }
   
   @noreturn func failUndef() { failForm("scope error", msg: "`\(name)` is not defined in this scope") }

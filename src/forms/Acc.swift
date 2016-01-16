@@ -25,7 +25,7 @@ class Acc: _Form, Expr { // accessor: `field@val`.
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let accesseeType = accessee.typeForExpr(ctx, scope)
-    return accessor.typeForAccess(ctx, accesseeType: accesseeType)
+    return Type.Prop(accessor.propAccessor, type: accesseeType)
   }
 
   func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {

@@ -3,6 +3,18 @@
 
 class Type: CustomStringConvertible, Hashable, Comparable {
 
+  enum PropAccessor {
+    case Index(Int)
+    case Name(String)
+
+    var accessorString: String {
+      switch self {
+      case Index(let index): return String(index)
+      case Name(let string): return string
+      }
+    }
+  }
+
   enum Kind {
     case All(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
     case Any(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
@@ -11,7 +23,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case Free(index: Int)
     case Host
     case Prim
-    case Prop(type: Type, name: String)
+    case Prop(accessor: PropAccessor, type: Type)
     case Sig(par: Type, ret: Type, frees: Set<Type>, vars: Set<Type>)
     case Struct // TODO: vars
     case Var(name: String)
@@ -78,6 +90,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return Type(name, .Prim)
   }
 
+  class func Prop(accessor: PropAccessor, type: Type) -> Type {
+    let description = ("\(accessor.accessorString)@\(type)")
+    return Type(description, .Prop(accessor: accessor, type: type))
+  }
+
   class func Sig(par par: Type, ret: Type) -> Type {
     let description = "\(par.nestedSigDescription)%\(ret.nestedSigDescription)"
     return allTypes[description].or(Type(description, .Sig(par: par, ret: ret,
@@ -111,7 +128,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .Free: return [self]
     case .Host: return []
     case .Prim: return []
-    case .Prop(let type, _): return type.frees
+    case .Prop(_, let type): return type.frees
     case .Sig(_, _, let frees, _): return frees
     case .Struct: return []
     case .Var: return []
@@ -127,7 +144,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .Free: return []
     case .Host: return []
     case .Prim: return []
-    case .Prop(let type, _): return type.vars
+    case .Prop(_, let type): return type.vars
     case .Sig(_, _, _, let vars): return vars
     case .Struct: return [] // TODO: vars.
     case .Var: return [self]
@@ -173,7 +190,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   func refinePar(par: TypePar, replacement: Type) -> TypePar {
     let type = refine(par.type, with: replacement)
-    return (type == par.type) ? par : TypePar(index: par.index, label: par.label, type: type, form: par.form)
+    return (type == par.type) ? par : TypePar(index: par.index, label: par.label, type: type)
   }
 }
 
