@@ -33,7 +33,7 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
     case .Cmpd(let pars, _, _):
-      if let par = pars.get(val) {
+      if let par = pars.optEl(val) {
         return par.type
       } else {
         failType("numeric accessor is out of range for type: \(accesseeType)")
