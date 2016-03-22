@@ -32,7 +32,7 @@ class Src: CustomStringConvertible {
     var c = count
     while c > 0 && idx < text.endIndex {
       idx = idx.successor()
-      c--
+      c -= 1
     }
     return Pos(idx: idx, line: pos.line, col: pos.col + count)
   }
@@ -156,7 +156,8 @@ class Src: CustomStringConvertible {
     return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: slice(pos, p))
   }
   
-  func parseLitNum(pos: Pos, var foundDot: Bool = false) -> LitNum {
+  func parseLitNum(pos: Pos, foundDot: Bool = false) -> LitNum {
+    var foundDot = foundDot
     assert(ployDecChars.contains(char(pos)) || char(pos) == ".")
     var p = adv(pos)
     while hasSome(p) {
@@ -214,7 +215,7 @@ class Src: CustomStringConvertible {
         if !ployHexChars.contains(c) {
           failParse(p, nil, "escape ordinal must be a hexadecimal digit")
         }
-        ordCount--
+        ordCount -= 1
       } else {
         if let op = ordPos {
           if let ord = Int(slice(op, p), radix: 16) {

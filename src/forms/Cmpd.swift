@@ -59,7 +59,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
       em.str(depth, " \(hostName):")
       arg.compileArg(ctx, scope, depth + 1)
       em.append(",")
-      argIndex++
+      argIndex += 1
     } else { // TODO: support default arguments.
       failType("missing argument for parameter")
     }
