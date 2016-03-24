@@ -4,7 +4,7 @@
 set -e
 cd $(dirname $0)/..
 
-profs=$(find _bld/test -name *.profraw -newer _bld/ploy)
+profs=$(find _build/test -name *.profraw -newer _build/ploy)
 
-xcrun llvm-profdata merge -o _bld/ploy.profdata $profs
-xcrun llvm-cov show _bld/ploy -instr-profile=_bld/ploy.profdata $(sh/sources.sh | egrep '^src/')
+xcrun llvm-profdata merge -o _build/ploy.profdata $profs
+xcrun llvm-cov show _build/ploy -instr-profile=_build/ploy.profdata $(sh/sources.sh | egrep '^src/')

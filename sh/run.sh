@@ -6,10 +6,10 @@ cd $(dirname $0)/..
 
 mainPath="$1"; shift
 base=${mainPath%.ploy}
-outPath="_bld/$base"
+outPath="_build/$base"
 outDir=$(dirname "$outPath")
 
 sh/build.sh
 mkdir -p "$outDir"
-_bld/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
+_build/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
 "$outPath" "$@"

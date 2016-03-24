@@ -17,7 +17,7 @@ from common.all import *
 
 
 bar_width = 64
-results_dir = '_bld'
+results_dir = '_build'
 
 arg_parser = argparse.ArgumentParser(description='test harness for ploy.')
 arg_parser.add_argument('-compiler', help='compiler command string')

@@ -10,5 +10,5 @@ tests="$@"
 [[ -z "$tests" ]] && tests="test"
 
 sh/run.sh test/0-basic/ret-0.ploy # pre-test to make sure that ploy works.
-tools/test.py -compiler "_bld/ploy $libs" $tests
+tools/test.py -compiler "_build/ploy $libs" $tests
 
