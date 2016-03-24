@@ -80,9 +80,9 @@ class Src: CustomStringConvertible {
   
   func underlines(pos: Pos, _ end: Pos, lineLen: Int) -> (String, String) {
     assert(pos.line < end.line)
-    let spaces = String(count: pos.col, char: " ")
-    let squigs = String(count: lineLen - pos.col, char: "~")
-    return ("\(spaces)\(squigs)", end.col > 0 ? String(count: end.col, char: "~") : "^")
+    let spaces = String(char: " ", count: pos.col)
+    let squigs = String(char: " ", count: lineLen - pos.col)
+    return ("\(spaces)\(squigs)", end.col > 0 ? String(char: " ", count: end.col) : "^")
   }
 
   func errPos(pos: Pos, end: Pos?, prefix: String, msg: String) {
