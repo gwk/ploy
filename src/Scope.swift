@@ -32,7 +32,7 @@ class Scope: CustomStringConvertible {
 
   func addRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
     if let existing = bindings[sym.name] {
-      if case .Fwd = existing.kind {
+      if case .fwd = existing.kind {
         assert(existing.sym?.name == sym.name)
       } else {
         sym.failRedef(existing.sym)
@@ -45,7 +45,7 @@ class Scope: CustomStringConvertible {
   
   func addValRecord(key: String, type: Type) {
     assert(!bindings.contains(key))
-    bindings[key] = ScopeRecord(sym: nil, hostName: key, kind: .Val(type))
+    bindings[key] = ScopeRecord(sym: nil, hostName: key, kind: .val(type))
   }
   
   func record(sym sym: Sym) -> ScopeRecord {
@@ -67,7 +67,7 @@ class Scope: CustomStringConvertible {
       if i == path.syms.lastIndex! {
         return r
       }
-      if case .Space(let s) = r.kind {
+      if case .space(let s) = r.kind {
         space = s
       } else {
         sym.failType("expected a space; found a \(r.kind.kindDesc)")

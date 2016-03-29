@@ -53,7 +53,7 @@ class TypeCtx {
 
   func trackFreeTypes(type: Type) {
     for free in type.frees {
-      guard case .Free(let index) = free.kind else { fatalError() }
+      guard case .free(let index) = free.kind else { fatalError() }
       freeIndicesToUnresolvedTypes.insert(index, member: type)
     }
   }
@@ -71,7 +71,7 @@ class TypeCtx {
       }
     }
     resolvedTypes[type] = resolved
-    if case .Free(let index) = resolved.kind {
+    if case .free(let index) = resolved.kind {
       let unresolvedTypes = freeIndicesToUnresolvedTypes[index].or([])
       for el in unresolvedTypes {
         let elResolved = el.refine(type, with: resolved)
@@ -84,19 +84,19 @@ class TypeCtx {
   func resolveConstraint(constraint: TypeConstraint) throws {
 
     switch constraint.actType.kind {
-    case .All(_ , _, _):
+    case .all(_ , _, _):
       throw Error("actual type cannot be of kind `All`")
-    case .Any(_ , _, _):
+    case .any(_ , _, _):
       throw Error("actual type is of kind `Any`; unimplemented")
-    case .Cmpd(_ , _, _): break
-    case .Enum: break
-    case .Free: break
-    case .Host: break
-    case .Prim: break
-    case .Prop(_, _): break
-    case .Sig(_, _, _, _): break
-    case .Struct: break
-    case .Var: break
+    case .cmpd(_ , _, _): break
+    case .enum_: break
+    case .free: break
+    case .host: break
+    case .prim: break
+    case .prop(_, _): break
+    case .sig(_, _, _, _): break
+    case .struct_: break
+    case .var_: break
     }
     if !constraint.actType.accepts(constraint.expType) {
       throw Error("constraint failed: \(constraint.desc)")
@@ -118,7 +118,7 @@ class TypeCtx {
       guard let resolved = resolvedTypes[type] else {
         fatalError("unresolved free type: \(type)")
       }
-      if case .Free = resolved.kind {
+      if case .free = resolved.kind {
         fatalError("free type resolved to free type: \(type) -> \(resolved)")
       }
     }

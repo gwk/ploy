@@ -33,7 +33,7 @@ class Space: Scope {
       mainIn.failForm("error", msg: "`main` is not defined in MAIN")
     }
     let record = getRecord(def.sym)!
-    guard case .Val(let type) = record.kind else {
+    guard case .val(let type) = record.kind else {
       def.failType("expected `main` to be a function value; found \(record.kind.kindDesc)")
     }
     if type != typeOfMainFn {
@@ -44,14 +44,14 @@ class Space: Scope {
 
   func extendRecord(record: ScopeRecord, method: Method) {
     switch record.kind {
-    case .PolyFn: break
+    case .polyFn: break
     default: method.identifier.failType("definition is not extensible", notes: (record.sym, "definition is here"))
     }
   }
 
   func createSpace(pathNames pathNames: [String], name: String, hostName: String) -> Space {
     let space = Space(pathNames: pathNames, parent: self, file: file)
-    bindings.insertNew(name, value: ScopeRecord(sym: nil, hostName: space.hostPrefix + hostName, kind: .Space(space)))
+    bindings.insertNew(name, value: ScopeRecord(sym: nil, hostName: space.hostPrefix + hostName, kind: .space(space)))
     // note: sym is nil because in forms can be declared in multiple locations.
     return space
   }
@@ -61,7 +61,7 @@ class Space: Scope {
     for (i, sym) in syms.enumerate() {
       if let r = space.bindings[sym.name] {
         switch r.kind {
-        case .Space(let next):
+        case .space(let next):
           space = next
         default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
         }
@@ -91,9 +91,9 @@ class Space: Scope {
   }
 
   func setupRoot(ins: [In], mainIn: In) -> Space { // returns MAIN.
-    bindings["ROOT"] = ScopeRecord(sym: nil, hostName: "ROOT", kind: .Space(self))
+    bindings["ROOT"] = ScopeRecord(sym: nil, hostName: "ROOT", kind: .space(self))
     for t in intrinsicTypes {
-      bindings[t.description] = ScopeRecord(sym: nil, hostName: t.description, kind: .Type(t))
+      bindings[t.description] = ScopeRecord(sym: nil, hostName: t.description, kind: .type(t))
     }
     for i in ins {
       let space = getOrCreateSpace(i.identifier!.syms)

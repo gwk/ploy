@@ -4,29 +4,29 @@
 class Type: CustomStringConvertible, Hashable, Comparable {
 
   enum PropAccessor {
-    case Index(Int)
-    case Name(String)
+    case index(Int)
+    case name(String)
 
     var accessorString: String {
       switch self {
-      case Index(let index): return String(index)
-      case Name(let string): return string
+      case index(let index): return String(index)
+      case name(let string): return string
       }
     }
   }
 
   enum Kind {
-    case All(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
-    case Any(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
-    case Cmpd(pars: [TypePar], frees: Set<Type>, vars: Set<Type>)
-    case Enum // TODO: vars
-    case Free(index: Int)
-    case Host
-    case Prim
-    case Prop(accessor: PropAccessor, type: Type)
-    case Sig(par: Type, ret: Type, frees: Set<Type>, vars: Set<Type>)
-    case Struct // TODO: vars
-    case Var(name: String)
+    case all(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
+    case any(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
+    case cmpd(pars: [TypePar], frees: Set<Type>, vars: Set<Type>)
+    case enum_ // TODO: vars
+    case free(index: Int)
+    case host
+    case prim
+    case prop(accessor: PropAccessor, type: Type)
+    case sig(par: Type, ret: Type, frees: Set<Type>, vars: Set<Type>)
+    case struct_ // TODO: vars
+    case var_(name: String)
   }
 
   static var allTypes: [String: Type] = [:]
@@ -45,29 +45,29 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
   
   class func All(members: Set<Type>) -> Type {
-    let description = members.count > 0 ? "All<\(members.map({$0.description}).sort().joinWithSeparator(" "))>" : "Every"
-    return allTypes[description].or(Type(description, .All(members: members,
-      frees: Set(members.flatMap { $0.frees }),
-      vars: Set(members.flatMap { $0.vars }))))
+    let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sort().joinWithSeparator(" "))>"
+    return allTypes[description].or(Type(description, .all(members: members,
+        frees: Set(members.flatMap { $0.frees }),
+        vars: Set(members.flatMap { $0.vars }))))
   }
 
   class func Any(members: Set<Type>) -> Type {
-    let description = members.count > 0 ? "Any<\(members.map({$0.description}).sort().joinWithSeparator(" "))>" : "Empty"
-    return allTypes[description].or(Type(description, .Any(members: members,
+    let description = members.isEmpty ? "Empty" : "Any<\(members.map({$0.description}).sort().joinWithSeparator(" "))>"
+    return allTypes[description].or(Type(description, .any(members: members,
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars }))))
   }
 
   class func Cmpd(pars: [TypePar]) -> Type {
     let description = "<\(pars.map({$0.description}).sort().joinWithSeparator(" "))>"
-    return allTypes[description].or(Type(description, .Cmpd(pars: pars,
+    return allTypes[description].or(Type(description, .cmpd(pars: pars,
       frees: Set(pars.flatMap { $0.type.frees }),
       vars: Set(pars.flatMap { $0.type.vars }))))
   }
 
   class func Enum(spacePathNames names: [String], sym: Sym) -> Type {
     let description = (names + [sym.name]).joinWithSeparator("/")
-    return Type(description, .Enum)
+    return Type(description, .enum_)
   }
 
   class func Free(index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
@@ -76,90 +76,90 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
     assert(index == allFreeTypes.count)
     let description = "*\(index)"
-    let t = Type(description, .Free(index: index))
+    let t = Type(description, .free(index: index))
     allFreeTypes.append(t)
     return t
   }
 
   class func Host(spacePathNames names: [String], sym: Sym) -> Type {
     let description = (names + [sym.name]).joinWithSeparator("/")
-    return Type(description, .Host)
+    return Type(description, .host)
   }
 
   class func Prim(name: String) -> Type {
-    return Type(name, .Prim)
+    return Type(name, .prim)
   }
 
   class func Prop(accessor: PropAccessor, type: Type) -> Type {
     let description = ("\(accessor.accessorString)@\(type)")
-    return Type(description, .Prop(accessor: accessor, type: type))
+    return Type(description, .prop(accessor: accessor, type: type))
   }
 
   class func Sig(par par: Type, ret: Type) -> Type {
     let description = "\(par.nestedSigDescription)%\(ret.nestedSigDescription)"
-    return allTypes[description].or(Type(description, .Sig(par: par, ret: ret,
+    return allTypes[description].or(Type(description, .sig(par: par, ret: ret,
       frees: Set(seqs: [par.frees, ret.frees]),
       vars: Set(seqs: [par.vars, ret.vars]))))
   }
 
   class func Struct(spacePathNames names: [String], sym: Sym) -> Type {
     let description = (names + [sym.name]).joinWithSeparator("/")
-    return Type(description, .Struct)
+    return Type(description, .struct_)
   }
 
   class func Var(name: String) -> Type {
     let description = "*" + name
-    return Type(description, .Var(name: name))
+    return Type(description, .var_(name: name))
   }
 
   var nestedSigDescription: String {
     switch kind {
-    case .Sig: return "(\(description))"
+    case .sig: return "(\(description))"
     default: return description
     }
   }
 
   var frees: Set<Type> {
     switch kind {
-    case .All(_ , let frees, _): return frees
-    case .Any(_ , let frees, _): return frees
-    case .Cmpd(_ , let frees, _): return frees
-    case .Enum: return []
-    case .Free: return [] // does not return self.
-    case .Host: return []
-    case .Prim: return []
-    case .Prop(_, let type): return type.frees
-    case .Sig(_, _, let frees, _): return frees
-    case .Struct: return []
-    case .Var: return []
+    case .all(_ , let frees, _): return frees
+    case .any(_ , let frees, _): return frees
+    case .cmpd(_ , let frees, _): return frees
+    case .enum_: return []
+    case .free: return [] // does not return self.
+    case .host: return []
+    case .prim: return []
+    case .prop(_, let type): return type.frees
+    case .sig(_, _, let frees, _): return frees
+    case .struct_: return []
+    case .var_: return []
     }
   }
 
   var vars: Set<Type> {
     switch kind {
-    case .All(_ , _, let vars): return vars
-    case .Any(_ , _, let vars): return vars
-    case .Cmpd(_ , _, let vars): return vars
-    case .Enum: return [] // TODO: vars.
-    case .Free: return []
-    case .Host: return []
-    case .Prim: return []
-    case .Prop(_, let type): return type.vars
-    case .Sig(_, _, _, let vars): return vars
-    case .Struct: return [] // TODO: vars.
-    case .Var: return [] // does not return self.
+    case .all(_ , _, let vars): return vars
+    case .any(_ , _, let vars): return vars
+    case .cmpd(_ , _, let vars): return vars
+    case .enum_: return [] // TODO: vars.
+    case .free: return []
+    case .host: return []
+    case .prim: return []
+    case .prop(_, let type): return type.vars
+    case .sig(_, _, _, let vars): return vars
+    case .struct_: return [] // TODO: vars.
+    case .var_: return [] // does not return self.
     }
   }
 
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var sigPar: Type {
-    if case .Sig(let par, _, _, _) = kind { return par }
+    if case .sig(let par, _, _, _) = kind { return par }
     fatalError()
   }
 
   var sigRet: Type {
-    if case .Sig(_, let ret, _, _) = kind { return ret }
+    if case .sig(_, let ret, _, _) = kind { return ret }
     fatalError()
   }
 
@@ -168,24 +168,24 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
     //if let inferred = inferredTypes[exp] {}
     switch kind {
-    case .All(let members, _, _):
+    case .all(let members, _, _):
       switch act.kind {
-      case .All(let actMembers, _, _): return members.isSubsetOf(actMembers)
+      case .all(let actMembers, _, _): return members.isSubsetOf(actMembers)
       default: return members.all { $0.accepts(act) }
       }
-    case .Any(let members, _, _):
+    case .any(let members, _, _):
       switch act.kind {
-      case .Any(let actMembers, _, _): return members.isSupersetOf(actMembers)
+      case .any(let actMembers, _, _): return members.isSupersetOf(actMembers)
       default: return members.any { $0.accepts(act) }
       }
-    case .Cmpd(let pars, _, _):
+    case .cmpd(let pars, _, _):
       switch act.kind {
-      case .Cmpd(let actPars, _, _): return allZip(pars, actPars) { $0.accepts($1) }
+      case .cmpd(let actPars, _, _): return allZip(pars, actPars) { $0.accepts($1) }
       default: return false
       }
-    case .Sig(let par, let ret, _, _):
+    case .sig(let par, let ret, _, _):
       switch act.kind {
-      case .Sig(let actPar, let actRet, _, _):
+      case .sig(let actPar, let actRet, _, _):
         return par.accepts(actPar) && ret.accepts(actRet)
       default: return false
       }
@@ -196,25 +196,25 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   func refine(target: Type, with replacement: Type) -> Type {
     // within the receiver type, replace target type with replacement, returning a new type.
     switch kind {
-    case .Free, .Var: return (self == target) ? replacement : self
-    case .All(let members, let frees, let vars):
+    case .free, .var_: return (self == target) ? replacement : self
+    case .all(let members, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
         return Type.All(Set(members.map { self.refine($0, with: replacement) }))
       } else { return self }
-    case .Any(let members, let frees, let vars):
+    case .any(let members, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
         return Type.Any(Set(members.map { self.refine($0, with: replacement) }))
       } else { return self }
-    case .Cmpd(let pars, let frees, let vars):
+    case .cmpd(let pars, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
         return Type.Cmpd(pars.map() { self.refinePar($0, replacement: replacement) })
       } else { return self }
-    case .Sig(let par, let ret, let frees, let vars):
+    case .sig(let par, let ret, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
         return Type.Sig(par: refine(par, with: replacement), ret: refine(ret, with: replacement))
       } else { return self }
-    case .Enum: return self // TODO: vars.
-    case .Struct: return self // TODO: vars.
+    case .enum_: return self // TODO: vars.
+    case .struct_: return self // TODO: vars.
     default: return self
     }
   }

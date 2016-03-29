@@ -27,7 +27,7 @@ class Bind: _Form, Expr, Def { // value binding: `name=expr`.
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let exprType = val.typeForExpr(ctx, scope)
-    scope.addRecord(sym, kind: .Val(exprType))
+    scope.addRecord(sym, kind: .val(exprType))
     ctx.trackExpr(self, type: typeVoid)
     return typeVoid
   }
@@ -47,7 +47,7 @@ class Bind: _Form, Expr, Def { // value binding: `name=expr`.
     let type = ctx.typeForExpr(val)
     let needsLazy: Bool
     switch type.kind {
-    case .Sig: needsLazy = false
+    case .sig: needsLazy = false
     default: needsLazy = true
     }
     let em = Emitter(file: space.file)
@@ -63,13 +63,13 @@ class Bind: _Form, Expr, Def { // value binding: `name=expr`.
       em.str(0, " \(hostName)__acc = function() { return val };")
       em.str(0, " return val; }")
       em.flush()
-      return .Lazy(type)
+      return .lazy(type)
     } else {
       em.str(0, "let \(hostName) =")
       val.compileExpr(ctx, em, 1, isTail: false)
       em.append(";")
       em.flush()
-      return .Val(type)
+      return .val(type)
     }
   }
 }

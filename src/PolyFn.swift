@@ -41,6 +41,6 @@ class PolyFn: _Form, Def {
     em.str(0, " throw \"error: PolyFn dispatch not implemented\"") // TODO: dispatch.
     em.append("}")
     em.flush()
-    return .PolyFn(type)
+    return .polyFn(type)
   }
 }

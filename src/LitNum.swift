@@ -27,12 +27,12 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   }
 
   var propAccessor: Type.PropAccessor {
-    return .Index(val)
+    return .index(val)
   }
 
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
-    case .Cmpd(let pars, _, _):
+    case .cmpd(let pars, _, _):
       if let par = pars.optEl(val) {
         return par.type
       } else {

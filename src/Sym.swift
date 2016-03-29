@@ -26,12 +26,12 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   }
 
   var propAccessor: Type.PropAccessor {
-    return .Name(name)
+    return .name(name)
   }
 
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
-    case .Cmpd(let pars, _, _):
+    case .cmpd(let pars, _, _):
       for par in pars {
         if let label = par.label {
           if name == label.name {
@@ -84,33 +84,33 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   
   func typeForExprRecord(scopeRecord: ScopeRecord) -> Type {
     switch scopeRecord.kind {
-    case .Lazy(let type): return type
-    case .Val(let type): return type
+    case .lazy(let type): return type
+    case .val(let type): return type
     default: failType("expression expects a value; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
   func typeForTypeRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
     switch scopeRecord.kind {
-    case .Type(let type): return type
+    case .type(let type): return type
     default: failType("\(subj) expects a type; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
   func compileSym(em: Emitter, _ depth: Int, _ scopeRecord: ScopeRecord, isTail: Bool) {
     switch scopeRecord.kind {
-    case .Val:
+    case .val:
       em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
-    case .Lazy:
+    case .lazy:
       let s = "\(scopeRecord.hostName)__acc()"
       em.str(depth, isTail ? "{v:\(s)}" : "\(s)")
-    case .Fwd:
+    case .fwd:
       failType("expected a value; `\(name)` refers to a forward declaration. INTERNAL ERROR?")
-    case .PolyFn:
+    case .polyFn:
       em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
-    case .Space(_):
+    case .space(_):
       failType("expected a value; `\(name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace?
-    case .Type(_):
+    case .type(_):
       failType("expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
   }

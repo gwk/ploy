@@ -23,7 +23,7 @@ class Struct: _Form, Def { // struct declaration: `struct S fields…;`.
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
     // TODO.
-    return .Type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
+    return .type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
   }
 }
 

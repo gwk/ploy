@@ -23,7 +23,7 @@ class Enum: _Form, Def { // enum declaration: `enum E variants…;`.
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
     // TODO.
-    return .Type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
+    return .type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
   }
 }
 

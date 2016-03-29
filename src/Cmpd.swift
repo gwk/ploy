@@ -28,7 +28,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     let type = ctx.typeForExpr(self)
     em.str(depth, isTail ? "{{v:" : "{")
     switch type.kind {
-    case .Cmpd(let pars, _, _):
+    case .cmpd(let pars, _, _):
       var argIndex = 0
       for par in pars {
         self.compilePar(ctx, em, depth, par: par, argIndex: &argIndex)
