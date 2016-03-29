@@ -1,0 +1,9 @@
+# compiler implementation notes
+
+# classes
+
+- Scope
+  - LocalScope
+  - Space
+
+
