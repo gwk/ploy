@@ -28,19 +28,20 @@ class Call : _Form, Expr {
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let calleeType = callee.typeForExpr(ctx, scope)
     let argType = arg.typeForExpr(ctx, scope)
-    let retType = ctx.addFreeType()
-    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: retType))
-    return retType
+    let type = ctx.addFreeType()
+    ctx.trackExpr(self, type: type)
+    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: type), "call type")
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    let em = scope.em
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
     em.str(depth, isTail ? "{" : "_tramp({")
     em.str(depth, " c:")
-    callee.compileExpr(ctx, scope, depth + 1, isTail: false)
+    callee.compileExpr(ctx, em, depth + 1, isTail: false)
     em.append(",")
     em.str(depth, " v:")
-    arg.compileExpr(ctx, scope, depth + 1, isTail: false)
+    arg.compileExpr(ctx, em, depth + 1, isTail: false)
     em.append(isTail ? "}" : "})")
   }
 }

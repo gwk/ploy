@@ -16,14 +16,14 @@ class PolyFn: _Form, Def {
 
   // MARK: Def
 
-  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
+  func compileDef(space: Space) -> ScopeRecord.Kind {
     let hostName = "\(space.hostPrefix)\(sym.name)"
     let methodList = space.methods.getDefault(sym.name)
     var sigsToPairs: [Type: MethodList.Pair]
     do {
       sigsToPairs = try methodList.pairs.mapUniquesToDict() {
         (pair) in
-        (pair.method.methodSig(ctx, pair.space), pair)
+        (pair.method.typeForMethodSig(pair.space), pair)
       }
     } catch let e as DuplicateKeyError<Type, MethodList.Pair> {
       failType("method has duplicate type: \(e.key)", notes:
@@ -31,17 +31,16 @@ class PolyFn: _Form, Def {
         (e.incoming.method, "conflicting method definition"))
     } catch { fatalError() }
     let type = Type.All(Set(sigsToPairs.keys))
-    let em = space.makeEm()
+    let em = Emitter(file: space.file)
     em.str(0, "\(hostName)__table = {")
     for (sig, pair) in sigsToPairs.pairsSortedByKey {
-      let ctx = TypeCtx()
-      pair.method.compileMethod(ctx, space: space, polyFnType: type, sigType: sig, hostName: hostName)
+      pair.method.compileMethod(space, polyFnType: type, sigType: sig, hostName: hostName)
     }
-
+    em.append("}")
     em.str(0, "function \(hostName)($){")
-
-      em.append("}")
-
-      return .PolyFn(type)
+    em.str(0, " throw \"error: PolyFn dispatch not implemented\"") // TODO: dispatch.
+    em.append("}")
+    em.flush()
+    return .PolyFn(type)
   }
 }

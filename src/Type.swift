@@ -125,7 +125,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .Any(_ , let frees, _): return frees
     case .Cmpd(_ , let frees, _): return frees
     case .Enum: return []
-    case .Free: return [self]
+    case .Free: return [] // does not return self.
     case .Host: return []
     case .Prim: return []
     case .Prop(_, let type): return type.frees
@@ -147,7 +147,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .Prop(_, let type): return type.vars
     case .Sig(_, _, _, let vars): return vars
     case .Struct: return [] // TODO: vars.
-    case .Var: return [self]
+    case .Var: return [] // does not return self.
     }
   }
 
@@ -163,7 +163,38 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     fatalError()
   }
 
+  func accepts(act: Type) -> Bool {
+    if self == act { return true }
+
+    //if let inferred = inferredTypes[exp] {}
+    switch kind {
+    case .All(let members, _, _):
+      switch act.kind {
+      case .All(let actMembers, _, _): return members.isSubsetOf(actMembers)
+      default: return members.all { $0.accepts(act) }
+      }
+    case .Any(let members, _, _):
+      switch act.kind {
+      case .Any(let actMembers, _, _): return members.isSupersetOf(actMembers)
+      default: return members.any { $0.accepts(act) }
+      }
+    case .Cmpd(let pars, _, _):
+      switch act.kind {
+      case .Cmpd(let actPars, _, _): return allZip(pars, actPars) { $0.accepts($1) }
+      default: return false
+      }
+    case .Sig(let par, let ret, _, _):
+      switch act.kind {
+      case .Sig(let actPar, let actRet, _, _):
+        return par.accepts(actPar) && ret.accepts(actRet)
+      default: return false
+      }
+    default: return false
+    }
+  }
+
   func refine(target: Type, with replacement: Type) -> Type {
+    // within the receiver type, replace target type with replacement, returning a new type.
     switch kind {
     case .Free, .Var: return (self == target) ? replacement : self
     case .All(let members, let frees, let vars):
@@ -188,7 +219,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
-  func refinePar(par: TypePar, replacement: Type) -> TypePar {
+  private func refinePar(par: TypePar, replacement: Type) -> TypePar {
     let type = refine(par.type, with: replacement)
     return (type == par.type) ? par : TypePar(index: par.index, label: par.label, type: type)
   }
@@ -208,6 +239,8 @@ let typeInt       = Type.Prim("Int")
 let typeNamespace = Type.Prim("Namespace")
 let typeStr       = Type.Prim("Str")
 let typeType      = Type.Prim("Type")
+
+let typeOfMainFn = Type.Sig(par: typeVoid, ret: typeInt)
 
 let intrinsicTypes = [
   typeBool,

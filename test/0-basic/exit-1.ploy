@@ -1,2 +1,4 @@
-PROC/exit.1
-0 # never reached.
+main = fn <>%Int
+  PROC/exit.1
+  0 # never reached.
+;

@@ -31,11 +31,16 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    fatalError()
+    let record = scope.record(path: self)
+    let type = syms.last!.typeForExprRecord(scope.record(path: self))
+    ctx.trackExpr(self, type: type)
+    ctx.pathRecords[self] = record
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    syms.last!.compileSym(ctx, depth, scope.em, scope.record(path: self), isTail: isTail)
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
+    syms.last!.compileSym(em, depth, ctx.pathRecords[self]!, isTail: isTail)
   }
 
   // MARK: Identifier
@@ -46,7 +51,7 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
 
   // MARK: TypeExpr
 
-  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type {
+  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type {
     return syms.last!.typeForTypeRecord(scope.record(path: self), subj)
   }
 }

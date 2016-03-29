@@ -1,4 +1,6 @@
 f = fn Int%Int
   if eq-Int($ 0) ? 0
     self.dec-Int.$;;
-f.100000
+
+main = fn <>%Int
+  f.100000;

@@ -2,10 +2,8 @@
 
 
 class LocalScope: Scope {
-  let em: Emitter
 
-  init(parent: Scope, em: Emitter) {
-    self.em = em
+  init(parent: Scope) {
     super.init(pathNames: [], parent: parent)
   }
 

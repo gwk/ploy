@@ -21,8 +21,8 @@ class Arg: _Form { // compound argument.
     return TypePar(index: index, label: label, type: expr.typeForExpr(ctx, scope))
   }
 
-  func compileArg(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int) {
-    return expr.compileExpr(ctx, scope, depth, isTail: false)
+  func compileArg(ctx: TypeCtx, _ em: Emitter, _ depth: Int) {
+    return expr.compileExpr(ctx, em, depth, isTail: false)
   }
   
   static func mk(form: Form, _ subj: String) -> Arg {

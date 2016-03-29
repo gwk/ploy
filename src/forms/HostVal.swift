@@ -19,7 +19,7 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
 
   // MARK: Def
 
-  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
-    return .Val(typeExpr.typeForTypeExpr(ctx, space, "host value declaration"))
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    return .Val(typeExpr.typeForTypeExpr(space, "host value declaration"))
   }
 }

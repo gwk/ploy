@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Struct: _Form, Def, Expr { // struct declaration: `struct S fields…;`.
+class Struct: _Form, Def { // struct declaration: `struct S fields…;`.
   let sym: Sym
   let fields: [Par]
   
@@ -21,19 +21,9 @@ class Struct: _Form, Def, Expr { // struct declaration: `struct S fields…;`.
 
   // MARK: Def
 
-  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
+  func compileDef(space: Space) -> ScopeRecord.Kind {
     // TODO.
     return .Type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
-  }
-
-  // MARK: Expr
-
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    fatalError()
-  }
-
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    fatalError()
   }
 }
 

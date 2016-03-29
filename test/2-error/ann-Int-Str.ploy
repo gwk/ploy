@@ -1,1 +1,2 @@
-0:Str
+main = fn <>%Int
+  0:Str;

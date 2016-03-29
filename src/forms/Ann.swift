@@ -27,13 +27,15 @@ class Ann: _Form, Expr { // annotation: `expr:Type`.
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let exprType = expr.typeForExpr(ctx, scope)
-    let type = typeExpr.typeForTypeExpr(ctx, scope, "type annotation")
-    ctx.constrain(expr, exprType, to: typeExpr, type)
+    let type = typeExpr.typeForTypeExpr(scope, "type annotation")
+    ctx.trackExpr(self, type: type)
+    ctx.constrain(expr, exprType, to: typeExpr, type, "type annotation")
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    expr.compileExpr(ctx, scope, depth, isTail: isTail)
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
+    expr.compileExpr(ctx, em, depth, isTail: isTail)
   }
 }
 

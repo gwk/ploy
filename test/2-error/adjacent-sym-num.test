@@ -1,8 +1,8 @@
 {
   'compile-err': '''\
-parse error: test/2-error/adjacent-sym-num.ploy:1:2: adjacent expressions require a separating space.
-  0a
-   ^
+parse error: test/2-error/adjacent-sym-num.ploy:2:4: adjacent expressions require a separating space.
+    0a;
+     ^
 ''',
   'compile-code': 1
 }  

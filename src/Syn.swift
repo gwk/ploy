@@ -33,7 +33,7 @@ class Syn: CustomStringConvertible {
         endStr = "-\(visEnd.col)"
       }
     } else {
-      endStr = "-\(visEnd.line + 1):\(visEnd.col)"
+      endStr = "--\(visEnd.line + 1):\(visEnd.col)"
     }
     return "\(src.path.withoutPathDir.withoutPathExt):\(pos.line + 1):\(pos.col + 1)\(endStr)"
   }

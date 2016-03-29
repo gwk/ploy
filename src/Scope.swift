@@ -33,8 +33,7 @@ class Scope: CustomStringConvertible {
   func addRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
     if let existing = bindings[sym.name] {
       if case .Fwd = existing.kind {
-        assert(existing.sym!.name == sym.name)
-        bindings.removeValueForKey(sym.name) // TODO: unecessary - remove?
+        assert(existing.sym?.name == sym.name)
       } else {
         sym.failRedef(existing.sym)
       }

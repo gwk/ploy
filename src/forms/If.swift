@@ -25,31 +25,32 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = (dflt == nil) ? typeVoid: ctx.addFreeType() // all cases must return same type.
+    ctx.trackExpr(self, type: type)
     // TODO: much more to do here when default is missing;
     // e.g. inferring complete case coverage without default, typeHalt support, etc.
     for c in cases {
       let cond = c.condition
       let cons = c.consequence
-      ctx.constrain(cond, cond.typeForExpr(ctx, scope), to: c, typeBool)
-      ctx.constrain(cons, cons.typeForExpr(ctx, scope), to: self, type)
+      ctx.constrain(cond, cond.typeForExpr(ctx, scope), to: c, typeBool, "if form condition")
+      ctx.constrain(cons, cons.typeForExpr(ctx, scope), to: self, type, "if form consequence")
     }
     if let dflt = dflt {
-      ctx.constrain(dflt, dflt.typeForExpr(ctx, scope), to: self, type)
+      ctx.constrain(dflt, dflt.typeForExpr(ctx, scope), to: self, type, "if form default")
     }
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    let em = scope.em
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
     em.str(depth, "(")
     for c in cases {
-      c.condition.compileExpr(ctx, scope, depth + 1, isTail: false)
+      c.condition.compileExpr(ctx, em, depth + 1, isTail: false)
       em.append(" ?")
-      c.consequence.compileExpr(ctx, scope, depth + 1, isTail: isTail)
+      c.consequence.compileExpr(ctx, em, depth + 1, isTail: isTail)
       em.append(" :")
     }
     if let dflt = dflt {
-      dflt.compileExpr(ctx, scope, depth + 1, isTail: isTail)
+      dflt.compileExpr(ctx, em, depth + 1, isTail: isTail)
     } else {
       em.str(depth + 1, "undefined")
     }

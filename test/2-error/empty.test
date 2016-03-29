@@ -1,7 +1,7 @@
 {
   'compile-code': 1,
   'compile-err': '''\
-syntax error: test/2-error/empty.ploy:1:1: empty main body; main requires a final Int exit code expression.
+error: test/2-error/empty.ploy:1:1: `main` is not defined in MAIN
   
   ^
 '''

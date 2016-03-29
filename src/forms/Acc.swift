@@ -23,16 +23,20 @@ class Acc: _Form, Expr { // accessor: `field@val`.
     accessee.writeTo(&target, depth + 1)
   }
 
+  // MARK: Expr
+
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let accesseeType = accessee.typeForExpr(ctx, scope)
-    return Type.Prop(accessor.propAccessor, type: accesseeType)
+    let type = Type.Prop(accessor.propAccessor, type: accesseeType)
+    ctx.trackExpr(self, type: type)
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    let em = scope.em
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
     em.str(depth, isTail ? "{v:" : "(")
-    accessee.compileExpr(ctx, scope, depth + 1, isTail: false)
-    accessor.compileAccess(em, depth + 1, accesseeType: ctx.typeForForm(accessee))
+    accessee.compileExpr(ctx, em, depth + 1, isTail: false)
+    accessor.compileAccess(em, depth + 1, accesseeType: ctx.typeForExpr(accessee))
     em.append(isTail ? "}" : ")")
   }
 }

@@ -41,12 +41,16 @@ guard let outPath = opts["-o"] else { fail("-o out-path argument is required.") 
 let tmpPath = outPath + ".tmp"
 let tmpFile = try! OutFile(path: tmpPath, create: 0o644)
 
-let (mainIns, mainDo) = Src(path: mainPath).parseMain(verbose: false)
+let (mainIns, mainIn) = Src(path: mainPath).parseMain(verbose: false)
 
-var ins = libPaths.flatMap { Src(path: $0).parseLib(verbose: false) }
-ins.appendContentsOf(mainIns)
+let ins = mainIns + libPaths.flatMap { Src(path: $0).parseLib(verbose: false) }
 
-compileProgram(tmpFile, hostPath: hostPath, main: mainDo, ins: ins)
+compileProgram(tmpFile, hostPath: hostPath, ins: ins, mainIn: mainIn)
 
 renameFileAtPath(tmpPath, toPath: outPath)
-try! File.changePerms(outPath, 0o755)
+do {
+  try File.changePerms(outPath, 0o755)
+} catch let e {
+  errL("error: could not set compiled output file to executable: \(outPath)")
+  errL("  \(e)")
+}

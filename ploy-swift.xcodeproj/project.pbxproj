@@ -52,7 +52,7 @@
 		EC6523A61B7BD2BF00CAA454 /* Struct.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238E1B7BD2BF00CAA454 /* Struct.swift */; };
 		EC6523A71B7BD2BF00CAA454 /* Sym.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC65238F1B7BD2BF00CAA454 /* Sym.swift */; };
 		EC6EFA5F1C442589008D0266 /* TypeCtx.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6EFA5E1C442589008D0266 /* TypeCtx.swift */; };
-		EC6EFA621C4478B0008D0266 /* SetDict.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6EFA601C4478B0008D0266 /* SetDict.swift */; };
+		EC6EFA621C4478B0008D0266 /* DictOfSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6EFA601C4478B0008D0266 /* DictOfSet.swift */; };
 		EC6EFA631C4478B0008D0266 /* SetRef.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC6EFA611C4478B0008D0266 /* SetRef.swift */; };
 		EC7F8F621BCED20700F6D684 /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7F8F611BCED20700F6D684 /* Error.swift */; };
 		EC8E68981B6986F00080F316 /* Pos.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8E68971B6986F00080F316 /* Pos.swift */; };
@@ -133,7 +133,7 @@
 		EC65238E1B7BD2BF00CAA454 /* Struct.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Struct.swift; sourceTree = "<group>"; };
 		EC65238F1B7BD2BF00CAA454 /* Sym.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Sym.swift; sourceTree = "<group>"; };
 		EC6EFA5E1C442589008D0266 /* TypeCtx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeCtx.swift; sourceTree = "<group>"; };
-		EC6EFA601C4478B0008D0266 /* SetDict.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SetDict.swift; path = qk/src/Core/SetDict.swift; sourceTree = "<group>"; };
+		EC6EFA601C4478B0008D0266 /* DictOfSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DictOfSet.swift; path = qk/src/Core/DictOfSet.swift; sourceTree = "<group>"; };
 		EC6EFA611C4478B0008D0266 /* SetRef.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SetRef.swift; path = qk/src/Core/SetRef.swift; sourceTree = "<group>"; };
 		EC7F8F611BCED20700F6D684 /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Error.swift; path = qk/src/Core/Error.swift; sourceTree = "<group>"; };
 		EC8E68971B6986F00080F316 /* Pos.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pos.swift; sourceTree = "<group>"; };
@@ -191,7 +191,7 @@
 				EC4EB1F81BE833B100B8ACD1 /* Result.swift */,
 				EC1FE8E81B6BE20C00112BB0 /* SequenceType.swift */,
 				EC4EB1FA1BE833D200B8ACD1 /* Set.swift */,
-				EC6EFA601C4478B0008D0266 /* SetDict.swift */,
+				EC6EFA601C4478B0008D0266 /* DictOfSet.swift */,
 				EC6EFA611C4478B0008D0266 /* SetRef.swift */,
 				EC1FE8E91B6BE20C00112BB0 /* String.swift */,
 			);
@@ -391,7 +391,7 @@
 				EC98DE831B7E277D00557D35 /* OutputStreamType.swift in Sources */,
 				EC49BCFB1B750C3200660AF0 /* check.swift in Sources */,
 				EC4EB1F71BE6815100B8ACD1 /* DefaultInitializable.swift in Sources */,
-				EC6EFA621C4478B0008D0266 /* SetDict.swift in Sources */,
+				EC6EFA621C4478B0008D0266 /* DictOfSet.swift in Sources */,
 				EC6EFA5F1C442589008D0266 /* TypeCtx.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

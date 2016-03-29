@@ -17,13 +17,15 @@ class Paren: _Form, Expr { // parenthesized expression: `(a)`.
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    return expr.typeForExpr(ctx, scope)
+    let type = expr.typeForExpr(ctx, scope)
+    ctx.trackExpr(self, type: type)
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    let em = scope.em
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
     em.str(depth, "(")
-    expr.compileExpr(ctx, scope, depth + 1, isTail: isTail)
+    expr.compileExpr(ctx, em, depth + 1, isTail: isTail)
     em.append(")")
   }
 }

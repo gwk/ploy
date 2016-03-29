@@ -81,8 +81,8 @@ class Src: CustomStringConvertible {
   func underlines(pos: Pos, _ end: Pos, lineLen: Int) -> (String, String) {
     assert(pos.line < end.line)
     let spaces = String(char: " ", count: pos.col)
-    let squigs = String(char: " ", count: lineLen - pos.col)
-    return ("\(spaces)\(squigs)", end.col > 0 ? String(char: " ", count: end.col) : "^")
+    let squigs = String(char: "~", count: lineLen - pos.col)
+    return ("\(spaces)\(squigs)", end.col > 0 ? String(char: "~", count: end.col) : "^")
   }
 
   func errPos(pos: Pos, end: Pos?, prefix: String, msg: String) {
@@ -97,7 +97,7 @@ class Src: CustomStringConvertible {
       } else { // multiline.
         let endLine = line(end)
         let (underlinePos, underlineEnd) = underlines(pos, end, lineLen: posLine.characters.count)
-        err("\(pos.col + 1)-\(end.line + 1):\(end.col): \(msg)\n")
+        err("\(pos.col + 1)--\(end.line + 1):\(end.col): \(msg)\n")
         err("  \(posLine)\n  \(underlinePos)…\n")
         err("  \(endLine)\n …\(underlineEnd)\n")
         return
@@ -541,38 +541,37 @@ class Src: CustomStringConvertible {
     return Do(Syn(src: self, pos: pos, visEnd: visEnd, end: end), exprs: exprs)
   }
   
-  func parseMain(verbose verbose: Bool = false) -> ([In], Do) {
+  func parseMain(verbose verbose: Bool = false) -> (ins: [In], mainIn: In) {
     let (forms, end) = parseRawForms(startPos)
     if hasSome(end) {
       failParse(end, nil, "unexpected terminator character: '\(char(end))'")
     }
     var ins: [In] = []
-    var exprs: [Expr] = []
-    for f in forms {
-      if let in_ = f as? In {
-        if exprs.count > 0 {
-          in_.failSyntax("`in` forms must precede all expressions in main body.",
-            notes: (exprs.last, "preceding expression here"))
+    var defs: [Def] = []
+    for form in forms {
+      if let in_ = form as? In {
+        if defs.count > 0 {
+          in_.failSyntax("`in` forms must precede all definitions in main.",
+            notes: (defs.first!, "first definition here"))
         }
         ins.append(in_)
-      } else if let s = f as? Expr {
-        exprs.append(s)
+      } else if let def = form as? Def {
+        defs.append(def)
       } else {
-        f.failSyntax("main body expects `in` forms and expressions; received \(f.syntaxName).")
+        form.failSyntax("main file expects `in` forms and definitions; received \(form.syntaxName).")
       }
     }
-    guard let last = exprs.last else {
-      fail(startPos, end, "syntax error", "empty main body; main requires a final Int exit code expression.")
-    }
-    let bodyPos = exprs[0].syn.pos
-    let bodyDo = Do(Syn(src: self, pos: bodyPos, visEnd: last.syn.visEnd, end: last.syn.end), exprs: exprs)
+    let mainPos = (defs.first?.syn.pos).or(end)
+    let mainVisEnd = (defs.last?.syn.visEnd).or(end)
+    let mainEnd = (defs.last?.syn.end).or(end)
+    let mainIn = In(Syn(src: self, pos: mainPos, visEnd: mainVisEnd, end: mainEnd), identifier: nil, defs: defs)
     if verbose {
-      for i in ins {
-        i.writeTo(&std_err)
+      for in_ in ins {
+        in_.writeTo(&std_err)
       }
-      bodyDo.writeTo(&std_err)
+      mainIn.writeTo(&std_err)
     }
-    return (ins, bodyDo)
+    return (ins, mainIn)
   }
   
   func parseLib(verbose verbose: Bool = false) -> [In] {

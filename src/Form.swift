@@ -11,7 +11,6 @@ protocol Form : Streamable, CustomStringConvertible {
   @noreturn func failType(msg: String, notes: (Form?, String)...)
 
   func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
-  func refine(ctx: TypeCtx, exp: Type, act: Type)
 }
 
 protocol Accessor: Form {
@@ -24,14 +23,14 @@ protocol Accessor: Form {
 protocol Def: Form {
   var sym: Sym { get }
   @warn_unused_result
-  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind
+  func compileDef(space: Space) -> ScopeRecord.Kind
 }
 
 
 protocol Expr: Form {
   @warn_unused_result
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool)
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool)
 }
 
 
@@ -45,7 +44,7 @@ protocol Identifier: Form {
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
   @warn_unused_result
-  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type
+  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type
 }
 
 
@@ -95,12 +94,6 @@ class _Form : Form, Hashable {
   
   func writeTo<Target : OutputStreamType>(inout target: Target) {
     writeTo(&target, 0)
-  }
-
-  func refine(ctx: TypeCtx, exp: Type, act: Type) {
-    if !ctx._refine(exp, act: act) {
-      failType("expected type: `\(exp)`; actual type: `\(act)`")
-    }
   }
 }
 

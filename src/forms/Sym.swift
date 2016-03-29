@@ -52,11 +52,16 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    return typeForExprRecord(scope.record(sym: self), "expression")
+    let record = scope.record(sym: self)
+    let type = typeForExprRecord(record)
+    ctx.trackExpr(self, type: type)
+    ctx.symRecords[self] = record
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    compileSym(ctx, depth, scope.em, scope.record(sym: self), isTail: isTail)
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
+    compileSym(em, depth, ctx.symRecords[self]!, isTail: isTail)
   }
 
   // MARK: Identifier
@@ -69,7 +74,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
 
   // MARK: TypeExpr
 
-  func typeForTypeExpr(ctx: TypeCtx, _ scope: Scope, _ subj: String) -> Type {
+  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type {
     return typeForTypeRecord(scope.record(sym: self), subj)
   }
 
@@ -77,11 +82,11 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   
   var hostName: String { return name.dashToUnder }
   
-  func typeForExprRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
+  func typeForExprRecord(scopeRecord: ScopeRecord) -> Type {
     switch scopeRecord.kind {
     case .Lazy(let type): return type
     case .Val(let type): return type
-    default: failType("\(subj) expects a value; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
+    default: failType("expression expects a value; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
@@ -92,7 +97,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     }
   }
   
-  func compileSym(ctx: TypeCtx, _ depth: Int, _ em: Emitter, _ scopeRecord: ScopeRecord, isTail: Bool) {
+  func compileSym(em: Emitter, _ depth: Int, _ scopeRecord: ScopeRecord, isTail: Bool) {
     switch scopeRecord.kind {
     case .Val:
       em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)

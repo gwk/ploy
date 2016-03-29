@@ -20,11 +20,13 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
   }
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    fatalError()
+    let type = typeStr
+    ctx.trackExpr(self, type: type)
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    let em = scope.em
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
     var s = "\""
     for code in val.codes {
       switch code {

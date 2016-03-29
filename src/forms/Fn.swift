@@ -20,21 +20,20 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let type = sig.typeForTypeExpr(ctx, scope, "signature")
-    let fnScope = LocalScope(parent: scope, em: scope.em)
+    let type = sig.typeForTypeExpr(scope, "signature")
+    let fnScope = LocalScope(parent: scope)
     fnScope.addValRecord("$", type: type.sigPar)
     fnScope.addValRecord("self", type: type)
-    return body.typeForExpr(ctx, fnScope)
+    let bodyType = body.typeForExpr(ctx, fnScope)
+    ctx.trackExpr(self, type: type)
+    ctx.constrain(body, bodyType, to: self, type.sigRet, "function body return type")
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    let em = scope.em
-    let fnScope = LocalScope(parent: scope, em: em)
-    let type = ctx.typeForForm(self)
-    fnScope.addValRecord("$", type: type.sigPar)
-    fnScope.addValRecord("self", type: type)
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
     em.str(depth, (isTail ? "{v:" : "") + "(function self($){")
-    body.compileBody(ctx, fnScope, depth + 1, isTail: true)
+    body.compileBody(ctx, em, depth + 1, isTail: true)
     em.append("})" + (isTail ? "}" : ""))
   }
 }

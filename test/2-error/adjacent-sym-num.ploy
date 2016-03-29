@@ -1,1 +1,2 @@
-0a
+main = fn <>%Int
+  0a;

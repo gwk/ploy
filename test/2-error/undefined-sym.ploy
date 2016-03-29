@@ -1,1 +1,3 @@
-undefined
+main = fn <>%Int
+  undefined
+  0;

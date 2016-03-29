@@ -18,18 +18,20 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
   
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let pars = args.enumerate().map { $1.typeParForArg(ctx, scope, index: $0) }
-    return Type.Cmpd(pars)
+    let type = Type.Cmpd(pars)
+    ctx.trackExpr(self, type: type)
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    let em = scope.em
-    let type = ctx.typeForForm(self)
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
+    let type = ctx.typeForExpr(self)
     em.str(depth, isTail ? "{{v:" : "{")
     switch type.kind {
     case .Cmpd(let pars, _, _):
       var argIndex = 0
       for par in pars {
-        self.compilePar(ctx, scope, depth, par: par, argIndex: &argIndex)
+        self.compilePar(ctx, em, depth, par: par, argIndex: &argIndex)
       }
       if argIndex != pars.count {
         failType("expected \(pars.count) arguments; received \(argIndex)")
@@ -40,9 +42,9 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     em.append(isTail ? "}}" : "}")
   }
 
-
-  func compilePar(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, par: TypePar, inout argIndex: Int) {
-    let em = scope.em
+  // MARK: Cmpd
+  
+  func compilePar(ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, inout argIndex: Int) {
     em.str(depth, " \(par.hostName):")
     if argIndex < args.count {
       let arg = args[argIndex]
@@ -57,7 +59,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
       }
       let hostName = (arg.label?.name.dashToUnder).or("\"\(argIndex)\"")
       em.str(depth, " \(hostName):")
-      arg.compileArg(ctx, scope, depth + 1)
+      arg.compileArg(ctx, em, depth + 1)
       em.append(",")
       argIndex += 1
     } else { // TODO: support default arguments.

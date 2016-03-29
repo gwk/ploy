@@ -23,15 +23,24 @@ class Space: Scope {
       return r
     }
     if let def = defs[sym.name] {
-      let ctx = TypeCtx()
-      let type = ctx.addFreeType()
-      addRecord(sym, kind: .Fwd(type)) // the fwd def serves as a marker to prevent recursion.
-      return addRecord(sym, kind: def.compileDef(ctx, self))
+      return addRecord(sym, kind: def.compileDef(self))
     }
     return nil
   }
 
-  func makeEm() -> Emitter { return Emitter(file: file) }
+  func compileMain(mainIn: In) -> ScopeRecord {
+    guard let def = defs["main"] else {
+      mainIn.failForm("error", msg: "`main` is not defined in MAIN")
+    }
+    let record = getRecord(def.sym)!
+    guard case .Val(let type) = record.kind else {
+      def.failType("expected `main` to be a function value; found \(record.kind.kindDesc)")
+    }
+    if type != typeOfMainFn {
+      def.failType("expected `main` to have type ()%Int; actual type is \(type)")
+    }
+    return record
+  }
 
   func extendRecord(record: ScopeRecord, method: Method) {
     switch record.kind {
@@ -40,47 +49,59 @@ class Space: Scope {
     }
   }
 
-  func setupGlobal(ins: [In]) {
+  func createSpace(pathNames pathNames: [String], name: String, hostName: String) -> Space {
+    let space = Space(pathNames: pathNames, parent: self, file: file)
+    bindings.insertNew(name, value: ScopeRecord(sym: nil, hostName: space.hostPrefix + hostName, kind: .Space(space)))
+    // note: sym is nil because in forms can be declared in multiple locations.
+    return space
+  }
 
-    func getOrCreateSpace(syms: [Sym]) -> Space {
-      var space: Space = self
-      for (i, sym) in syms.enumerate() {
-        if let r = space.bindings[sym.name] {
-          switch r.kind {
-          case .Space(let next):
-            space = next
-          default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
-          }
-        } else { // create.
-          let next = Space(pathNames: syms[0...i].map { $0.name }, parent: self, file: file)
-          space.bindings[sym.name] = ScopeRecord(sym: nil, hostName: space.hostPrefix + sym.hostName, kind: .Space(next))
+  func getOrCreateSpace(syms: [Sym]) -> Space {
+    var space: Space = self
+    for (i, sym) in syms.enumerate() {
+      if let r = space.bindings[sym.name] {
+        switch r.kind {
+        case .Space(let next):
           space = next
+        default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
         }
+      } else {
+        space = space.createSpace(pathNames: syms[0...i].map { $0.name }, name: sym.name, hostName: sym.hostName)
       }
-      return space
     }
+    return space
+  }
 
+  func addDefs(defsList: [Def]) {
+
+    for def in defsList {
+      if let method = def as? Method {
+        let syms = method.identifier.syms
+        let targetSpaceSyms = Array(syms[0..<(syms.count - 1)])
+        let targetSpace = getOrCreateSpace(targetSpaceSyms)
+        let name = method.identifier.name
+        let methodList = targetSpace.methods.getDefault(name)
+        methodList.pairs.append((self, method))
+      } else if let existing = defs[def.sym.name] {
+        def.sym.failRedef(existing.sym)
+      } else {
+        defs[def.sym.name] = def
+      }
+    }
+  }
+
+  func setupRoot(ins: [In], mainIn: In) -> Space { // returns MAIN.
     bindings["ROOT"] = ScopeRecord(sym: nil, hostName: "ROOT", kind: .Space(self))
     for t in intrinsicTypes {
       bindings[t.description] = ScopeRecord(sym: nil, hostName: t.description, kind: .Type(t))
     }
     for i in ins {
-      let space = getOrCreateSpace(i.identifier.syms)
-      for def in i.defs {
-        if let method = def as? Method {
-          let syms = method.identifier.syms
-          let targetSpaceSyms = Array(syms[0..<(syms.count - 1)])
-          let targetSpace = getOrCreateSpace(targetSpaceSyms)
-          let name = method.identifier.name
-          let methodList = targetSpace.methods.getDefault(name)
-          methodList.pairs.append((space, method))
-        } else if let existing = space.defs[def.sym.name] {
-          def.sym.failRedef(existing.sym)
-        } else {
-          space.defs[def.sym.name] = def
-        }
-      }
+      let space = getOrCreateSpace(i.identifier!.syms)
+      space.addDefs(i.defs)
     }
+    let mainSpace = createSpace(pathNames: ["MAIN"], name: "MAIN", hostName: "MAIN")
+    mainSpace.addDefs(mainIn.defs)
+    return mainSpace
   }
   
 

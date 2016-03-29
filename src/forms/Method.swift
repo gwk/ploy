@@ -22,27 +22,32 @@ class Method: _Form, Def { // method definition.
 
   // MARK: Def
 
-  var sym: Sym { fatalError() } // a method is not an independent definition; handled specially.
+  var sym: Sym { fatalError("Method is not an independent definition; sym should never be called.") }
 
-  func compileDef(ctx: TypeCtx, _ space: Space) -> ScopeRecord.Kind {
-    fatalError()
+  func compileDef(space: Space) -> ScopeRecord.Kind {
+    fatalError("Method is not an independent definition; compileDef should never be called.")
   }
 
   // MARK: Method
 
-  func methodSig(ctx: TypeCtx, _ space: Space) -> Type {
-    return sig.typeForTypeExpr(ctx, space, "method")
+  func typeForMethodSig(space: Space) -> Type {
+    return sig.typeForTypeExpr(space, "method")
   }
 
-  func compileMethod(ctx: TypeCtx, space: Space, polyFnType: Type, sigType: Type, hostName: String) {
-    let em = space.makeEm()
-    let fnScope = LocalScope(parent: space, em: em)
-    fnScope.addValRecord("$", type: sigType.sigPar)
+  func compileMethod(space: Space, polyFnType: Type, sigType: Type, hostName: String) {
+    let fnScope = LocalScope(parent: space)
+    let parType = sigType.sigPar
+    let retType = sigType.sigRet
+    fnScope.addValRecord("$", type: parType)
     fnScope.addValRecord("self", type: polyFnType)
+    let ctx = TypeCtx()
+    let bodyType = body.typeForExpr(ctx, fnScope)
+    ctx.constrain(body, bodyType, to: sig.ret, retType, "method body return type")
+    ctx.resolve()
+    let em = Emitter(file: space.file)
     em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")
     em.str(1, "let self = \(hostName)")
-    body.typeForExpr(ctx, fnScope) // TODO: what to do with the resulting type?
-    body.compileBody(ctx, fnScope, 1, isTail: true)
+    body.compileBody(ctx, em, 1, isTail: true)
     em.append("}")
   }
 }

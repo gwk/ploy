@@ -1,2 +1,3 @@
-x = 0
-x
+main = fn <>%Int
+  x = 0
+  x;

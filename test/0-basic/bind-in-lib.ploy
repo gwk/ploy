@@ -2,4 +2,5 @@ in TEST
 x = 0:Int
 ;
 
-TEST/x
+main = fn <>%Int
+  TEST/x;

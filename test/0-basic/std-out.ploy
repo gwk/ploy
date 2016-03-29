@@ -1,2 +1,3 @@
-FS/write-Str(PROC/std-out 'this is std-out.\n')
-0
+main = fn <>%Int
+  FS/write-Str(PROC/std-out 'this is std-out.\n')
+  0;

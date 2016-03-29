@@ -50,18 +50,14 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    fatalError()
+    let type = typeInt
+    ctx.trackExpr(self, type: type)
+    return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) {
-    fatalError()
-  }
-  
-  func compileExpr(ctx: TypeCtx, _ scope: LocalScope, _ depth: Int, isTail: Bool) -> Type {
-    let em = scope.em
-    // TODO: typecheck.
+  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    ctx.assertIsTracking(self)
     em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)
-    return typeInt
   }
 }
 
