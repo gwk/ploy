@@ -26,7 +26,7 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     fnScope.addValRecord("self", type: type)
     let bodyType = body.typeForExpr(ctx, fnScope)
     ctx.trackExpr(self, type: type)
-    ctx.constrain(body, bodyType, to: self, type.sigRet, "function body return type")
+    ctx.constrain(body, bodyType, to: self, type.sigRet, "function body")
     return type
   }
 

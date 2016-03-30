@@ -1,8 +1,11 @@
 {
   'compile-code': 1,
   'compile-err': '''\
-type error: test/2-error/ann-Int-Str.ploy:1:1-5: expected type: Int; actual type: Str
-  0:Str
-  ~~~~~
+type error: test/2-error/ann-Int-Str.ploy:2:3-3: constraint failed for type annotation; actual type: Int
+    0:Str;
+    ~
+note: test/2-error/ann-Int-Str.ploy:2:5-7: expected type: Str
+    0:Str;
+      ~~~
 '''
 }

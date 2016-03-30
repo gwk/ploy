@@ -22,7 +22,7 @@ class Do: _Form, Expr { // do block: `{…}`.
     for (i, expr) in exprs.enumerate() {
       if i == exprs.count - 1 { break }
       let stmtType = expr.typeForExpr(ctx, scope)
-      ctx.constrain(expr, stmtType, to: self, typeVoid, "statement void type")
+      ctx.constrain(expr, stmtType, to: self, typeVoid, "statement")
     }
     let type: Type
     if let last = exprs.last {

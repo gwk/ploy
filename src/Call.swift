@@ -30,7 +30,7 @@ class Call : _Form, Expr {
     let argType = arg.typeForExpr(ctx, scope)
     let type = ctx.addFreeType()
     ctx.trackExpr(self, type: type)
-    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: type), "call type")
+    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: type), "call")
     return type
   }
 

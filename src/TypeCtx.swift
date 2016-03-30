@@ -82,7 +82,6 @@ class TypeCtx {
   }
 
   func resolveConstraint(constraint: TypeConstraint) throws {
-
     switch constraint.actType.kind {
     case .all(_ , _, _):
       throw Error("actual type cannot be of kind `All`")
@@ -99,7 +98,7 @@ class TypeCtx {
     case .var_: break
     }
     if !constraint.actType.accepts(constraint.expType) {
-      throw Error("constraint failed: \(constraint.desc)")
+      throw Error("constraint failed for \(constraint.desc)")
     }
   }
 
@@ -109,7 +108,9 @@ class TypeCtx {
       do {
         try resolveConstraint(constraint)
       } catch let e as Error {
-        constraint.actExpr.failType(e.msg, notes: (constraint.expForm, "expected type"))
+        constraint.actExpr.failType(
+          "\(e.msg); actual type: \(constraint.actType)",
+          notes: (constraint.expForm, "expected type: \(constraint.expType)"))
       } catch { fatalError() }
     }
 
