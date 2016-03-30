@@ -72,7 +72,7 @@ class TypeCtx {
     }
     resolvedTypes[type] = resolved
     if case .free(let index) = resolved.kind {
-      let unresolvedTypes = freeIndicesToUnresolvedTypes[index].or([])
+      let unresolvedTypes = (freeIndicesToUnresolvedTypes[index]?.val).or([])
       for el in unresolvedTypes {
         let elResolved = el.refine(type, with: resolved)
         try resolveType(el, to: elResolved)
@@ -123,7 +123,7 @@ class TypeCtx {
       }
     }
     for (index, set) in freeIndicesToUnresolvedTypes {
-      for type in set {
+      for type in set.val {
         errL("freeIndicesToUnResolvedType: \(index): \(type)")
       }
     }
