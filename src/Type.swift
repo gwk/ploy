@@ -59,7 +59,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Cmpd(pars: [TypePar]) -> Type {
-    let description = "<\(pars.map({$0.description}).sort().joinWithSeparator(" "))>"
+    let description = "<\(pars.map({$0.description}).joinWithSeparator(" "))>"
     return allTypes[description].or(Type(description, .cmpd(pars: pars,
       frees: Set(pars.flatMap { $0.type.frees }),
       vars: Set(pars.flatMap { $0.type.vars }))))
