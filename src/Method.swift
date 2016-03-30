@@ -13,8 +13,8 @@ class Method: _Form, Def { // method definition.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     identifier.writeTo(&target, depth + 1)
     sig.writeTo(&target, depth + 1)
     body.writeTo(&target, depth + 1)

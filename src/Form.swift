@@ -1,24 +1,23 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-protocol Form : Streamable, CustomStringConvertible {
+protocol Form : Streamable {
   var syn: Syn { get }
-  var syntaxName: String { get }
 
-  func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int)
+  func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int)
 }
 
 extension Form {
 
   var syntaxName: String { return String(self.dynamicType) }
 
-  var description: String {
+  var fullDesc: String {
     var s = ""
     writeTo(&s, 0)
     return s
   }
 
-  func writeTo<Target : OutputStreamType>(inout target: Target) {
+  func writeTo<Target : OutputStream>(inout target: Target) {
     writeTo(&target, 0)
   }
 
@@ -80,18 +79,26 @@ protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
 }
 
 
-class _Form : Form, Hashable {
+class _Form : Form, Hashable, CustomStringConvertible {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
   
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
-  func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
+  var description: String {
+    var s = ""
+    writeHead(&s, 0, "")
+    return s
+  }
+
+  func writeTo<Target: OutputStream>(inout target: Target, _ depth: Int) { fatalError() }
+
+  func writeHead<Target: OutputStream>(inout target: Target, _ depth: Int, _ suffix: String) {
     target.write(String(indent: depth))
     target.write(String(self.dynamicType))
     target.write(" ")
     target.write(String(syn))
-    target.write("\n")
+    target.write(suffix)
   }
 }
 

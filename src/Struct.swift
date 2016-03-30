@@ -11,8 +11,8 @@ class Struct: _Form, Def { // struct declaration: `struct S fields…;`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     sym.writeTo(&target, depth + 1)
     for f in fields {
       f.writeTo(&target, depth + 1)

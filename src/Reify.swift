@@ -17,8 +17,8 @@ class Reify: _Form, TypeExpr { // type reification:  `T^A`.
       arg: castForm(r, "type reification", "type expression"))
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     callee.writeTo(&target, depth + 1)
     arg.writeTo(&target, depth + 1)
   }

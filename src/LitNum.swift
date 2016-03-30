@@ -12,14 +12,8 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   
   //var description: String { return String(val) }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    target.write(String(indent: depth))
-    target.write(String(self.dynamicType))
-    target.write(" ")
-    target.write(String(syn))
-    target.write(": ")
-    target.write(String(val))
-    target.write("\n")
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, ": \(val)\n")
   }
 
   var hostAccessor: String {

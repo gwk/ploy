@@ -11,8 +11,8 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     for c in cases {
       c.writeTo(&target, depth + 1)
     }

@@ -9,8 +9,8 @@ class Do: _Form, Expr { // do block: `{…}`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, exprs.isEmpty ? " {}\n" : "\n")
     for e in exprs {
       e.writeTo(&target, depth + 1)
     }

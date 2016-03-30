@@ -17,8 +17,8 @@ class Acc: _Form, Expr { // accessor: `field@val`.
       accessee: castForm(r, "access", "accessee expression"))
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     accessor.writeTo(&target, depth + 1)
     accessee.writeTo(&target, depth + 1)
   }

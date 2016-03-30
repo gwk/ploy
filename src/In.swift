@@ -11,12 +11,10 @@ class In: _Form { // in statement: `in module-name statements…;`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, (identifier == nil) ? " MAIN\n" : "\n")
     if let identifier = identifier {
       identifier.writeTo(&target, depth + 1)
-    } else {
-      target.write("MAIN\n")
     }
     for d in defs {
       d.writeTo(&target, depth + 1)

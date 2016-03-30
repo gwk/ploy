@@ -17,8 +17,8 @@ class Call : _Form, Expr {
       arg: castForm(r, "call", "expression"))
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     callee.writeTo(&target, depth + 1)
     arg.writeTo(&target, depth + 1)
   }
@@ -30,7 +30,7 @@ class Call : _Form, Expr {
     let argType = arg.typeForExpr(ctx, scope)
     let type = ctx.addFreeType()
     ctx.trackExpr(self, type: type)
-    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: type), "call")
+    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: type), "callee")
     return type
   }
 

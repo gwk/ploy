@@ -11,8 +11,8 @@ class Enum: _Form, Def { // enum declaration: `enum E variants…;`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     sym.writeTo(&target, depth + 1)
     for v in variants {
       v.writeTo(&target, depth + 1)

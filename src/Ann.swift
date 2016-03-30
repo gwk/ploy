@@ -17,8 +17,8 @@ class Ann: _Form, Expr { // annotation: `expr:Type`.
       typeExpr: castForm(r, "type annotation", "type expression"))
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     expr.writeTo(&target, depth + 1)
     typeExpr.writeTo(&target, depth + 1)
   }

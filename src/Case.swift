@@ -17,8 +17,8 @@ class Case: _Form { // conditional case: `condition ? consequence`.
       consequence: castForm(r, "case", "consequence"))
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     condition.writeTo(&target, depth + 1)
     consequence.writeTo(&target, depth + 1)
   }

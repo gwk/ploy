@@ -9,8 +9,8 @@ class CmpdType: _Form, TypeExpr { // compound type: `<A B>`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, pars.isEmpty ? " <>\n" : "\n")
     for p in pars {
       p.writeTo(&target, depth + 1)
     }

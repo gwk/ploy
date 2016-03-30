@@ -9,14 +9,8 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    target.write(String(indent: depth))
-    target.write(String(self.dynamicType))
-    target.write(" ")
-    target.write(String(syn))
-    target.write(" \"")
-    target.write(val) // TODO: escape properly.
-    target.write("\"\n")
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, ": \(val)\n") // TODO: escape val properly.
   }
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {

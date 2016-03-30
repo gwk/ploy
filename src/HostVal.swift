@@ -11,8 +11,8 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    super.writeTo(&target, depth)
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, "\n")
     sym.writeTo(&target, depth + 1)
     typeExpr.writeTo(&target, depth + 1)
   }
@@ -20,6 +20,7 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
   // MARK: Def
 
   func compileDef(space: Space) -> ScopeRecord.Kind {
-    return .val(typeExpr.typeForTypeExpr(space, "host value declaration"))
+    let type = typeExpr.typeForTypeExpr(space, "host value declaration")
+    return .val(type)
   }
 }

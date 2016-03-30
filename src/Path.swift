@@ -10,12 +10,8 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStreamType>(inout target: Target, _ depth: Int) {
-    target.write(String(indent: depth))
-    target.write(String(self.dynamicType))
-    target.write(" ")
-    target.write(String(syn))
-    target.write(": ")
+  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
+    writeHead(&target, depth, ": ")
     var first = true
     for s in syms {
       if first {
