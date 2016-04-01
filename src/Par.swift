@@ -28,9 +28,7 @@ class Par: _Form { // compound parameter.
       dflt.writeTo(&target, depth + 1)
     }
   }
-  
-  var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
-  
+    
   func typeParForPar(scope: Scope, _ subj: String) -> TypePar {
     var type: Type
     if let typeExpr = typeExpr {

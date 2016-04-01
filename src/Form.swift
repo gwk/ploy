@@ -48,7 +48,6 @@ extension Form {
 protocol Accessor: Form {
   var hostAccessor: String { get }
   var propAccessor: Type.PropAccessor { get }
-  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type)
 }
 
 protocol Def: Form {

@@ -36,7 +36,7 @@ class Acc: _Form, Expr { // accessor: `field@val`.
     ctx.assertIsTracking(self)
     em.str(depth, isTail ? "{v:" : "(")
     accessee.compileExpr(ctx, em, depth + 1, isTail: false)
-    accessor.compileAccess(em, depth + 1, accesseeType: ctx.typeForExpr(accessee))
+    em.str(depth + 1, accessor.hostAccessor)
     em.append(isTail ? "}" : ")")
   }
 }

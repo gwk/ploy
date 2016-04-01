@@ -39,10 +39,6 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     }
   }
 
-  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) {
-    em.str(depth, hostAccessor)
-  }
-
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {

@@ -17,7 +17,7 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   }
 
   var hostAccessor: String {
-    return "[\"\(val)\"]"
+    return "._\(val)"
   }
 
   var propAccessor: Type.PropAccessor {
@@ -35,10 +35,6 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
     default:
       failType("numeric literal cannot access into value of type: \(accesseeType)")
     }
-  }
-
-  func compileAccess(em: Emitter, _ depth: Int, accesseeType: Type) {
-    em.str(depth, hostAccessor)
   }
 
   // MARK: Expr
