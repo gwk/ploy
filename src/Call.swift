@@ -26,11 +26,14 @@ class Call : _Form, Expr {
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let calleeType = callee.typeForExpr(ctx, scope)
-    let argType = arg.typeForExpr(ctx, scope)
+    let _ = callee.typeForExpr(ctx, scope)
+    let _ = arg.typeForExpr(ctx, scope)
+    let parType = ctx.addFreeType()
     let type = ctx.addFreeType()
+    let sigType = Type.Sig(par: parType, ret: type)
     ctx.trackExpr(self, type: type)
-    ctx.constrain(callee, calleeType, to: self, Type.Sig(par: argType, ret: type), "callee")
+    ctx.constrain(callee, expForm: self, expType: sigType, "callee")
+    ctx.constrain(arg, expForm: self, expType: parType, "argument")
     return type
   }
 

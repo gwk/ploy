@@ -21,8 +21,8 @@ class Do: _Form, Expr { // do block: `{…}`.
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
     for (i, expr) in exprs.enumerate() {
       if i == exprs.count - 1 { break }
-      let stmtType = expr.typeForExpr(ctx, scope)
-      ctx.constrain(expr, stmtType, to: self, typeVoid, "statement")
+      let _ = expr.typeForExpr(ctx, scope)
+      ctx.constrain(expr, expForm: self, expType: typeVoid, "statement")
     }
     let type: Type
     if let last = exprs.last {

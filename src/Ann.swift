@@ -26,10 +26,10 @@ class Ann: _Form, Expr { // annotation: `expr:Type`.
   // MARK: Expr
 
   func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let exprType = expr.typeForExpr(ctx, scope)
+    let _ = expr.typeForExpr(ctx, scope)
     let type = typeExpr.typeForTypeExpr(scope, "type annotation")
     ctx.trackExpr(self, type: type)
-    ctx.constrain(expr, exprType, to: typeExpr, type, "type annotation")
+    ctx.constrain(expr, expForm: typeExpr, expType: type, "type annotation")
     return type
   }
 

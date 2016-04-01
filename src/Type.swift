@@ -163,36 +163,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     fatalError()
   }
 
-  func accepts(act: Type) -> Bool {
-    if self == act { return true }
-
-    //if let inferred = inferredTypes[exp] {}
-    switch kind {
-    case .all(let members, _, _):
-      switch act.kind {
-      case .all(let actMembers, _, _): return members.isSubsetOf(actMembers)
-      default: return members.all { $0.accepts(act) }
-      }
-    case .any(let members, _, _):
-      switch act.kind {
-      case .any(let actMembers, _, _): return members.isSupersetOf(actMembers)
-      default: return members.any { $0.accepts(act) }
-      }
-    case .cmpd(let pars, _, _):
-      switch act.kind {
-      case .cmpd(let actPars, _, _): return allZip(pars, actPars) { $0.accepts($1) }
-      default: return false
-      }
-    case .sig(let par, let ret, _, _):
-      switch act.kind {
-      case .sig(let actPar, let actRet, _, _):
-        return par.accepts(actPar) && ret.accepts(actRet)
-      default: return false
-      }
-    default: return false
-    }
-  }
-
   func refine(target: Type, with replacement: Type) -> Type {
     // within the receiver type, replace target type with replacement, returning a new type.
     switch kind {

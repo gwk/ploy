@@ -1,10 +1,12 @@
 {
   'compile-code': 1,
   'compile-err': '''\
-type error: test/2-error/ann-Int-Str.ploy:2:3-3: constraint failed for type annotation; actual type: Int
+type error: test/2-error/ann-Int-Str.ploy:2:3-3: mismatched types: type annotation;
+resolved type: Int
     0:Str;
     ~
-note: test/2-error/ann-Int-Str.ploy:2:5-7: expected type: Str
+note: test/2-error/ann-Int-Str.ploy:2:5-7: type annotation;
+expected type: Str
     0:Str;
       ~~~
 '''

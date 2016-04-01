@@ -146,6 +146,8 @@
 		EC5049E81CAB0084000FB61D /* TypeCtx.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypeCtx.swift; sourceTree = "<group>"; };
 		EC5049E91CAB0084000FB61D /* TypePar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TypePar.swift; sourceTree = "<group>"; };
 		EC504A131CAB0277000FB61D /* ArithmeticFloat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArithmeticFloat.swift; path = qk/src/Core/ArithmeticFloat.swift; sourceTree = "<group>"; };
+		EC6A7E751CAE02D70040A320 /* _repro.ploy */ = {isa = PBXFileReference; lastKnownFileType = text; path = _repro.ploy; sourceTree = "<group>"; };
+		EC6A7E761CAE02DE0040A320 /* _repro-lib.ploy */ = {isa = PBXFileReference; lastKnownFileType = text; path = "_repro-lib.ploy"; sourceTree = "<group>"; };
 		EC6EFA601C4478B0008D0266 /* DictOfSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DictOfSet.swift; path = qk/src/Core/DictOfSet.swift; sourceTree = "<group>"; };
 		EC7F8F611BCED20700F6D684 /* Error.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Error.swift; path = qk/src/Core/Error.swift; sourceTree = "<group>"; };
 		EC97D70C1B84F9A8001D9ABB /* Chain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Chain.swift; path = qk/src/Core/Chain.swift; sourceTree = "<group>"; };
@@ -256,6 +258,8 @@
 				EC1FE8E01B6BDEF900112BB0 /* qk-src */,
 				EC5049C01CAB0084000FB61D /* src */,
 				ECAE89061B69391F002AE9B9 /* Products */,
+				EC6A7E761CAE02DE0040A320 /* _repro-lib.ploy */,
+				EC6A7E751CAE02D70040A320 /* _repro.ploy */,
 			);
 			sourceTree = "<group>";
 		};

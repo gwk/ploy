@@ -31,11 +31,14 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
     for c in cases {
       let cond = c.condition
       let cons = c.consequence
-      ctx.constrain(cond, cond.typeForExpr(ctx, scope), to: c, typeBool, "if form condition")
-      ctx.constrain(cons, cons.typeForExpr(ctx, scope), to: self, type, "if form consequence")
+      let _ = cond.typeForExpr(ctx, scope)
+      let _ = cons.typeForExpr(ctx, scope)
+      ctx.constrain(cond, expForm: c, expType: typeBool, "if form condition")
+      ctx.constrain(cons, expForm: self, expType: type, "if form consequence")
     }
     if let dflt = dflt {
-      ctx.constrain(dflt, dflt.typeForExpr(ctx, scope), to: self, type, "if form default")
+      let _ = dflt.typeForExpr(ctx, scope)
+      ctx.constrain(dflt, expForm: self, expType: type, "if form default")
     }
     return type
   }

@@ -2,9 +2,9 @@
 
 in FS
 host-type File;
-host-val write-Bool <file:File bool:Bool>%<>;
-host-val write-Int  <file:File int:Int>%<>;
-host-val write-Str  <file:File str:Str>%<>;
+host-val write-Bool <File Bool>%<>;
+host-val write-Int  <File Int>%<>;
+host-val write-Str  <File Str>%<>;
 ;
 
 in ROOT

@@ -22,11 +22,5 @@ class TypePar: CustomStringConvertible {
   }
   
   var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
-
-  func accepts(act: TypePar) -> Bool {
-    return index == act.index && label?.name == act.label?.name && type.accepts(act.type)
-  }
-
-
 }
 

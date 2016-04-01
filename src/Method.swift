@@ -41,13 +41,14 @@ class Method: _Form, Def { // method definition.
     fnScope.addValRecord("$", type: parType)
     fnScope.addValRecord("self", type: polyFnType)
     let ctx = TypeCtx()
-    let bodyType = body.typeForExpr(ctx, fnScope)
-    ctx.constrain(body, bodyType, to: sig.ret, retType, "method body")
+    let _ = body.typeForExpr(ctx, fnScope)
+    ctx.constrain(body, expForm: sig.ret, expType: retType, "method body")
     ctx.resolve()
     let em = Emitter(file: space.file)
     em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")
     em.str(1, "let self = \(hostName)")
     body.compileBody(ctx, em, 1, isTail: true)
     em.append("}")
+    em.flush()
   }
 }

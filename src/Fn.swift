@@ -24,9 +24,9 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     let fnScope = LocalScope(parent: scope)
     fnScope.addValRecord("$", type: type.sigPar)
     fnScope.addValRecord("self", type: type)
-    let bodyType = body.typeForExpr(ctx, fnScope)
+    let _ = body.typeForExpr(ctx, fnScope)
     ctx.trackExpr(self, type: type)
-    ctx.constrain(body, bodyType, to: self, type.sigRet, "function body")
+    ctx.constrain(body, expForm: self, expType: type.sigRet, "function body")
     return type
   }
 
