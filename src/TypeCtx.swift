@@ -13,17 +13,17 @@ struct Constraint {
   var actDesc: String { return actChain.map({"\($0) of\n"}).join() }
   var expDesc: String { return expChain.map({"\($0) of\n"}).join() }
 
-  func subConstraint(actType actType: Type, actDesc: String, expType: Type, expDesc: String) -> Constraint {
+  func subConstraint(actType actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Constraint {
     return Constraint(
-      actExpr: actExpr, actType: actType, actChain: .link(actDesc, actChain),
-      expForm: expForm, expType: expType, expChain: .link(expDesc, expChain), desc: desc)
+      actExpr: actExpr, actType: actType, actChain: (actDesc == nil) ? actChain : .link(actDesc!, actChain),
+      expForm: expForm, expType: expType, expChain: (expDesc == nil) ? expChain : .link(expDesc!, expChain), desc: desc)
   }
 
   @noreturn
   func fail(actType: Type, _ expType: Type, _ msg: String) {
     actExpr.failType(
-      "\(msg): \(actDesc)\(desc);\nresolved type: \(actType)",
-      notes: (expForm, "\(expDesc)\(desc);\nexpected type: \(expType)"))
+      "\(msg);\n\(actDesc)\(desc);\nresolved type: \(actType)",
+      notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(expType)"))
   }
 }
 
@@ -104,22 +104,47 @@ class TypeCtx {
     }
   }
 
+  func resolveFreeType(freeType: Type, to resolved: Type) {
+    // just for clarity / as an experiment, always prefer lower free indices.
+    if case .free(let resolvedIndex) = resolved.kind {
+      if freeType.freeIndex > resolvedIndex {
+        resolveType(freeType, to: resolved)
+      } else {
+        resolveType(resolved, to: freeType)
+      }
+    }
+  }
+
+  func resolveOpaqueConstraint(constraint: Constraint, actType: Type, expOpaqueType: Type) {
+    switch actType.kind {
+    case .prop(let accessor, let accesseeType):
+      switch accesseeType.kind {
+      case .cmpd(let pars, _, _):
+        for par in pars {
+          if par.accessorString == accessor.accessorString {
+            resolveConstraint(constraint.subConstraint(
+              actType: par.type, actDesc: "`\(par.accessorString)` property",
+              expType: expOpaqueType, expDesc: nil))
+            return
+          }
+        }
+      default: constraint.fail(accesseeType, expOpaqueType, "actual type is not an accessible type")
+      }
+    default: constraint.fail(actType, expOpaqueType, "actual type is not expected opaque type")
+    }
+    fatalError()
+  }
+
   func resolveConstraint(constraint: Constraint) {
     let actType = resolvedType(constraint.actType)
     let expType = resolvedType(constraint.expType)
     if (actType == expType) {
       return
     }
-    // first eleminate the case where actual is free.
-    if case .free(let actIndex) = actType.kind {
-      let fwd: Bool // is type propagating forward from actual to expected?
-      if case .free(let expIndex) = expType.kind {
-        fwd = actIndex < expIndex // is reverse ever possible?
-      } else {
-        fwd = false // actual type is replaced with expected type.
-      }
-      if !fwd { print("resolveConstraint: reversed free indices possible!") }
-      resolveType(fwd ? expType : actType, to: fwd ? actType : expType)
+    // first eleminate the case where actType is free.
+    if case .free = actType.kind {
+      resolveFreeType(actType, to: expType)
+      return
     }
 
     switch expType.kind {
@@ -132,15 +157,16 @@ class TypeCtx {
       switch actType.kind {
       case .cmpd(_, _, _):
         constraint.fail(actType, expType, "Cmpd type conversion not implemented")
-      default: break
+      default: constraint.fail(actType, expType, "actual type is not a compound")
       }
     case .enum_:
       constraint.fail(actType, expType, "enum constraints not implemented")
     case .free:
       resolveType(expType, to: actType)
       return
-    case .host: break
-    case .prim: break
+    case .host, .prim:
+      resolveOpaqueConstraint(constraint, actType: actType, expOpaqueType: expType)
+      return
     case .prop(_, _):
       constraint.fail(actType, expType, "prop constraints not implemented")
     case .sig(let expPar, let expRet, _, _):
@@ -160,7 +186,7 @@ class TypeCtx {
     case .var_:
       constraint.fail(actType, expType, "var constraints not implemented")
     }
-    constraint.fail(actType, expType, "mismatched types")
+    fatalError()
   }
 
   func resolve() {

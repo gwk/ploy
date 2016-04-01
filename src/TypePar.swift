@@ -20,6 +20,8 @@ class TypePar: CustomStringConvertible {
       return type.description
     }
   }
+
+  var accessorString: String { return (label?.name).or("\(index)") }
   
   var hostName: String { return (label?.name.dashToUnder).or("\"\(index)\"") }
 }

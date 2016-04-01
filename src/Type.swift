@@ -163,6 +163,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     fatalError()
   }
 
+  var freeIndex: Int {
+    if case .free(let index) = kind { return index }
+    fatalError()
+  }
+
   func refine(target: Type, with replacement: Type) -> Type {
     // within the receiver type, replace target type with replacement, returning a new type.
     switch kind {
