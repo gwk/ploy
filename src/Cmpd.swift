@@ -45,7 +45,6 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
   // MARK: Cmpd
   
   func compilePar(ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, inout argIndex: Int) {
-    em.str(depth, " \(par.hostName):")
     if argIndex < args.count {
       let arg = args[argIndex]
       if let argLabel = arg.label {
@@ -57,15 +56,13 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
           argLabel.failType("argument label does not match unlabeled parameter", notes: (arg, "unlabeled parameter"))
         }
       }
-      let hostName = (arg.label?.name.dashToUnder).or("\"\(argIndex)\"")
-      em.str(depth, " \(hostName):")
+      em.str(depth, " \(par.hostName):")
       arg.compileArg(ctx, em, depth + 1)
       em.append(",")
       argIndex += 1
     } else { // TODO: support default arguments.
       failType("missing argument for parameter")
     }
-    em.append(",")
   }
 }
 
