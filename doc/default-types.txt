@@ -1,0 +1,5 @@
+`<x=0:Int y=1:Int>` is a value whose type is `<Dflt<Int> Dflt<Int>>'.
+this is essentially the union type `Any<<> <Int> <Int Int>>`;
+Dflt exists to prevent combinatorial explosion and provide clarity of intent.
+
+The parameter of a function signature is an 'Any' type; it accepts any of the member types.
