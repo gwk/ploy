@@ -13,3 +13,7 @@ sh/build.sh
 mkdir -p "$outDir"
 _build/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
 "$outPath" "$@"
+
+# TODO: move the profile dump.
+#prof_cwd_path = 'default.profraw' # llvm name is fixed; always outputs to cwd.
+#prof_path = exe_path + '.profraw'
