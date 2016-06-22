@@ -9,8 +9,8 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, ": \(name)\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, ": \(name)\n")
   }
 
   // MARK: Accessor
@@ -41,7 +41,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let record = scope.record(sym: self)
     let type = typeForExprRecord(record)
     ctx.trackExpr(self, type: type)
@@ -49,7 +49,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     compileSym(em, depth, ctx.symRecords[self]!, isTail: isTail)
   }
@@ -58,13 +58,13 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
 
   var syms: [Sym] { return [self] }
   
-  func record(scope: Scope, _ sym: Sym) -> ScopeRecord {
+  func record(_ scope: Scope, _ sym: Sym) -> ScopeRecord {
     return scope.record(sym: self)
   }
 
   // MARK: TypeExpr
 
-  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type {
+  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
     return typeForTypeRecord(scope.record(sym: self), subj)
   }
 
@@ -72,7 +72,7 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   
   var hostName: String { return name.dashToUnder }
   
-  func typeForExprRecord(scopeRecord: ScopeRecord) -> Type {
+  func typeForExprRecord(_ scopeRecord: ScopeRecord) -> Type {
     switch scopeRecord.kind {
     case .lazy(let type): return type
     case .val(let type): return type
@@ -80,14 +80,14 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     }
   }
   
-  func typeForTypeRecord(scopeRecord: ScopeRecord, _ subj: String) -> Type {
+  func typeForTypeRecord(_ scopeRecord: ScopeRecord, _ subj: String) -> Type {
     switch scopeRecord.kind {
     case .type(let type): return type
     default: failType("\(subj) expects a type; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
     }
   }
   
-  func compileSym(em: Emitter, _ depth: Int, _ scopeRecord: ScopeRecord, isTail: Bool) {
+  func compileSym(_ em: Emitter, _ depth: Int, _ scopeRecord: ScopeRecord, isTail: Bool) {
     switch scopeRecord.kind {
     case .val:
       em.str(depth, isTail ? "{v:\(scopeRecord.hostName)}" : scopeRecord.hostName)
@@ -105,10 +105,10 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
     }
   }
   
-  @noreturn func failUndef() { failForm("scope error", msg: "`\(name)` is not defined in this scope") }
+  @noreturn func failUndef() { failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope") }
   
   @noreturn func failRedef(original: Sym?) {
-    failForm("scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
+    failForm(prefix: "scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
   }
 }
 

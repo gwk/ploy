@@ -23,7 +23,7 @@ done
 swiftc \
 -gline-tables-only \
 -Onone \
--sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk \
+-sdk /Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk \
 -target x86_64-apple-macosx10.11 \
 -module-name ploy \
 -profile-coverage-mapping \

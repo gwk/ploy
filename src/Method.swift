@@ -13,28 +13,28 @@ class Method: _Form, Def { // method definition.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    identifier.writeTo(&target, depth + 1)
-    sig.writeTo(&target, depth + 1)
-    body.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    identifier.write(to: &stream, depth + 1)
+    sig.write(to: &stream, depth + 1)
+    body.write(to: &stream, depth + 1)
   }
 
   // MARK: Def
 
   var sym: Sym { fatalError("Method is not an independent definition; sym should never be called.") }
 
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(_ space: Space) -> ScopeRecord.Kind {
     fatalError("Method is not an independent definition; compileDef should never be called.")
   }
 
   // MARK: Method
 
-  func typeForMethodSig(space: Space) -> Type {
+  func typeForMethodSig(_ space: Space) -> Type {
     return sig.typeForTypeExpr(space, "method")
   }
 
-  func compileMethod(space: Space, polyFnType: Type, sigType: Type, hostName: String) {
+  func compileMethod(_ space: Space, polyFnType: Type, sigType: Type, hostName: String) {
     let fnScope = LocalScope(parent: space)
     let parType = sigType.sigPar
     let retType = sigType.sigRet

@@ -9,17 +9,17 @@ class Do: _Form, Expr { // do block: `{…}`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, exprs.isEmpty ? " {}\n" : "\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, exprs.isEmpty ? " {}\n" : "\n")
     for e in exprs {
-      e.writeTo(&target, depth + 1)
+      e.write(to: &stream, depth + 1)
     }
   }
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    for (i, expr) in exprs.enumerate() {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    for (i, expr) in exprs.enumerated() {
       if i == exprs.count - 1 { break }
       let _ = expr.typeForExpr(ctx, scope)
       ctx.constrain(expr, expForm: self, expType: typeVoid, "statement")
@@ -34,7 +34,7 @@ class Do: _Form, Expr { // do block: `{…}`.
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     em.str(depth, "(function(){")
     compileBody(ctx, em, depth + 1, isTail: isTail)
@@ -43,8 +43,8 @@ class Do: _Form, Expr { // do block: `{…}`.
 
   // MARK: Body
   
-  func compileBody(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    for (i, expr) in exprs.enumerate() {
+  func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+    for (i, expr) in exprs.enumerated() {
       let isLast = (i == exprs.lastIndex)
       if isLast {
         em.str(depth, "return (")

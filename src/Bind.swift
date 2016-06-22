@@ -17,22 +17,22 @@ class Bind: _Form, Expr, Def { // value binding: `name=expr`.
       val: castForm(r, "binding", "value expression"))
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    sym.writeTo(&target, depth + 1)
-    val.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    sym.write(to: &stream, depth + 1)
+    val.write(to: &stream, depth + 1)
   }
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let exprType = val.typeForExpr(ctx, scope)
-    scope.addRecord(sym, kind: .val(exprType))
+    scope.addRecord(sym: sym, kind: .val(exprType))
     ctx.trackExpr(self, type: typeVoid)
     return typeVoid
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     em.str(depth, "let \(sym.hostName) =")
     val.compileExpr(ctx, em, depth + 1, isTail: false)
@@ -40,7 +40,7 @@ class Bind: _Form, Expr, Def { // value binding: `name=expr`.
 
   // MARK: Def
   
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(_ space: Space) -> ScopeRecord.Kind {
     let ctx = TypeCtx()
     let _ = val.typeForExpr(ctx, LocalScope(parent: space)) // initial root type is ignored.
     ctx.resolve()

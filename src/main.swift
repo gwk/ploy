@@ -14,7 +14,7 @@ var libPaths: [String] = []
 var opts: [String: String] = [:]
 
 var opt: String? = nil
-for (i, arg) in Process.arguments.enumerate() {
+for (i, arg) in Process.arguments.enumerated() {
   if i == 0 {
     ployPath = arg
   } else if let o = opt {
@@ -45,7 +45,7 @@ let (mainIns, mainIn) = Src(path: mainPath).parseMain(verbose: false)
 
 let ins = mainIns + libPaths.flatMap { Src(path: $0).parseLib(verbose: false) }
 
-compileProgram(tmpFile, hostPath: hostPath, ins: ins, mainIn: mainIn)
+compileProgram(file: tmpFile, hostPath: hostPath, ins: ins, mainIn: mainIn)
 
 renameFileAtPath(tmpPath, toPath: outPath)
 do {

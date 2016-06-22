@@ -12,8 +12,8 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   
   //var description: String { return String(val) }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, ": \(val)\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, ": \(val)\n")
   }
 
   var hostAccessor: String {
@@ -39,13 +39,13 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = typeInt
     ctx.trackExpr(self, type: type)
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)
   }

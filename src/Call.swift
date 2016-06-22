@@ -17,15 +17,15 @@ class Call : _Form, Expr {
       arg: castForm(r, "call", "expression"))
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    callee.writeTo(&target, depth + 1)
-    arg.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    callee.write(to: &stream, depth + 1)
+    arg.write(to: &stream, depth + 1)
   }
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let _ = callee.typeForExpr(ctx, scope)
     let _ = arg.typeForExpr(ctx, scope)
     let parType = ctx.addFreeType()
@@ -37,7 +37,7 @@ class Call : _Form, Expr {
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     em.str(depth, isTail ? "{" : "_tramp({")
     em.str(depth, " c:")

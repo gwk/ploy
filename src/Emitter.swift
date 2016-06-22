@@ -24,11 +24,11 @@ class Emitter {
     }
   }
 
-  func str(depth: Int, _ string: String) {
+  func str(_ depth: Int, _ string: String) {
     lines.append(String(indent: depth) + string)
   }
   
-  func append(string: String) {
+  func append(_ string: String) {
     lines[lines.lastIndex!] = lines.last! + string
   }
 }
@@ -44,8 +44,8 @@ func compileProgram(file: OutFile, hostPath: String, ins: [In], mainIn: In) {
   file.writeL("// host.js END.\n")
 
   let rootSpace = Space(pathNames: ["ROOT"], parent: nil, file: file)
-  let mainSpace = rootSpace.setupRoot(ins, mainIn: mainIn)
-  let mainRecord = mainSpace.compileMain(mainIn)
+  let mainSpace = rootSpace.setupRoot(ins: ins, mainIn: mainIn)
+  let mainRecord = mainSpace.compileMain(mainIn: mainIn)
 
   // call the main function via the tail recursion trampoline, and pass the return code to PROC/exit.
   file.writeL("\nPROC__exit(_tramp(\(mainRecord.hostName)()))})()")

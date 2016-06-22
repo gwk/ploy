@@ -11,17 +11,17 @@ class Struct: _Form, Def { // struct declaration: `struct S fields…;`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    sym.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    sym.write(to: &stream, depth + 1)
     for f in fields {
-      f.writeTo(&target, depth + 1)
+      f.write(to: &stream, depth + 1)
     }
   }
 
   // MARK: Def
 
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(_ space: Space) -> ScopeRecord.Kind {
     // TODO.
     return .type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
   }

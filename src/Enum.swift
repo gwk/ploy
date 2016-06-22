@@ -11,17 +11,17 @@ class Enum: _Form, Def { // enum declaration: `enum E variants…;`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    sym.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    sym.write(to: &stream, depth + 1)
     for v in variants {
-      v.writeTo(&target, depth + 1)
+      v.write(to: &stream, depth + 1)
     }
   }
 
   // MARK: Def
 
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(_ space: Space) -> ScopeRecord.Kind {
     // TODO.
     return .type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
   }

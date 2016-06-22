@@ -4,7 +4,7 @@
 protocol Form : Streamable {
   var syn: Syn { get }
 
-  func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int)
+  func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int)
 }
 
 extension Form {
@@ -13,15 +13,15 @@ extension Form {
 
   var fullDesc: String {
     var s = ""
-    writeTo(&s, 0)
+    write(to: &s, 0)
     return s
   }
 
-  func writeTo<Target : OutputStream>(inout target: Target) {
-    writeTo(&target, 0)
+  func write<Stream : OutputStream>(to stream: inout Stream) {
+    write(to: &stream, 0)
   }
 
-  @noreturn func failForm(prefix: String, msg: String, notes: [(Form?, String)]) {
+  @noreturn func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) {
     syn.src.errPos(syn.pos, end: syn.visEnd, prefix: prefix, msg: msg)
     for (form, msg) in notes {
       if let form = form {
@@ -32,15 +32,15 @@ extension Form {
   }
 
   @noreturn func failForm(prefix: String, msg: String, notes: (Form?, String)...) {
-    failForm(prefix, msg: msg, notes: notes)
+    failForm(prefix: prefix, msg: msg, notes: notes)
   }
 
-  @noreturn func failSyntax(msg: String, notes: (Form?, String)...) {
-    failForm("syntax error", msg: msg, notes: notes)
+  @noreturn func failSyntax(_ msg: String, notes: (Form?, String)...) {
+    failForm(prefix: "syntax error", msg: msg, notes: notes)
   }
 
-  @noreturn func failType(msg: String, notes: (Form?, String)...) {
-    failForm("type error", msg: msg, notes: notes)
+  @noreturn func failType(_ msg: String, notes: (Form?, String)...) {
+    failForm(prefix: "type error", msg: msg, notes: notes)
   }
 }
 
@@ -53,14 +53,14 @@ protocol Accessor: Form {
 protocol Def: Form {
   var sym: Sym { get }
   @warn_unused_result
-  func compileDef(space: Space) -> ScopeRecord.Kind
+  func compileDef(_ space: Space) -> ScopeRecord.Kind
 }
 
 
 protocol Expr: Form {
   @warn_unused_result
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool)
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool)
 }
 
 
@@ -68,13 +68,13 @@ protocol Identifier: Form {
   var name: String { get }
   var syms: [Sym] { get }
   @warn_unused_result
-  func record(scope: Scope, _ sym: Sym) -> ScopeRecord
+  func record(_ scope: Scope, _ sym: Sym) -> ScopeRecord
 }
 
 
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
   @warn_unused_result
-  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type
+  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type
 }
 
 
@@ -86,18 +86,18 @@ class _Form : Form, Hashable, CustomStringConvertible {
 
   var description: String {
     var s = ""
-    writeHead(&s, 0, "")
+    writeHead(to: &s, 0, "")
     return s
   }
 
-  func writeTo<Target: OutputStream>(inout target: Target, _ depth: Int) { fatalError() }
+  func write<Stream: OutputStream>(to stream: inout Stream, _ depth: Int) { fatalError() }
 
-  func writeHead<Target: OutputStream>(inout target: Target, _ depth: Int, _ suffix: String) {
-    target.write(String(indent: depth))
-    target.write(String(self.dynamicType))
-    target.write(" ")
-    target.write(String(syn))
-    target.write(suffix)
+  func writeHead<Stream: OutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String) {
+    stream.write(String(indent: depth))
+    stream.write(String(self.dynamicType))
+    stream.write(" ")
+    stream.write(String(syn))
+    stream.write(suffix)
   }
 }
 
@@ -106,7 +106,7 @@ func ==(l: _Form, r: _Form) -> Bool { return l === r }
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
 @warn_unused_result
-func castForm<T>(form: Form, _ subj: String, _ exp: String) -> T {
+func castForm<T>(_ form: Form, _ subj: String, _ exp: String) -> T {
   // note: seems that should be able to parameterize as <T: Form> but swift 2.2 does not like that.
   if let form = form as? T {
     return form

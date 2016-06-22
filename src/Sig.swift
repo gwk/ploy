@@ -17,13 +17,13 @@ class Sig: _Form, TypeExpr { // function signature: `Par%Ret`.
       ret: castForm(r, "signature return", "type expression"))
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    par.writeTo(&target, depth + 1)
-    ret.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    par.write(to: &stream, depth + 1)
+    ret.write(to: &stream, depth + 1)
   }
 
-  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type {
+  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
     return Type.Sig(par: par.typeForTypeExpr(scope, "signature input"), ret: ret.typeForTypeExpr(scope, "signature return"))
   }
 }

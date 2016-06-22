@@ -11,19 +11,19 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
     for c in cases {
-      c.writeTo(&target, depth + 1)
+      c.write(to: &stream, depth + 1)
     }
     if let dflt = dflt {
-      dflt.writeTo(&target, depth + 1)
+      dflt.write(to: &stream, depth + 1)
     }
   }
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = (dflt == nil) ? typeVoid: ctx.addFreeType() // all cases must return same type.
     ctx.trackExpr(self, type: type)
     // TODO: much more to do here when default is missing;
@@ -43,7 +43,7 @@ class If: _Form, Expr { // if statement: `if cases… default;`.
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     em.str(depth, "(")
     for c in cases {

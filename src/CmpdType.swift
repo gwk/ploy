@@ -9,14 +9,14 @@ class CmpdType: _Form, TypeExpr { // compound type: `<A B>`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, pars.isEmpty ? " <>\n" : "\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, pars.isEmpty ? " <>\n" : "\n")
     for p in pars {
-      p.writeTo(&target, depth + 1)
+      p.write(to: &stream, depth + 1)
     }
   }
   
-  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type {
+  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
     return Type.Cmpd(pars.map { $0.typeParForPar(scope, subj) })
   }
 }

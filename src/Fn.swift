@@ -11,15 +11,15 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    sig.writeTo(&target, depth + 1)
-    body.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    sig.write(to: &stream, depth + 1)
+    body.write(to: &stream, depth + 1)
   }
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = sig.typeForTypeExpr(scope, "signature")
     let fnScope = LocalScope(parent: scope)
     fnScope.addValRecord("$", type: type.sigPar)
@@ -30,7 +30,7 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     em.str(depth, (isTail ? "{v:" : "") + "(function self($){")
     body.compileBody(ctx, em, depth + 1, isTail: true)

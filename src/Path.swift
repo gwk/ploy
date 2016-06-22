@@ -10,23 +10,23 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, ": ")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, ": ")
     var first = true
     for s in syms {
       if first {
         first = false
       } else {
-        target.write("/")
+        stream.write("/")
       }
-      target.write(s.name)
+      stream.write(s.name)
     }
-    target.write("\n")
+    stream.write("\n")
   }
 
   // MARK: Expr
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let record = scope.record(path: self)
     let type = syms.last!.typeForExprRecord(scope.record(path: self))
     ctx.trackExpr(self, type: type)
@@ -34,20 +34,20 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     syms.last!.compileSym(em, depth, ctx.pathRecords[self]!, isTail: isTail)
   }
 
   // MARK: Identifier
 
-  var name: String { return syms.map({$0.name}).joinWithSeparator("/") }
+  var name: String { return syms.map({$0.name}).joined(separator: "/") }
   
-  func record(scope: Scope, _ sym: Sym) -> ScopeRecord { return scope.record(path: self) }
+  func record(_ scope: Scope, _ sym: Sym) -> ScopeRecord { return scope.record(path: self) }
 
   // MARK: TypeExpr
 
-  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type {
+  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
     return syms.last!.typeForTypeRecord(scope.record(path: self), subj)
   }
 }

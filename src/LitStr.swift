@@ -9,31 +9,31 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, ": \(val)\n") // TODO: escape val properly.
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, ": \(val)\n") // TODO: escape val properly.
   }
 
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = typeStr
     ctx.trackExpr(self, type: type)
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     var s = "\""
     for code in val.codes {
       switch code {
-      case "\0":    s.appendContentsOf("\\0")
-      case "\u{8}": s.appendContentsOf("\\b")
-      case "\t":    s.appendContentsOf("\\t")
-      case "\n":    s.appendContentsOf("\\n")
-      case "\r":    s.appendContentsOf("\\r")
-      case "\"":    s.appendContentsOf("\\\"")
-      case "\\":    s.appendContentsOf("\\\\")
+      case "\0":    s.append("\\0")
+      case "\u{8}": s.append("\\b")
+      case "\t":    s.append("\\t")
+      case "\n":    s.append("\\n")
+      case "\r":    s.append("\\r")
+      case "\"":    s.append("\\\"")
+      case "\\":    s.append("\\\\")
       default:
         if code < " " || code > "~" {
-          s.appendContentsOf("\\u{\(Int(code.value).hex)}")
+          s.append("\\u{\(Int(code.value).hex)}")
         } else {
           s.append(Character(code))
         }

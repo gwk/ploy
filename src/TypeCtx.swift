@@ -13,24 +13,24 @@ struct Constraint {
   var actDesc: String { return actChain.map({"\($0) of\n"}).join() }
   var expDesc: String { return expChain.map({"\($0) of\n"}).join() }
 
-  func subConstraint(actType actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Constraint {
+  func subConstraint(actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Constraint {
     return Constraint(
       actExpr: actExpr, actType: actType, actChain: (actDesc == nil) ? actChain : .link(actDesc!, actChain),
       expForm: expForm, expType: expType, expChain: (expDesc == nil) ? expChain : .link(expDesc!, expChain), desc: desc)
   }
 
   @noreturn
-  func fail(actType: Type, _ expType: Type, _ msg: String) {
+  func fail(act: Type, exp: Type, _ msg: String) {
     actExpr.failType(
-      "\(msg);\n\(actDesc)\(desc);\nresolved type: \(actType)",
-      notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(expType)"))
+      "\(msg);\n\(actDesc)\(desc);\nresolved type: \(act)",
+      notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(exp)"))
   }
 }
 
 
 class TypeCtx {
 
-  struct Error: ErrorType {
+  struct Error: ErrorProtocol {
     let constraint: Constraint
     let msg: String
 
@@ -52,15 +52,15 @@ class TypeCtx {
 
   deinit { assert(isResolved) }
 
-  func assertIsTracking(expr: Expr) { assert(exprOriginalTypes.contains(expr as! _Form)) }
+  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(expr as! _Form)) }
 
-  func originalTypeForExpr(expr: Form) -> Type { return exprOriginalTypes[expr as! _Form]! }
+  func originalTypeForExpr(_ expr: Form) -> Type { return exprOriginalTypes[expr as! _Form]! }
 
-  func resolvedType(type: Type) -> Type {
+  func resolvedType(_ type: Type) -> Type {
     return resolvedTypes[type].or(type)
   }
 
-  func typeForExpr(expr: Expr) -> Type {
+  func typeForExpr(_ expr: Expr) -> Type {
     return resolvedType(originalTypeForExpr(expr))
   }
 
@@ -70,26 +70,26 @@ class TypeCtx {
     return t
   }
 
-  func trackExpr(expr: Expr, type: Type) {
+  func trackExpr(_ expr: Expr, type: Type) {
     exprOriginalTypes.insertNew(expr as! _Form, value: type)
     trackFreeTypes(type)
   }
 
-  func trackFreeTypes(type: Type) {
+  func trackFreeTypes(_ type: Type) {
     for free in type.frees {
       guard case .free(let index) = free.kind else { fatalError() }
       freeIndicesToUnresolvedTypes.insert(index, member: type)
     }
   }
 
-  func constrain(actExpr: Expr, expForm: Form, expType: Type, _ desc: String) {
+  func constrain(_ actExpr: Expr, expForm: Form, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
       actExpr: actExpr, actType: originalTypeForExpr(actExpr), actChain: .end,
       expForm: expForm, expType: expType, expChain: .end, desc: desc))
   }
 
-  func resolveType(type: Type, to resolved: Type) {
+  func resolveType(_ type: Type, to resolved: Type) {
     if let existing = resolvedTypes[type] {
       fatalError("multiple resolutions not yet supported;\n  original: \(type)\n  existing: \(existing)\n  incoming: \(resolved)")
     }
@@ -104,7 +104,7 @@ class TypeCtx {
     }
   }
 
-  func resolveFreeType(freeType: Type, to resolved: Type) {
+  func resolveFreeType(_ freeType: Type, to resolved: Type) {
     // just for clarity / as an experiment, always prefer lower free indices.
     if case .free(let resolvedIndex) = resolved.kind {
       if freeType.freeIndex > resolvedIndex {
@@ -115,7 +115,7 @@ class TypeCtx {
     }
   }
 
-  func resolveOpaqueConstraint(constraint: Constraint, actType: Type, expOpaqueType: Type) {
+  func resolveOpaqueConstraint(_ constraint: Constraint, actType: Type, expOpaqueType: Type) {
     switch actType.kind {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
@@ -128,14 +128,14 @@ class TypeCtx {
             return
           }
         }
-      default: constraint.fail(accesseeType, expOpaqueType, "actual type is not an accessible type")
+      default: constraint.fail(act: accesseeType, exp: expOpaqueType, "actual type is not an accessible type")
       }
-    default: constraint.fail(actType, expOpaqueType, "actual type is not expected opaque type")
+    default: constraint.fail(act: actType, exp: expOpaqueType, "actual type is not expected opaque type")
     }
     fatalError()
   }
 
-  func resolveConstraint(constraint: Constraint) {
+  func resolveConstraint(_ constraint: Constraint) {
     let actType = resolvedType(constraint.actType)
     let expType = resolvedType(constraint.expType)
     if (actType == expType) {
@@ -149,18 +149,18 @@ class TypeCtx {
 
     switch expType.kind {
     case .all(_, _, _):
-      constraint.fail(actType, expType, "expected type of kind `All` not yet implemented")
+      constraint.fail(act: actType, exp: expType, "expected type of kind `All` not yet implemented")
     case .any(let members, _, _):
       if members.contains(actType) { return }
-      constraint.fail(actType, expType, "actual type is not a member of `Any` expected type")
+      constraint.fail(act: actType, exp: expType, "actual type is not a member of `Any` expected type")
     case .cmpd(_ , _, _):
       switch actType.kind {
       case .cmpd(_, _, _):
-        constraint.fail(actType, expType, "Cmpd type conversion not implemented")
-      default: constraint.fail(actType, expType, "actual type is not a compound")
+        constraint.fail(act: actType, exp: expType, "Cmpd type conversion not implemented")
+      default: constraint.fail(act: actType, exp: expType, "actual type is not a compound")
       }
     case .enum_:
-      constraint.fail(actType, expType, "enum constraints not implemented")
+      constraint.fail(act: actType, exp: expType, "enum constraints not implemented")
     case .free:
       resolveType(expType, to: actType)
       return
@@ -168,7 +168,7 @@ class TypeCtx {
       resolveOpaqueConstraint(constraint, actType: actType, expOpaqueType: expType)
       return
     case .prop(_, _):
-      constraint.fail(actType, expType, "prop constraints not implemented")
+      constraint.fail(act: actType, exp: expType, "prop constraints not implemented")
     case .sig(let expPar, let expRet, _, _):
       switch actType.kind {
       case .sig(let actPar, let actRet, _, _):
@@ -179,12 +179,12 @@ class TypeCtx {
           actType: actRet, actDesc: "signature return",
           expType: expRet, expDesc: "signature return"))
         return
-      default: constraint.fail(actType, expType, "actual type is not a signature")
+      default: constraint.fail(act: actType, exp: expType, "actual type is not a signature")
       }
     case .struct_:
-      constraint.fail(actType, expType, "struct constraints not implemented")
+      constraint.fail(act: actType, exp: expType, "struct constraints not implemented")
     case .var_:
-      constraint.fail(actType, expType, "var constraints not implemented")
+      constraint.fail(act: actType, exp: expType, "var constraints not implemented")
     }
     fatalError()
   }

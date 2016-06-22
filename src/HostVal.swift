@@ -11,15 +11,15 @@ class HostVal: _Form, Def { // host value declaration: `host-val sym Type;`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    sym.writeTo(&target, depth + 1)
-    typeExpr.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    sym.write(to: &stream, depth + 1)
+    typeExpr.write(to: &stream, depth + 1)
   }
 
   // MARK: Def
 
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(_ space: Space) -> ScopeRecord.Kind {
     let type = typeExpr.typeForTypeExpr(space, "host value declaration")
     return .val(type)
   }

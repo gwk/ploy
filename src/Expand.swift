@@ -9,10 +9,10 @@ class Expand: _Form { // compound macro expansion argument: `[a b]`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
     for p in pars {
-      p.writeTo(&target, depth + 1)
+      p.write(to: &stream, depth + 1)
     }
   }
   

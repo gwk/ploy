@@ -9,21 +9,21 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, args.isEmpty ? " ()\n" : "\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, args.isEmpty ? " ()\n" : "\n")
     for a in args {
-      a.writeTo(&target, depth + 1)
+      a.write(to: &stream, depth + 1)
     }
   }
   
-  func typeForExpr(ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let pars = args.enumerate().map { $1.typeParForArg(ctx, scope, index: $0) }
+  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    let pars = args.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
     let type = Type.Cmpd(pars)
     ctx.trackExpr(self, type: type)
     return type
   }
 
-  func compileExpr(ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     let type = ctx.typeForExpr(self)
     em.str(depth, isTail ? "{{v:" : "{")
@@ -44,7 +44,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
 
   // MARK: Cmpd
   
-  func compilePar(ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, inout argIndex: Int) {
+  func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, argIndex: inout Int) {
     if argIndex < args.count {
       let arg = args[argIndex]
       if let argLabel = arg.label {

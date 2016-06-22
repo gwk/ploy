@@ -17,13 +17,13 @@ class Reify: _Form, TypeExpr { // type reification:  `T^A`.
       arg: castForm(r, "type reification", "type expression"))
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    callee.writeTo(&target, depth + 1)
-    arg.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    callee.write(to: &stream, depth + 1)
+    arg.write(to: &stream, depth + 1)
   }
 
-  func typeForTypeExpr(scope: Scope, _ subj: String) -> Type {
+  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
     fatalError()
   }
 }

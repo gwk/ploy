@@ -16,20 +16,20 @@ class Par: _Form { // compound parameter.
     super.init(syn)
   }
   
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
     if let label = label {
-      label.writeTo(&target, depth + 1)
+      label.write(to: &stream, depth + 1)
     }
     if let typeExpr = typeExpr {
-      typeExpr.writeTo(&target, depth + 1)
+      typeExpr.write(to: &stream, depth + 1)
     }
     if let dflt = dflt {
-      dflt.writeTo(&target, depth + 1)
+      dflt.write(to: &stream, depth + 1)
     }
   }
     
-  func typeParForPar(scope: Scope, _ subj: String) -> TypePar {
+  func typeParForPar(_ scope: Scope, _ subj: String) -> TypePar {
     var type: Type
     if let typeExpr = typeExpr {
       type = typeExpr.typeForTypeExpr(scope, "parameter type")
@@ -42,7 +42,7 @@ class Par: _Form { // compound parameter.
     return TypePar(index: index, label: label, type: type)
   }
   
-  static func mk(index index: Int, form: Form, subj: String) -> Par {
+  static func mk(index: Int, form: Form, subj: String) -> Par {
     var label: Sym? = nil
     var typeExpr: TypeExpr? = nil
     var dflt: Expr? = nil

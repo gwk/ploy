@@ -72,7 +72,6 @@
 		ECB639831B83CA3600138A8C /* fs.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECB639821B83CA3600138A8C /* fs.swift */; };
 		ECC68F911C1CA24D005168B0 /* Random.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECC68F901C1CA24D005168B0 /* Random.swift */; };
 		ECDA37151B7EB16200939000 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDA37141B7EB16200939000 /* File.swift */; };
-		ECDFDFF81CA45BF000B52E52 /* backport.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECDFDFF71CA45BF000B52E52 /* backport.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -157,7 +156,6 @@
 		ECB639821B83CA3600138A8C /* fs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = fs.swift; path = qk/src/Core/fs.swift; sourceTree = "<group>"; };
 		ECC68F901C1CA24D005168B0 /* Random.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Random.swift; path = qk/src/Core/Random.swift; sourceTree = "<group>"; };
 		ECDA37141B7EB16200939000 /* File.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = File.swift; path = qk/src/Core/File.swift; sourceTree = "<group>"; };
-		ECDFDFF71CA45BF000B52E52 /* backport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = backport.swift; path = qk/src/Core/backport.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,7 +175,6 @@
 				EC504A131CAB0277000FB61D /* ArithmeticFloat.swift */,
 				EC49BD3E1B7565E700660AF0 /* ArithmeticProtocol.swift */,
 				EC1FE8E11B6BE20C00112BB0 /* Array.swift */,
-				ECDFDFF71CA45BF000B52E52 /* backport.swift */,
 				EC97D70C1B84F9A8001D9ABB /* Chain.swift */,
 				EC1FE8E21B6BE20C00112BB0 /* Character.swift */,
 				EC49BCFA1B750C3200660AF0 /* check.swift */,
@@ -297,11 +294,12 @@
 		ECAE88FD1B69391F002AE9B9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0700;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = gwk;
 				TargetAttributes = {
 					ECAE89041B69391F002AE9B9 = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -331,7 +329,6 @@
 				EC1FE8F11B6BE20C00112BB0 /* Sequence.swift in Sources */,
 				EC504A041CAB0084000FB61D /* PolyFn.swift in Sources */,
 				EC5049FF1CAB0084000FB61D /* main.swift in Sources */,
-				ECDFDFF81CA45BF000B52E52 /* backport.swift in Sources */,
 				EC504A091CAB0084000FB61D /* ScopeRecord.swift in Sources */,
 				EC1FE8EB1B6BE20C00112BB0 /* Character.swift in Sources */,
 				EC504A051CAB0084000FB61D /* Pos.swift in Sources */,
@@ -507,6 +504,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -514,6 +512,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

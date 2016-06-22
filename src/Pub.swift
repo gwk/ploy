@@ -9,16 +9,16 @@ class Pub: _Form, Def { // public modifier: `pub expr;`.
     super.init(syn)
   }
 
-  override func writeTo<Target : OutputStream>(inout target: Target, _ depth: Int) {
-    writeHead(&target, depth, "\n")
-    def.writeTo(&target, depth + 1)
+  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+    writeHead(to: &stream, depth, "\n")
+    def.write(to: &stream, depth + 1)
   }
 
   // MARK: Def
 
   var sym: Sym { return def.sym }
 
-  func compileDef(space: Space) -> ScopeRecord.Kind {
+  func compileDef(_ space: Space) -> ScopeRecord.Kind {
     fatalError()
   }
 }

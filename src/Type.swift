@@ -44,33 +44,33 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     Type.allTypes[description] = self
   }
   
-  class func All(members: Set<Type>) -> Type {
-    let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sort().joinWithSeparator(" "))>"
+  class func All(_ members: Set<Type>) -> Type {
+    let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return allTypes[description].or(Type(description, .all(members: members,
         frees: Set(members.flatMap { $0.frees }),
         vars: Set(members.flatMap { $0.vars }))))
   }
 
-  class func Any(members: Set<Type>) -> Type {
-    let description = members.isEmpty ? "Empty" : "Any<\(members.map({$0.description}).sort().joinWithSeparator(" "))>"
+  class func Any(_ members: Set<Type>) -> Type {
+    let description = members.isEmpty ? "Empty" : "Any<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return allTypes[description].or(Type(description, .any(members: members,
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars }))))
   }
 
-  class func Cmpd(pars: [TypePar]) -> Type {
-    let description = "<\(pars.map({$0.description}).joinWithSeparator(" "))>"
+  class func Cmpd(_ pars: [TypePar]) -> Type {
+    let description = "<\(pars.map({$0.description}).joined(separator: " "))>"
     return allTypes[description].or(Type(description, .cmpd(pars: pars,
       frees: Set(pars.flatMap { $0.type.frees }),
       vars: Set(pars.flatMap { $0.type.vars }))))
   }
 
   class func Enum(spacePathNames names: [String], sym: Sym) -> Type {
-    let description = (names + [sym.name]).joinWithSeparator("/")
+    let description = (names + [sym.name]).joined(separator: "/")
     return Type(description, .enum_)
   }
 
-  class func Free(index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
+  class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
     if index < allFreeTypes.count {
       return allFreeTypes[index]
     }
@@ -82,20 +82,20 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Host(spacePathNames names: [String], sym: Sym) -> Type {
-    let description = (names + [sym.name]).joinWithSeparator("/")
+    let description = (names + [sym.name]).joined(separator: "/")
     return Type(description, .host)
   }
 
-  class func Prim(name: String) -> Type {
+  class func Prim(_ name: String) -> Type {
     return Type(name, .prim)
   }
 
-  class func Prop(accessor: PropAccessor, type: Type) -> Type {
+  class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
     let description = ("\(accessor.accessorString)@\(type)")
     return Type(description, .prop(accessor: accessor, type: type))
   }
 
-  class func Sig(par par: Type, ret: Type) -> Type {
+  class func Sig(par: Type, ret: Type) -> Type {
     let description = "\(par.nestedSigDescription)%\(ret.nestedSigDescription)"
     return allTypes[description].or(Type(description, .sig(par: par, ret: ret,
       frees: Set(seqs: [par.frees, ret.frees]),
@@ -103,11 +103,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Struct(spacePathNames names: [String], sym: Sym) -> Type {
-    let description = (names + [sym.name]).joinWithSeparator("/")
+    let description = (names + [sym.name]).joined(separator: "/")
     return Type(description, .struct_)
   }
 
-  class func Var(name: String) -> Type {
+  class func Var(_ name: String) -> Type {
     let description = "*" + name
     return Type(description, .var_(name: name))
   }
@@ -168,7 +168,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     fatalError()
   }
 
-  func refine(target: Type, with replacement: Type) -> Type {
+  func refine(_ target: Type, with replacement: Type) -> Type {
     // within the receiver type, replace target type with replacement, returning a new type.
     switch kind {
     case .free, .var_: return (self == target) ? replacement : self
@@ -182,7 +182,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       } else { return self }
     case .cmpd(let pars, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
-        return Type.Cmpd(pars.map() { self.refinePar($0, replacement: replacement) })
+        return Type.Cmpd(pars.map() { self.refine(par: $0, replacement: replacement) })
       } else { return self }
     case .sig(let par, let ret, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
@@ -194,7 +194,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
-  private func refinePar(par: TypePar, replacement: Type) -> TypePar {
+  private func refine(par: TypePar, replacement: Type) -> TypePar {
     let type = refine(par.type, with: replacement)
     return (type == par.type) ? par : TypePar(index: par.index, label: par.label, type: type)
   }
