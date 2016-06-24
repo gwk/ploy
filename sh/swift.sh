@@ -8,17 +8,17 @@ sources=$(sh/sources.sh)
 
 mkdir -p _build
 
-echo "swift.sh: destination path: $DST"
-[[ -n "$DST" ]] || exit 1
+echo "swift.sh: target: $TARGET"
+[[ -n "$TARGET" ]] || exit 1
 
 for s in $0 $sources; do
-  if [[ $s -nt "$DST" ]]; then
-    echo "source changed: $s"
+  if [[ $s -nt "$TARGET" ]]; then
+    echo "  source changed: $s"
     stale="true"
   fi
 done
 
-[[ -z "$stale" ]] && echo "no change." && exit 0
+[[ -z "$stale" ]] && echo "$TARGET: no change." && exit 0
 
 swiftc \
 -gline-tables-only \

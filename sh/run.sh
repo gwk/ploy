@@ -5,8 +5,8 @@ set -e
 cd $(dirname $0)/..
 
 mainPath="$1"; shift
-base=${mainPath%.ploy}
-outPath="_build/$base"
+stem=${mainPath%.ploy}
+outPath="_build/_run/$stem" # the '_run' subdir distinguishes these products from test.
 outDir=$(dirname "$outPath")
 
 sh/build.sh

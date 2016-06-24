@@ -4,7 +4,7 @@
 set -e
 cd $(dirname $0)/..
 
-export DST=_build/ploy
+export TARGET=_build/ploy
 
 sh/swift.sh \
--o "$DST"
+-o "$TARGET"

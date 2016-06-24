@@ -1,0 +1,4 @@
+{
+  'compile': '$BUILD/ploy lib/core.ploy lib/host.ploy -main $SRC -o $NAME',
+  'links': { 'lib': 'lib', 'test': 'test' }
+}

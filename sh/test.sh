@@ -4,11 +4,8 @@
 set -e
 cd $(dirname $0)/..
 
-libs=$(ls lib/*.ploy)
-tests="$@"
+sh/run.sh test/0-basic/ret-0.ploy # pre-test to make sure that ploy works at all
 
-[[ -z "$tests" ]] && tests="test"
-
-sh/run.sh test/0-basic/ret-0.ploy # pre-test to make sure that ploy works.
-tools/test.py -compiler "_build/ploy $libs" $tests
-
+args="$@"
+[[ -z "$args" ]] && args="test"
+iotest $args

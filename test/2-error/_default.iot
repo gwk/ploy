@@ -1,0 +1,5 @@
+{
+  'cmd': '$BUILD/ploy',
+  'args': '$PROJ/lib/core.ploy $PROJ/lib/host.ploy -main $SRC -o $NAME',
+  'links': { 'test': 'test' }
+}
