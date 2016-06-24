@@ -39,7 +39,7 @@ guard let mainPath = opts["-main"] else { fail("-main main-src-path argument is 
 guard let outPath = opts["-o"] else { fail("-o out-path argument is required.") }
 
 let tmpPath = outPath + ".tmp"
-let tmpFile = try! OutFile(path: tmpPath, create: 0o644)
+let tmpFile = guarded { try OutFile(path: tmpPath, create: 0o644) }
 
 let (mainIns, mainIn) = Src(path: mainPath).parseMain(verbose: false)
 
@@ -51,6 +51,5 @@ renameFileAtPath(tmpPath, toPath: outPath)
 do {
   try File.changePerms(outPath, 0o755)
 } catch let e {
-  errL("error: could not set compiled output file to executable: \(outPath)")
-  errL("  \(e)")
+  fail("error: could not set compiled output file to executable: \(outPath)\n  \(e)")
 }
