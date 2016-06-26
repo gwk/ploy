@@ -7,4 +7,4 @@ cd $(dirname $0)/..
 profs=$(find _build/test -name *.profraw -newer _build/ploy)
 
 xcrun llvm-profdata merge -o _build/ploy.profdata $profs
-xcrun llvm-cov show _build/ploy -instr-profile=_build/ploy.profdata $(sh/sources.sh | egrep '^src/')
+xcrun llvm-cov show _build/ploy -instr-profile=_build/ploy.profdata $(ls src/*.swift)

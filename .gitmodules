@@ -1,6 +1,0 @@
-[submodule "qk"]
-	path = qk
-	url = git@github.com:gwk/qk.git
-[submodule "writeup"]
-	path = writeup
-	url = git@github.com:gwk/writeup.git

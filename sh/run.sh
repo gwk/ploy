@@ -4,14 +4,15 @@
 set -e
 cd $(dirname $0)/..
 
+make build
+
 mainPath="$1"; shift
 stem=${mainPath%.ploy}
-outPath="_build/_run/$stem" # the '_run' subdir distinguishes these products from test.
+outPath="_build/_run/$stem.out" # the '_run' subdir distinguishes these products from test.
 outDir=$(dirname "$outPath")
 
-sh/build.sh
 mkdir -p "$outDir"
-_build/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
+.build/debug/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
 "$outPath" "$@"
 
 # TODO: move the profile dump.

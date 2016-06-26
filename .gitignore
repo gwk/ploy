@@ -4,6 +4,10 @@
 # Python.
 __pycache__
 
+# Swift.
+.build
+Packages
+
 # Xcode.
 xcuserdata
 profile

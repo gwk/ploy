@@ -1,5 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
+import Quilt
+
 
 let usageMsg = "usage: lib-src-paths… -main main-src-path -o out-path."
 

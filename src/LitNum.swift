@@ -1,5 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
+import Quilt
+
 
 class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   let val: Int
@@ -47,7 +49,7 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
 
   func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
-    em.str(depth, isTail ? "{v:\(val.dec)}" : val.dec)
+    em.str(depth, isTail ? "{v:\(val)}" : String(val))
   }
 }
 
