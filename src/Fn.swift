@@ -32,8 +32,8 @@ class Fn: _Form, Expr { // function declaration: `fn type body…;`.
 
   func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
-    em.str(depth, (isTail ? "{v:" : "") + "(function self($){")
+    em.str(depth,  "(function self($){")
     body.compileBody(ctx, em, depth + 1, isTail: true)
-    em.append("})" + (isTail ? "}" : ""))
+    em.append("})")
   }
 }

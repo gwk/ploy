@@ -39,13 +39,10 @@ class Call : _Form, Expr {
 
   func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
-    em.str(depth, isTail ? "{" : "_tramp({")
-    em.str(depth, " c:")
     callee.compileExpr(ctx, em, depth + 1, isTail: false)
-    em.append(",")
-    em.str(depth, " v:")
+    em.str(depth, "(")
     arg.compileExpr(ctx, em, depth + 1, isTail: false)
-    em.append(isTail ? "}" : "})")
+    em.append(")")
   }
 }
 

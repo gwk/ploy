@@ -49,7 +49,7 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
 
   func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
-    em.str(depth, isTail ? "{v:\(val)}" : String(val))
+    em.str(depth, String(val)) // TODO: preserve written format for clarity?
   }
 }
 

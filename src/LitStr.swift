@@ -10,7 +10,7 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, ": \(val)\n") // TODO: escape val properly.
+    writeHead(to: &stream, depth, ": \"\(val)\"\n") // TODO: use source string.
   }
 
   func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
@@ -40,7 +40,7 @@ class LitStr: _Form, Expr { // string literal: `'hi', "hi"`.
       }
     }
     s.append(Character("\""))
-    em.str(depth, isTail ? "{v:\(s)}" : s)
+    em.str(depth, s)
   }
 }
 

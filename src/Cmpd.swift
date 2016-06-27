@@ -26,7 +26,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
   func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     let type = ctx.typeForExpr(self)
-    em.str(depth, isTail ? "{{v:" : "{")
+    em.str(depth, "{")
     switch type.kind {
     case .cmpd(let pars, _, _):
       var argIndex = 0
@@ -39,7 +39,7 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     default:
       self.failType("expected type: \(type); received compound value.")
     }
-    em.append(isTail ? "}}" : "}")
+    em.append("}")
   }
 
   // MARK: Cmpd

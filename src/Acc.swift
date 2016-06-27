@@ -34,10 +34,10 @@ class Acc: _Form, Expr { // accessor: `field@val`.
 
   func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
-    em.str(depth, isTail ? "{v:" : "(")
+    em.str(depth, "(")
     accessee.compileExpr(ctx, em, depth + 1, isTail: false)
     em.str(depth + 1, accessor.hostAccessor)
-    em.append(isTail ? "}" : ")")
+    em.append(")")
   }
 }
 
