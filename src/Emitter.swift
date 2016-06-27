@@ -37,7 +37,17 @@ class Emitter {
 
 
 func compileProgram(file: OutFile, hostPath: String, ins: [In], mainIn: In) {
-  file.writeL("#!/usr/bin/env node")
+  // normal hash bang line (commented below) cannot pass necessary flags to node,
+  // because hashbang only respects one argument.
+  // file.writeL("#!/usr/bin/env node")
+
+  // instead, launch as shell script, then immediately exec env with all arguments.
+  // the hack relies on sh and node both interpreting the line;
+  // node sees a string followed by a comment;
+  // sh sees the no-op ':' command followed by the exec command.
+  file.writeL("#!/bin/sh")
+  file.writeL("':' //; exec /usr/bin/env node --harmony-tailcalls \"$0\" \"$@\"\n")
+  
   file.writeL("\"use strict\";\n")
   file.writeL("(function(){ // ploy.")
   file.writeL("// host.js.")
