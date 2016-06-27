@@ -1,5 +1,6 @@
 {
-  'cmd': '$BUILD/ploy',
+  'env': { 'PLOY': '$PROJ/.build/debug/ploy' },
+  'cmd': '$PLOY',
   'args': '$PROJ/lib/core.ploy $PROJ/lib/host.ploy -main $SRC -o $NAME',
   'links': { 'test': 'test' }
 }

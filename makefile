@@ -6,7 +6,7 @@
 
 .PHONY: default all clean cov test
 
-default: _build/ploy
+default: .build/debug/ploy
 
 all: clean test
 
@@ -17,14 +17,11 @@ clean:
 cov:
 	swift build -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
 
-test: _build/ploy
+test: .build/debug/ploy
 	iotest test
 
 _build:
 	mkdir -p $@
 
-_build/ploy: _build
-	@# creates .build/debug/ploy.
+.build/debug/ploy:
 	swift build
-	@# using a symlink does not work (do not understand why), but hardlink does.
-	ln -f .build/debug/ploy $@

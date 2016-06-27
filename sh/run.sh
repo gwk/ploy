@@ -4,7 +4,7 @@
 set -e
 cd $(dirname $0)/..
 
-make build
+make .build/debug/ploy
 
 mainPath="$1"; shift
 stem=${mainPath%.ploy}
