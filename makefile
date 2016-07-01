@@ -4,11 +4,14 @@
 # $<: The name of the first prerequisite.
 # $^: The names of all the prerequisites, with spaces between them. 
 
-.PHONY: default all clean cov test
+.PHONY: default all build clean cov test
 
-default: .build/debug/ploy
+default: build
 
-all: clean test
+all: clean build test
+
+build:
+	swift build
 
 clean:
 	rm -rf .build/*
@@ -22,6 +25,3 @@ test: .build/debug/ploy
 
 _build:
 	mkdir -p $@
-
-.build/debug/ploy:
-	swift build
