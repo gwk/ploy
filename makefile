@@ -17,10 +17,12 @@ clean:
 	rm -rf .build/*
 	rm -rf _build/*
 
+clean-ploy:
+	rm -rf .build/debug/ploy*
 cov:
 	swift build -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
 
-test: .build/debug/ploy
+test: build
 	iotest test
 
 _build:
