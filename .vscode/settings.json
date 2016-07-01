@@ -1,0 +1,6 @@
+{
+  "search.exclude": {
+    "_build": true,
+    ".build": true
+  }
+}
