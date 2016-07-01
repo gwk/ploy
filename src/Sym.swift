@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
+class Sym: _Form, Expr, Identifier, TypeExpr { // symbol: `name`.
   let name: String
 
   init(_ syn: Syn, name: String) {
@@ -11,16 +11,6 @@ class Sym: _Form, Accessor, Expr, Identifier, TypeExpr { // symbol: `name`.
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": \(name)\n")
-  }
-
-  // MARK: Accessor
-  
-  var hostAccessor: String {
-    return ".\(hostName)"
-  }
-
-  var propAccessor: Type.PropAccessor {
-    return .name(name)
   }
 
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.

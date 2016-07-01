@@ -13,13 +13,13 @@ class Acc: _Form, Expr { // accessor: `field@val`.
 
   static func mk(l: Form, _ r: Form) -> Form {
     return Acc(Syn(l.syn, r.syn),
-      accessor: castForm(l, "access", "accessor symbol or number literal"),
+      accessor: Accessor(form: l, subj: "access"),
       accessee: castForm(r, "access", "accessee expression"))
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    accessor.write(to: &stream, depth + 1)
+    accessor.form.write(to: &stream, depth + 1)
     accessee.write(to: &stream, depth + 1)
   }
 

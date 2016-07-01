@@ -45,11 +45,6 @@ extension Form {
 }
 
 
-protocol Accessor: Form {
-  var hostAccessor: String { get }
-  var propAccessor: Type.PropAccessor { get }
-}
-
 protocol Def: Form {
   var sym: Sym { get }
   @warn_unused_result

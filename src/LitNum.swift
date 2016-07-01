@@ -3,7 +3,7 @@
 import Quilt
 
 
-class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
+class LitNum: _Form, Expr { // numeric literal: `0`.
   let val: Int
 
   init(_ syn: Syn, val: Int) {
@@ -16,14 +16,6 @@ class LitNum: _Form, Accessor, Expr { // numeric literal: `0`.
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": \(val)\n")
-  }
-
-  var hostAccessor: String {
-    return "._\(val)"
-  }
-
-  var propAccessor: Type.PropAccessor {
-    return .index(val)
   }
 
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
