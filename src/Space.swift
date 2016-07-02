@@ -47,7 +47,8 @@ class Space: Scope {
   func extendRecord(record: ScopeRecord, method: Method) {
     switch record.kind {
     case .polyFn: break
-    default: method.identifier.failType("definition is not extensible", notes: (record.sym, "definition is here"))
+    default: method.identifier.form.failType("definition is not extensible",
+      notes: (record.sym, "definition is here"))
     }
   }
 

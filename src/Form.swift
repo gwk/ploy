@@ -48,14 +48,6 @@ extension Form {
   }
 }
 
-protocol Identifier: Form {
-  var name: String { get }
-  var syms: [Sym] { get }
-  @warn_unused_result
-  func record(_ scope: Scope, _ sym: Sym) -> ScopeRecord
-}
-
-
 protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
   @warn_unused_result
   func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type

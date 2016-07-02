@@ -343,15 +343,17 @@ class Src: CustomStringConvertible {
   }
   
   func parseIn(_ sym: Sym) -> Form {
-    let identifier: Identifier = parseForm(sym.syn.end, "`in` form", "module name symbol")
+    let identifier = Identifier(form: parsePhrase(sym.syn.end),
+      subj: "`in` form", exp: "namespace identifier")
     var defs: [Def] = []
-    let end = parseFormsTo(&defs, identifier.syn.end, subj: "`in` form")
+    let end = parseFormsTo(&defs, identifier.form.syn.end, subj: "`in` form")
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
   
   func parseMethod(_ sym: Sym) -> Form {
-    let identifier: Identifier = parseForm(sym.syn.end, "`method` form", "poly-fn name or path identifier")
-    let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature")
+    let identifier = Identifier(form: parsePhrase(sym.syn.end),
+      subj: "`method` form", exp: "poly-fn name or path identifier")
+    let sig: Sig = parseForm(identifier.form.syn.end, "`method` form", "method signature")
     let body = parseBodyToImplicitDo(sig.syn.end)
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
   }
@@ -513,7 +515,7 @@ class Src: CustomStringConvertible {
     return p
   }
   
-    func parseFormsTo<T: SubForm>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
+  func parseFormsTo<T: SubForm>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
     while hasSome(p) {

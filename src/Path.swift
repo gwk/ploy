@@ -3,7 +3,7 @@
 import Quilt
 
 
-class Path: _Form, Identifier, TypeExpr { // path: `LIB/name`.
+class Path: _Form, TypeExpr { // path: `LIB/name`.
   let syms: [Sym]
   
   init(_ syn: Syn, syms: [Sym]) {
@@ -25,12 +25,6 @@ class Path: _Form, Identifier, TypeExpr { // path: `LIB/name`.
     }
     stream.write("\n")
   }
-
-  // MARK: Identifier
-
-  var name: String { return syms.map({$0.name}).joined(separator: "/") }
-  
-  func record(_ scope: Scope, _ sym: Sym) -> ScopeRecord { return scope.record(path: self) }
 
   // MARK: TypeExpr
 
