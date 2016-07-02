@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Reify: _Form, TypeExpr { // type reification:  `T^A`.
+class Reify: _Form { // type reification:  `T^A`.
   let callee: TypeExpr
   let arg: TypeExpr
 
@@ -13,18 +13,14 @@ class Reify: _Form, TypeExpr { // type reification:  `T^A`.
 
   static func mk(l: Form, _ r: Form) -> Form {
     return self.init(Syn(l.syn, r.syn),
-      callee: castForm(l, "type reification", "type expression"),
-      arg: castForm(r, "type reification", "type expression"))
+      callee: TypeExpr(form: l, subj: "type reification"),
+      arg: TypeExpr(form: r, subj: "type reification"))
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     callee.write(to: &stream, depth + 1)
     arg.write(to: &stream, depth + 1)
-  }
-
-  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
-    fatalError()
   }
 }
 

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Sym: _Form, TypeExpr { // symbol: `name`.
+class Sym: _Form { // symbol: `name`.
   let name: String
 
   init(_ syn: Syn, name: String) {
@@ -27,12 +27,6 @@ class Sym: _Form, TypeExpr { // symbol: `name`.
     default:
       failType("symbol cannot access into value of type: \(accesseeType)")
     }
-  }
-
-  // MARK: TypeExpr
-
-  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
-    return typeForTypeRecord(scope.record(sym: self), subj)
   }
 
   // MARK: Sym

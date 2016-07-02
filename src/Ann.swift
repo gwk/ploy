@@ -14,7 +14,7 @@ class Ann: _Form { // annotation: `expr:Type`.
   static func mk(l: Form, _ r: Form) -> Form {
     return Ann(Syn(l.syn, r.syn),
       expr: Expr(form: l, subj: "type annotation"),
-      typeExpr: castForm(r, "type annotation", "type expression"))
+      typeExpr: TypeExpr(form: r, subj: "type annotation"))
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {

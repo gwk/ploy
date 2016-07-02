@@ -58,10 +58,8 @@ class Par: _Form { // compound parameter.
       }
       label = bind.sym
       dflt = bind.val
-    } else if let t = form as? TypeExpr {
-      typeExpr = t
     } else {
-      form.failSyntax("\(subj) parameter currently limited to require an explicit type.")
+      typeExpr = TypeExpr(form: form, subj: subj)
     }
     return Par(form.syn, index: index, label: label, typeExpr: typeExpr, dflt: dflt)
   }

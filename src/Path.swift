@@ -3,7 +3,7 @@
 import Quilt
 
 
-class Path: _Form, TypeExpr { // path: `LIB/name`.
+class Path: _Form { // path: `LIB/name`.
   let syms: [Sym]
   
   init(_ syn: Syn, syms: [Sym]) {
@@ -24,12 +24,6 @@ class Path: _Form, TypeExpr { // path: `LIB/name`.
       stream.write(s.name)
     }
     stream.write("\n")
-  }
-
-  // MARK: TypeExpr
-
-  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
-    return syms.last!.typeForTypeRecord(scope.record(path: self), subj)
   }
 }
 

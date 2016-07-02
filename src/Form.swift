@@ -6,10 +6,6 @@ protocol Form : Streamable {
   func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int)
 }
 
-protocol SubForm {
-  init(form: Form, subj: String)
-  var form: Form { get }
-}
 
 extension Form {
 
@@ -46,11 +42,6 @@ extension Form {
   @noreturn func failType(_ msg: String, notes: (Form?, String)...) {
     failForm(prefix: "type error", msg: msg, notes: notes)
   }
-}
-
-protocol TypeExpr: Form { // TODO: eventually TypeExpr will conform to Expr.
-  @warn_unused_result
-  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type
 }
 
 
