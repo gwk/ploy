@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Struct: _Form, Def { // struct declaration: `struct S fields…;`.
+class Struct: _Form { // struct declaration: `struct S fields…;`.
   let sym: Sym
   let fields: [Par]
   
@@ -17,13 +17,6 @@ class Struct: _Form, Def { // struct declaration: `struct S fields…;`.
     for f in fields {
       f.write(to: &stream, depth + 1)
     }
-  }
-
-  // MARK: Def
-
-  func compileDef(_ space: Space) -> ScopeRecord.Kind {
-    // TODO.
-    return .type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
   }
 }
 

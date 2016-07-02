@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Enum: _Form, Def { // enum declaration: `enum E variants…;`.
+class Enum: _Form { // enum declaration: `enum E variants…;`.
   let sym: Sym
   let variants: [Par]
 
@@ -17,13 +17,6 @@ class Enum: _Form, Def { // enum declaration: `enum E variants…;`.
     for v in variants {
       v.write(to: &stream, depth + 1)
     }
-  }
-
-  // MARK: Def
-
-  func compileDef(_ space: Space) -> ScopeRecord.Kind {
-    // TODO.
-    return .type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
   }
 }
 

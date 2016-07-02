@@ -36,10 +36,10 @@ class Space: Scope {
     }
     let record = getRecord(sym: def.sym)!
     guard case .val(let type) = record.kind else {
-      def.failType("expected `main` to be a function value; found \(record.kind.kindDesc)")
+      def.form.failType("expected `main` to be a function value; found \(record.kind.kindDesc)")
     }
     if type != typeOfMainFn {
-      def.failType("expected `main` to have type ()%Int; actual type is \(type)")
+      def.form.failType("expected `main` to have type ()%Int; actual type is \(type)")
     }
     return record
   }
@@ -77,7 +77,7 @@ class Space: Scope {
   func add(defs defsList: [Def]) {
 
     for def in defsList {
-      if let method = def as? Method {
+      if case .method(let method) = def {
         let syms = method.identifier.syms
         let targetSpaceSyms = Array(syms[0..<(syms.count - 1)])
         let targetSpace = getOrCreateSpace(syms: targetSpaceSyms)

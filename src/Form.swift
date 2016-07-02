@@ -7,6 +7,10 @@ protocol Form : Streamable {
   func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int)
 }
 
+protocol FormInitable {
+  init(form: Form, subj: String)
+}
+
 extension Form {
 
   var syntaxName: String { return String(self.dynamicType) }
@@ -43,14 +47,6 @@ extension Form {
     failForm(prefix: "type error", msg: msg, notes: notes)
   }
 }
-
-
-protocol Def: Form {
-  var sym: Sym { get }
-  @warn_unused_result
-  func compileDef(_ space: Space) -> ScopeRecord.Kind
-}
-
 
 protocol Expr: Form {
   @warn_unused_result

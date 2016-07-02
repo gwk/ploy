@@ -3,7 +3,7 @@
 import Quilt
 
 
-class PolyFn: _Form, Def {
+class PolyFn: _Form {
   let sym: Sym
 
   init(_ syn: Syn, sym: Sym) {
@@ -14,35 +14,5 @@ class PolyFn: _Form, Def {
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     sym.write(to: &stream, depth + 1)
-  }
-
-  // MARK: Def
-
-  func compileDef(_ space: Space) -> ScopeRecord.Kind {
-    let hostName = "\(space.hostPrefix)\(sym.name)"
-    let methodList = space.methods.getDefault(sym.name)
-    var sigsToPairs: [Type: MethodList.Pair]
-    do {
-      sigsToPairs = try methodList.pairs.mapUniquesToDict() {
-        (pair) in
-        (pair.method.typeForMethodSig(pair.space), pair)
-      }
-    } catch let e as DuplicateKeyError<Type, MethodList.Pair> {
-      failType("method has duplicate type: \(e.key)", notes:
-        (e.existing.method, "conflicting method definition"),
-        (e.incoming.method, "conflicting method definition"))
-    } catch { fatalError() }
-    let type = Type.All(Set(sigsToPairs.keys))
-    let em = Emitter(file: space.file)
-    em.str(0, "\(hostName)__table = {")
-    for (sig, pair) in sigsToPairs.pairsSortedByKey {
-      pair.method.compileMethod(space, polyFnType: type, sigType: sig, hostName: hostName)
-    }
-    em.append("}")
-    em.str(0, "function \(hostName)($){")
-    em.str(0, " throw \"error: PolyFn dispatch not implemented\"") // TODO: dispatch.
-    em.append("}")
-    em.flush()
-    return .polyFn(type)
   }
 }

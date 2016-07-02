@@ -346,7 +346,7 @@ class Src: CustomStringConvertible {
   func parseIn(_ sym: Sym) -> Form {
     let identifier: Identifier = parseForm(sym.syn.end, "`in` form", "module name symbol")
     var defs: [Def] = []
-    let end = parseForms(&defs, identifier.syn.end, "`in` form", "definition")
+    let end = parseFormsTo(&defs, identifier.syn.end, subj: "`in` form")
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
   
@@ -365,7 +365,7 @@ class Src: CustomStringConvertible {
   
   func parsePub(_ sym: Sym) -> Form {
     let def: Def = parseForm(sym.syn.end, "`pub` form", "definition")
-    return Pub(Syn(sym.syn, def.syn), def: def)
+    return Pub(Syn(sym.syn, def.form.syn), def: def)
   }
   
   func parseStruct(_ sym: Sym) -> Form {
@@ -514,6 +514,25 @@ class Src: CustomStringConvertible {
     return p
   }
   
+    func parseFormsTo<T: FormInitable>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
+    var p = parseSpace(pos)
+    var prevSpace = true
+    while hasSome(p) {
+      if ployTerminatorChars.contains(char(p)) {
+        break
+      }
+      if !prevSpace {
+        failParse(p, nil, "adjacent expressions require a separating space.")
+      }
+      let form = parsePhrase(p)
+      p = form.syn.end
+      prevSpace = form.syn.hasSpace
+      forms.append(T(form: form, subj: subj))
+    }
+    return p
+  }
+  
+
   func parseRawForms(_ pos: Pos) -> ([Form], Pos) {
     var forms: [Form] = []
     let end = parseForms(&forms, pos, "form", "any form (INTERNAL ERROR)")
@@ -555,18 +574,17 @@ class Src: CustomStringConvertible {
       if let in_ = form as? In {
         if defs.count > 0 {
           in_.failSyntax("`in` forms must precede all definitions in main.",
-            notes: (defs.first!, "first definition here"))
+            notes: (defs.first!.form, "first definition here"))
         }
         ins.append(in_)
-      } else if let def = form as? Def {
-        defs.append(def)
       } else {
-        form.failSyntax("main file expects `in` forms and definitions; received \(form.syntaxName).")
+        let def = Def(form: form, subj: "main file")
+        defs.append(def)
       }
     }
-    let mainPos = (defs.first?.syn.pos).or(end)
-    let mainVisEnd = (defs.last?.syn.visEnd).or(end)
-    let mainEnd = (defs.last?.syn.end).or(end)
+    let mainPos = (defs.first?.form.syn.pos).or(end)
+    let mainVisEnd = (defs.last?.form.syn.visEnd).or(end)
+    let mainEnd = (defs.last?.form.syn.end).or(end)
     let mainIn = In(Syn(src: self, pos: mainPos, visEnd: mainVisEnd, end: mainEnd), identifier: nil, defs: defs)
     if verbose {
       for in_ in ins {

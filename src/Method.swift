@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Method: _Form, Def { // method definition.
+class Method: _Form { // method definition.
   let identifier: Identifier
   let sig: Sig
   let body: Do
@@ -18,14 +18,6 @@ class Method: _Form, Def { // method definition.
     identifier.write(to: &stream, depth + 1)
     sig.write(to: &stream, depth + 1)
     body.write(to: &stream, depth + 1)
-  }
-
-  // MARK: Def
-
-  var sym: Sym { fatalError("Method is not an independent definition; sym should never be called.") }
-
-  func compileDef(_ space: Space) -> ScopeRecord.Kind {
-    fatalError("Method is not an independent definition; compileDef should never be called.")
   }
 
   // MARK: Method

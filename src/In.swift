@@ -17,7 +17,7 @@ class In: _Form { // in statement: `in module-name statements…;`.
       identifier.write(to: &stream, depth + 1)
     }
     for d in defs {
-      d.write(to: &stream, depth + 1)
+      d.form.write(to: &stream, depth + 1)
     }
   }
 }

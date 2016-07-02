@@ -2,7 +2,7 @@
 
 import Quilt
 
-enum Accessor {
+enum Accessor: FormInitable {
 
   case litNum(LitNum)
   case sym(Sym)
@@ -13,7 +13,7 @@ enum Accessor {
     } else if let form = form as? Sym {
       self = .sym(form)
     } else {
-      form.failSyntax("\(subj) expects accessor symbol or number literal  but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expects accessor symbol or number literal but received \(form.syntaxName).")
     }
   }
 
