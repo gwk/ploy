@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Sym: _Form, Expr, Identifier, TypeExpr { // symbol: `name`.
+class Sym: _Form, Identifier, TypeExpr { // symbol: `name`.
   let name: String
 
   init(_ syn: Syn, name: String) {
@@ -27,21 +27,6 @@ class Sym: _Form, Expr, Identifier, TypeExpr { // symbol: `name`.
     default:
       failType("symbol cannot access into value of type: \(accesseeType)")
     }
-  }
-
-  // MARK: Expr
-
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let record = scope.record(sym: self)
-    let type = typeForExprRecord(record)
-    ctx.trackExpr(self, type: type)
-    ctx.symRecords[self] = record
-    return type
-  }
-
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    compileSym(em, depth, ctx.symRecords[self]!, isTail: isTail)
   }
 
   // MARK: Identifier

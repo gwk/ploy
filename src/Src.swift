@@ -334,8 +334,7 @@ class Src: CustomStringConvertible {
       if let c = f as? Case {
         cases.append(c)
       } else if i == forms.lastIndex {
-        let d: Expr = castForm(f, "`if` form", "default expression")
-        dflt = d
+        dflt = Expr(form: f, subj: "`if` form", exp: "default expression")
       } else {
         f.failSyntax("`if` form expects `?` case but received \(f.syntaxName).")
       }
@@ -364,7 +363,7 @@ class Src: CustomStringConvertible {
   }
   
   func parsePub(_ sym: Sym) -> Form {
-    let def: Def = parseForm(sym.syn.end, "`pub` form", "definition")
+    let def: Def = parseForm(sym.syn.end, "`pub` form", "definition") // TODO: looks broken.
     return Pub(Syn(sym.syn, def.form.syn), def: def)
   }
   
@@ -514,7 +513,7 @@ class Src: CustomStringConvertible {
     return p
   }
   
-    func parseFormsTo<T: FormInitable>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
+    func parseFormsTo<T: SubForm>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
     while hasSome(p) {
@@ -553,8 +552,8 @@ class Src: CustomStringConvertible {
   
   func parseBody(_ pos: Pos) -> ([Expr], Pos, Pos) {
     let (forms, end) = parseRawForms(pos)
-    let exprs: [Expr] = forms.map { castForm($0, "body", "expression") }
-    let visEnd = (exprs.last?.syn.end).or(end)
+    let exprs = forms.map { Expr(form: $0, subj: "body") }
+    let visEnd = (exprs.last?.form.syn.end).or(end)
     return (exprs, visEnd, end)
   }
   

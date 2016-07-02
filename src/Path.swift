@@ -3,7 +3,7 @@
 import Quilt
 
 
-class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
+class Path: _Form, Identifier, TypeExpr { // path: `LIB/name`.
   let syms: [Sym]
   
   init(_ syn: Syn, syms: [Sym]) {
@@ -24,21 +24,6 @@ class Path: _Form, Expr, Identifier, TypeExpr { // path: `LIB/name`.
       stream.write(s.name)
     }
     stream.write("\n")
-  }
-
-  // MARK: Expr
-
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let record = scope.record(path: self)
-    let type = syms.last!.typeForExprRecord(scope.record(path: self))
-    ctx.trackExpr(self, type: type)
-    ctx.pathRecords[self] = record
-    return type
-  }
-
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    syms.last!.compileSym(em, depth, ctx.pathRecords[self]!, isTail: isTail)
   }
 
   // MARK: Identifier

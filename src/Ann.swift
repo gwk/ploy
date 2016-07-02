@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Ann: _Form, Expr { // annotation: `expr:Type`.
+class Ann: _Form { // annotation: `expr:Type`.
   let expr: Expr
   let typeExpr: TypeExpr
   
@@ -13,29 +13,14 @@ class Ann: _Form, Expr { // annotation: `expr:Type`.
   
   static func mk(l: Form, _ r: Form) -> Form {
     return Ann(Syn(l.syn, r.syn),
-      expr: castForm(l, "type annotation", "expression"),
+      expr: Expr(form: l, subj: "type annotation"),
       typeExpr: castForm(r, "type annotation", "type expression"))
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    expr.write(to: &stream, depth + 1)
+    expr.form.write(to: &stream, depth + 1)
     typeExpr.write(to: &stream, depth + 1)
-  }
-
-  // MARK: Expr
-
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let _ = expr.typeForExpr(ctx, scope)
-    let type = typeExpr.typeForTypeExpr(scope, "type annotation")
-    ctx.trackExpr(self, type: type)
-    ctx.constrain(expr, expForm: typeExpr, expType: type, "type annotation")
-    return type
-  }
-
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    expr.compileExpr(ctx, em, depth, isTail: isTail)
   }
 }
 

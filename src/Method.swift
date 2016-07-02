@@ -33,8 +33,9 @@ class Method: _Form { // method definition.
     fnScope.addValRecord("$", type: parType)
     fnScope.addValRecord("self", type: polyFnType)
     let ctx = TypeCtx()
-    let _ = body.typeForExpr(ctx, fnScope)
-    ctx.constrain(body, expForm: sig.ret, expType: retType, "method body")
+    let do_ = Expr.do_(body) // TODO: temporary hack to expose typeForExpr method.
+    let _ = do_.typeForExpr(ctx, fnScope)
+    ctx.constrain(do_, expForm: sig.ret, expType: retType, "method body")
     ctx.resolve()
     let em = Emitter(file: space.file)
     em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")

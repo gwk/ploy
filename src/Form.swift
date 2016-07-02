@@ -3,12 +3,12 @@
 
 protocol Form : Streamable {
   var syn: Syn { get }
-
   func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int)
 }
 
-protocol FormInitable {
+protocol SubForm {
   init(form: Form, subj: String)
+  var form: Form { get }
 }
 
 extension Form {
@@ -47,13 +47,6 @@ extension Form {
     failForm(prefix: "type error", msg: msg, notes: notes)
   }
 }
-
-protocol Expr: Form {
-  @warn_unused_result
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool)
-}
-
 
 protocol Identifier: Form {
   var name: String { get }

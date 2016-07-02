@@ -2,7 +2,7 @@
 
 import Quilt
 
-enum Accessor: FormInitable {
+enum Accessor: SubForm {
 
   case litNum(LitNum)
   case sym(Sym)

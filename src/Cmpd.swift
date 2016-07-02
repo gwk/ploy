@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Cmpd: _Form, Expr { // compound value: `(a b)`.
+class Cmpd: _Form { // compound value: `(a b)`.
   let args: [Arg]
   
   init(_ syn: Syn, args: [Arg]) {
@@ -16,32 +16,6 @@ class Cmpd: _Form, Expr { // compound value: `(a b)`.
     }
   }
   
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let pars = args.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
-    let type = Type.Cmpd(pars)
-    ctx.trackExpr(self, type: type)
-    return type
-  }
-
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    let type = ctx.typeForExpr(self)
-    em.str(depth, "{")
-    switch type.kind {
-    case .cmpd(let pars, _, _):
-      var argIndex = 0
-      for par in pars {
-        self.compilePar(ctx, em, depth, par: par, argIndex: &argIndex)
-      }
-      if argIndex != pars.count {
-        failType("expected \(pars.count) arguments; received \(argIndex)")
-      }
-    default:
-      self.failType("expected type: \(type); received compound value.")
-    }
-    em.append("}")
-  }
-
   // MARK: Cmpd
   
   func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, argIndex: inout Int) {

@@ -13,14 +13,14 @@ class Case: _Form { // conditional case: `condition ? consequence`.
 
   static func mk(l: Form, _ r: Form) -> Form {
     return Case(Syn(l.syn, r.syn),
-      condition: castForm(l, "case", "condition"),
-      consequence: castForm(r, "case", "consequence"))
+      condition: Expr(form: l, subj: "case", exp: "condition"),
+      consequence: Expr(form: r, subj: "case", exp: "consequence"))
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    condition.write(to: &stream, depth + 1)
-    consequence.write(to: &stream, depth + 1)
+    condition.form.write(to: &stream, depth + 1)
+    consequence.form.write(to: &stream, depth + 1)
   }
 }
 

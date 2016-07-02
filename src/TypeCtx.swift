@@ -23,7 +23,7 @@ struct Constraint {
 
   @noreturn
   func fail(act: Type, exp: Type, _ msg: String) {
-    actExpr.failType(
+    actExpr.form.failType(
       "\(msg);\n\(actDesc)\(desc);\nresolved type: \(act)",
       notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(exp)"))
   }
@@ -54,9 +54,9 @@ class TypeCtx {
 
   deinit { assert(isResolved) }
 
-  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(expr as! _Form)) }
+  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(expr.form as! _Form)) }
 
-  func originalTypeForExpr(_ expr: Form) -> Type { return exprOriginalTypes[expr as! _Form]! }
+  func originalTypeForExpr(_ expr: Expr) -> Type { return exprOriginalTypes[expr.form as! _Form]! }
 
   func resolvedType(_ type: Type) -> Type {
     return resolvedTypes[type].or(type)
@@ -73,7 +73,7 @@ class TypeCtx {
   }
 
   func trackExpr(_ expr: Expr, type: Type) {
-    exprOriginalTypes.insertNew(expr as! _Form, value: type)
+    exprOriginalTypes.insertNew(expr.form as! _Form, value: type)
     trackFreeTypes(type)
   }
 
@@ -102,7 +102,7 @@ class TypeCtx {
         let elResolved = el.refine(type, with: resolved)
         resolveType(el, to: elResolved)
       }
-      freeIndicesToUnresolvedTypes.removeValue(index)
+      _ = freeIndicesToUnresolvedTypes.removeValue(index)
     }
   }
 

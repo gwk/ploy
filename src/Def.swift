@@ -3,7 +3,7 @@
 import Quilt
 
 
-enum Def: FormInitable {
+enum Def: SubForm {
 
   case bind(Bind)
   case enum_(Enum)

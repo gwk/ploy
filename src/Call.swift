@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Call : _Form, Expr {
+class Call : _Form {
   let callee: Expr
   let arg: Expr
   
@@ -13,36 +13,14 @@ class Call : _Form, Expr {
   
   static func mk(l: Form, _ r: Form) -> Form {
     return self.init(Syn(l.syn, r.syn),
-      callee: castForm(l, "call", "expression"),
-      arg: castForm(r, "call", "expression"))
+      callee: Expr(form: l, subj: "call"),
+      arg: Expr(form: r, subj: "call"))
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    callee.write(to: &stream, depth + 1)
-    arg.write(to: &stream, depth + 1)
-  }
-
-  // MARK: Expr
-
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let _ = callee.typeForExpr(ctx, scope)
-    let _ = arg.typeForExpr(ctx, scope)
-    let parType = ctx.addFreeType()
-    let type = ctx.addFreeType()
-    let sigType = Type.Sig(par: parType, ret: type)
-    ctx.trackExpr(self, type: type)
-    ctx.constrain(callee, expForm: self, expType: sigType, "callee")
-    ctx.constrain(arg, expForm: self, expType: parType, "argument")
-    return type
-  }
-
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    callee.compileExpr(ctx, em, depth + 1, isTail: false)
-    em.str(depth, "(")
-    arg.compileExpr(ctx, em, depth + 1, isTail: false)
-    em.append(")")
+    callee.form.write(to: &stream, depth + 1)
+    arg.form.write(to: &stream, depth + 1)
   }
 }
 

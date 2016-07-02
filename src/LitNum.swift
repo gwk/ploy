@@ -3,7 +3,7 @@
 import Quilt
 
 
-class LitNum: _Form, Expr { // numeric literal: `0`.
+class LitNum: _Form { // numeric literal: `0`.
   let val: Int
 
   init(_ syn: Syn, val: Int) {
@@ -29,19 +29,6 @@ class LitNum: _Form, Expr { // numeric literal: `0`.
     default:
       failType("numeric literal cannot access into value of type: \(accesseeType)")
     }
-  }
-
-  // MARK: Expr
-
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let type = typeInt
-    ctx.trackExpr(self, type: type)
-    return type
-  }
-
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    em.str(depth, String(val)) // TODO: preserve written format for clarity?
   }
 }
 

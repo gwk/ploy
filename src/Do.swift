@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Do: _Form, Expr { // do block: `{…}`.
+class Do: _Form { // do block: `{…}`.
   let exprs: [Expr]
 
   init(_ syn: Syn, exprs: [Expr]) {
@@ -12,33 +12,8 @@ class Do: _Form, Expr { // do block: `{…}`.
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, exprs.isEmpty ? " {}\n" : "\n")
     for e in exprs {
-      e.write(to: &stream, depth + 1)
+      e.form.write(to: &stream, depth + 1)
     }
-  }
-
-  // MARK: Expr
-
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    for (i, expr) in exprs.enumerated() {
-      if i == exprs.count - 1 { break }
-      let _ = expr.typeForExpr(ctx, scope)
-      ctx.constrain(expr, expForm: self, expType: typeVoid, "statement")
-    }
-    let type: Type
-    if let last = exprs.last {
-      type = last.typeForExpr(ctx, LocalScope(parent: scope))
-    } else {
-      type = typeVoid
-    }
-    ctx.trackExpr(self, type: type)
-    return type
-  }
-
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    em.str(depth, "(function(){")
-    compileBody(ctx, em, depth + 1, isTail: isTail)
-    em.append("})()")
   }
 
   // MARK: Body
