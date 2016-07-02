@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Reify: _Form { // type reification:  `T^A`.
+class Reify: Form { // type reification:  `T^A`.
   let callee: TypeExpr
   let arg: TypeExpr
 

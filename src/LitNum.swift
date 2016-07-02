@@ -3,7 +3,7 @@
 import Quilt
 
 
-class LitNum: _Form { // numeric literal: `0`.
+class LitNum: Form { // numeric literal: `0`.
   let val: Int
 
   init(_ syn: Syn, val: Int) {

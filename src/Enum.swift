@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Enum: _Form { // enum declaration: `enum E variants…;`.
+class Enum: Form { // enum declaration: `enum E variants…;`.
   let sym: Sym
   let variants: [Par]
 

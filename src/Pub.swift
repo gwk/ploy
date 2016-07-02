@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Pub: _Form { // public modifier: `pub expr;`.
+class Pub: Form { // public modifier: `pub expr;`.
   let def: Def
 
   init(_ syn: Syn, def: Def) {

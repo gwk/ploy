@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class LitStr: _Form { // string literal: `'hi', "hi"`.
+class LitStr: Form { // string literal: `'hi', "hi"`.
   let val: String
 
   init(_ syn: Syn, val: String) {

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class In: _Form { // in statement: `in module-name statements…;`.
+class In: Form { // in statement: `in module-name statements…;`.
   let identifier: Identifier? // main In does not have an identifier.
   let defs: [Def]
 

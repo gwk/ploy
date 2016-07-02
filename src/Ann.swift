@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Ann: _Form { // annotation: `expr:Type`.
+class Ann: Form { // annotation: `expr:Type`.
   let expr: Expr
   let typeExpr: TypeExpr
   

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class If: _Form { // if statement: `if cases… default;`.
+class If: Form { // if statement: `if cases… default;`.
   let cases: [Case]
   let dflt: Expr?
 

@@ -46,7 +46,7 @@ class TypeCtx {
   private var freeTypes = [Type]()
   private var resolvedTypes = [Type:Type]() // maps all types containing free types to partially or completely resolved types.
   private var freeIndicesToUnresolvedTypes = DictOfSet<Int, Type>() // maps free types to all types containing them.
-  private var exprOriginalTypes = [_Form:Type]() // maps forms to original types.
+  private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
   private var isResolved = false
 
   var symRecords = [Sym:ScopeRecord]()
@@ -54,9 +54,9 @@ class TypeCtx {
 
   deinit { assert(isResolved) }
 
-  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(expr.form as! _Form)) }
+  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(expr.form)) }
 
-  func originalTypeForExpr(_ expr: Expr) -> Type { return exprOriginalTypes[expr.form as! _Form]! }
+  func originalTypeForExpr(_ expr: Expr) -> Type { return exprOriginalTypes[expr.form]! }
 
   func resolvedType(_ type: Type) -> Type {
     return resolvedTypes[type].or(type)
@@ -73,7 +73,7 @@ class TypeCtx {
   }
 
   func trackExpr(_ expr: Expr, type: Type) {
-    exprOriginalTypes.insertNew(expr.form as! _Form, value: type)
+    exprOriginalTypes.insertNew(expr.form, value: type)
     trackFreeTypes(type)
   }
 

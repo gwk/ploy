@@ -3,7 +3,7 @@
 import Quilt
 
 
-class PolyFn: _Form {
+class PolyFn: Form {
   let sym: Sym
 
   init(_ syn: Syn, sym: Sym) {

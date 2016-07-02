@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class HostVal: _Form { // host value declaration: `host-val sym Type;`.
+class HostVal: Form { // host value declaration: `host-val sym Type;`.
   let sym: Sym
   let typeExpr: TypeExpr
 

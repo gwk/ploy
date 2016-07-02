@@ -1,13 +1,17 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-protocol Form : Streamable {
-  var syn: Syn { get }
-  func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int)
-}
+class Form: Hashable, CustomStringConvertible {
+  let syn: Syn
+  init(_ syn: Syn) { self.syn = syn }
+  
+  var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
-
-extension Form {
+  var description: String {
+    var s = ""
+    writeHead(to: &s, 0, "")
+    return s
+  }
 
   var syntaxName: String { return String(self.dynamicType) }
 
@@ -19,6 +23,16 @@ extension Form {
 
   func write<Stream : OutputStream>(to stream: inout Stream) {
     write(to: &stream, 0)
+  }
+
+  func write<Stream: OutputStream>(to stream: inout Stream, _ depth: Int) { fatalError() }
+
+  func writeHead<Stream: OutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String) {
+    stream.write(String(indent: depth))
+    stream.write(String(self.dynamicType))
+    stream.write(" ")
+    stream.write(String(syn))
+    stream.write(suffix)
   }
 
   @noreturn func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) {
@@ -45,30 +59,7 @@ extension Form {
 }
 
 
-class _Form : Form, Hashable, CustomStringConvertible {
-  let syn: Syn
-  init(_ syn: Syn) { self.syn = syn }
-  
-  var hashValue: Int { return ObjectIdentifier(self).hashValue }
-
-  var description: String {
-    var s = ""
-    writeHead(to: &s, 0, "")
-    return s
-  }
-
-  func write<Stream: OutputStream>(to stream: inout Stream, _ depth: Int) { fatalError() }
-
-  func writeHead<Stream: OutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String) {
-    stream.write(String(indent: depth))
-    stream.write(String(self.dynamicType))
-    stream.write(" ")
-    stream.write(String(syn))
-    stream.write(suffix)
-  }
-}
-
-func ==(l: _Form, r: _Form) -> Bool { return l === r }
+func ==(l: Form, r: Form) -> Bool { return l === r }
 
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
@@ -80,6 +71,5 @@ func castForm<T>(_ form: Form, _ subj: String, _ exp: String) -> T {
   } else {
     form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
   }
-  
 }
 

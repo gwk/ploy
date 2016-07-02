@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Bind: _Form { // value binding: `name=expr`.
+class Bind: Form { // value binding: `name=expr`.
   let sym: Sym
   let val: Expr
   

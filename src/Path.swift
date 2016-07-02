@@ -3,7 +3,7 @@
 import Quilt
 
 
-class Path: _Form { // path: `LIB/name`.
+class Path: Form { // path: `LIB/name`.
   let syms: [Sym]
   
   init(_ syn: Syn, syms: [Sym]) {

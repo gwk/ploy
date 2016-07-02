@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Fn: _Form { // function declaration: `fn type body…;`.
+class Fn: Form { // function declaration: `fn type body…;`.
   let sig: Sig
   let body: Do
 

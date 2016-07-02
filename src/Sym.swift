@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Sym: _Form { // symbol: `name`.
+class Sym: Form { // symbol: `name`.
   let name: String
 
   init(_ syn: Syn, name: String) {

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class HostType: _Form { // host type declaration: `host-type sym;`.
+class HostType: Form { // host type declaration: `host-type sym;`.
   let sym: Sym
 
   init(_ syn: Syn, sym: Sym) {

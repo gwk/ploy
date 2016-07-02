@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Case: _Form { // conditional case: `condition ? consequence`.
+class Case: Form { // conditional case: `condition ? consequence`.
   let condition: Expr
   let consequence: Expr
 

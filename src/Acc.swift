@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Acc: _Form { // accessor: `field@val`.
+class Acc: Form { // accessor: `field@val`.
   let accessor: Accessor
   let accessee: Expr
   

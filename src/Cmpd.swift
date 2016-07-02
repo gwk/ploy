@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Cmpd: _Form { // compound value: `(a b)`.
+class Cmpd: Form { // compound value: `(a b)`.
   let args: [Arg]
   
   init(_ syn: Syn, args: [Arg]) {

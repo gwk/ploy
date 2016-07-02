@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Sig: _Form { // function signature: `Par%Ret`.
+class Sig: Form { // function signature: `Par%Ret`.
   let par: TypeExpr // TODO: rename input.
   let ret: TypeExpr
 

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Expand: _Form { // compound macro expansion argument: `[a b]`.
+class Expand: Form { // compound macro expansion argument: `[a b]`.
   let pars: [Par]
 
   init(_ syn: Syn, pars: [Par]) {

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Arg: _Form { // compound argument.
+class Arg: Form { // compound argument.
   
   let label: Sym?
   let expr: Expr

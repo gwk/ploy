@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Method: _Form { // method definition.
+class Method: Form { // method definition.
   let identifier: Identifier
   let sig: Sig
   let body: Do
