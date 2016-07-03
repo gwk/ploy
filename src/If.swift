@@ -17,7 +17,7 @@ class If: Form { // if statement: `if cases… default;`.
       c.write(to: &stream, depth + 1)
     }
     if let dflt = dflt {
-      dflt.form.write(to: &stream, depth + 1)
+      dflt.write(to: &stream, depth + 1)
     }
   }
 }

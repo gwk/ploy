@@ -346,14 +346,14 @@ class Src: CustomStringConvertible {
     let identifier = Identifier(form: parsePhrase(sym.syn.end),
       subj: "`in` form", exp: "namespace identifier")
     var defs: [Def] = []
-    let end = parseFormsTo(&defs, identifier.form.syn.end, subj: "`in` form")
+    let end = parseFormsTo(&defs, identifier.syn.end, subj: "`in` form")
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
   
   func parseMethod(_ sym: Sym) -> Form {
     let identifier = Identifier(form: parsePhrase(sym.syn.end),
       subj: "`method` form", exp: "poly-fn name or path identifier")
-    let sig: Sig = parseForm(identifier.form.syn.end, "`method` form", "method signature")
+    let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature")
     let body = parseBodyToImplicitDo(sig.syn.end)
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
   }
@@ -366,7 +366,7 @@ class Src: CustomStringConvertible {
   
   func parsePub(_ sym: Sym) -> Form {
     let def: Def = parseForm(sym.syn.end, "`pub` form", "definition") // TODO: looks broken.
-    return Pub(Syn(sym.syn, def.form.syn), def: def)
+    return Pub(Syn(sym.syn, def.syn), def: def)
   }
   
   func parseStruct(_ sym: Sym) -> Form {
@@ -555,7 +555,7 @@ class Src: CustomStringConvertible {
   func parseBody(_ pos: Pos) -> ([Expr], Pos, Pos) {
     let (forms, end) = parseRawForms(pos)
     let exprs = forms.map { Expr(form: $0, subj: "body") }
-    let visEnd = (exprs.last?.form.syn.end).or(end)
+    let visEnd = (exprs.last?.syn.end).or(end)
     return (exprs, visEnd, end)
   }
   
@@ -583,9 +583,9 @@ class Src: CustomStringConvertible {
         defs.append(def)
       }
     }
-    let mainPos = (defs.first?.form.syn.pos).or(end)
-    let mainVisEnd = (defs.last?.form.syn.visEnd).or(end)
-    let mainEnd = (defs.last?.form.syn.end).or(end)
+    let mainPos = (defs.first?.syn.pos).or(end)
+    let mainVisEnd = (defs.last?.syn.visEnd).or(end)
+    let mainEnd = (defs.last?.syn.end).or(end)
     let mainIn = In(Syn(src: self, pos: mainPos, visEnd: mainVisEnd, end: mainEnd), identifier: nil, defs: defs)
     if verbose {
       for in_ in ins {

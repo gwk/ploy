@@ -19,8 +19,8 @@ class Case: Form { // conditional case: `condition ? consequence`.
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    condition.form.write(to: &stream, depth + 1)
-    consequence.form.write(to: &stream, depth + 1)
+    condition.write(to: &stream, depth + 1)
+    consequence.write(to: &stream, depth + 1)
   }
 }
 

@@ -11,7 +11,7 @@ class Pub: Form { // public modifier: `pub expr;`.
 
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    def.form.write(to: &stream, depth + 1)
+    def.write(to: &stream, depth + 1)
   }
 }
 

@@ -25,7 +25,7 @@ class Par: Form { // compound parameter.
       typeExpr.write(to: &stream, depth + 1)
     }
     if let dflt = dflt {
-      dflt.form.write(to: &stream, depth + 1)
+      dflt.write(to: &stream, depth + 1)
     }
   }
     
@@ -34,7 +34,7 @@ class Par: Form { // compound parameter.
     if let typeExpr = typeExpr {
       type = typeExpr.typeForTypeExpr(scope, "parameter type")
     } else if let dflt = dflt {
-      let ann = dflt.form as! Ann // previously verified in mk; TEMPORARY.
+      guard case .ann(let ann) = dflt else { fatalError() } // previously verified in mk; TEMPORARY.
       type = ann.typeExpr.typeForTypeExpr(scope, "parameter default type")
     } else {
       fatalError() // enforced by mk.
@@ -47,13 +47,13 @@ class Par: Form { // compound parameter.
     var typeExpr: TypeExpr? = nil
     var dflt: Expr? = nil
     if let ann = form as? Ann {
-      guard let sym = ann.expr.form as? Sym else {
+      guard case .sym(let sym) = ann.expr else {
         ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
       }
       label = sym
       typeExpr = ann.typeExpr
     } else if let bind = form as? Bind {
-      guard let _ = bind.val.form as? Ann else {
+      guard case .ann = bind.val else {
         bind.val.form.failSyntax("default parameter requires an annotated value (TEMPORARY).")
       }
       label = bind.sym

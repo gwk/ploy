@@ -11,7 +11,7 @@ class Paren: Form { // parenthesized expression: `(a)`.
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    expr.form.write(to: &stream, depth + 1)
+    expr.write(to: &stream, depth + 1)
   }
 }
 

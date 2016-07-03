@@ -17,7 +17,7 @@ class Arg: Form { // compound argument.
     if let label = label {
       label.write(to: &stream, depth + 1)
     }
-    expr.form.write(to: &stream, depth + 1)
+    expr.write(to: &stream, depth + 1)
   }
 
   func typeParForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypePar {
@@ -33,7 +33,7 @@ class Arg: Form { // compound argument.
       return Arg(bind.syn, label: bind.sym, expr: bind.val)
     }
     let expr = Expr(form: form, subj: subj, exp: "expression (temporary limitation)")
-    return Arg(expr.form.syn, label: nil, expr: expr)
+    return Arg(expr.syn, label: nil, expr: expr)
   }
 }
 

@@ -15,7 +15,7 @@ class Method: Form { // method definition.
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    identifier.form.write(to: &stream, depth + 1)
+    identifier.write(to: &stream, depth + 1)
     sig.write(to: &stream, depth + 1)
     body.write(to: &stream, depth + 1)
   }

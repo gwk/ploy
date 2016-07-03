@@ -20,7 +20,7 @@ class Bind: Form { // value binding: `name=expr`.
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     sym.write(to: &stream, depth + 1)
-    val.form.write(to: &stream, depth + 1)
+    val.write(to: &stream, depth + 1)
   }
 }
 

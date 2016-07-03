@@ -12,7 +12,7 @@ class Do: Form { // do block: `{…}`.
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, exprs.isEmpty ? " {}\n" : "\n")
     for e in exprs {
-      e.form.write(to: &stream, depth + 1)
+      e.write(to: &stream, depth + 1)
     }
   }
 
