@@ -48,7 +48,7 @@ enum TypeExpr: SubForm {
       fatalError()
 
     case sig(let sig):
-      return Type.Sig(par: sig.par.typeForTypeExpr(scope, "signature input"),
+      return Type.Sig(par: sig.send.typeForTypeExpr(scope, "signature send"),
         ret: sig.ret.typeForTypeExpr(scope, "signature return"))
 
     case sym(let sym):

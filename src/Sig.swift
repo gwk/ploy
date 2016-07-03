@@ -2,24 +2,24 @@
 
 
 class Sig: Form { // function signature: `Par%Ret`.
-  let par: TypeExpr // TODO: rename input.
+  let send: TypeExpr
   let ret: TypeExpr
 
-  init(_ syn: Syn, par: TypeExpr, ret: TypeExpr) {
-    self.par = par
+  init(_ syn: Syn, send: TypeExpr, ret: TypeExpr) {
+    self.send = send
     self.ret = ret
     super.init(syn)
   }
 
   static func mk(l: Form, _ r: Form) -> Form {
     return Sig(Syn(l.syn, r.syn),
-      par: TypeExpr(form: l, subj: "signature parameter"),
+      send: TypeExpr(form: l, subj: "signature send"),
       ret: TypeExpr(form: r, subj: "signature return"))
   }
   
   override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    par.write(to: &stream, depth + 1)
+    send.write(to: &stream, depth + 1)
     ret.write(to: &stream, depth + 1)
   }
 }
