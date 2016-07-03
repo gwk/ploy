@@ -38,7 +38,7 @@ enum TypeExpr: SubForm {
  func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
    switch self {
 
-     case cmpdType(let cmpdType): 
+    case cmpdType(let cmpdType):
        return Type.Cmpd(cmpdType.pars.map { $0.typeParForPar(scope, subj) })
 
     case path(let path):

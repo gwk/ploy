@@ -7,6 +7,7 @@ enum Expr: SubForm {
   case bind(Bind)
   case call(Call)
   case cmpd(Cmpd)
+  case cmpdType(CmpdType)
   case do_(Do)
   case fn(Fn)
   case if_(If)
@@ -14,22 +15,27 @@ enum Expr: SubForm {
   case litStr(LitStr)
   case paren(Paren)
   case path(Path)
+  case reify(Reify)
+  case sig(Sig)
   case sym(Sym)
   
   init(form: Form, subj: String, exp: String) {
-    if let form = form as? Acc          { self = .acc(form) }
-    else if let form = form as? Ann     { self = .ann(form) }
-    else if let form = form as? Bind    { self = .bind(form) }
-    else if let form = form as? Call    { self = .call(form) }
-    else if let form = form as? Cmpd    { self = .cmpd(form) }
-    else if let form = form as? Do      { self = .do_(form) }
-    else if let form = form as? Fn      { self = .fn(form) }
-    else if let form = form as? If      { self = .if_(form) }
-    else if let form = form as? LitNum  { self = .litNum(form) }
-    else if let form = form as? LitStr  { self = .litStr(form) }
-    else if let form = form as? Paren   { self = .paren(form) }
-    else if let form = form as? Path    { self = .path(form) }
-    else if let form = form as? Sym     { self = .sym(form) }
+    if let form = form as? Acc            { self = .acc(form) }
+    else if let form = form as? Ann       { self = .ann(form) }
+    else if let form = form as? Bind      { self = .bind(form) }
+    else if let form = form as? Call      { self = .call(form) }
+    else if let form = form as? Cmpd      { self = .cmpd(form) }
+    else if let form = form as? CmpdType  { self = .cmpdType(form) }
+    else if let form = form as? Do        { self = .do_(form) }
+    else if let form = form as? Fn        { self = .fn(form) }
+    else if let form = form as? If        { self = .if_(form) }
+    else if let form = form as? LitNum    { self = .litNum(form) }
+    else if let form = form as? LitStr    { self = .litStr(form) }
+    else if let form = form as? Paren     { self = .paren(form) }
+    else if let form = form as? Path      { self = .path(form) }
+    else if let form = form as? Reify     { self = .reify(form) }
+    else if let form = form as? Sig       { self = .sig(form) }
+    else if let form = form as? Sym       { self = .sym(form) }
     else {
       form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
     }
@@ -46,6 +52,7 @@ enum Expr: SubForm {
     case .bind(let bind): return bind
     case .call(let call): return call
     case .cmpd(let cmpd): return cmpd
+    case .cmpdType(let cmpdType): return cmpdType
     case .do_(let do_): return do_
     case .fn(let fn): return fn
     case .if_(let if_): return if_
@@ -53,6 +60,8 @@ enum Expr: SubForm {
     case .litStr(let litStr): return litStr
     case .paren(let paren): return paren
     case .path(let path): return path
+    case .reify(let reify): return reify 
+    case .sig(let sig): return sig
     case .sym(let sym): return sym
     }
   }
@@ -96,6 +105,9 @@ enum Expr: SubForm {
       let type = Type.Cmpd(pars)
       ctx.trackExpr(self, type: type)
       return type
+
+    case .cmpdType(let cmpdType):
+      cmpdType.failType("type compound cannot be used as an expression (temporary).")
 
     case .do_(let do_):
       for (i, expr) in do_.exprs.enumerated() {
@@ -164,6 +176,12 @@ enum Expr: SubForm {
       ctx.pathRecords[path] = record
       return type
 
+    case .reify(let reify):
+      reify.failType("type reification cannot be used as a value expression (temporary)")
+
+    case .sig(let sig):
+      sig.failType("type signature cannot be used as a value expression (temporary)")
+
     case .sym(let sym):
       let record = scope.record(sym: sym)
       let type = sym.typeForExprRecord(record)
@@ -214,6 +232,9 @@ enum Expr: SubForm {
       }
       em.append("}")
 
+    case .cmpdType:
+      fatalError()
+
     case .do_(let do_):
       em.str(depth, "(function(){")
       do_.compileBody(ctx, em, depth + 1, isTail: isTail)
@@ -241,7 +262,6 @@ enum Expr: SubForm {
 
     case .litNum(let litNum):
       em.str(depth, String(litNum.val)) // TODO: preserve written format for clarity?
-
 
     case .litStr(let litStr):
       var s = "\""
@@ -272,6 +292,12 @@ enum Expr: SubForm {
 
     case .path(let path):
       path.syms.last!.compileSym(em, depth, ctx.pathRecords[path]!, isTail: isTail)
+
+    case .reify:
+      fatalError()
+    
+    case .sig:
+      fatalError()
 
     case .sym(let sym):
       sym.compileSym(em, depth, ctx.symRecords[sym]!, isTail: isTail)
