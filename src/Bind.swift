@@ -2,18 +2,45 @@
 
 
 class Bind: Form { // value binding: `name=expr`.
-  let sym: Sym
+
+  enum Name {
+    case sym(Sym)
+    case ann(Ann)
+
+    var sym: Sym {
+      switch self {
+        case sym(let sym): return sym
+        case ann(let ann):
+          guard case .sym(let sym) = ann.expr else { fatalError() }
+          return sym
+      }
+    }
+  }
+
+  let name: Name
   let val: Expr
   
-  init(_ syn: Syn, sym: Sym, val: Expr) {
-    self.sym = sym
+  init(_ syn: Syn, name: Name, val: Expr) {
+    self.name = name
     self.val = val
     super.init(syn)
   }
   
   static func mk(l: Form, _ r: Form) -> Form {
+    let name: Name
+    if let sym = l as? Sym {
+      name = .sym(sym)
+    }
+    else if let ann = l as? Ann {
+      guard case .sym = ann.expr else {
+        ann.expr.form.failSyntax("annotated binding name expects name symbol but received \(ann.expr.form.syntaxName).")
+      }
+      name = .ann(ann)
+    } else {
+      l.failSyntax("binding name expects name symbol or annotated name symbol but received \(l.syntaxName).")
+    }
     return Bind(Syn(l.syn, r.syn),
-      sym: castForm(l, "binding", "name symbol"),
+      name: name,
       val: Expr(form: r, subj: "binding", exp: "value expression"))
   }
   
@@ -22,5 +49,7 @@ class Bind: Form { // value binding: `name=expr`.
     sym.write(to: &stream, depth + 1)
     val.write(to: &stream, depth + 1)
   }
+
+  var sym: Sym { return name.sym }
 }
 
