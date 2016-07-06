@@ -431,7 +431,7 @@ class Src: CustomStringConvertible {
     }
   }
   
-  static let operator_groups: [[(String, (Form, Form)->Form)]] = [
+  static let operatorGroups: [[(String, (Form, Form)->Form)]] = [
     [ ("=", Bind.mk),
       ("?", Case.mk)],
     [ (":", Ann.mk)],
@@ -443,9 +443,9 @@ class Src: CustomStringConvertible {
   
   
   // TODO: currently unused.
-  static let operator_characters = { () -> Set<Character> in
+  static let operatorCharacters = { () -> Set<Character> in
     var s = Set<Character>()
-    for g in operator_groups {
+    for g in operatorGroups {
       for (string, handler) in g {
         for c in string.characters {
           s.insert(c)
@@ -455,7 +455,7 @@ class Src: CustomStringConvertible {
     return s
   }()
   
-  let adjacency_operators: [(Character, (Form, Form)->Form)] = [
+  let adjacencyOperators: [(Character, (Form, Form)->Form)] = [
     ("(", CallAdj.mk),
     ("<", ReifyAdj.mk)
   ]
@@ -464,8 +464,8 @@ class Src: CustomStringConvertible {
     var left = parsePoly(pos)
     var p = left.syn.end
     outer: while hasSome(p) {
-      for i in precedence..<Src.operator_groups.count {
-        let group = Src.operator_groups[i]
+      for i in precedence..<Src.operatorGroups.count {
+        let group = Src.operatorGroups[i]
         for (string, handler) in group {
           if hasString(p, string) {
             p = adv(p, count: string.characters.count)
@@ -479,9 +479,9 @@ class Src: CustomStringConvertible {
       }
       // adjacency operators have highest precedence.
       if !left.syn.hasSpace {
-        for (c, handler) in adjacency_operators {
+        for (c, handler) in adjacencyOperators {
           if char(p) == c {
-            let right = parsePhrase(p, precedence: Src.operator_groups.count) // TODO: decide if this should call parsePoly instead.
+            let right = parsePhrase(p, precedence: Src.operatorGroups.count) // TODO: decide if this should call parsePoly instead.
             left = handler(left, right)
             p = left.syn.end
             continue outer
