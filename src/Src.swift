@@ -365,7 +365,7 @@ class Src: CustomStringConvertible {
   }
   
   func parsePub(_ sym: Sym) -> Form {
-    let def: Def = parseForm(sym.syn.end, "`pub` form", "definition") // TODO: looks broken.
+    let def: Def = Def(form: parsePhrase(sym.syn.end), subj: "`pub` form")
     return Pub(Syn(sym.syn, def.syn), def: def)
   }
   
@@ -493,11 +493,11 @@ class Src: CustomStringConvertible {
     return left
   }
   
-  func parseForm<T>(_ pos: Pos, _ subj: String, _ exp: String) -> T {
+  func parseForm<T: Form>(_ pos: Pos, _ subj: String, _ exp: String) -> T {
     return castForm(parsePhrase(pos), subj, exp)
   }
   
-  func parseForms<T>(_ forms: inout [T], _ pos: Pos, _ subj: String, _ exp: String) -> Pos {
+  func parseForms<T: Form>(_ forms: inout [T], _ pos: Pos, _ subj: String, _ exp: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
     while hasSome(p) {
