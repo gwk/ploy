@@ -47,7 +47,7 @@ class Src: CustomStringConvertible {
   
   func hasSome(_ pos: Pos) -> Bool { return pos.idx < text.endIndex }
   
-  func hasString(_ pos: Pos, _ string: String) -> Bool {
+  func match(pos: Pos, string: String) -> Bool {
     return text.contains(string: string, atIndex: pos.idx)
   }
   
@@ -449,20 +449,19 @@ class Src: CustomStringConvertible {
   
   static let operatorGroups: [[(String, (Form, Form)->Form)]] = [
     [ ("=", Bind.mk),
-      ("?", Case.mk)],
+      ("?", Case.mk)], // TODO: why is case lower than annotate?
     [ (":", Ann.mk)],
     [ ("@", Acc.mk),
       (".", Call.mk),
       ("^", Reify.mk),
       ("%", Sig.mk)]
-  ]
+    ]
   
-  
-  // TODO: currently unused.
+  // note: currently unused.
   static let operatorCharacters = { () -> Set<Character> in
     var s = Set<Character>()
     for g in operatorGroups {
-      for (string, handler) in g {
+      for (string, _) in g {
         for c in string.characters {
           s.insert(c)
         }
@@ -483,7 +482,7 @@ class Src: CustomStringConvertible {
       for i in precedence..<Src.operatorGroups.count {
         let group = Src.operatorGroups[i]
         for (string, handler) in group {
-          if hasString(p, string) {
+          if match(pos: p, string: string) {
             p = adv(p, count: string.characters.count)
             p = parseSpace(p)
             let right = parsePhrase(p, precedence: i)
