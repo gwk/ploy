@@ -161,7 +161,8 @@ class Src: CustomStringConvertible {
   
   func parseLitNum(_ pos: Pos, foundDot: Bool = false) -> LitNum {
     var foundDot = foundDot
-    assert(ployDecChars.contains(char(pos)) || char(pos) == ".")
+    let leadChar = char(pos)
+    assert(leadChar == "." || leadChar == "-" || ployDecChars.contains(leadChar))
     var p = adv(pos)
     while hasSome(p) {
       let c = char(p)
@@ -390,6 +391,18 @@ class Src: CustomStringConvertible {
   ]
   
   // MARK: parse dispatch.
+
+  func parseDash(_ pos: Pos) -> Form {
+    let nextPos = adv(pos)
+    if !hasSome(nextPos) {
+      failParse(pos, nil, "dangling dash at end of file.")
+    }
+    let nextChar = char(nextPos)
+    if ployDecChars.contains(nextChar) {
+      return parseLitNum(pos, foundDot: false)
+    }
+    failParse(pos, nil, "unexpected dash.")
+  }
   
   func parsePoly(_ pos: Pos) -> Form {
     let c = char(pos)
@@ -422,6 +435,7 @@ class Src: CustomStringConvertible {
       return parseLitStr(pos)
     }
     switch c {
+    case "-": return parseDash(pos)
     case ".": return parseLitNum(pos, foundDot: true)
     case "$": return parseBling(pos)
     case "(": return parseCmpdOrParen(pos)
