@@ -44,7 +44,7 @@ class Scope: CustomStringConvertible {
   }
   
   func addValRecord(_ key: String, type: Type) {
-    assert(!bindings.contains(key))
+    assert(!bindings.contains(key: key))
     bindings[key] = ScopeRecord(sym: nil, hostName: key, kind: .val(type))
   }
   

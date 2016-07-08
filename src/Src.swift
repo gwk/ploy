@@ -47,7 +47,9 @@ class Src: CustomStringConvertible {
   
   func hasSome(_ pos: Pos) -> Bool { return pos.idx < text.endIndex }
   
-  func hasString(_ pos: Pos, _ string: String) -> Bool { return text.has(string, atIndex: pos.idx) }
+  func hasString(_ pos: Pos, _ string: String) -> Bool {
+    return text.contains(string: string, atIndex: pos.idx)
+  }
   
   func char(_ pos: Pos) -> Character { return text[pos.idx] }
   
@@ -417,7 +419,7 @@ class Src: CustomStringConvertible {
       while !sym.syn.hasSpace && hasSome(p) && char(p) == "/" {
         p = adv(p)
         sym = parseSym(p)
-        if Src.keywordSentenceHandlers.contains(sym.name) {
+        if Src.keywordSentenceHandlers.contains(key: sym.name) {
           sym.failSyntax("reserved keyword name cannot appear in path")
         }
         syms.append(sym)

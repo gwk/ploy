@@ -40,7 +40,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     self.description = description
     self.kind = kind
     self.globalIndex = Type.allTypes.count
-    assert(!Type.allTypes.contains(description))
+    assert(!Type.allTypes.contains(key: description))
     Type.allTypes[description] = self
   }
   

@@ -54,7 +54,7 @@ class TypeCtx {
 
   deinit { assert(isResolved) }
 
-  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(expr.form)) }
+  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(key: expr.form)) }
 
   func originalTypeForExpr(_ expr: Expr) -> Type { return exprOriginalTypes[expr.form]! }
 
