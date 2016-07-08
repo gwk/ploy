@@ -10,8 +10,10 @@ default: build
 
 all: clean build test
 
+swift_build = swift build # --build-path _build
+
 build:
-	swift build
+	$(swift_build)
 
 clean:
 	rm -rf .build/*
@@ -20,7 +22,7 @@ clean:
 clean-ploy:
 	rm -rf .build/debug/ploy*
 cov:
-	swift build -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
+	$(swift_build) -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
 
 test: build
 	iotest test
