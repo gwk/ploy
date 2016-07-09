@@ -98,8 +98,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func Sig(par: Type, ret: Type) -> Type {
     let description = "\(par.nestedSigDescription)%\(ret.nestedSigDescription)"
     return allTypes[description].or(Type(description, .sig(par: par, ret: ret,
-      frees: Set(seqs: [par.frees, ret.frees]),
-      vars: Set(seqs: [par.vars, ret.vars]))))
+      frees: Set(sequences: [par.frees, ret.frees]),
+      vars: Set(sequences: [par.vars, ret.vars]))))
   }
 
   class func Struct(spacePathNames names: [String], sym: Sym) -> Type {
