@@ -42,10 +42,10 @@ class TypeCtx {
     }
   }
 
-  private var constraints = [Constraint]()
-  private var freeTypes = [Type]()
-  private var resolvedTypes = [Type:Type]() // maps all types containing free types to partially or completely resolved types.
-  private var freeIndicesToUnresolvedTypes = DictOfSet<Int, Type>() // maps free types to all types containing them.
+  private var constraints: [Constraint] = []
+  private var freeTypes: [Type] = []
+  private var resolvedTypes: [Type:Type] = [:] // maps all types containing free types to partially or completely resolved types.
+  private var freeIndicesToUnresolvedTypes: DictOfSet<Int, Type> = [:] // maps free types to all types containing them.
   private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
   private var isResolved = false
 
