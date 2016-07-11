@@ -13,26 +13,28 @@ struct ScopeRecord {
     case space(_Space)
     case type(_Type)
     case val(_Type)
-    
-    var kindDesc: String {
-      switch self {
-      case fwd: return "forward declaration"
-      case lazy: return "lazy value"
-      case polyFn: return "polyfunction"
-      case space: return "namespace"
-      case type: return "type"
-      case val: return "value"
-      }
-    }
   }
-  
-  let sym: Sym? // bindings intrinsic to the language are not associated with any source location.
+
+  let name: String
   let hostName: String
+  let sym: Sym? // bindings intrinsic to the language are not associated with any source location.
   let kind: Kind
   
-  init(sym: Sym?, hostName: String, kind: Kind) {
+  init(name: String, hostName: String? = nil, sym: Sym?, kind: Kind) {
+    self.name = name
+    self.hostName = hostName.or(name)
     self.sym = sym
-    self.hostName = hostName
     self.kind = kind
+  }
+
+  var kindDesc: String {
+    switch kind {
+    case .fwd: return "forward declaration"
+    case .lazy: return "lazy value"
+    case .polyFn: return "polyfunction"
+    case .space: return "namespace"
+    case .type: return "type"
+    case .val: return "value"
+    }
   }
 }

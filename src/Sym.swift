@@ -37,21 +37,14 @@ class Sym: Form { // symbol: `name`.
     switch scopeRecord.kind {
     case .lazy(let type): return type
     case .val(let type): return type
-    default: failType("expression expects a value; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
-    }
-  }
-  
-  func typeForTypeRecord(_ scopeRecord: ScopeRecord, _ subj: String) -> Type {
-    switch scopeRecord.kind {
-    case .type(let type): return type
-    default: failType("\(subj) expects a type; `\(name)` refers to a \(scopeRecord.kind.kindDesc).")
+    default: failType("expression expects a value; `\(name)` refers to a \(scopeRecord.kindDesc).")
     }
   }
   
   @noreturn func failUndef() {
     failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope")
   }
-
+  
   @noreturn func failRedef(original: Sym?) {
     failForm(prefix: "scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
   }

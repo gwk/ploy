@@ -42,8 +42,8 @@ enum TypeExpr: SubForm {
        return Type.Cmpd(cmpdType.pars.map { $0.typeParForPar(scope, subj) })
 
     case path(let path):
-      return path.syms.last!.typeForTypeRecord(scope.record(path: path), subj)
-
+      return scope.typeBinding(path: path, subj: subj)
+    
     case reify:
       fatalError()
 
@@ -52,7 +52,7 @@ enum TypeExpr: SubForm {
         ret: sig.ret.typeForTypeExpr(scope, "signature return"))
 
     case sym(let sym):
-      return sym.typeForTypeRecord(scope.record(sym: sym), subj)
+      return scope.typeBinding(sym: sym, subj: subj)
     }
   }
 }

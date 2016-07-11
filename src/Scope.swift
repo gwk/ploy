@@ -38,14 +38,14 @@ class Scope: CustomStringConvertible {
         sym.failRedef(original: existing.sym)
       }
     }
-    let r = ScopeRecord(sym: sym, hostName: hostPrefix + sym.hostName, kind: kind)
+    let r = ScopeRecord(name: sym.name, hostName: hostPrefix + sym.hostName, sym: sym, kind: kind)
     bindings[sym.name] = r
     return r
   }
   
-  func addValRecord(_ key: String, type: Type) {
-    assert(!bindings.contains(key: key))
-    bindings[key] = ScopeRecord(sym: nil, hostName: key, kind: .val(type))
+  func addValRecord(name: String, type: Type) {
+    assert(!bindings.contains(key: name))
+    bindings[name] = ScopeRecord(name: name, sym: nil, kind: .val(type))
   }
   
   func record(sym: Sym) -> ScopeRecord {
@@ -70,10 +70,26 @@ class Scope: CustomStringConvertible {
       if case .space(let s) = r.kind {
         space = s
       } else {
-        sym.failType("expected a space; found a \(r.kind.kindDesc)")
+        sym.failType("expected a space; found a \(r.kindDesc)")
       }
     }
     fatalError()
+  }
+  
+  func typeBinding(sym: Sym, subj: String) -> Type {
+    let rec = record(sym: sym)
+    switch rec.kind {
+    case .type(let type): return type
+    default: sym.failType("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
+    }
+  }
+
+  func typeBinding(path: Path, subj: String) -> Type {
+    let rec = record(path: path)
+    switch rec.kind {
+    case .type(let type): return type
+    default: path.failType("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
+    }
   }
 }
 

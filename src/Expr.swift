@@ -127,8 +127,8 @@ enum Expr: SubForm {
     case .fn(let fn):
       let type = TypeExpr.sig(fn.sig).typeForTypeExpr(scope, "signature")
       let fnScope = LocalScope(parent: scope)
-      fnScope.addValRecord("$", type: type.sigPar)
-      fnScope.addValRecord("self", type: type)
+      fnScope.addValRecord(name: "$", type: type.sigPar)
+      fnScope.addValRecord(name: "self", type: type)
       let do_ = Expr.do_(fn.body) // HACK
       let _ = do_.typeForExpr(ctx, fnScope)
       ctx.constrain(do_, expForm: fn, expType: type.sigRet, "function body")

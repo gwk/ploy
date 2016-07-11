@@ -36,7 +36,7 @@ class Space: Scope {
     }
     let record = getRecord(sym: def.sym)!
     guard case .val(let type) = record.kind else {
-      def.form.failType("expected `main` to be a function value; found \(record.kind.kindDesc)")
+      def.form.failType("expected `main` to be a function value; found \(record.kindDesc)")
     }
     if type != typeOfMainFn {
       def.form.failType("expected `main` to have type ()%Int; actual type is \(type)")
@@ -54,7 +54,8 @@ class Space: Scope {
 
   func createSpace(pathNames: [String], name: String, hostName: String) -> Space {
     let space = Space(pathNames: pathNames, parent: self, file: file)
-    bindings.insertNew(name, value: ScopeRecord(sym: nil, hostName: space.hostPrefix + hostName, kind: .space(space)))
+    let record = ScopeRecord(name: name, hostName: space.hostPrefix + hostName, sym: nil, kind: .space(space))
+    bindings.insertNew(name, value: record)
     // note: sym is nil because in forms can be declared in multiple locations.
     return space
   }
@@ -66,7 +67,7 @@ class Space: Scope {
         switch r.kind {
         case .space(let next):
           space = next
-        default: sym.failType("expected a space; found a \(r.kind.kindDesc)")
+        default: sym.failType("expected a space; found a \(r.kindDesc)")
         }
       } else {
         space = space.createSpace(pathNames: syms[0...i].map { $0.name }, name: sym.name, hostName: sym.hostName)
@@ -94,9 +95,10 @@ class Space: Scope {
   }
 
   func setupRoot(ins: [In], mainIn: In) -> Space { // returns MAIN.
-    bindings["ROOT"] = ScopeRecord(sym: nil, hostName: "ROOT", kind: .space(self))
+    bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, kind: .space(self))
     for t in intrinsicTypes {
-      bindings[t.description] = ScopeRecord(sym: nil, hostName: t.description, kind: .type(t))
+      let rec = ScopeRecord(name: t.description, sym: nil, kind: .type(t))
+      bindings[t.description] = rec
     }
     for i in ins {
       let space = getOrCreateSpace(syms: i.identifier!.syms)
