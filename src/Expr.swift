@@ -67,7 +67,7 @@ enum Expr: SubForm {
   }
 
 
-  func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func genTypeConstraints(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = typeDisp(ctx, scope)
     ctx.trackExpr(self, type: type)
     return type
@@ -77,24 +77,24 @@ enum Expr: SubForm {
     switch self {
 
     case .acc(let acc):
-      let accesseeType = acc.accessee.typeForExpr(ctx, scope)
+      let accesseeType = acc.accessee.genTypeConstraints(ctx, scope)
       let type = Type.Prop(acc.accessor.propAccessor, type: accesseeType)
       return type
 
     case .ann(let ann):
-      let _ = ann.expr.typeForExpr(ctx, scope)
+      let _ = ann.expr.genTypeConstraints(ctx, scope)
       let type = ann.typeExpr.type(scope, "type annotation")
       ctx.constrain(ann.expr, expForm: ann.typeExpr.form, expType: type, "type annotation")
       return type
 
     case .bind(let bind):
-      let exprType = bind.val.typeForExpr(ctx, scope)
+      let exprType = bind.val.genTypeConstraints(ctx, scope)
       _ = scope.addRecord(sym: bind.sym, kind: .val(exprType))
       return typeVoid
 
     case .call(let call):
-      let _ = call.callee.typeForExpr(ctx, scope)
-      let _ = call.arg.typeForExpr(ctx, scope)
+      let _ = call.callee.genTypeConstraints(ctx, scope)
+      let _ = call.arg.genTypeConstraints(ctx, scope)
       let parType = ctx.addFreeType()
       let type = ctx.addFreeType()
       let sigType = Type.Sig(par: parType, ret: type)
@@ -113,12 +113,12 @@ enum Expr: SubForm {
     case .do_(let do_):
       for (i, expr) in do_.exprs.enumerated() {
         if i == do_.exprs.count - 1 { break }
-        let _ = expr.typeForExpr(ctx, scope)
+        let _ = expr.genTypeConstraints(ctx, scope)
         ctx.constrain(expr, expForm: do_, expType: typeVoid, "statement")
       }
       let type: Type
       if let last = do_.exprs.last {
-        type = last.typeForExpr(ctx, LocalScope(parent: scope))
+        type = last.genTypeConstraints(ctx, LocalScope(parent: scope))
       } else {
         type = typeVoid
       }
@@ -130,7 +130,7 @@ enum Expr: SubForm {
       fnScope.addValRecord(name: "$", type: type.sigPar)
       fnScope.addValRecord(name: "self", type: type)
       let do_ = Expr.do_(fn.body) // HACK
-      let _ = do_.typeForExpr(ctx, fnScope)
+      let _ = do_.genTypeConstraints(ctx, fnScope)
       ctx.constrain(do_, expForm: fn, expType: type.sigRet, "function body")
       return type
 
@@ -141,13 +141,13 @@ enum Expr: SubForm {
       for c in if_.cases {
         let cond = c.condition
         let cons = c.consequence
-        let _ = cond.typeForExpr(ctx, scope)
-        let _ = cons.typeForExpr(ctx, scope)
+        let _ = cond.genTypeConstraints(ctx, scope)
+        let _ = cons.genTypeConstraints(ctx, scope)
         ctx.constrain(cond, expForm: c, expType: typeBool, "if form condition")
         ctx.constrain(cons, expForm: if_, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
-        let _ = dflt.typeForExpr(ctx, scope)
+        let _ = dflt.genTypeConstraints(ctx, scope)
         ctx.constrain(dflt, expForm: if_, expType: type, "if form default")
       }
       return type
@@ -161,7 +161,7 @@ enum Expr: SubForm {
       return type
 
     case .paren(let paren):
-      let type = paren.expr.typeForExpr(ctx, scope)
+      let type = paren.expr.genTypeConstraints(ctx, scope)
       return type
 
     case .path(let path):
@@ -209,7 +209,7 @@ enum Expr: SubForm {
       em.append(")")
 
     case .cmpd(let cmpd):
-      let type = ctx.typeForExpr(self)
+      let type = ctx.typeFor(expr: self)
       em.str(depth, "{")
       switch type.kind {
       case .cmpd(let pars, _, _):

@@ -62,7 +62,7 @@ class TypeCtx {
     return resolvedTypes[type].or(type)
   }
 
-  func typeForExpr(_ expr: Expr) -> Type {
+  func typeFor(expr: Expr) -> Type {
     return resolvedType(originalTypeForExpr(expr))
   }
 

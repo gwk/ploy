@@ -21,7 +21,7 @@ class Arg: Form { // compound argument.
   }
 
   func typeParForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypePar {
-    return TypePar(index: index, label: label, type: expr.typeForExpr(ctx, scope))
+    return TypePar(index: index, label: label, type: expr.genTypeConstraints(ctx, scope))
   }
 
   func compileArg(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int) {

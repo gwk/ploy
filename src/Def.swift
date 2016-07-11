@@ -59,9 +59,9 @@ enum Def: SubForm {
 
     case .bind(let bind):
       let ctx = TypeCtx()
-      let _ = bind.val.typeForExpr(ctx, LocalScope(parent: space)) // initial root type is ignored.
+      let _ = bind.val.genTypeConstraints(ctx, LocalScope(parent: space)) // initial root type is ignored.
       ctx.resolve()
-      let type = ctx.typeForExpr(bind.val)
+      let type = ctx.typeFor(expr: bind.val)
       let needsLazy: Bool
       switch type.kind {
         case .sig: needsLazy = false

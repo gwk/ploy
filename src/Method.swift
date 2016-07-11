@@ -33,8 +33,8 @@ class Method: Form { // method definition.
     fnScope.addValRecord(name: "$", type: parType)
     fnScope.addValRecord(name: "self", type: polyFnType)
     let ctx = TypeCtx()
-    let do_ = Expr.do_(body) // TODO: temporary hack to expose typeForExpr method.
-    let _ = do_.typeForExpr(ctx, fnScope)
+    let do_ = Expr.do_(body) // TODO: temporary hack to expose genTypeConstraints method.
+    let _ = do_.genTypeConstraints(ctx, fnScope)
     ctx.constrain(do_, expForm: sig.ret.form, expType: retType, "method body")
     ctx.resolve()
     let em = Emitter(file: space.file)
