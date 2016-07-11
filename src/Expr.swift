@@ -68,12 +68,12 @@ enum Expr: SubForm {
 
 
   func genTypeConstraints(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let type = typeDisp(ctx, scope)
+    let type = genTypeConstraintsDisp(ctx, scope)
     ctx.trackExpr(self, type: type)
     return type
   }
 
-  func typeDisp(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func genTypeConstraintsDisp(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     switch self {
 
     case .acc(let acc):
