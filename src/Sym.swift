@@ -48,26 +48,10 @@ class Sym: Form { // symbol: `name`.
     }
   }
   
-  func compileSym(_ em: Emitter, _ depth: Int, _ scopeRecord: ScopeRecord, isTail: Bool) {
-    switch scopeRecord.kind {
-    case .val:
-      em.str(depth, scopeRecord.hostName)
-    case .lazy:
-      let s = "\(scopeRecord.hostName)__acc()"
-      em.str(depth, "\(s)")
-    case .fwd:
-      failType("expected a value; `\(name)` refers to a forward declaration. INTERNAL ERROR?")
-    case .polyFn:
-      em.str(depth, scopeRecord.hostName)
-    case .space(_):
-      failType("expected a value; `\(name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace?
-    case .type(_):
-      failType("expected a value; `\(name)` refers to a type.") // TODO: eventually this will return a runtime type.
-    }
+  @noreturn func failUndef() {
+    failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope")
   }
-  
-  @noreturn func failUndef() { failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope") }
-  
+
   @noreturn func failRedef(original: Sym?) {
     failForm(prefix: "scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
   }

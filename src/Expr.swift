@@ -284,7 +284,7 @@ enum Expr: SubForm {
       em.append(")")
 
     case .path(let path):
-      path.syms.last!.compileSym(em, depth, ctx.pathRecords[path]!, isTail: isTail)
+      compile(em: em, depth: depth, scopeRecord: ctx.pathRecords[path]!, sym: path.syms.last!, isTail: isTail)
 
     case .reify:
       fatalError()
@@ -293,8 +293,26 @@ enum Expr: SubForm {
       fatalError()
 
     case .sym(let sym):
-      sym.compileSym(em, depth, ctx.symRecords[sym]!, isTail: isTail)
+      compile(em: em, depth: depth, scopeRecord: ctx.symRecords[sym]!, sym: sym, isTail: isTail)
     }
   }
 }
 
+
+func compile(em: Emitter, depth: Int, scopeRecord: ScopeRecord, sym: Sym, isTail: Bool) {
+  switch scopeRecord.kind {
+  case .val:
+    em.str(depth, scopeRecord.hostName)
+  case .lazy:
+    let s = "\(scopeRecord.hostName)__acc()"
+    em.str(depth, "\(s)")
+  case .fwd:
+    sym.failType("expected a value; `\(sym.name)` refers to a forward declaration. INTERNAL ERROR?")
+  case .polyFn:
+    em.str(depth, scopeRecord.hostName)
+  case .space(_):
+    sym.failType("expected a value; `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace?
+  case .type(_):
+    sym.failType("expected a value; `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
+  }
+}
