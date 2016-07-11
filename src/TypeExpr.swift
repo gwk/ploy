@@ -35,7 +35,7 @@ enum TypeExpr: SubForm {
   }
 
 
- func typeForTypeExpr(_ scope: Scope, _ subj: String) -> Type {
+ func type(_ scope: Scope, _ subj: String) -> Type {
    switch self {
 
     case cmpdType(let cmpdType):
@@ -48,8 +48,8 @@ enum TypeExpr: SubForm {
       fatalError()
 
     case sig(let sig):
-      return Type.Sig(par: sig.send.typeForTypeExpr(scope, "signature send"),
-        ret: sig.ret.typeForTypeExpr(scope, "signature return"))
+      return Type.Sig(par: sig.send.type(scope, "signature send"),
+        ret: sig.ret.type(scope, "signature return"))
 
     case sym(let sym):
       return scope.typeBinding(sym: sym, subj: subj)

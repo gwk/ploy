@@ -83,7 +83,7 @@ enum Expr: SubForm {
 
     case .ann(let ann):
       let _ = ann.expr.typeForExpr(ctx, scope)
-      let type = ann.typeExpr.typeForTypeExpr(scope, "type annotation")
+      let type = ann.typeExpr.type(scope, "type annotation")
       ctx.constrain(ann.expr, expForm: ann.typeExpr.form, expType: type, "type annotation")
       return type
 
@@ -125,7 +125,7 @@ enum Expr: SubForm {
       return type
 
     case .fn(let fn):
-      let type = TypeExpr.sig(fn.sig).typeForTypeExpr(scope, "signature")
+      let type = TypeExpr.sig(fn.sig).type(scope, "signature")
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: type.sigPar)
       fnScope.addValRecord(name: "self", type: type)

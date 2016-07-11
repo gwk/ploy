@@ -97,7 +97,7 @@ enum Def: SubForm {
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
     case .hostVal(let hostVal):
-       let type = hostVal.typeExpr.typeForTypeExpr(space, "host value declaration")
+       let type = hostVal.typeExpr.type(space, "host value declaration")
        return .val(type)
     
     case .method:

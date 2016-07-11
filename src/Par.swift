@@ -32,10 +32,10 @@ class Par: Form { // compound parameter.
   func typeParForPar(_ scope: Scope, _ subj: String) -> TypePar {
     var type: Type
     if let typeExpr = typeExpr {
-      type = typeExpr.typeForTypeExpr(scope, "parameter type")
+      type = typeExpr.type(scope, "parameter type")
     } else if let dflt = dflt {
       guard case .ann(let ann) = dflt else { fatalError() } // previously verified in mk; TEMPORARY.
-      type = ann.typeExpr.typeForTypeExpr(scope, "parameter default type")
+      type = ann.typeExpr.type(scope, "parameter default type")
     } else {
       fatalError() // enforced by mk.
     }
