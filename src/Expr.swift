@@ -68,25 +68,28 @@ enum Expr: SubForm {
 
 
   func typeForExpr(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
+    let type = typeDisp(ctx, scope)
+    ctx.trackExpr(self, type: type)
+    return type
+  }
+
+  func typeDisp(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     switch self {
 
     case .acc(let acc):
       let accesseeType = acc.accessee.typeForExpr(ctx, scope)
       let type = Type.Prop(acc.accessor.propAccessor, type: accesseeType)
-      ctx.trackExpr(self, type: type)
       return type
 
     case .ann(let ann):
       let _ = ann.expr.typeForExpr(ctx, scope)
       let type = ann.typeExpr.typeForTypeExpr(scope, "type annotation")
-      ctx.trackExpr(self, type: type)
       ctx.constrain(ann.expr, expForm: ann.typeExpr.form, expType: type, "type annotation")
       return type
 
     case .bind(let bind):
       let exprType = bind.val.typeForExpr(ctx, scope)
       _ = scope.addRecord(sym: bind.sym, kind: .val(exprType))
-      ctx.trackExpr(self, type: typeVoid)
       return typeVoid
 
     case .call(let call):
@@ -95,7 +98,6 @@ enum Expr: SubForm {
       let parType = ctx.addFreeType()
       let type = ctx.addFreeType()
       let sigType = Type.Sig(par: parType, ret: type)
-      ctx.trackExpr(self, type: type)
       ctx.constrain(call.callee, expForm: call, expType: sigType, "callee")
       ctx.constrain(call.arg, expForm: call, expType: parType, "argument")
       return type
@@ -103,7 +105,6 @@ enum Expr: SubForm {
     case .cmpd(let cmpd):
       let pars = cmpd.args.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
       let type = Type.Cmpd(pars)
-      ctx.trackExpr(self, type: type)
       return type
 
     case .cmpdType(let cmpdType):
@@ -121,7 +122,6 @@ enum Expr: SubForm {
       } else {
         type = typeVoid
       }
-      ctx.trackExpr(self, type: type)
       return type
 
     case .fn(let fn):
@@ -131,13 +131,11 @@ enum Expr: SubForm {
       fnScope.addValRecord("self", type: type)
       let do_ = Expr.do_(fn.body) // HACK
       let _ = do_.typeForExpr(ctx, fnScope)
-      ctx.trackExpr(self, type: type)
       ctx.constrain(do_, expForm: fn, expType: type.sigRet, "function body")
       return type
 
     case .if_(let if_):
       let type = (if_.dflt == nil) ? typeVoid: ctx.addFreeType() // all cases must return same type.
-      ctx.trackExpr(self, type: type)
       // TODO: much more to do here when default is missing;
       // e.g. inferring complete case coverage without default, typeHalt support, etc.
       for c in if_.cases {
@@ -156,23 +154,19 @@ enum Expr: SubForm {
 
     case .litNum:
       let type = typeInt
-      ctx.trackExpr(self, type: type)
       return type
 
     case .litStr:
       let type = typeStr
-      ctx.trackExpr(self, type: type)
       return type
 
     case .paren(let paren):
       let type = paren.expr.typeForExpr(ctx, scope)
-      ctx.trackExpr(self, type: type)
       return type
 
     case .path(let path):
       let record = scope.record(path: path)
       let type = path.syms.last!.typeForExprRecord(scope.record(path: path))
-      ctx.trackExpr(self, type: type)
       ctx.pathRecords[path] = record
       return type
 
@@ -185,7 +179,6 @@ enum Expr: SubForm {
     case .sym(let sym):
       let record = scope.record(sym: sym)
       let type = sym.typeForExprRecord(record)
-      ctx.trackExpr(self, type: type)
       ctx.symRecords[sym] = record
       return type
     }
