@@ -75,7 +75,7 @@ enum Def: SubForm {
         em.str(0, " \(hostName)__acc = function() {")
         em.str(0, "  throw \"error: lazy value '\(fullName)' recursively referenced during initialization.\" };")
         em.str(0, " let val =")
-        bind.val.compileExpr(ctx, em, 1, isTail: false)
+        bind.val.compile(ctx, em, 1, isTail: false)
         em.append(";")
         em.str(0, " \(hostName)__acc = function() { return val };")
         em.str(0, " return val; }")
@@ -83,7 +83,7 @@ enum Def: SubForm {
         return .lazy(type)
       } else {
         em.str(0, "let \(hostName) =")
-        bind.val.compileExpr(ctx, em, 1, isTail: false)
+        bind.val.compile(ctx, em, 1, isTail: false)
         em.append(";")
         em.flush()
         return .val(type)

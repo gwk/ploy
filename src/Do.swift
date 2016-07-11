@@ -24,7 +24,7 @@ class Do: Form { // do block: `{…}`.
       if isLast {
         em.str(depth, "return (")
       }
-      expr.compileExpr(ctx, em, depth, isTail: isLast && isTail)
+      expr.compile(ctx, em, depth, isTail: isLast && isTail)
       em.append(isLast ? ")" : ";")
     }
   }

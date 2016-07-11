@@ -185,27 +185,27 @@ enum Expr: SubForm {
   }
 
 
-  func compileExpr(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compile(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     switch self {
 
     case .acc(let acc):
       em.str(depth, "(")
-      acc.accessee.compileExpr(ctx, em, depth + 1, isTail: false)
+      acc.accessee.compile(ctx, em, depth + 1, isTail: false)
       em.str(depth + 1, acc.accessor.hostAccessor)
       em.append(")")
 
     case .ann(let ann):
-      ann.expr.compileExpr(ctx, em, depth, isTail: isTail)
+      ann.expr.compile(ctx, em, depth, isTail: isTail)
 
     case .bind(let bind):
       em.str(depth, "let \(bind.sym.hostName) =")
-      bind.val.compileExpr(ctx, em, depth + 1, isTail: false)
+      bind.val.compile(ctx, em, depth + 1, isTail: false)
 
     case .call(let call):
-      call.callee.compileExpr(ctx, em, depth + 1, isTail: false)
+      call.callee.compile(ctx, em, depth + 1, isTail: false)
       em.str(depth, "(")
-      call.arg.compileExpr(ctx, em, depth + 1, isTail: false)
+      call.arg.compile(ctx, em, depth + 1, isTail: false)
       em.append(")")
 
     case .cmpd(let cmpd):
@@ -241,13 +241,13 @@ enum Expr: SubForm {
     case .if_(let if_):
       em.str(depth, "(")
       for c in if_.cases {
-        c.condition.compileExpr(ctx, em, depth + 1, isTail: false)
+        c.condition.compile(ctx, em, depth + 1, isTail: false)
         em.append(" ?")
-        c.consequence.compileExpr(ctx, em, depth + 1, isTail: isTail)
+        c.consequence.compile(ctx, em, depth + 1, isTail: isTail)
         em.append(" :")
       }
       if let dflt = if_.dflt {
-        dflt.compileExpr(ctx, em, depth + 1, isTail: isTail)
+        dflt.compile(ctx, em, depth + 1, isTail: isTail)
       } else {
         em.str(depth + 1, "undefined")
       }
@@ -280,11 +280,11 @@ enum Expr: SubForm {
 
     case .paren(let paren):
       em.str(depth, "(")
-      paren.expr.compileExpr(ctx, em, depth + 1, isTail: isTail)
+      paren.expr.compile(ctx, em, depth + 1, isTail: isTail)
       em.append(")")
 
     case .path(let path):
-      compile(em: em, depth: depth, scopeRecord: ctx.pathRecords[path]!, sym: path.syms.last!, isTail: isTail)
+      compileSym(em, depth, scopeRecord: ctx.pathRecords[path]!, sym: path.syms.last!, isTail: isTail)
 
     case .reify:
       fatalError()
@@ -293,13 +293,13 @@ enum Expr: SubForm {
       fatalError()
 
     case .sym(let sym):
-      compile(em: em, depth: depth, scopeRecord: ctx.symRecords[sym]!, sym: sym, isTail: isTail)
+      compileSym(em, depth, scopeRecord: ctx.symRecords[sym]!, sym: sym, isTail: isTail)
     }
   }
 }
 
 
-func compile(em: Emitter, depth: Int, scopeRecord: ScopeRecord, sym: Sym, isTail: Bool) {
+func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym, isTail: Bool) {
   switch scopeRecord.kind {
   case .val:
     em.str(depth, scopeRecord.hostName)

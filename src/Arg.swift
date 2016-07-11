@@ -25,7 +25,7 @@ class Arg: Form { // compound argument.
   }
 
   func compileArg(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int) {
-    return expr.compileExpr(ctx, em, depth, isTail: false)
+    return expr.compile(ctx, em, depth, isTail: false)
   }
   
   static func mk(_ form: Form, _ subj: String) -> Arg {
