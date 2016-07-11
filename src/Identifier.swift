@@ -34,13 +34,6 @@ enum Identifier: SubForm {
       case .sym(let sym): return [sym]
     }
   }
-
-  func record(_ scope: Scope, _ sym: Sym) -> ScopeRecord {
-    switch self {
-      case .path(let path): return scope.record(path: path)
-      case .sym(let sym): return scope.record(sym: sym)
-    }
-  }
 }
 
 
