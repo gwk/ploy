@@ -9,8 +9,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
     var accessorString: String {
       switch self {
-      case index(let index): return String(index)
-      case name(let string): return string
+      case .index(let index): return String(index)
+      case .name(let string): return string
       }
     }
   }
@@ -43,7 +43,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     assert(!Type.allTypes.contains(key: description))
     Type.allTypes[description] = self
   }
-  
+
   class func All(_ members: Set<Type>) -> Type {
     let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return allTypes[description].or(Type(description, .all(members: members,
@@ -51,8 +51,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
         vars: Set(members.flatMap { $0.vars }))))
   }
 
-  class func Any(_ members: Set<Type>) -> Type {
-    let description = members.isEmpty ? "Empty" : "Any<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+  class func Any_(_ members: Set<Type>) -> Type {
+    let description = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return allTypes[description].or(Type(description, .any(members: members,
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars }))))
@@ -178,7 +178,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       } else { return self }
     case .any(let members, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
-        return Type.Any(Set(members.map { self.refine($0, with: replacement) }))
+        return Type.Any_(Set(members.map { self.refine($0, with: replacement) }))
       } else { return self }
     case .cmpd(let pars, let frees, let vars):
       if frees.contains(target) || vars.contains(target) {
@@ -205,7 +205,7 @@ func ==(l: Type, r: Type) -> Bool { return l === r }
 func <(l: Type, r: Type) -> Bool { return l.description < r.description }
 
 
-let typeEmpty = Type.Any([]) // aka "Bottom type".
+let typeEmpty = Type.Any_([]) // aka "Bottom type".
 let typeEvery = Type.All([]) // aka "Top type".
 let typeVoid = Type.Cmpd([])
 

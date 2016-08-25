@@ -13,7 +13,7 @@ class Method: Form { // method definition.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     identifier.write(to: &stream, depth + 1)
     sig.write(to: &stream, depth + 1)

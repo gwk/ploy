@@ -9,7 +9,7 @@ class LitStr: Form { // string literal: `'hi', "hi"`.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": \"\(val)\"\n") // TODO: use source string.
   }
 }

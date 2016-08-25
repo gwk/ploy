@@ -17,7 +17,7 @@ class Call : Form {
       arg: Expr(form: r, subj: "call"))
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     callee.write(to: &stream, depth + 1)
     arg.write(to: &stream, depth + 1)

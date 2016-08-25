@@ -16,7 +16,7 @@ var libPaths: [String] = []
 var opts: [String: String] = [:]
 
 var opt: String? = nil
-for (i, arg) in Process.arguments.enumerated() {
+for (i, arg) in processArguments.enumerated() {
   if i == 0 {
     ployPath = arg
   } else if let o = opt {

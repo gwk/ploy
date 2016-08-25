@@ -9,7 +9,7 @@ class Do: Form { // do block: `{…}`.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, exprs.isEmpty ? " {}\n" : "\n")
     for e in exprs {
       e.write(to: &stream, depth + 1)

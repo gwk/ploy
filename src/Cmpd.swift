@@ -9,7 +9,7 @@ class Cmpd: Form { // compound value: `(a b)`.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, args.isEmpty ? " ()\n" : "\n")
     for a in args {
       a.write(to: &stream, depth + 1)

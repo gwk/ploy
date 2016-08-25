@@ -12,7 +12,7 @@ class Path: Form { // path: `LIB/name`.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": ")
     var first = true
     for s in syms {

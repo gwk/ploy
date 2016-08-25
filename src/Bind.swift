@@ -30,7 +30,7 @@ class Bind: Form { // value binding: `name=expr`.
       val: Expr(form: r, subj: "binding", exp: "value expression"))
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     place.write(to: &stream, depth + 1)
     val.write(to: &stream, depth + 1)

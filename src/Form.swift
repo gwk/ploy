@@ -1,10 +1,12 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
+import Darwin
+
 
 class Form: Hashable, CustomStringConvertible {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
-  
+
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var description: String {
@@ -13,7 +15,7 @@ class Form: Hashable, CustomStringConvertible {
     return s
   }
 
-  var syntaxName: String { return String(self.dynamicType) }
+  var syntaxName: String { return String(describing: type(of: self)) }
 
   var fullDesc: String {
     var s = ""
@@ -21,39 +23,39 @@ class Form: Hashable, CustomStringConvertible {
     return s
   }
 
-  func write<Stream : OutputStream>(to stream: inout Stream) {
+  func write<Stream : TextOutputStream>(to stream: inout Stream) {
     write(to: &stream, 0)
   }
 
-  func write<Stream: OutputStream>(to stream: inout Stream, _ depth: Int) { fatalError() }
+  func write<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int) { fatalError() }
 
-  func writeHead<Stream: OutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String) {
+  func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String) {
     stream.write(String(indent: depth))
-    stream.write(String(self.dynamicType))
+    stream.write(String(describing: type(of: self)))
     stream.write(" ")
-    stream.write(String(syn))
+    stream.write(String(describing: syn))
     stream.write(suffix)
   }
 
-  @noreturn func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) {
+  func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) -> Never {
     syn.src.errPos(syn.pos, end: syn.visEnd, prefix: prefix, msg: msg)
     for (form, msg) in notes {
       if let form = form {
         form.syn.src.errPos(form.syn.pos, end: form.syn.visEnd, prefix: "note", msg: msg)
       }
     }
-    Process.exit(1)
+    exit(1)
   }
 
-  @noreturn func failForm(prefix: String, msg: String, notes: (Form?, String)...) {
+  func failForm(prefix: String, msg: String, notes: (Form?, String)...) -> Never {
     failForm(prefix: prefix, msg: msg, notes: notes)
   }
 
-  @noreturn func failSyntax(_ msg: String, notes: (Form?, String)...) {
+  func failSyntax(_ msg: String, notes: (Form?, String)...) -> Never {
     failForm(prefix: "syntax error", msg: msg, notes: notes)
   }
 
-  @noreturn func failType(_ msg: String, notes: (Form?, String)...) {
+  func failType(_ msg: String, notes: (Form?, String)...) -> Never {
     failForm(prefix: "type error", msg: msg, notes: notes)
   }
 }

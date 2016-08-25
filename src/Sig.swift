@@ -17,7 +17,7 @@ class Sig: Form { // function signature: `Par%Ret`.
       ret: TypeExpr(form: r, subj: "signature return"))
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     send.write(to: &stream, depth + 1)
     ret.write(to: &stream, depth + 1)

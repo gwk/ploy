@@ -11,7 +11,7 @@ class In: Form { // in statement: `in module-name statements…;`.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, (identifier == nil) ? " MAIN\n" : "\n")
     if let identifier = identifier {
       identifier.write(to: &stream, depth + 1)

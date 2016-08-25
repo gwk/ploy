@@ -9,7 +9,7 @@ class Sym: Form { // symbol: `name`.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": \(name)\n")
   }
 
@@ -41,11 +41,11 @@ class Sym: Form { // symbol: `name`.
     }
   }
   
-  @noreturn func failUndef() {
+  func failUndef() -> Never {
     failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope")
   }
   
-  @noreturn func failRedef(original: Sym?) {
+  func failRedef(original: Sym?) -> Never {
     failForm(prefix: "scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
   }
 }

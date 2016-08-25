@@ -15,7 +15,7 @@ class Scope: CustomStringConvertible {
   }
 
   var description: String {
-    return "\(self.dynamicType):\(pathNames.joined(separator: "/"))"
+    return "\(type(of: self)):\(pathNames.joined(separator: "/"))"
   }
 
   func getRecord(sym: Sym) -> ScopeRecord? { fatalError() }

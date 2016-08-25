@@ -12,7 +12,7 @@ class Arg: Form { // compound argument.
     super.init(syn)
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     if let label = label {
       label.write(to: &stream, depth + 1)

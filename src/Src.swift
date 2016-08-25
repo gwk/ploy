@@ -1,5 +1,6 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
+import Darwin
 import Quilt
 
 
@@ -14,21 +15,21 @@ let ployTerminatorChars = Set(")>]};".characters)
 class Src: CustomStringConvertible {
   let path: String
   let text: String
-  
+
   init(path: String) {
     self.path = path
     self.text = guarded { try InFile(path: path).readText() }
   }
-  
+
   init(name: String) {
     self.path = name
     self.text = ""
   }
-  
+
   var description: String { return "Src(\(path))" }
-  
+
   var startPos: Pos { return Pos(idx: text.startIndex, line: 0, col: 0) }
-  
+
   func adv(_ pos: Pos, count: Int = 1) -> Pos {
     var idx = pos.idx
     var c = count
@@ -38,23 +39,23 @@ class Src: CustomStringConvertible {
     }
     return Pos(idx: idx, line: pos.line, col: pos.col + count)
   }
-  
+
   func advLine(_ pos: Pos) -> Pos {
     assert(pos.idx < text.endIndex)
     let idx = text.index(after: pos.idx)
     return Pos(idx: idx, line: pos.line + 1, col: 0)
   }
-  
+
   func hasSome(_ pos: Pos) -> Bool { return pos.idx < text.endIndex }
-  
+
   func match(pos: Pos, string: String) -> Bool {
     return text.contains(string: string, atIndex: pos.idx)
   }
-  
+
   func char(_ pos: Pos) -> Character { return text[pos.idx] }
-  
+
   func slice(_ pos: Pos, _ end: Pos) -> String { return text[pos.idx..<end.idx] }
-  
+
   /// returns the line of source text containing pos; always excludes newline for consistency.
   func line(_ pos: Pos) -> String {
     var s = pos.idx
@@ -72,16 +73,16 @@ class Src: CustomStringConvertible {
   }
 
   func underline(_ pos: Pos, _ end: Pos? = nil) -> String {
-    let indent = String(repeating: Character(" "), count: pos.col)
+    let indent = String(repeating: " ", count: pos.col)
     if let end = end {
       assert(pos.line == end.line)
       if pos.idx < end.idx {
-        return indent + String(repeating: Character("~"), count: end.col - pos.col)
+        return indent + String(repeating: "~", count: end.col - pos.col)
       }
     }
     return indent + "^"
   }
-  
+
   func underlines(_ pos: Pos, _ end: Pos, lineLen: Int) -> (String, String) {
     assert(pos.line < end.line)
     let spaces = String(char: " ", count: pos.col)
@@ -112,12 +113,14 @@ class Src: CustomStringConvertible {
     err("\(pos.col + 1):\(msgSpace)\(msg)\n  \(posLine)\n  \(underline(pos))\n")
   }
 
-  @noreturn func fail(_ pos: Pos, _ end: Pos?, _ prefix: String, _ msg: String) {
+  func fail(_ pos: Pos, _ end: Pos?, _ prefix: String, _ msg: String) -> Never {
     errPos(pos, end: end, prefix: prefix, msg: msg)
-    Process.exit(1)
+    exit(1)
   }
 
-  @noreturn func failParse(_ pos: Pos, _ end: Pos?, _ msg: String) { fail(pos, end, "parse error", msg) }
+  func failParse(_ pos: Pos, _ end: Pos?, _ msg: String) -> Never {
+    fail(pos, end, "parse error", msg)
+  }
 
   func parseSpace(_ pos: Pos) -> Pos {
     var p = pos
@@ -142,9 +145,9 @@ class Src: CustomStringConvertible {
     }
     return p
   }
-  
+
   // MARK: leaves.
-  
+
   func parseSym(_ pos: Pos) -> Sym {
     assert(ploySymHeadChars.contains(char(pos)))
     var prev = char(pos)
@@ -160,7 +163,7 @@ class Src: CustomStringConvertible {
     }
     return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: slice(pos, p))
   }
-  
+
   func parseLitNum(_ pos: Pos, foundDot: Bool = false) -> LitNum {
     var foundDot = foundDot
     let leadChar = char(pos)
@@ -187,7 +190,7 @@ class Src: CustomStringConvertible {
     }
     return LitNum(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), val: val)
   }
-  
+
   func parseLitStr(_ pos: Pos) -> LitStr {
     let terminator = char(pos)
     var p = adv(pos)
@@ -228,7 +231,7 @@ class Src: CustomStringConvertible {
             if ord > 0x10ffff {
               failParse(op, p, "escaped unicode ordinal exceeds maximum value of 0x10ffff")
             }
-            res.append(Character(UnicodeScalar(ord)))
+            res.append(Character(UnicodeScalar(ord)!))
           } else {
             failParse(op, p, "escaped unicode ordinal is invalid")
           }
@@ -247,9 +250,9 @@ class Src: CustomStringConvertible {
     }
     failParse(pos, p, "unterminated string literal")
   }
-  
+
   // MARK: compound helpers.
-  
+
   func synForTerminator(_ pos: Pos, _ p: Pos, _ terminator: Character, _ formName: String) -> Syn {
     if !hasSome(p) {
       failParse(pos, p, "`\(formName)` form expects '\(terminator)' terminator; reached end of source text.")
@@ -261,21 +264,21 @@ class Src: CustomStringConvertible {
     let visEnd = adv(p)
     return Syn(src: self, pos: pos, visEnd: visEnd, end: parseSpace(visEnd))
   }
-  
+
   func synForSemicolon(_ sym: Sym, _ p: Pos, _ formName: String) -> Syn {
     return synForTerminator(sym.syn.pos, p, ";", formName)
   }
-  
+
   // MARK: prefixes.
-  
+
   func parseBling(_ pos: Pos) -> Form {
     // in the future bling will also be a prefix.
     let p = adv(pos)
     return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: "$")
   }
-  
+
   // MARK: nesting sentences.
-  
+
   func parseCmpdOrParen(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
     let (args, end) = parseArgs(p, "compound value")
@@ -290,45 +293,45 @@ class Src: CustomStringConvertible {
       return Cmpd(synForTerminator(pos, end, ")", "compound expression"), args: args)
     }
   }
-  
+
   func parseCmpdType(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
     let (pars, end) = parsePars(p, "compound type")
     return CmpdType(synForTerminator(pos, end, ">", "compound type"), pars: pars)
   }
-  
+
   func parseDo(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
     let (exprs, _, end) = parseBody(p)
     return Do(synForTerminator(pos, end, "}", "do form"), exprs: exprs)
   }
-  
+
   // MARK: keyword sentences.
-  
+
   func parseEnum(_ sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`enum` form", "name symbol")
     var variants: [Par] = []
     let end = parseForms(&variants, nameSym.syn.end, "`enum` form", "variant parameter")
     return Enum(synForSemicolon(sym, end, "enum"), sym: nameSym, variants: variants)
   }
-  
+
   func parseFn(_ sym: Sym) -> Form {
     let sig: Sig = parseForm(sym.syn.end, "`fn` form", "function signature")
     let do_ = parseBodyToImplicitDo(sig.syn.end)
     return Fn(synForSemicolon(sym, do_.syn.end, "fn"), sig: sig, body: do_)
   }
-  
+
   func parseHostType(_ sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`host-type` form", "name symbol")
     return HostType(synForSemicolon(sym, nameSym.syn.end, "host-type"), sym: nameSym)
   }
-  
+
   func parseHostVal(_ sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
     let typeExpr = TypeExpr(form: parsePhrase(nameSym.syn.end), subj: "`host-val` form")
     return HostVal(synForSemicolon(sym, typeExpr.syn.end, "host-val"), sym: nameSym, typeExpr: typeExpr)
   }
-  
+
   func parseIf(_ sym: Sym) -> Form {
     let (forms, end) = parseRawForms(sym.syn.end)
     var cases: [Case] = []
@@ -344,7 +347,7 @@ class Src: CustomStringConvertible {
     }
     return If(synForSemicolon(sym, end, "`if` form"), cases: cases, dflt: dflt)
   }
-  
+
   func parseIn(_ sym: Sym) -> Form {
     let identifier = Identifier(form: parsePhrase(sym.syn.end),
       subj: "`in` form", exp: "namespace identifier")
@@ -352,7 +355,7 @@ class Src: CustomStringConvertible {
     let end = parseFormsTo(&defs, identifier.syn.end, subj: "`in` form")
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
-  
+
   func parseMethod(_ sym: Sym) -> Form {
     let identifier = Identifier(form: parsePhrase(sym.syn.end),
       subj: "`method` form", exp: "poly-fn name or path identifier")
@@ -366,19 +369,19 @@ class Src: CustomStringConvertible {
     // TODO: type constraint.
     return PolyFn(synForSemicolon(sym, nameSym.syn.end, "poly-fn"), sym: nameSym)
   }
-  
+
   func parsePub(_ sym: Sym) -> Form {
     let def: Def = Def(form: parsePhrase(sym.syn.end), subj: "`pub` form")
     return Pub(Syn(sym.syn, def.syn), def: def)
   }
-  
+
   func parseStruct(_ sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`struct` form", "name symbol")
     var fields: [Par] = []
     let end = parseForms(&fields, nameSym.syn.end, "`struct` form", "field parameter")
     return Struct(synForSemicolon(sym, end, "enum"), sym: nameSym, fields: fields)
   }
-  
+
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
     "enum"      : parseEnum,
     "fn"        : parseFn,
@@ -391,7 +394,7 @@ class Src: CustomStringConvertible {
     "pub"       : parsePub,
     "struct"    : parseStruct,
   ]
-  
+
   // MARK: parse dispatch.
 
   func parseDash(_ pos: Pos) -> Form {
@@ -405,7 +408,7 @@ class Src: CustomStringConvertible {
     }
     failParse(pos, nil, "unexpected dash.")
   }
-  
+
   func parsePoly(_ pos: Pos) -> Form {
     let c = char(pos)
     if ploySymHeadChars.contains(c) {
@@ -446,7 +449,7 @@ class Src: CustomStringConvertible {
     default: failParse(pos, nil, "unexpected character: '\(c)'.")
     }
   }
-  
+
   static let operatorGroups: [[(String, (Form, Form)->Form)]] = [
     [ ("=", Bind.mk),
       ("?", Case.mk)], // TODO: why is case lower than annotate?
@@ -456,7 +459,7 @@ class Src: CustomStringConvertible {
       ("^", Reify.mk),
       ("%", Sig.mk)]
     ]
-  
+
   // note: currently unused.
   static let operatorCharacters = { () -> Set<Character> in
     var s = Set<Character>()
@@ -469,12 +472,12 @@ class Src: CustomStringConvertible {
     }
     return s
   }()
-  
+
   let adjacencyOperators: [(Character, (Form, Form)->Form)] = [
     ("(", CallAdj.mk),
     ("<", ReifyAdj.mk)
   ]
-  
+
   func parsePhrase(_ pos: Pos, precedence: Int = 0) -> Form {
     var left = parsePoly(pos)
     var p = left.syn.end
@@ -507,11 +510,11 @@ class Src: CustomStringConvertible {
     }
     return left
   }
-  
+
   func parseForm<T: Form>(_ pos: Pos, _ subj: String, _ exp: String) -> T {
     return castForm(parsePhrase(pos), subj, exp)
   }
-  
+
   func parseForms<T: Form>(_ forms: inout [T], _ pos: Pos, _ subj: String, _ exp: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
@@ -529,7 +532,7 @@ class Src: CustomStringConvertible {
     }
     return p
   }
-  
+
   func parseFormsTo<T: SubForm>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
@@ -547,38 +550,38 @@ class Src: CustomStringConvertible {
     }
     return p
   }
-  
+
 
   func parseRawForms(_ pos: Pos) -> ([Form], Pos) {
     var forms: [Form] = []
     let end = parseForms(&forms, pos, "form", "any form (INTERNAL ERROR)")
     return (forms, end)
   }
-  
+
   func parsePars(_ pos: Pos, _ subj: String) -> ([Par], Pos) {
     let (forms, end) = parseRawForms(pos)
     let pars = forms.enumerated().map { Par.mk(index: $0.offset, form: $0.element, subj: subj) }
     return (pars, end)
   }
-  
+
   func parseArgs(_ pos: Pos, _ subj: String) -> ([Arg], Pos) {
     let (forms, end) = parseRawForms(pos)
     let args = forms.map { Arg.mk($0, subj) }
     return (args, end)
   }
-  
+
   func parseBody(_ pos: Pos) -> ([Expr], Pos, Pos) {
     let (forms, end) = parseRawForms(pos)
     let exprs = forms.map { Expr(form: $0, subj: "body") }
     let visEnd = (exprs.last?.syn.end).or(end)
     return (exprs, visEnd, end)
   }
-  
+
   func parseBodyToImplicitDo(_ pos: Pos) -> Do {
     let (exprs, visEnd, end) = parseBody(pos)
     return Do(Syn(src: self, pos: pos, visEnd: visEnd, end: end), exprs: exprs)
   }
-  
+
   func parseMain(verbose: Bool = false) -> (ins: [In], mainIn: In) {
     let (forms, end) = parseRawForms(startPos)
     if hasSome(end) {
@@ -610,7 +613,7 @@ class Src: CustomStringConvertible {
     }
     return (ins, mainIn)
   }
-  
+
   func parseLib(verbose: Bool = false) -> [In] {
     var ins: [In] = []
     let end = parseForms(&ins, startPos, "module", "`in` statement")

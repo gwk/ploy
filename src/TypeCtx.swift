@@ -21,8 +21,7 @@ struct Constraint {
       expForm: expForm, expType: expType, expChain: (expDesc == nil) ? expChain : .link(expDesc!, expChain), desc: desc)
   }
 
-  @noreturn
-  func fail(act: Type, exp: Type, _ msg: String) {
+  func fail(act: Type, exp: Type, _ msg: String) -> Never {
     actExpr.form.failType(
       "\(msg);\n\(actDesc)\(desc);\nresolved type: \(act)",
       notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(exp)"))
@@ -32,7 +31,7 @@ struct Constraint {
 
 class TypeCtx {
 
-  struct Error: ErrorProtocol {
+  struct Err: Error {
     let constraint: Constraint
     let msg: String
 
@@ -154,7 +153,7 @@ class TypeCtx {
       constraint.fail(act: actType, exp: expType, "expected type of kind `All` not yet implemented")
     case .any(let members, _, _):
       if members.contains(actType) { return }
-      constraint.fail(act: actType, exp: expType, "actual type is not a member of `Any` expected type")
+      constraint.fail(act: actType, exp: expType, "actual type is not a member of `Any_` expected type")
     case .cmpd(_ , _, _):
       switch actType.kind {
       case .cmpd(_, _, _):

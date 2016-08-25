@@ -11,7 +11,7 @@ class Fn: Form { // function declaration: `fn type body…;`.
     super.init(syn)
   }
 
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     sig.write(to: &stream, depth + 1)
     body.write(to: &stream, depth + 1)

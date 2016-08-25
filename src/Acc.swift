@@ -17,7 +17,7 @@ class Acc: Form { // accessor: `field@val`.
       accessee: Expr(form: r, subj: "access", exp: "accessee expression"))
   }
   
-  override func write<Stream : OutputStream>(to stream: inout Stream, _ depth: Int) {
+  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     accessor.write(to: &stream, depth + 1)
     accessee.write(to: &stream, depth + 1)
