@@ -18,7 +18,7 @@ class Src: CustomStringConvertible {
 
   init(path: String) {
     self.path = path
-    self.text = guarded { try InFile(path: path).readText() }
+    self.text = guarded { try String(contentsOfFile: path) }
   }
 
   init(name: String) {

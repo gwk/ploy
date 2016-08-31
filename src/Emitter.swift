@@ -47,11 +47,11 @@ func compileProgram(file: OutFile, hostPath: String, ins: [In], mainIn: In) {
   // sh sees the no-op ':' command followed by the exec command.
   file.writeL("#!/bin/sh")
   file.writeL("':' //; exec /usr/bin/env node --harmony-tailcalls \"$0\" \"$@\"\n")
-  
+
   file.writeL("\"use strict\";\n")
   file.writeL("(function(){ // ploy.")
   file.writeL("// host.js.")
-  let host_src = try! InFile(path: hostPath).readText()
+  let host_src = guarded { try String(contentsOfFile: hostPath) }
   file.writeL(host_src)
   file.writeL("// host.js END.\n")
 
