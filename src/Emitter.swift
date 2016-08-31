@@ -10,7 +10,7 @@ class Emitter {
   deinit {
     assert(lines.isEmpty)
   }
-  
+
   init(file: OutFile) {
     self.file = file
   }
@@ -29,7 +29,7 @@ class Emitter {
   func str(_ depth: Int, _ string: String) {
     lines.append(String(indent: depth) + string)
   }
-  
+
   func append(_ string: String) {
     lines[lines.lastIndex!] = lines.last! + string
   }
