@@ -37,8 +37,8 @@ for (i, arg) in processArguments.enumerated() {
 check(opt == nil, "dangling option flag: '\(opt)'")
 check(hostPath != nil, "host.ploy must be specified in the library sources list.")
 
-guard let mainPath = opts["-main"] else { fail("-main main-src-path argument is required.") }
-guard let outPath = opts["-o"] else { fail("-o out-path argument is required.") }
+guard let mainPath = opts["-main"] else { fail("`-main main-src-path` argument is required.") }
+guard let outPath = opts["-o"] else { fail("`-o out-path` argument is required.") }
 
 let tmpPath = outPath + ".tmp"
 let tmpFile = guarded { try OutFile(path: tmpPath, create: 0o644) }
