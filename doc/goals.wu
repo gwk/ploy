@@ -120,5 +120,5 @@ More research required!
 
 Effects systems are an ineresting field but it will be some time before I can begin to explore this in the implementation.
 
-I'm looking for some comfortable middle ground that allows the programmer to use imperative techniques while still enabling the compiler to prove things about program safety. For example, should simply logging to std-err change the type signature of a function from pure to impure?
+I'm looking for some comfortable middle ground that allows the programmer to use imperative techniques while still enabling the compiler to prove things about program safety. For example, should simply logging to std_err change the type signature of a function from pure to impure?
 

@@ -1,10 +1,10 @@
 f = fn Int%Int
-  if eq-Int(0 0) ? 0
-    g.dec-Int.$;;
+  if eq_Int(0 0) ? 0
+    g.dec_Int.$;;
 
 g = fn Int%Int
-  if eq-Int(0 0) ? 1
-    f.dec-Int.$;;
+  if eq_Int(0 0) ? 1
+    f.dec_Int.$;;
 
 main = fn <>%Int
   f.100000;

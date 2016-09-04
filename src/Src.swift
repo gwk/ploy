@@ -4,11 +4,11 @@ import Darwin
 import Quilt
 
 
-let ployOctChars = Set("01234567".characters)
-let ployDecChars = Set("0123456789".characters)
-let ployHexChars = Set("0123456789ABCDEFabcdef".characters)
-let ploySymHeadChars = Set("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".characters)
-let ploySymTailChars = ploySymHeadChars.union(ployDecChars).union(["-"])
+let ployOctChars = Set("_01234567".characters)
+let ployDecChars = Set("_0123456789".characters)
+let ployHexChars = Set("_0123456789ABCDEFabcdef".characters)
+let ploySymHeadChars = Set("_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".characters)
+let ploySymTailChars = ploySymHeadChars.union(ployDecChars)
 let ployTerminatorChars = Set(")>]};".characters)
 
 
@@ -155,8 +155,8 @@ class Src: CustomStringConvertible {
     while hasSome(p) {
       let c = char(p)
       if !ploySymTailChars.contains(c) { break }
-      if prev == "-" && c == "-" {
-        failParse(p, nil, "symbols cannot contain repeated '-' characters.")
+      if prev == "_" && c == "_" {
+        failParse(p, nil, "symbols cannot contain repeated '_' characters.")
       }
       prev = c
       p = adv(p)
@@ -182,6 +182,9 @@ class Src: CustomStringConvertible {
       p = adv(p)
     }
     let string = slice(pos, p)
+    if string == "." || string == "-" {
+      failParse(pos, p, "incomplete number literal.")
+    }
     if foundDot {
       failParse(pos, p, "floating point literals are not yet supported.")
     }
@@ -322,14 +325,14 @@ class Src: CustomStringConvertible {
   }
 
   func parseHostType(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`host-type` form", "name symbol")
-    return HostType(synForSemicolon(sym, nameSym.syn.end, "host-type"), sym: nameSym)
+    let nameSym: Sym = parseForm(sym.syn.end, "`host_type` form", "name symbol")
+    return HostType(synForSemicolon(sym, nameSym.syn.end, "host_type"), sym: nameSym)
   }
 
   func parseHostVal(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`host-val` form", "name symbol")
-    let typeExpr = TypeExpr(form: parsePhrase(nameSym.syn.end), subj: "`host-val` form")
-    return HostVal(synForSemicolon(sym, typeExpr.syn.end, "host-val"), sym: nameSym, typeExpr: typeExpr)
+    let nameSym: Sym = parseForm(sym.syn.end, "`host_val` form", "name symbol")
+    let typeExpr = TypeExpr(form: parsePhrase(nameSym.syn.end), subj: "`host_val` form")
+    return HostVal(synForSemicolon(sym, typeExpr.syn.end, "host_val"), sym: nameSym, typeExpr: typeExpr)
   }
 
   func parseIf(_ sym: Sym) -> Form {
@@ -358,7 +361,7 @@ class Src: CustomStringConvertible {
 
   func parseMethod(_ sym: Sym) -> Form {
     let identifier = Identifier(form: parsePhrase(sym.syn.end),
-      subj: "`method` form", exp: "poly-fn name or path identifier")
+      subj: "`method` form", exp: "polyfn name or path identifier")
     let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature")
     let body = parseBodyToImplicitDo(sig.syn.end)
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
@@ -367,7 +370,7 @@ class Src: CustomStringConvertible {
   func parsePolyFn(_ sym: Sym) -> Form {
     let nameSym = parseSym(sym.syn.end)
     // TODO: type constraint.
-    return PolyFn(synForSemicolon(sym, nameSym.syn.end, "poly-fn"), sym: nameSym)
+    return PolyFn(synForSemicolon(sym, nameSym.syn.end, "polyfn"), sym: nameSym)
   }
 
   func parsePub(_ sym: Sym) -> Form {
@@ -385,12 +388,12 @@ class Src: CustomStringConvertible {
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
     "enum"      : parseEnum,
     "fn"        : parseFn,
-    "host-type" : parseHostType,
-    "host-val"  : parseHostVal,
+    "host_type" : parseHostType,
+    "host_val"  : parseHostVal,
     "if"        : parseIf,
     "in"        : parseIn,
     "method"    : parseMethod,
-    "poly-fn"   : parsePolyFn,
+    "polyfn"    : parsePolyFn,
     "pub"       : parsePub,
     "struct"    : parseStruct,
   ]

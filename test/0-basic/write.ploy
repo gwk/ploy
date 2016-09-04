@@ -1,6 +1,6 @@
 main = fn <>%Int
-  FS/write-Bool(PROC/std-out true)
-  FS/write-Str(PROC/std-out ' ')
-  FS/write-Int(PROC/std-out 0)
-  FS/write-Str(PROC/std-out '\n')
+  FS/write_Bool(PROC/std_out true)
+  FS/write_Str(PROC/std_out ' ')
+  FS/write_Int(PROC/std_out 0)
+  FS/write_Str(PROC/std_out '\n')
   0;

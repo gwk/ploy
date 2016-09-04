@@ -30,9 +30,9 @@ class Sym: Form { // symbol: `name`.
   }
 
   // MARK: Sym
-  
-  var hostName: String { return name.dashToUnder }
-  
+
+  var hostName: String { return name }
+
   func typeForExprRecord(_ scopeRecord: ScopeRecord) -> Type {
     switch scopeRecord.kind {
     case .lazy(let type): return type

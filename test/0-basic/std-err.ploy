@@ -1,3 +1,3 @@
 main = fn <>%Int
-  FS/write-Str(PROC/std-err 'this is std-err.\n')
+  FS/write_Str(PROC/std_err 'this is std_err.\n')
   0;
