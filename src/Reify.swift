@@ -16,7 +16,7 @@ class Reify: Form { // type reification:  `T^A`.
       callee: TypeExpr(form: l, subj: "type reification"),
       arg: TypeExpr(form: r, subj: "type reification"))
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     callee.write(to: &stream, depth + 1)
@@ -27,4 +27,3 @@ class Reify: Form { // type reification:  `T^A`.
 
 /// type reification implied by adjacency to CmpdType: `T<A B>`.
 class ReifyAdj: Reify {}
-

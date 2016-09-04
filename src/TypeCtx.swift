@@ -214,4 +214,3 @@ class TypeCtx {
     isResolved = true
   }
 }
-

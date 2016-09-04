@@ -2,30 +2,30 @@
 
 
 class Syn: CustomStringConvertible {
-  
+
   let src: Src
   let pos: Pos
   let visEnd: Pos // position past the last visible character.
   let end: Pos // position past the last member character, including whitespace.
-  
+
   var hasSpace: Bool { return visEnd.idx < end.idx }
   var visRange: Range<String.CharacterView.Index> { return pos.idx..<visEnd.idx }
   var range: Range<String.CharacterView.Index> { return pos.idx..<end.idx }
-  
+
   var visString: String { return String(src.text[visRange]) }
   var string: String { return String(src.text[range]) }
-  
+
   init(src: Src, pos: Pos, visEnd: Pos, end: Pos) {
     self.src = src
     self.pos = pos
     self.visEnd = visEnd
     self.end = end
   }
-  
+
   convenience init(_ l: Syn, _ r: Syn) {
     self.init(src: l.src, pos: l.pos, visEnd: r.visEnd, end: r.end)
   }
-  
+
   var description: String {
     var endStr = ""
     if pos.line == visEnd.line {

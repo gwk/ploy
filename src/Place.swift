@@ -24,12 +24,12 @@ enum Place: SubForm { // left side of a binding.
     }
   }
 
-    var sym: Sym {
-      switch self {
-        case .sym(let sym): return sym
-        case .ann(let ann):
-          guard case .sym(let sym) = ann.expr else { fatalError() }
-          return sym
-      }
+  var sym: Sym {
+    switch self {
+      case .sym(let sym): return sym
+      case .ann(let ann):
+        guard case .sym(let sym) = ann.expr else { fatalError() }
+        return sym
     }
   }
+}

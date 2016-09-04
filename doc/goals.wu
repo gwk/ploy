@@ -39,7 +39,7 @@ This looks a lot like a traditional pattern-matching function; the main differen
 |   fn <Flt Flt>%Flt ...; # support floats too.
 | ;
 
-Essentially, `L/add` remains unaltered, while `M/add` combines the old and new methods (with whatever dispatch resolution rules the subtyping system might specify). Alternatively, we could make generic functions be extensible, but then have a form to produce a sealed version of a given function in order to guarantee correctness. 
+Essentially, `L/add` remains unaltered, while `M/add` combines the old and new methods (with whatever dispatch resolution rules the subtyping system might specify). Alternatively, we could make generic functions be extensible, but then have a form to produce a sealed version of a given function in order to guarantee correctness.
 
 Either way, we end up with a compromise between regular, closed functions and open, extensible generic functions. I cannot think of a case where this actually buys the programmer anything useful; certainly the whole value of defining `add` as a generic is that it can be extended for unticipated data types.
 
@@ -70,7 +70,7 @@ The compiler could calculate that the `g` accepts any type for which there exist
 
 ## Miscellaneous
 
-It would be nice if generic accessors defaulted to accessing the same-named field of any such structure, or compound type. 
+It would be nice if generic accessors defaulted to accessing the same-named field of any such structure, or compound type.
 
 
 # Fine Grained Dependency Calculation and Versioning

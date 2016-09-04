@@ -73,4 +73,3 @@ func castForm<T: Form>(_ form: Form, _ subj: String, _ exp: String) -> T {
     form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
   }
 }
-

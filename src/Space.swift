@@ -108,6 +108,4 @@ class Space: Scope {
     mainSpace.add(defs: mainIn.defs)
     return mainSpace
   }
-  
-
 }

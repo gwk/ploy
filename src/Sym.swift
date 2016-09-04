@@ -8,7 +8,7 @@ class Sym: Form { // symbol: `name`.
     self.name = name
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": \(name)\n")
   }
@@ -40,13 +40,12 @@ class Sym: Form { // symbol: `name`.
     default: failType("expression expects a value; `\(name)` refers to a \(scopeRecord.kindDesc).")
     }
   }
-  
+
   func failUndef() -> Never {
     failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope")
   }
-  
+
   func failRedef(original: Sym?) -> Never {
     failForm(prefix: "scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
   }
 }
-

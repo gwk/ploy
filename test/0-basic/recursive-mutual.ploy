@@ -8,4 +8,3 @@ g = fn Int%Int
 
 main = fn <>%Int
   f.100000;
-

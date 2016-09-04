@@ -16,4 +16,3 @@ class CmpdType: Form { // compound type: `<A B>`.
     }
   }
 }
-

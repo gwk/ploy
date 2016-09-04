@@ -5,9 +5,9 @@ class Scope: CustomStringConvertible {
   let pathNames: [String]
   let hostPrefix: String
   let parent: Scope?
-  
+
   var bindings: [String: ScopeRecord] = [:]
-  
+
   init(pathNames: [String], parent: Scope?) {
     self.pathNames = pathNames
     self.hostPrefix = pathNames.isEmpty ? "" : (pathNames.joined(separator: "__") + "__")
@@ -21,7 +21,7 @@ class Scope: CustomStringConvertible {
   func getRecord(sym: Sym) -> ScopeRecord? { fatalError() }
 
   var name: String { return pathNames.joined(separator: "/") }
-  
+
   var globalSpace: Space {
     var scope = self
     while let p = scope.parent {
@@ -42,12 +42,12 @@ class Scope: CustomStringConvertible {
     bindings[sym.name] = r
     return r
   }
-  
+
   func addValRecord(name: String, type: Type) {
     assert(!bindings.contains(key: name))
     bindings[name] = ScopeRecord(name: name, sym: nil, kind: .val(type))
   }
-  
+
   func record(sym: Sym) -> ScopeRecord {
     if let r = getRecord(sym: sym) {
       return r
@@ -57,7 +57,7 @@ class Scope: CustomStringConvertible {
     }
     sym.failUndef()
   }
-  
+
   func record(path: Path) -> ScopeRecord {
     var space: Space = globalSpace
     for (i, sym) in path.syms.enumerated() {
@@ -75,7 +75,7 @@ class Scope: CustomStringConvertible {
     }
     fatalError()
   }
-  
+
   func typeBinding(sym: Sym, subj: String) -> Type {
     let rec = record(sym: sym)
     switch rec.kind {
@@ -92,4 +92,3 @@ class Scope: CustomStringConvertible {
     }
   }
 }
-

@@ -1,3 +1,2 @@
 main = fn <>%Int
   0:Int;
-

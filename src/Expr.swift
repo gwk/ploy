@@ -18,7 +18,7 @@ enum Expr: SubForm {
   case reify(Reify)
   case sig(Sig)
   case sym(Sym)
-  
+
   init(form: Form, subj: String, exp: String) {
     if let form = form as? Acc            { self = .acc(form) }
     else if let form = form as? Ann       { self = .ann(form) }
@@ -44,7 +44,7 @@ enum Expr: SubForm {
   init(form: Form, subj: String) {
     self.init(form: form, subj: subj, exp: "expression")
   }
-  
+
   var form: Form {
     switch self {
     case .acc(let acc): return acc
@@ -60,7 +60,7 @@ enum Expr: SubForm {
     case .litStr(let litStr): return litStr
     case .paren(let paren): return paren
     case .path(let path): return path
-    case .reify(let reify): return reify 
+    case .reify(let reify): return reify
     case .sig(let sig): return sig
     case .sym(let sym): return sym
     }
@@ -288,7 +288,7 @@ enum Expr: SubForm {
 
     case .reify:
       fatalError()
-    
+
     case .sig:
       fatalError()
 

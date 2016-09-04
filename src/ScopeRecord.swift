@@ -19,7 +19,7 @@ struct ScopeRecord {
   let hostName: String
   let sym: Sym? // bindings intrinsic to the language are not associated with any source location.
   let kind: Kind
-  
+
   init(name: String, hostName: String? = nil, sym: Sym?, kind: Kind) {
     self.name = name
     self.hostName = hostName.or(name)

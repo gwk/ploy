@@ -14,5 +14,3 @@ extension SubForm {
     form.write(to: &stream, depth)
   }
 }
-
-

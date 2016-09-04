@@ -4,13 +4,13 @@
 class Struct: Form { // struct declaration: `struct S fields…;`.
   let sym: Sym
   let fields: [Par]
-  
+
   init(_ syn: Syn, sym: Sym, fields: [Par]) {
     self.sym = sym
     self.fields = fields
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     sym.write(to: &stream, depth + 1)
@@ -19,4 +19,3 @@ class Struct: Form { // struct declaration: `struct S fields…;`.
     }
   }
 }
-

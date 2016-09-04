@@ -2,7 +2,7 @@
 
 
 class TypePar: CustomStringConvertible {
-  
+
   let index: Int
   let label: Sym?
   let type: Type
@@ -12,7 +12,7 @@ class TypePar: CustomStringConvertible {
     self.label = label
     self.type = type
   }
-  
+
   var description: String {
     if let label = label {
       return "\(label.name):\(type)"

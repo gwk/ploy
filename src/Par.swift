@@ -2,7 +2,7 @@
 
 
 class Par: Form { // compound parameter.
-  
+
   let index: Int
   let label: Sym?
   let typeExpr: TypeExpr? // typeExpr and dflt cannot both be set. // TODO: use Either enum?
@@ -15,7 +15,7 @@ class Par: Form { // compound parameter.
     self.dflt = dflt
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     if let label = label {
@@ -28,7 +28,7 @@ class Par: Form { // compound parameter.
       dflt.write(to: &stream, depth + 1)
     }
   }
-    
+
   func typeParForPar(_ scope: Scope, _ subj: String) -> TypePar {
     var type: Type
     if let typeExpr = typeExpr {
@@ -41,7 +41,7 @@ class Par: Form { // compound parameter.
     }
     return TypePar(index: index, label: label, type: type)
   }
-  
+
   static func mk(index: Int, form: Form, subj: String) -> Par {
     var label: Sym? = nil
     var typeExpr: TypeExpr? = nil
@@ -64,4 +64,3 @@ class Par: Form { // compound parameter.
     return Par(form.syn, index: index, label: label, typeExpr: typeExpr, dflt: dflt)
   }
 }
-

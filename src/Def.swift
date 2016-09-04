@@ -92,14 +92,14 @@ enum Def: SubForm {
     case .enum_:
       // TODO.
       return .type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
-    
+
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
     case .hostVal(let hostVal):
        let type = hostVal.typeExpr.type(space, "host value declaration")
        return .val(type)
-    
+
     case .method:
       fatalError("Method is not an independent definition; compileDef should never be called.")
 

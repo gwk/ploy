@@ -2,16 +2,16 @@
 
 
 class Arg: Form { // compound argument.
-  
+
   let label: Sym?
   let expr: Expr
-  
+
   init(_ syn: Syn, label: Sym?, expr: Expr) {
     self.label = label
     self.expr = expr
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     if let label = label {
@@ -27,7 +27,7 @@ class Arg: Form { // compound argument.
   func compileArg(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int) {
     return expr.compile(ctx, em, depth, isTail: false)
   }
-  
+
   static func mk(_ form: Form, _ subj: String) -> Arg {
     if let bind = form as? Bind {
       return Arg(bind.syn, label: bind.sym, expr: bind.val)
@@ -36,4 +36,3 @@ class Arg: Form { // compound argument.
     return Arg(expr.syn, label: nil, expr: expr)
   }
 }
-

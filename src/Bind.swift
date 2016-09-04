@@ -5,13 +5,13 @@ class Bind: Form { // value binding: `name=expr`.
 
   let place: Place
   let val: Expr
-  
+
   init(_ syn: Syn, place: Place, val: Expr) {
     self.place = place
     self.val = val
     super.init(syn)
   }
-  
+
   static func mk(l: Form, _ r: Form) -> Form {
     let place: Place
     if let sym = l as? Sym {
@@ -29,7 +29,7 @@ class Bind: Form { // value binding: `name=expr`.
       place: place,
       val: Expr(form: r, subj: "binding", exp: "value expression"))
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     place.write(to: &stream, depth + 1)
@@ -38,4 +38,3 @@ class Bind: Form { // value binding: `name=expr`.
 
   var sym: Sym { return place.sym }
 }
-

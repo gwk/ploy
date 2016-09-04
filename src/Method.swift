@@ -5,14 +5,14 @@ class Method: Form { // method definition.
   let identifier: Identifier
   let sig: Sig
   let body: Do
-  
+
   init(_ syn: Syn, identifier: Identifier, sig: Sig, body: Do) {
     self.identifier = identifier
     self.sig = sig
     self.body = body
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     identifier.write(to: &stream, depth + 1)

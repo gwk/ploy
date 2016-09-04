@@ -5,13 +5,13 @@ import Quilt
 
 class Path: Form { // path: `LIB/name`.
   let syms: [Sym]
-  
+
   init(_ syn: Syn, syms: [Sym]) {
     check(syms.count > 0)
     self.syms = syms
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": ")
     var first = true
@@ -26,4 +26,3 @@ class Path: Form { // path: `LIB/name`.
     stream.write("\n")
   }
 }
-

@@ -8,7 +8,7 @@ class Do: Form { // do block: `{…}`.
     self.exprs = exprs
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, exprs.isEmpty ? " {}\n" : "\n")
     for e in exprs {
@@ -17,7 +17,7 @@ class Do: Form { // do block: `{…}`.
   }
 
   // MARK: Body
-  
+
   func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     for (i, expr) in exprs.enumerated() {
       let isLast = (i == exprs.lastIndex)
@@ -29,4 +29,3 @@ class Do: Form { // do block: `{…}`.
     }
   }
 }
-
