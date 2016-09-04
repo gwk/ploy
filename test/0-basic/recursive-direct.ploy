@@ -1,6 +1,6 @@
-f = fn Int%Int
+f = fn Int->Int
   if eq_Int($ 0) ? 0
     self.dec_Int.$;;
 
-main = fn <>%Int
+main = fn <>->Int
   f.100000;

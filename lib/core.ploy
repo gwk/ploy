@@ -3,6 +3,6 @@ in ROOT
 
 polyfn add;
 
-method add <Int Int>%Int add_Int.$;
+method add <Int Int>->Int add_Int.$;
 
 ;

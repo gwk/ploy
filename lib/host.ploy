@@ -2,42 +2,42 @@
 
 in FS
 host_type File;
-host_val write_Bool <File Bool>%<>;
-host_val write_Int  <File Int>%<>;
-host_val write_Str  <File Str>%<>;
+host_val write_Bool <File Bool>-><>;
+host_val write_Int  <File Int>-><>;
+host_val write_Str  <File Str>-><>;
 ;
 
 in ROOT
 host_val true Bool;
 host_val false Bool;
 
-host_val dec_Int Int%Int;
-host_val inc_Int Int%Int;
+host_val dec_Int Int->Int;
+host_val inc_Int Int->Int;
 
-host_val add_Int <Int Int>%Int;
-host_val sub_Int <Int Int>%Int;
-host_val mul_Int <Int Int>%Int;
-host_val div_Int <Int Int>%Int;
-host_val mod_Int <Int Int>%Int;
-host_val rem_Int <Int Int>%Int;
+host_val add_Int <Int Int>->Int;
+host_val sub_Int <Int Int>->Int;
+host_val mul_Int <Int Int>->Int;
+host_val div_Int <Int Int>->Int;
+host_val mod_Int <Int Int>->Int;
+host_val rem_Int <Int Int>->Int;
 
-host_val eq_Int <Int Int>%Bool;
-host_val ne_Int <Int Int>%Bool;
-host_val ge_Int <Int Int>%Bool;
-host_val gt_Int <Int Int>%Bool;
-host_val le_Int <Int Int>%Bool;
-host_val lt_Int <Int Int>%Bool;
+host_val eq_Int <Int Int>->Bool;
+host_val ne_Int <Int Int>->Bool;
+host_val ge_Int <Int Int>->Bool;
+host_val gt_Int <Int Int>->Bool;
+host_val le_Int <Int Int>->Bool;
+host_val lt_Int <Int Int>->Bool;
 
-host_val errL_Bool Bool%<>;
-host_val errL_Int Int%<>;
-host_val errL_Str Str%<>;
+host_val errL_Bool Bool-><>;
+host_val errL_Int Int-><>;
+host_val errL_Str Str-><>;
 ;
 
 in HOST
 ;
 
 in PROC
-host_val exit Int%<>;
+host_val exit Int-><>;
 host_val std_out FS/File;
 host_val std_err FS/File;
 ;

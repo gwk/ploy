@@ -1,2 +1,2 @@
-main = fn <>%Int
-  fn Int%Int $;.0;
+main = fn <>->Int
+  fn Int->Int $;.0;

@@ -1,2 +1,2 @@
-main = fn <>%Int
+main = fn <>->Int
   add(0 0);
