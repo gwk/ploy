@@ -10,18 +10,18 @@ default: build
 
 all: clean build test
 
-swift_build = swift build # --build-path _build
+swift_build = swift build --build-path _build
 
 # src/Lex.swift
 build:
 	$(swift_build)
+	@echo done.
 
 clean:
-	rm -rf .build/*
 	rm -rf _build/*
 
 clean-ploy:
-	rm -rf .build/debug/ploy*
+	rm -rf _build/debug/ploy*
 cov:
 	$(swift_build) -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
 

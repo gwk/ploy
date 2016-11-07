@@ -4,7 +4,7 @@
 set -e
 cd $(dirname $0)/..
 
-make .build/debug/ploy
+make _build/debug/ploy
 
 mainPath="$1"; shift
 stem=${mainPath%.ploy}
@@ -12,7 +12,7 @@ outPath="_build/_run/$stem.out" # the '_run' subdir distinguishes these products
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
-.build/debug/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
+_build/debug/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
 "$outPath" "$@"
 
 # TODO: move the profile dump.
