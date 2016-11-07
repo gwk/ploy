@@ -4,11 +4,11 @@
 # $<: The name of the first prerequisite.
 # $^: The names of all the prerequisites, with spaces between them.
 
-.PHONY: default all build clean cov test
+.PHONY: default all build clean cov gen test
 
 default: build
 
-all: clean build test
+all: clean gen build test
 
 swift_build = swift build --build-path _build
 
@@ -22,8 +22,11 @@ clean:
 
 clean-ploy:
 	rm -rf _build/debug/ploy*
+
 cov:
 	$(swift_build) -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
+
+gen: src/Lex.swift
 
 src/Lex.swift: ploy.legs
 	legs \
