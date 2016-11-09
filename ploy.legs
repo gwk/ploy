@@ -1,0 +1,49 @@
+newline: \n
+spaces: \s+
+tabs: \t+
+comment: \# [$Ascii_Readable - \n]*
+
+int: $Dec+
+| 0d  $Dec+
+| 0b  $Bin+
+| 0q  [0123]+
+| 0x  $Hex+
+
+sym: $Ascii_Letter [$Ascii_Letter $Ascii_Number _]*
+
+stringDQ: " ( [ $Ascii_Readable - \\ " ] | \\ $Ascii_Readable )* "
+stringSQ: ' ( [ $Ascii_Readable - \\ ' ] | \\ $Ascii_Readable )* '
+
+at: @
+bling: \$
+caret: ^
+colon: :
+dot: .
+equal: =
+minus: -
+percent: %
+question: \?
+slash: /
+
+arrowThin: ->
+arrowFat: =>
+
+parenO: \(
+parenC: \)
+brackO: \[
+brackC: \]
+braceO: {
+braceC: }
+angleO: <
+angleC: >
+
+enum
+fn
+hostType
+hostVal
+if
+in
+method
+polyFn
+pub
+struct
