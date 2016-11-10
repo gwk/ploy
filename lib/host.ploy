@@ -2,9 +2,16 @@
 
 in FS
 host_type File;
-write_Bool = host_val <File Bool>-><> "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
-write_Int  = host_val <File Int>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
-write_Str  = host_val <File Str>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
+host_type _Fs;
+_fs = host_val _Fs "require('fs')";
+write_Bool = host_val <File Bool>-><> "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write_Int  = host_val <File Int>-><>  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write_Str  = host_val <File Str>-><>  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+;
+
+in HOST
+host_type _Process;
+_process = host_val _Process "process";
 ;
 
 in ROOT
@@ -28,14 +35,14 @@ gt_Int = host_val <Int Int>->Bool "function($) { return $._0 >  $._1; }";
 le_Int = host_val <Int Int>->Bool "function($) { return $._0 <= $._1; }";
 lt_Int = host_val <Int Int>->Bool "function($) { return $._0 <  $._1; }";
 
-exit = host_val Int-><> "function($) { HOST__process.exit($); }";
-std_out = host_val FS/File "HOST__process.stdout.fd";
-std_err = host_val FS/File "HOST__process.stderr.fd";
+exit = host_val Int-><> "function($) { HOST___process.exit($); }" HOST/_process;
+std_out = host_val FS/File "HOST___process.stdout.fd" HOST/_process;
+std_err = host_val FS/File "HOST___process.stderr.fd" HOST/_process;
 ;
 
 in PROC
 # TODO: these are probably the wrong type;
 # need to repackage into proper ploy types or hide behind accessor functions.
-#PROC__cmd  = host_val Xyz HOST__process.argv
-#PROC__args = host_val Xyz HOST__process.argv.slice(1)
+#PROC__cmd  = host_val Xyz HOST___process.argv
+#PROC__args = host_val Xyz HOST___process.argv.slice(1)
 ;

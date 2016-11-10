@@ -156,6 +156,9 @@ enum Expr: SubForm {
       return type
 
     case .hostVal(let hostVal):
+      for dep in hostVal.deps {
+        _ = scope.record(identifier: dep)
+      }
       let type = hostVal.typeExpr.type(scope, "host value declaration")
       return type
 

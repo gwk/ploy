@@ -4,10 +4,12 @@
 class HostVal: Form { // host value declaration: `host_val sym Type;`.
   let typeExpr: TypeExpr
   let code: LitStr
+  let deps: [Identifier]
 
-  init(_ syn: Syn, typeExpr: TypeExpr, code: LitStr) {
+  init(_ syn: Syn, typeExpr: TypeExpr, code: LitStr, deps: [Identifier]) {
     self.typeExpr = typeExpr
     self.code = code
+    self.deps = deps
     super.init(syn)
   }
 
@@ -15,5 +17,8 @@ class HostVal: Form { // host value declaration: `host_val sym Type;`.
     writeHead(to: &stream, depth, "\n")
     typeExpr.write(to: &stream, depth + 1)
     code.write(to: &stream, depth + 1)
+    for dep in deps {
+      dep.write(to: &stream, depth + 1)
+    }
   }
 }

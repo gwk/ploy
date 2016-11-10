@@ -76,6 +76,13 @@ class Scope: CustomStringConvertible {
     fatalError()
   }
 
+  func record(identifier: Identifier) -> ScopeRecord {
+    switch identifier {
+    case .sym(let sym): return record(sym: sym)
+    case .path(let path): return record(path: path)
+    }
+  }
+
   func typeBinding(sym: Sym, subj: String) -> Type {
     let rec = record(sym: sym)
     switch rec.kind {
