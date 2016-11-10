@@ -215,7 +215,7 @@ let typeNamespace = Type.Prim("Namespace")
 let typeStr       = Type.Prim("Str")
 let typeType      = Type.Prim("Type")
 
-let typeOfMainFn = Type.Sig(par: typeVoid, ret: typeInt)
+let typeOfMainFn = Type.Sig(par: typeVoid, ret: typeVoid)
 
 let intrinsicTypes = [
   typeBool,

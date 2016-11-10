@@ -2,5 +2,5 @@ in TEST
 x = 0:Int
 ;
 
-main = <>->Int =>
-  TEST/x
+main = <>-><> =>
+  exit.TEST/x

@@ -39,7 +39,7 @@ class Space: Scope {
       def.form.failType("expected `main` to be a function value; found \(record.kindDesc)")
     }
     if type != typeOfMainFn {
-      def.form.failType("expected `main` to have type ()%Int; actual type is \(type)")
+      def.form.failType("expected `main` to have type <>-><>; actual type is \(type)")
     }
     return record
   }

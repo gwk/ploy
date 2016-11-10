@@ -1,6 +1,12 @@
 
 in ROOT
 
+outL_Int = Int-><> => {
+  FS/write_Int(std_out $)
+  FS/write_Str(std_out '\n')
+}
+
+
 polyfn add;
 
 method add <Int Int>->Int add_Int.$;

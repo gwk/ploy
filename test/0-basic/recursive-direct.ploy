@@ -2,5 +2,5 @@ f = Int->Int =>
   if eq_Int($ 0) ? 0
     self.dec_Int.$;
 
-main = <>->Int =>
-  f.100000
+main = <>-><> =>
+  exit.f.100000

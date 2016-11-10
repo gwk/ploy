@@ -1,4 +1,4 @@
-main = <>->Int => {
-  PROC/exit.1
-  0 # never reached.
+main = <>-><> => {
+  exit.1
+  exit.0 # never reached.
 }

@@ -1,3 +1,3 @@
-main = <>->Int => {
+main = <>-><> => {
   x = 0
-  x }
+  exit.x }

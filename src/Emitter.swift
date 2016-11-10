@@ -59,6 +59,5 @@ func compileProgram(file: OutFile, hostPath: String, ins: [In], mainIn: In) {
   let mainSpace = rootSpace.setupRoot(ins: ins, mainIn: mainIn)
   let mainRecord = mainSpace.compileMain(mainIn: mainIn)
 
-  // call the main function and pass the return code to PROC/exit.
-  file.writeL("\nHOST__process.exit(\(mainRecord.hostName)())})()")
+  file.writeL("\n\(mainRecord.hostName)()})()")
 }

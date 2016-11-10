@@ -6,5 +6,5 @@ g = Int->Int =>
   if eq_Int(0 0) ? 1
     f.dec_Int.$;
 
-main = <>->Int =>
-  f.100000
+main = <>-><> =>
+  exit.f.100000

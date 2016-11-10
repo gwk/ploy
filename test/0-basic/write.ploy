@@ -1,6 +1,6 @@
-main = <>->Int => {
-  FS/write_Bool(PROC/std_out true)
-  FS/write_Str(PROC/std_out ' ')
-  FS/write_Int(PROC/std_out 0)
-  FS/write_Str(PROC/std_out '\n')
-  0 }
+main = <>-><> => {
+  FS/write_Bool(std_out true)
+  FS/write_Str(std_out ' ')
+  FS/write_Int(std_out 0)
+  FS/write_Str(std_out '\n')
+}
