@@ -66,7 +66,6 @@ func ==(l: Form, r: Form) -> Bool { return l === r }
 
 /// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
 func castForm<T: Form>(_ form: Form, _ subj: String, _ exp: String) -> T {
-  // note: seems that should be able to parameterize as <T: Form> but swift 2.2 does not like that.
   if let form = form as? T {
     return form
   } else {
