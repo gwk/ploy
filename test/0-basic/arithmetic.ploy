@@ -1,0 +1,15 @@
+outL = Int-><> => {
+  FS/write_Int(PROC/std_out $)
+  FS/write_Str(PROC/std_out '\n')
+}
+
+main = <>->Int => {
+
+  outL.sub_Int(1 1)
+  outL.add_Int(0 1)
+  outL.mul_Int(1 2)
+  outL.div_Int(6 2)
+  outL.mod_Int(9 5)
+
+  0
+}
