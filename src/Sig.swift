@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Sig: Form { // function signature: `Par%Ret`.
+class Sig: Form { // function signature: `Par->Ret`.
   let send: TypeExpr
   let ret: TypeExpr
 
@@ -16,7 +16,7 @@ class Sig: Form { // function signature: `Par%Ret`.
       send: TypeExpr(form: l, subj: "signature send"),
       ret: TypeExpr(form: r, subj: "signature return"))
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
     send.write(to: &stream, depth + 1)
