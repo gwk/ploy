@@ -11,7 +11,7 @@ let validOpts = Set([
 ])
 
 var ployPath: String! = nil
-var hostPath: String! = nil
+var includePaths: [String] = []
 var libPaths: [String] = []
 var opts: [String: String] = [:]
 
@@ -26,16 +26,16 @@ for (i, arg) in processArguments.enumerated() {
     opt = arg
   } else if arg.hasPrefix("-") {
     fail("unrecognized option: '\(arg)'")
-  } else {
-    if let hostDir = arg.beforeSuffix("host.ploy") {
-      hostPath = hostDir + "host.js"
-    }
+  } else if arg.pathExt == ".js" {
+    includePaths.append(arg)
+  } else if arg.pathExt == ".ploy" {
     libPaths.append(arg)
+  } else {
+    fail("invalid path extension: '\(arg)'")
   }
 }
 
 check(opt == nil, "dangling option flag: '\(opt)'")
-check(hostPath != nil, "host.ploy must be specified in the library sources list.")
 
 guard let mainPath = opts["-main"] else { fail("`-main main-src-path` argument is required.") }
 guard let outPath = opts["-o"] else { fail("`-o out-path` argument is required.") }
@@ -47,7 +47,7 @@ let (mainIns, mainIn) = Src(path: mainPath).parseMain(verbose: false)
 
 let ins = mainIns + libPaths.flatMap { Src(path: $0).parseLib(verbose: false) }
 
-compileProgram(file: tmpFile, hostPath: hostPath, ins: ins, mainIn: mainIn)
+compileProgram(file: tmpFile, includePaths: includePaths, ins: ins, mainIn: mainIn)
 
 renameFileAtPath(tmpPath, toPath: outPath)
 do {

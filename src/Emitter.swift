@@ -36,7 +36,7 @@ class Emitter {
 }
 
 
-func compileProgram(file: OutFile, hostPath: String, ins: [In], mainIn: In) {
+func compileProgram(file: OutFile, includePaths: [String], ins: [In], mainIn: In) {
   // normal hash bang line (commented below) cannot pass necessary flags to node,
   // because hashbang only respects one argument.
   // file.writeL("#!/usr/bin/env node")
@@ -50,10 +50,14 @@ func compileProgram(file: OutFile, hostPath: String, ins: [In], mainIn: In) {
 
   file.writeL("\"use strict\";\n")
   file.writeL("(function(){ // ploy.")
-  file.writeL("// host.js.")
-  let host_src = guarded { try String(contentsOfFile: hostPath) }
-  file.writeL(host_src)
-  file.writeL("// host.js END.\n")
+
+  for path in includePaths {
+    let name = path.withoutPathDir
+    file.writeL("// included: \(name).")
+    let src = guarded { try String(contentsOfFile: path) }
+    file.writeL(src)
+    file.writeL("// end: \(name).\n")
+  }
 
   let rootSpace = Space(pathNames: ["ROOT"], parent: nil, file: file)
   let mainSpace = rootSpace.setupRoot(ins: ins, mainIn: mainIn)
