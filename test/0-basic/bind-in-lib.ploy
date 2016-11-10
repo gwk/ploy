@@ -2,5 +2,5 @@ in TEST
 x = 0:Int
 ;
 
-main = fn <>->Int
-  TEST/x;
+main = <>->Int =>
+  TEST/x

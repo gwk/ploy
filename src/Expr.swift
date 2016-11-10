@@ -129,9 +129,9 @@ enum Expr: SubForm {
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: type.sigPar)
       fnScope.addValRecord(name: "self", type: type)
-      let do_ = Expr.do_(fn.body) // HACK
-      let _ = do_.genTypeConstraints(ctx, fnScope)
-      ctx.constrain(do_, expForm: fn, expType: type.sigRet, "function body")
+      let body = fn.body
+      let _ = body.genTypeConstraints(ctx, fnScope)
+      ctx.constrain(body, expForm: fn, expType: type.sigRet, "function body")
       return type
 
     case .if_(let if_):
@@ -235,7 +235,14 @@ enum Expr: SubForm {
 
     case .fn(let fn):
       em.str(depth,  "(function self($){")
-      fn.body.compileBody(ctx, em, depth + 1, isTail: true)
+      switch fn.body {
+      case .do_(let do_):
+        do_.compileBody(ctx, em, depth + 1, isTail: true)
+      default:
+        em.append("return (")
+        fn.body.compile(ctx, em, depth + 1, isTail: true)
+        em.append(")")
+      }
       em.append("})")
 
     case .if_(let if_):

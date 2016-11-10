@@ -318,12 +318,6 @@ class Src: CustomStringConvertible {
     return Enum(synForSemicolon(sym, end, "enum"), sym: nameSym, variants: variants)
   }
 
-  func parseFn(_ sym: Sym) -> Form {
-    let sig: Sig = parseForm(sym.syn.end, "`fn` form", "function signature")
-    let do_ = parseBodyToImplicitDo(sig.syn.end)
-    return Fn(synForSemicolon(sym, do_.syn.end, "fn"), sig: sig, body: do_)
-  }
-
   func parseHostType(_ sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`host_type` form", "name symbol")
     return HostType(synForSemicolon(sym, nameSym.syn.end, "host_type"), sym: nameSym)
@@ -387,7 +381,6 @@ class Src: CustomStringConvertible {
 
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
     "enum"      : parseEnum,
-    "fn"        : parseFn,
     "host_type" : parseHostType,
     "host_val"  : parseHostVal,
     "if"        : parseIf,
@@ -454,8 +447,9 @@ class Src: CustomStringConvertible {
   }
 
   static let operatorGroups: [[(String, (Form, Form)->Form)]] = [
-    [ ("=", Bind.mk),
-      ("?", Case.mk)], // TODO: why is case lower than annotate?
+    [ ("=>", Fn.mk),
+      ("=", Bind.mk),
+      ("?", Case.mk)],
     [ (":", Ann.mk)],
     [ ("@", Acc.mk),
       (".", Call.mk),

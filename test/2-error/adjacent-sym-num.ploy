@@ -1,2 +1,2 @@
-main = fn <>->Int
-  0a;
+main = <>->Int =>
+  0a

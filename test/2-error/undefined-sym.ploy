@@ -1,3 +1,3 @@
-main = fn <>->Int
+main = <>->Int => {
   undefined
-  0;
+  0 }
