@@ -63,8 +63,8 @@ enum Def: SubForm {
       ctx.resolve()
       let type = ctx.typeFor(expr: bind.val)
       let needsLazy: Bool
-      switch type.kind {
-        case .sig: needsLazy = false
+      switch bind.val {
+        case .fn: needsLazy = false
         default: needsLazy = true
       }
       let em = Emitter(file: space.file)
