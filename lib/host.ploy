@@ -27,10 +27,6 @@ host_val ge_Int <Int Int>->Bool;
 host_val gt_Int <Int Int>->Bool;
 host_val le_Int <Int Int>->Bool;
 host_val lt_Int <Int Int>->Bool;
-
-host_val errL_Bool Bool-><>;
-host_val errL_Int Int-><>;
-host_val errL_Str Str-><>;
 ;
 
 in HOST
