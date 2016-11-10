@@ -97,8 +97,12 @@ enum Def: SubForm {
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
     case .hostVal(let hostVal):
-       let type = hostVal.typeExpr.type(space, "host value declaration")
-       return .val(type)
+      let type = hostVal.typeExpr.type(space, "host value declaration")
+      let em = Emitter(file: space.file)
+      let hostName = "\(space.hostPrefix)\(sym.hostName)"
+      em.str(0, "let \(hostName) = \(hostVal.code.val)")
+      em.flush()
+      return .val(type)
 
     case .method:
       fatalError("Method is not an independent definition; compileDef should never be called.")

@@ -8,7 +8,7 @@ class Emitter {
   var lines: [String] = []
 
   deinit {
-    assert(lines.isEmpty)
+    assert(lines.isEmpty, "lines is not empty")
   }
 
   init(file: OutFile) {
@@ -60,5 +60,5 @@ func compileProgram(file: OutFile, hostPath: String, ins: [In], mainIn: In) {
   let mainRecord = mainSpace.compileMain(mainIn: mainIn)
 
   // call the main function and pass the return code to PROC/exit.
-  file.writeL("\nPROC__exit(\(mainRecord.hostName)())})()")
+  file.writeL("\nHOST__process.exit(\(mainRecord.hostName)())})()")
 }

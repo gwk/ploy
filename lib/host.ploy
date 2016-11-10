@@ -2,38 +2,40 @@
 
 in FS
 host_type File;
-host_val write_Bool <File Bool>-><>;
-host_val write_Int  <File Int>-><>;
-host_val write_Str  <File Str>-><>;
+host_val write_Bool <File Bool>-><> "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
+host_val write_Int  <File Int>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
+host_val write_Str  <File Str>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
 ;
 
 in ROOT
-host_val true Bool;
-host_val false Bool;
+host_val true Bool  "true";
+host_val false Bool "false";
 
-host_val dec_Int Int->Int;
-host_val inc_Int Int->Int;
+host_val dec_Int Int->Int "function($) { return $ - 1; }";
+host_val inc_Int Int->Int "function($) { return $ + 1; }";
 
-host_val add_Int <Int Int>->Int;
-host_val sub_Int <Int Int>->Int;
-host_val mul_Int <Int Int>->Int;
-host_val div_Int <Int Int>->Int;
-host_val mod_Int <Int Int>->Int;
-host_val rem_Int <Int Int>->Int;
+host_val add_Int <Int Int>->Int "function($) { return $._0 + $._1; }";
+host_val sub_Int <Int Int>->Int "function($) { return $._0 - $._1; }";
+host_val mul_Int <Int Int>->Int "function($) { return $._0 * $._1; }";
+host_val div_Int <Int Int>->Int "function($) { return $._0 / $._1; }";
+host_val mod_Int <Int Int>->Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
+host_val rem_Int <Int Int>->Int "function($) { return $._0 % $._1; }";
 
-host_val eq_Int <Int Int>->Bool;
-host_val ne_Int <Int Int>->Bool;
-host_val ge_Int <Int Int>->Bool;
-host_val gt_Int <Int Int>->Bool;
-host_val le_Int <Int Int>->Bool;
-host_val lt_Int <Int Int>->Bool;
-;
-
-in HOST
+host_val eq_Int <Int Int>->Bool "function($) { return $._0 == $._1; }";
+host_val ne_Int <Int Int>->Bool "function($) { return $._0 != $._1; }";
+host_val ge_Int <Int Int>->Bool "function($) { return $._0 >= $._1; }";
+host_val gt_Int <Int Int>->Bool "function($) { return $._0 >  $._1; }";
+host_val le_Int <Int Int>->Bool "function($) { return $._0 <= $._1; }";
+host_val lt_Int <Int Int>->Bool "function($) { return $._0 <  $._1; }";
 ;
 
 in PROC
-host_val exit Int-><>;
-host_val std_out FS/File;
-host_val std_err FS/File;
+host_val exit Int-><> "function($) { HOST__process.exit($); }";
+host_val std_out FS/File "HOST__process.stdout.fd";
+host_val std_err FS/File "HOST__process.stderr.fd";
+
+# TODO: these are probably the wrong type;
+# need to repackage into proper ploy types or hide behind accessor functions.
+#const PROC__cmd   = HOST__process.argv
+#const PROC__args  = HOST__process.argv.slice(1)
 ;
