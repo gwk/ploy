@@ -2,12 +2,10 @@
 
 
 class HostVal: Form { // host value declaration: `host_val sym Type;`.
-  let sym: Sym
   let typeExpr: TypeExpr
   let code: LitStr
 
-  init(_ syn: Syn, sym: Sym, typeExpr: TypeExpr, code: LitStr) {
-    self.sym = sym
+  init(_ syn: Syn, typeExpr: TypeExpr, code: LitStr) {
     self.typeExpr = typeExpr
     self.code = code
     super.init(syn)
@@ -15,7 +13,6 @@ class HostVal: Form { // host value declaration: `host_val sym Type;`.
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, "\n")
-    sym.write(to: &stream, depth + 1)
     typeExpr.write(to: &stream, depth + 1)
     code.write(to: &stream, depth + 1)
   }

@@ -2,40 +2,40 @@
 
 in FS
 host_type File;
-host_val write_Bool <File Bool>-><> "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
-host_val write_Int  <File Int>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
-host_val write_Str  <File Str>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
+write_Bool = host_val <File Bool>-><> "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
+write_Int  = host_val <File Int>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
+write_Str  = host_val <File Str>-><>  "function($) { HOST__fs.writeSync($._0, $._1); return undefined; }";
 ;
 
 in ROOT
-host_val true Bool  "true";
-host_val false Bool "false";
+true  = host_val Bool "true";
+false = host_val Bool "false";
 
-host_val dec_Int Int->Int "function($) { return $ - 1; }";
-host_val inc_Int Int->Int "function($) { return $ + 1; }";
+dec_Int = host_val Int->Int "function($) { return $ - 1; }";
+inc_Int = host_val Int->Int "function($) { return $ + 1; }";
 
-host_val add_Int <Int Int>->Int "function($) { return $._0 + $._1; }";
-host_val sub_Int <Int Int>->Int "function($) { return $._0 - $._1; }";
-host_val mul_Int <Int Int>->Int "function($) { return $._0 * $._1; }";
-host_val div_Int <Int Int>->Int "function($) { return $._0 / $._1; }";
-host_val mod_Int <Int Int>->Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
-host_val rem_Int <Int Int>->Int "function($) { return $._0 % $._1; }";
+add_Int = host_val <Int Int>->Int "function($) { return $._0 + $._1; }";
+sub_Int = host_val <Int Int>->Int "function($) { return $._0 - $._1; }";
+mul_Int = host_val <Int Int>->Int "function($) { return $._0 * $._1; }";
+div_Int = host_val <Int Int>->Int "function($) { return $._0 / $._1; }";
+mod_Int = host_val <Int Int>->Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
+rem_Int = host_val <Int Int>->Int "function($) { return $._0 % $._1; }";
 
-host_val eq_Int <Int Int>->Bool "function($) { return $._0 == $._1; }";
-host_val ne_Int <Int Int>->Bool "function($) { return $._0 != $._1; }";
-host_val ge_Int <Int Int>->Bool "function($) { return $._0 >= $._1; }";
-host_val gt_Int <Int Int>->Bool "function($) { return $._0 >  $._1; }";
-host_val le_Int <Int Int>->Bool "function($) { return $._0 <= $._1; }";
-host_val lt_Int <Int Int>->Bool "function($) { return $._0 <  $._1; }";
+eq_Int = host_val <Int Int>->Bool "function($) { return $._0 == $._1; }";
+ne_Int = host_val <Int Int>->Bool "function($) { return $._0 != $._1; }";
+ge_Int = host_val <Int Int>->Bool "function($) { return $._0 >= $._1; }";
+gt_Int = host_val <Int Int>->Bool "function($) { return $._0 >  $._1; }";
+le_Int = host_val <Int Int>->Bool "function($) { return $._0 <= $._1; }";
+lt_Int = host_val <Int Int>->Bool "function($) { return $._0 <  $._1; }";
 
-host_val exit Int-><> "function($) { HOST__process.exit($); }";
-host_val std_out FS/File "HOST__process.stdout.fd";
-host_val std_err FS/File "HOST__process.stderr.fd";
+exit = host_val Int-><> "function($) { HOST__process.exit($); }";
+std_out = host_val FS/File "HOST__process.stdout.fd";
+std_err = host_val FS/File "HOST__process.stderr.fd";
 ;
 
 in PROC
 # TODO: these are probably the wrong type;
 # need to repackage into proper ploy types or hide behind accessor functions.
-#const PROC__cmd   = HOST__process.argv
-#const PROC__args  = HOST__process.argv.slice(1)
+#PROC__cmd  = host_val Xyz HOST__process.argv
+#PROC__args = host_val Xyz HOST__process.argv.slice(1)
 ;

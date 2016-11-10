@@ -324,10 +324,9 @@ class Src: CustomStringConvertible {
   }
 
   func parseHostVal(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`host_val` form", "name symbol")
-    let typeExpr = TypeExpr(form: parsePhrase(nameSym.syn.end), subj: "`host_val` form")
+    let typeExpr = TypeExpr(form: parsePhrase(sym.syn.end), subj: "`host_val` form")
     let code: LitStr = parseForm(typeExpr.syn.end, "`host_val` form", "code string")
-    return HostVal(synForSemicolon(sym, code.syn.end, "host_val"), sym: nameSym, typeExpr: typeExpr, code: code)
+    return HostVal(synForSemicolon(sym, code.syn.end, "host_val"), typeExpr: typeExpr, code: code)
   }
 
   func parseIf(_ sym: Sym) -> Form {

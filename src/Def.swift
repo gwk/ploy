@@ -8,7 +8,6 @@ enum Def: SubForm {
   case bind(Bind)
   case enum_(Enum)
   case hostType(HostType)
-  case hostVal(HostVal)
   case method(Method)
   case polyFn(PolyFn)
   case pub(Pub)
@@ -18,7 +17,6 @@ enum Def: SubForm {
     if let form = form as? Bind           { self = .bind(form) }
     else if let form = form as? Enum      { self = .enum_(form) }
     else if let form = form as? HostType  { self = .hostType(form) }
-    else if let form = form as? HostVal   { self = .hostVal(form) }
     else if let form = form as? Method    { self = .method(form) }
     else if let form = form as? PolyFn    { self = .polyFn(form) }
     else if let form = form as? Pub       { self = .pub(form) }
@@ -33,7 +31,6 @@ enum Def: SubForm {
     case .bind(let bind): return bind
     case .enum_(let enum_): return enum_
     case .hostType(let hostType): return hostType
-    case .hostVal(let hostVal): return hostVal
     case .method(let method): return method
     case .polyFn(let polyFn): return polyFn
     case .pub(let pub): return pub
@@ -46,7 +43,6 @@ enum Def: SubForm {
     case .bind(let bind): return bind.sym
     case .enum_(let enum_): return enum_.sym
     case .hostType(let hostType): return hostType.sym
-    case .hostVal(let hostVal): return hostVal.sym
     case .method: fatalError("Method is not an independent definition; sym should never be called.")
     case .polyFn(let polyFn): return polyFn.sym
     case .pub(let pub): return pub.def.sym
@@ -95,14 +91,6 @@ enum Def: SubForm {
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
-
-    case .hostVal(let hostVal):
-      let type = hostVal.typeExpr.type(space, "host value declaration")
-      let em = Emitter(file: space.file)
-      let hostName = "\(space.hostPrefix)\(sym.hostName)"
-      em.str(0, "let \(hostName) = \(hostVal.code.val)")
-      em.flush()
-      return .val(type)
 
     case .method:
       fatalError("Method is not an independent definition; compileDef should never be called.")

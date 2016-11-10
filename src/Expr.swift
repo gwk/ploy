@@ -10,6 +10,7 @@ enum Expr: SubForm {
   case cmpdType(CmpdType)
   case do_(Do)
   case fn(Fn)
+  case hostVal(HostVal)
   case if_(If)
   case litNum(LitNum)
   case litStr(LitStr)
@@ -28,6 +29,7 @@ enum Expr: SubForm {
     else if let form = form as? CmpdType  { self = .cmpdType(form) }
     else if let form = form as? Do        { self = .do_(form) }
     else if let form = form as? Fn        { self = .fn(form) }
+    else if let form = form as? HostVal   { self = .hostVal(form) }
     else if let form = form as? If        { self = .if_(form) }
     else if let form = form as? LitNum    { self = .litNum(form) }
     else if let form = form as? LitStr    { self = .litStr(form) }
@@ -55,6 +57,7 @@ enum Expr: SubForm {
     case .cmpdType(let cmpdType): return cmpdType
     case .do_(let do_): return do_
     case .fn(let fn): return fn
+    case .hostVal(let hostVal): return hostVal
     case .if_(let if_): return if_
     case .litNum(let litNum): return litNum
     case .litStr(let litStr): return litStr
@@ -152,6 +155,10 @@ enum Expr: SubForm {
       }
       return type
 
+    case .hostVal(let hostVal):
+      let type = hostVal.typeExpr.type(scope, "host value declaration")
+      return type
+
     case .litNum:
       let type = typeInt
       return type
@@ -244,6 +251,9 @@ enum Expr: SubForm {
         em.append(")")
       }
       em.append("})")
+
+    case .hostVal(let hostVal):
+      em.str(0, hostVal.code.val)
 
     case .if_(let if_):
       em.str(depth, "(")
