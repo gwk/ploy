@@ -13,18 +13,7 @@ class Bind: Form { // value binding: `name=expr`.
   }
 
   static func mk(l: Form, _ r: Form) -> Form {
-    let place: Place
-    if let sym = l as? Sym {
-      place = .sym(sym)
-    }
-    else if let ann = l as? Ann {
-      guard case .sym = ann.expr else {
-        ann.expr.form.failSyntax("annotated binding name expects name symbol but received \(ann.expr.form.syntaxName).")
-      }
-      place = .ann(ann)
-    } else {
-      l.failSyntax("binding name expects name symbol or annotated name symbol but received \(l.syntaxName).")
-    }
+    let place = Place(form: l, subj: "binding")
     return Bind(Syn(l.syn, r.syn),
       place: place,
       val: Expr(form: r, subj: "binding", exp: "value expression"))
