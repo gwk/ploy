@@ -560,7 +560,7 @@ class Src: CustomStringConvertible {
 
   func parsePars(_ pos: Pos, _ subj: String) -> ([Par], Pos) {
     let (forms, end) = parseRawForms(pos)
-    let pars = forms.enumerated().map { Par.mk(index: $0.offset, form: $0.element, subj: subj) }
+    let pars = forms.map { Par.mk(form: $0, subj: subj) }
     return (pars, end)
   }
 

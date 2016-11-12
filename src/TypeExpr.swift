@@ -35,11 +35,14 @@ enum TypeExpr: SubForm {
   }
 
 
- func type(_ scope: Scope, _ subj: String) -> Type {
-   switch self {
+  func type(_ scope: Scope, _ subj: String) -> Type {
+    switch self {
 
     case .cmpdType(let cmpdType):
-       return Type.Cmpd(cmpdType.pars.map { $0.typeParForPar(scope, subj) })
+      return Type.Cmpd(cmpdType.pars.enumerated().map {
+        (index, par) in
+        return par.typeParForPar(scope, index: index, subj: subj)
+      })
 
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
@@ -48,8 +51,7 @@ enum TypeExpr: SubForm {
       fatalError()
 
     case .sig(let sig):
-      return Type.Sig(par: sig.send.type(scope, "signature send"),
-        ret: sig.ret.type(scope, "signature return"))
+      return Type.Sig(par: sig.send.type(scope, "signature send"), ret: sig.ret.type(scope, "signature return"))
 
     case .sym(let sym):
       return scope.typeBinding(sym: sym, subj: subj)
