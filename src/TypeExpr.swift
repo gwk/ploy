@@ -41,7 +41,7 @@ enum TypeExpr: SubForm {
     case .cmpdType(let cmpdType):
       return Type.Cmpd(cmpdType.pars.enumerated().map {
         (index, par) in
-        return par.typeParForPar(scope, index: index, subj: subj)
+        return par.typeParForPar(scope, index: index)
       })
 
     case .path(let path):

@@ -27,7 +27,7 @@ class Par: Form { // compound parameter.
     }
   }
 
-  func typeParForPar(_ scope: Scope, index: Int, subj: String) -> TypePar {
+  func typeParForPar(_ scope: Scope, index: Int) -> TypePar {
     var type: Type
     if let typeExpr = typeExpr {
       type = typeExpr.type(scope, "parameter type")
