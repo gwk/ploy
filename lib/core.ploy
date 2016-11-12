@@ -1,6 +1,26 @@
 
 in ROOT
 
+err = Str-><> => FS/write_Str(std_err $)
+out = Str-><> => FS/write_Str(std_out $)
+
+errL = Str-><> => {
+  err.$
+  err.'\n' }
+
+outL = Str-><> => {
+  out.$
+  out.'\n' }
+
+
+assert = <Bool Str>-><> => {
+  if 0@$ ? {}
+  { err.'assertion failed: '
+    errL(1@$)
+    exit.1 }; }
+
+
+
 outL_Int = Int-><> => {
   FS/write_Int(std_out $)
   FS/write_Str(std_out '\n')
