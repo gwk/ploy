@@ -2,9 +2,9 @@
 
 
 class Cmpd: Form { // compound value: `(a b)`.
-  let args: [Arg]
+  let args: [Expr]
 
-  init(_ syn: Syn, args: [Arg]) {
+  init(_ syn: Syn, args: [Expr]) {
     self.args = args
     super.init(syn)
   }
@@ -27,7 +27,7 @@ class Cmpd: Form { // compound value: `(a b)`.
             argLabel.failType("argument label does not match parameter label", notes: (parLabel, "parameter label"))
           }
         } else {
-          argLabel.failType("argument label does not match unlabeled parameter", notes: (arg, "unlabeled parameter"))
+          argLabel.failType("argument label does not match unlabeled parameter", notes: (arg.form, "unlabeled parameter"))
         }
       }
       em.str(depth, " \(par.hostName):")

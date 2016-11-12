@@ -69,6 +69,12 @@ enum Expr: SubForm {
     }
   }
 
+  var label: Sym? {
+    switch self {
+    case .bind(let bind): return bind.sym
+    default: return nil
+    }
+  }
 
   func genTypeConstraints(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
     let type = genTypeConstraintsDisp(ctx, scope)
@@ -195,6 +201,11 @@ enum Expr: SubForm {
   }
 
 
+  func typeParForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypePar {
+    return TypePar(index: index, label: label, type: genTypeConstraints(ctx, scope))
+  }
+
+
   func compile(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     switch self {
@@ -315,6 +326,11 @@ enum Expr: SubForm {
     case .sym(let sym):
       compileSym(em, depth, scopeRecord: ctx.symRecords[sym]!, sym: sym, isTail: isTail)
     }
+  }
+
+
+  func compileArg(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int) {
+    return compile(ctx, em, depth, isTail: false)
   }
 }
 

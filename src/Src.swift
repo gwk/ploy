@@ -284,13 +284,14 @@ class Src: CustomStringConvertible {
 
   func parseCmpdOrParen(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
-    let (args, end) = parseArgs(p, "compound value")
+    var args: [Expr] = []
+    let end = parseFormsTo(&args, p, subj: "parenthesized expression")
     if args.count == 1 {
-      let arg = args[0]
-      if let label = arg.label {
+      let expr = args[0]
+      if let label = expr.label {
         label.failSyntax("label implies disallowed single-element compound expression")
       } else {
-        return Paren(synForTerminator(pos, end, ")", "parenthesized expression"), expr: arg.expr)
+        return Paren(synForTerminator(pos, end, ")", "parenthesized expression"), expr: expr)
       }
     } else {
       return Cmpd(synForTerminator(pos, end, ")", "compound expression"), args: args)
@@ -561,12 +562,6 @@ class Src: CustomStringConvertible {
     let (forms, end) = parseRawForms(pos)
     let pars = forms.enumerated().map { Par.mk(index: $0.offset, form: $0.element, subj: subj) }
     return (pars, end)
-  }
-
-  func parseArgs(_ pos: Pos, _ subj: String) -> ([Arg], Pos) {
-    let (forms, end) = parseRawForms(pos)
-    let args = forms.map { Arg.mk($0, subj) }
-    return (args, end)
   }
 
   func parseBody(_ pos: Pos) -> ([Expr], Pos, Pos) {
