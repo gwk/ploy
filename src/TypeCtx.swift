@@ -103,11 +103,11 @@ class TypeCtx {
             return
           }
         }
+        constraint.fail(act: accesseeType, exp: expOpaqueType, "actual type has no field matching accessor") // TODO: this should be caught earlier.
       default: constraint.fail(act: accesseeType, exp: expOpaqueType, "actual type is not an accessible type")
       }
     default: constraint.fail(act: actType, exp: expOpaqueType, "actual type is not expected opaque type")
     }
-    fatalError()
   }
 
   func resolveConstraint(_ constraint: Constraint) {
