@@ -9,19 +9,15 @@ enum TypeExpr: SubForm {
   case sig(Sig)
   case sym(Sym)
 
-  init(form: Form, subj: String, exp: String) {
+  init(form: Form, subj: String) {
     if let form = form as? CmpdType   { self = .cmpdType(form) }
     else if let form = form as? Path  { self = .path(form) }
     else if let form = form as? Reify { self = .reify(form) }
     else if let form = form as? Sig   { self = .sig(form) }
     else if let form = form as? Sym   { self = .sym(form) }
     else {
-      form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expects type expression but received \(form.syntaxName).")
     }
-  }
-
-  init(form: Form, subj: String) {
-    self.init(form: form, subj: subj, exp: "type expression")
   }
 
   var form: Form {
