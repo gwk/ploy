@@ -1,5 +1,6 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
+
 enum Accessor: SubForm {
 
   case litNum(LitNum)
