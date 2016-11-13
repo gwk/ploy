@@ -556,7 +556,6 @@ class Src: CustomStringConvertible {
     return p
   }
 
-
   func parseRawForms(_ pos: Pos) -> ([Form], Pos) {
     var forms: [Form] = []
     let end = parseForms(&forms, pos, "form", "any form (INTERNAL ERROR)")
