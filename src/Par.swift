@@ -15,7 +15,7 @@ class Par: Form { // compound parameter.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     if let label = label {
       label.write(to: &stream, depth + 1)
     }

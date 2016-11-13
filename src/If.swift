@@ -12,7 +12,7 @@ class If: Form { // if statement: `if cases… default;`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     for c in cases {
       c.write(to: &stream, depth + 1)
     }

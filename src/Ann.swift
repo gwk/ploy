@@ -18,7 +18,7 @@ class Ann: Form { // annotation: `expr:Type`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     expr.write(to: &stream, depth + 1)
     typeExpr.write(to: &stream, depth + 1)
   }

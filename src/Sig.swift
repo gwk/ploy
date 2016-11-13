@@ -18,7 +18,7 @@ class Sig: Form { // function signature: `Par->Ret`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     send.write(to: &stream, depth + 1)
     ret.write(to: &stream, depth + 1)
   }

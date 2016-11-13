@@ -29,7 +29,7 @@ class Form: Hashable, CustomStringConvertible {
 
   func write<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int) { fatalError() }
 
-  func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String) {
+  func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String = "\n") {
     stream.write(String(indent: depth))
     stream.write(String(describing: type(of: self)))
     stream.write(" ")

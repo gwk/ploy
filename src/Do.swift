@@ -10,7 +10,7 @@ class Do: Form { // do block: `{…}`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     body.write(to: &stream, depth + 1)
   }
 }

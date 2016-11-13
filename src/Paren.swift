@@ -10,7 +10,7 @@ class Paren: Form { // parenthesized expression: `(a)`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     expr.write(to: &stream, depth + 1)
   }
 }

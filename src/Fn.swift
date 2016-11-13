@@ -12,7 +12,7 @@ class Fn: Form { // function declaration: `fn type body…;`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     sig.write(to: &stream, depth + 1)
     body.write(to: &stream, depth + 1)
   }

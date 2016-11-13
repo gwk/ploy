@@ -18,7 +18,7 @@ class Acc: Form { // accessor: `field@val`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     accessor.write(to: &stream, depth + 1)
     accessee.write(to: &stream, depth + 1)
   }

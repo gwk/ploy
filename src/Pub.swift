@@ -10,7 +10,7 @@ class Pub: Form { // public modifier: `pub expr;`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     def.write(to: &stream, depth + 1)
   }
 }

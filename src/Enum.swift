@@ -10,9 +10,9 @@ class Enum: Form { // enum declaration: `enum E variants…;`.
     self.variants = variants
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     sym.write(to: &stream, depth + 1)
     for v in variants {
       v.write(to: &stream, depth + 1)

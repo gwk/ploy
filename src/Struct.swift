@@ -12,7 +12,7 @@ class Struct: Form { // struct declaration: `struct S fields…;`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, "\n")
+    writeHead(to: &stream, depth)
     sym.write(to: &stream, depth + 1)
     for f in fields {
       f.write(to: &stream, depth + 1)
