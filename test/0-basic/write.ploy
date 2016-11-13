@@ -1,4 +1,4 @@
-main = <>-><> => {
+main = {
   FS/write_Bool(std_out true)
   FS/write_Str(std_out ' ')
   FS/write_Int(std_out 0)

@@ -61,7 +61,6 @@ func compileProgram(file: OutFile, includePaths: [String], ins: [In], mainIn: In
 
   let rootSpace = Space(pathNames: ["ROOT"], parent: nil, file: file)
   let mainSpace = rootSpace.setupRoot(ins: ins, mainIn: mainIn)
-  let mainRecord = mainSpace.compileMain(mainIn: mainIn)
-
-  file.writeL("\n\(mainRecord.hostName)()})()")
+  mainSpace.compileMain(mainIn: mainIn)
+  file.writeL("})();")
 }

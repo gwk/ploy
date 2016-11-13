@@ -6,5 +6,4 @@ g = Int->Int =>
   if eq_Int(0 0) ? 0
     f(self dec_Int.$);
 
-main = <>-><> =>
-  exit.g.100000
+main = exit.g.100000

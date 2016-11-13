@@ -1,2 +1,1 @@
-main = <>-><> =>
-  exit.(Int->Int => $).0
+main = exit.(Int->Int => $).0

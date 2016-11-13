@@ -1,5 +1,4 @@
-main = <>-><> => {
-
+main = {
   outL_Int.sub_Int(1 1)
   outL_Int.add_Int(0 1)
   outL_Int.mul_Int(1 2)

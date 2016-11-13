@@ -1,2 +1,1 @@
-main = <>-><> =>
-  FS/write_Str(std_err 'this is std_err.\n')
+main = FS/write_Str(std_err 'this is std_err.\n')

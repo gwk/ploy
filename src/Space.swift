@@ -30,18 +30,14 @@ class Space: Scope {
     return nil
   }
 
-  func compileMain(mainIn: In) -> ScopeRecord {
+  func compileMain(mainIn: In) {
     guard let def = defs["main"] else {
       mainIn.failForm(prefix: "error", msg: "`main` is not defined in MAIN")
     }
     let record = getRecord(sym: def.sym)!
-    guard case .val(let type) = record.kind else {
-      def.form.failType("expected `main` to be a function value; found \(record.kindDesc)")
-    }
-    if type != typeOfMainFn {
-      def.form.failType("expected `main` to have type <>-><>; actual type is \(type)")
-    }
-    return record
+    let em = Emitter(file: self.file)
+    compileSym(em, 0, scopeRecord: record, sym: def.sym, isTail: true)
+    em.flush()
   }
 
   func extendRecord(record: ScopeRecord, method: Method) {
