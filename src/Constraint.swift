@@ -4,7 +4,7 @@ import Quilt
 
 
 struct Constraint {
-  let actExpr: Expr
+  let actForm: Form
   let actType: Type
   let actChain: Chain<String>
   let expForm: Form
@@ -17,12 +17,12 @@ struct Constraint {
 
   func subConstraint(actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Constraint {
     return Constraint(
-      actExpr: actExpr, actType: actType, actChain: (actDesc == nil) ? actChain : .link(actDesc!, actChain),
+      actForm: actForm, actType: actType, actChain: (actDesc == nil) ? actChain : .link(actDesc!, actChain),
       expForm: expForm, expType: expType, expChain: (expDesc == nil) ? expChain : .link(expDesc!, expChain), desc: desc)
   }
 
   func fail(act: Type, exp: Type, _ msg: String) -> Never {
-    actExpr.form.failType(
+    actForm.failType(
       "\(msg);\n\(actDesc)\(desc);\nresolved type: \(act)",
       notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(exp)"))
   }

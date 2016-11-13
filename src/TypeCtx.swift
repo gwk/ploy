@@ -60,7 +60,7 @@ class TypeCtx {
   func constrain(_ actExpr: Expr, expForm: Form, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
-      actExpr: actExpr, actType: originalTypeForExpr(actExpr), actChain: .end,
+      actForm: actExpr.form, actType: originalTypeForExpr(actExpr), actChain: .end,
       expForm: expForm, expType: expType, expChain: .end, desc: desc))
   }
 
