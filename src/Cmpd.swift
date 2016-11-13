@@ -31,7 +31,7 @@ class Cmpd: Form { // compound value: `(a b)`.
         }
       }
       em.str(depth, " \(par.hostName):")
-      arg.compileArg(ctx, em, depth + 1)
+      arg.compile(ctx, em, depth + 1, isTail: false)
       em.append(",")
       argIndex += 1
     } else { // TODO: support default arguments.

@@ -310,11 +310,6 @@ enum Expr: SubForm {
       compileSym(em, depth, scopeRecord: ctx.symRecords[sym]!, sym: sym, isTail: isTail)
     }
   }
-
-
-  func compileArg(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int) {
-    return compile(ctx, em, depth, isTail: false)
-  }
 }
 
 
