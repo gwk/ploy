@@ -49,7 +49,7 @@ func compileProgram(file: OutFile, includePaths: [String], ins: [In], mainIn: In
   file.writeL("':' //; exec /usr/bin/env node --harmony-tailcalls \"$0\" \"$@\"\n")
 
   file.writeL("\"use strict\";\n")
-  file.writeL("(function(){ // ploy.")
+  file.writeL("(function(){ // ploy scope.")
 
   for path in includePaths {
     let name = path.withoutPathDir
