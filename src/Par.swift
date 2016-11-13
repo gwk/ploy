@@ -4,10 +4,10 @@
 class Par: Form { // compound parameter.
 
   let label: Sym?
-  let typeExpr: TypeExpr? // typeExpr and dflt cannot both be set. // TODO: use Either enum?
+  let typeExpr: Expr? // typeExpr and dflt cannot both be set. // TODO: use Either enum?
   let dflt: Expr?
 
-  init(_ syn: Syn, label: Sym?, typeExpr: TypeExpr?, dflt: Expr?) {
+  init(_ syn: Syn, label: Sym?, typeExpr: Expr?, dflt: Expr?) {
     self.label = label
     self.typeExpr = typeExpr
     self.dflt = dflt
@@ -42,7 +42,7 @@ class Par: Form { // compound parameter.
 
   static func mk(form: Form, subj: String) -> Par {
     var label: Sym? = nil
-    var typeExpr: TypeExpr? = nil
+    var typeExpr: Expr? = nil
     var dflt: Expr? = nil
     if let ann = form as? Ann {
       guard case .sym(let sym) = ann.expr else {
@@ -57,7 +57,7 @@ class Par: Form { // compound parameter.
       label = bind.sym
       dflt = bind.val
     } else {
-      typeExpr = TypeExpr(form: form, subj: subj)
+      typeExpr = Expr(form: form, subj: subj)
     }
     return Par(form.syn, label: label, typeExpr: typeExpr, dflt: dflt)
   }

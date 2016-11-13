@@ -50,7 +50,7 @@ extension Expr {
       return genTypeConstraintsBody(ctx, scope, body: do_.body)
 
     case .fn(let fn):
-      let type = TypeExpr.sig(fn.sig).type(scope, "signature")
+      let type = Expr.sig(fn.sig).type(scope, "signature")
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: type.sigPar)
       fnScope.addValRecord(name: "self", type: type)
@@ -112,6 +112,33 @@ extension Expr {
       let type = sym.typeForExprRecord(record)
       ctx.symRecords[sym] = record
       return type
+    }
+  }
+
+
+  func type(_ scope: Scope, _ subj: String) -> Type {
+    switch self {
+
+    case .cmpdType(let cmpdType):
+      return Type.Cmpd(cmpdType.pars.enumerated().map {
+        (index, par) in
+        return par.typeParForPar(scope, index: index)
+      })
+
+    case .path(let path):
+      return scope.typeBinding(path: path, subj: subj)
+
+    case .reify:
+      fatalError()
+
+    case .sig(let sig):
+      return Type.Sig(par: sig.send.type(scope, "signature send"), ret: sig.ret.type(scope, "signature return"))
+
+    case .sym(let sym):
+      return scope.typeBinding(sym: sym, subj: subj)
+
+    default:
+      form.failType("not a type (TODO: IMPROVE)")
     }
   }
 

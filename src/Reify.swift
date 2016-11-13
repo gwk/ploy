@@ -2,10 +2,10 @@
 
 
 class Reify: Form { // type reification:  `T^A`.
-  let callee: TypeExpr
-  let arg: TypeExpr
+  let callee: Expr
+  let arg: Expr
 
-  required init(_ syn: Syn, callee: TypeExpr, arg: TypeExpr) {
+  required init(_ syn: Syn, callee: Expr, arg: Expr) {
     self.callee = callee
     self.arg = arg
     super.init(syn)
@@ -13,8 +13,8 @@ class Reify: Form { // type reification:  `T^A`.
 
   static func mk(l: Form, _ r: Form) -> Form {
     return self.init(Syn(l.syn, r.syn),
-      callee: TypeExpr(form: l, subj: "type reification"),
-      arg: TypeExpr(form: r, subj: "type reification"))
+      callee: Expr(form: l, subj: "type reification"),
+      arg: Expr(form: r, subj: "type reification"))
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {

@@ -2,11 +2,11 @@
 
 
 class HostVal: Form { // host value declaration: `host_val sym Type;`.
-  let typeExpr: TypeExpr
+  let typeExpr: Expr
   let code: LitStr
   let deps: [Identifier]
 
-  init(_ syn: Syn, typeExpr: TypeExpr, code: LitStr, deps: [Identifier]) {
+  init(_ syn: Syn, typeExpr: Expr, code: LitStr, deps: [Identifier]) {
     self.typeExpr = typeExpr
     self.code = code
     self.deps = deps

@@ -331,7 +331,7 @@ class Src: CustomStringConvertible {
   }
 
   func parseHostVal(_ sym: Sym) -> Form {
-    let typeExpr = TypeExpr(form: parsePhrase(sym.syn.end), subj: "`host_val` form")
+    let typeExpr = Expr(form: parsePhrase(sym.syn.end), subj: "`host_val` form")
     let code: LitStr = parseForm(typeExpr.syn.end, "`host_val` form", "code string")
     var deps: [Identifier] = []
     let end = parseSubForms(&deps, code.syn.end, subj: "`host_val` form")

@@ -23,7 +23,7 @@ class Method: Form { // method definition.
   // MARK: Method
 
   func typeForMethodSig(_ space: Space) -> Type {
-    return TypeExpr.sig(sig).type(space, "method")
+    return Expr.sig(sig).type(space, "method")
   }
 
   func compileMethod(_ space: Space, polyFnType: Type, sigType: Type, hostName: String) {

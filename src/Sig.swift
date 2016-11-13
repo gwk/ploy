@@ -2,10 +2,10 @@
 
 
 class Sig: Form { // function signature: `Par->Ret`.
-  let send: TypeExpr
-  let ret: TypeExpr
+  let send: Expr
+  let ret: Expr
 
-  init(_ syn: Syn, send: TypeExpr, ret: TypeExpr) {
+  init(_ syn: Syn, send: Expr, ret: Expr) {
     self.send = send
     self.ret = ret
     super.init(syn)
@@ -13,8 +13,8 @@ class Sig: Form { // function signature: `Par->Ret`.
 
   static func mk(l: Form, _ r: Form) -> Form {
     return Sig(Syn(l.syn, r.syn),
-      send: TypeExpr(form: l, subj: "signature send"),
-      ret: TypeExpr(form: r, subj: "signature return"))
+      send: Expr(form: l, subj: "signature send"),
+      ret: Expr(form: r, subj: "signature return"))
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {

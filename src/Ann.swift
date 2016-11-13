@@ -3,9 +3,9 @@
 
 class Ann: Form { // annotation: `expr:Type`.
   let expr: Expr
-  let typeExpr: TypeExpr
+  let typeExpr: Expr
 
-  init(_ syn: Syn, expr: Expr, typeExpr: TypeExpr) {
+  init(_ syn: Syn, expr: Expr, typeExpr: Expr) {
     self.expr = expr
     self.typeExpr = typeExpr
     super.init(syn)
@@ -14,7 +14,7 @@ class Ann: Form { // annotation: `expr:Type`.
   static func mk(l: Form, _ r: Form) -> Form {
     return Ann(Syn(l.syn, r.syn),
       expr: Expr(form: l, subj: "type annotation"),
-      typeExpr: TypeExpr(form: r, subj: "type annotation"))
+      typeExpr: Expr(form: r, subj: "type annotation"))
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
