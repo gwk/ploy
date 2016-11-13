@@ -285,7 +285,7 @@ class Src: CustomStringConvertible {
   func parseCmpdOrParen(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
     var args: [Expr] = []
-    let end = parseFormsTo(&args, p, subj: "parenthesized expression")
+    let end = parseSubForms(&args, p, subj: "parenthesized expression")
     if args.count == 1 {
       let expr = args[0]
       if let label = expr.label {
@@ -334,7 +334,7 @@ class Src: CustomStringConvertible {
     let typeExpr = TypeExpr(form: parsePhrase(sym.syn.end), subj: "`host_val` form")
     let code: LitStr = parseForm(typeExpr.syn.end, "`host_val` form", "code string")
     var deps: [Identifier] = []
-    let end = parseFormsTo(&deps, code.syn.end, subj: "`host_val` form")
+    let end = parseSubForms(&deps, code.syn.end, subj: "`host_val` form")
     return HostVal(synForSemicolon(sym, end, "host_val"), typeExpr: typeExpr, code: code, deps: deps)
   }
 
@@ -358,7 +358,7 @@ class Src: CustomStringConvertible {
     let identifier = Identifier(form: parsePhrase(sym.syn.end),
       subj: "`in` form", exp: "namespace identifier")
     var defs: [Def] = []
-    let end = parseFormsTo(&defs, identifier.syn.end, subj: "`in` form")
+    let end = parseSubForms(&defs, identifier.syn.end, subj: "`in` form")
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
 
@@ -538,7 +538,7 @@ class Src: CustomStringConvertible {
     return p
   }
 
-  func parseFormsTo<T: SubForm>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
+  func parseSubForms<T: SubForm>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
     while hasSome(p) {
@@ -571,7 +571,7 @@ class Src: CustomStringConvertible {
 
   func parseBody(_ pos: Pos, subj: String) -> Body {
     var exprs: [Expr] = []
-    let end = parseFormsTo(&exprs, pos, subj: "body")
+    let end = parseSubForms(&exprs, pos, subj: "body")
     return Body(Syn(src: self, pos: pos, visEnd: (exprs.last?.syn.visEnd).or(pos), end: end), exprs: exprs)
   }
 
