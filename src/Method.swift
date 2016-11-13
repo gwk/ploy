@@ -40,7 +40,7 @@ class Method: Form { // method definition.
     let em = Emitter(file: space.file)
     em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")
     em.str(1, "let self = \(hostName)")
-    body.compileBody(ctx, em, 1, isTail: true)
+    compileBody(ctx, em, 1, body: body.exprs, isTail: true)
     em.append("}")
     em.flush()
   }

@@ -15,17 +15,4 @@ class Do: Form { // do block: `{…}`.
       e.write(to: &stream, depth + 1)
     }
   }
-
-  // MARK: Body
-
-  func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    for (i, expr) in exprs.enumerated() {
-      let isLast = (i == exprs.lastIndex)
-      if isLast {
-        em.str(depth, "return (")
-      }
-      expr.compile(ctx, em, depth, isTail: isLast && isTail)
-      em.append(isLast ? ")" : ";")
-    }
-  }
 }

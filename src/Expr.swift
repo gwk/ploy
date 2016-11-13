@@ -251,14 +251,14 @@ enum Expr: SubForm {
 
     case .do_(let do_):
       em.str(depth, "(function(){")
-      do_.compileBody(ctx, em, depth + 1, isTail: isTail)
+      compileBody(ctx, em, depth + 1, body: do_.exprs, isTail: isTail)
       em.append("})()")
 
     case .fn(let fn):
       em.str(depth,  "(function self($){")
       switch fn.body {
       case .do_(let do_):
-        do_.compileBody(ctx, em, depth + 1, isTail: true)
+        compileBody(ctx, em, depth + 1, body: do_.exprs, isTail: true)
       default:
         em.append("return (")
         fn.body.compile(ctx, em, depth + 1, isTail: true)
@@ -350,5 +350,17 @@ func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym,
     sym.failType("expected a value; `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace?
   case .type(_):
     sym.failType("expected a value; `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
+  }
+}
+
+
+func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: [Expr], isTail: Bool) {
+  for (i, expr) in body.enumerated() {
+    let isLast = (i == body.lastIndex)
+    if isLast {
+      em.str(depth, "return (")
+    }
+    expr.compile(ctx, em, depth, isTail: isLast && isTail)
+    em.append(isLast ? ")" : ";")
   }
 }
