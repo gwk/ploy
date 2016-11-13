@@ -8,7 +8,7 @@ class Emitter {
   var lines: [String] = []
 
   deinit {
-    assert(lines.isEmpty, "lines is not empty")
+    assert(lines.isEmpty, "Emitter was not flushed.")
   }
 
   init(file: OutFile) {
