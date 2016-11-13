@@ -1,5 +1,5 @@
-f = Int->Int =>
+f = fn Int->Int
   if eq_Int($ 0) ? 0
-    self.dec_Int.$;
+    self.dec_Int.$;;
 
 main = exit.f.100000

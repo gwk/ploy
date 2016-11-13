@@ -4,9 +4,9 @@
 class Method: Form { // method definition.
   let identifier: Identifier
   let sig: Sig
-  let body: Do
+  let body: Body
 
-  init(_ syn: Syn, identifier: Identifier, sig: Sig, body: Do) {
+  init(_ syn: Syn, identifier: Identifier, sig: Sig, body: Body) {
     self.identifier = identifier
     self.sig = sig
     self.body = body
@@ -33,14 +33,13 @@ class Method: Form { // method definition.
     fnScope.addValRecord(name: "$", type: parType)
     fnScope.addValRecord(name: "self", type: polyFnType)
     let ctx = TypeCtx()
-    let do_ = Expr.do_(body) // TODO: temporary hack to expose genTypeConstraints method.
-    let _ = do_.genTypeConstraints(ctx, fnScope)
-    ctx.constrain(do_, expForm: sig.ret.form, expType: retType, "method body")
+    let type = genTypeConstraintsBody(ctx, fnScope, body: body)
+    ctx.constrain(body: body, type: type, expForm: sig.ret.form, expType: retType, "method body")
     ctx.resolve()
     let em = Emitter(file: space.file)
     em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")
     em.str(1, "let self = \(hostName)")
-    compileBody(ctx, em, 1, body: body.exprs, isTail: true)
+    compileBody(ctx, em, 1, body: body, isTail: true)
     em.append("}")
     em.flush()
   }

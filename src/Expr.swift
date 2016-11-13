@@ -120,27 +120,15 @@ enum Expr: SubForm {
       cmpdType.failType("type compound cannot be used as an expression (temporary).")
 
     case .do_(let do_):
-      for (i, expr) in do_.exprs.enumerated() {
-        if i == do_.exprs.count - 1 { break }
-        let _ = expr.genTypeConstraints(ctx, scope)
-        ctx.constrain(expr, expForm: do_, expType: typeVoid, "statement")
-      }
-      let type: Type
-      if let last = do_.exprs.last {
-        type = last.genTypeConstraints(ctx, LocalScope(parent: scope))
-      } else {
-        type = typeVoid
-      }
-      return type
+      return genTypeConstraintsBody(ctx, scope, body: do_.body)
 
     case .fn(let fn):
       let type = TypeExpr.sig(fn.sig).type(scope, "signature")
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: type.sigPar)
       fnScope.addValRecord(name: "self", type: type)
-      let body = fn.body
-      let _ = body.genTypeConstraints(ctx, fnScope)
-      ctx.constrain(body, expForm: fn, expType: type.sigRet, "function body")
+      let bodyType = genTypeConstraintsBody(ctx, fnScope, body: fn.body)
+      ctx.constrain(body: fn.body, type: bodyType, expForm: fn, expType: type.sigRet, "function body")
       return type
 
     case .if_(let if_):
@@ -251,19 +239,12 @@ enum Expr: SubForm {
 
     case .do_(let do_):
       em.str(depth, "(function(){")
-      compileBody(ctx, em, depth + 1, body: do_.exprs, isTail: isTail)
+      compileBody(ctx, em, depth + 1, body: do_.body, isTail: isTail)
       em.append("})()")
 
     case .fn(let fn):
       em.str(depth,  "(function self($){")
-      switch fn.body {
-      case .do_(let do_):
-        compileBody(ctx, em, depth + 1, body: do_.exprs, isTail: true)
-      default:
-        em.append("return (")
-        fn.body.compile(ctx, em, depth + 1, isTail: true)
-        em.append(")")
-      }
+      compileBody(ctx, em, depth + 1, body: fn.body, isTail: isTail)
       em.append("})")
 
     case .hostVal(let hostVal):
@@ -335,6 +316,22 @@ enum Expr: SubForm {
 }
 
 
+func genTypeConstraintsBody(_ ctx: TypeCtx, _ scope: LocalScope, body: Body) -> Type {
+  for (i, expr) in body.exprs.enumerated() {
+    if i == body.exprs.count - 1 { break }
+    let _ = expr.genTypeConstraints(ctx, scope)
+    ctx.constrain(expr, expForm: body, expType: typeVoid, "statement")
+  }
+  let type: Type
+  if let last = body.exprs.last {
+    type = last.genTypeConstraints(ctx, LocalScope(parent: scope))
+  } else {
+    type = typeVoid
+  }
+  return type
+}
+
+
 func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym, isTail: Bool) {
   switch scopeRecord.kind {
   case .val:
@@ -354,9 +351,9 @@ func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym,
 }
 
 
-func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: [Expr], isTail: Bool) {
-  for (i, expr) in body.enumerated() {
-    let isLast = (i == body.lastIndex)
+func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail: Bool) {
+  for (i, expr) in body.exprs.enumerated() {
+    let isLast = (i == body.exprs.lastIndex)
     if isLast {
       em.str(depth, "return (")
     }

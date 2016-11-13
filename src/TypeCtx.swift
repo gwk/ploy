@@ -64,6 +64,14 @@ class TypeCtx {
       expForm: expForm, expType: expType, expChain: .end, desc: desc))
   }
 
+  func constrain(body: Body, type: Type, expForm: Form, expType: Type, _ desc: String) {
+    trackFreeTypes(expType)
+    constraints.append(Constraint(
+      actForm: body, actType: type, actChain: .end,
+      expForm: expForm, expType: expType, expChain: .end, desc: desc))
+  }
+
+
   func resolveType(_ type: Type, to resolved: Type) {
     if let existing = resolvedTypes[type] {
       fatalError("multiple resolutions not yet supported;\n  original: \(type)\n  existing: \(existing)\n  incoming: \(resolved)")

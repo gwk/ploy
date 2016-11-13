@@ -1,30 +1,29 @@
 
 in ROOT
 
-err = Str-><> => FS/write_Str(std_err $)
-out = Str-><> => FS/write_Str(std_out $)
+err = fn Str-><> FS/write_Str(std_err $);
+out = fn Str-><> FS/write_Str(std_out $);
 
-errL = Str-><> => {
+errL = fn Str-><>
   err.$
-  err.'\n' }
+  err.'\n';
 
-outL = Str-><> => {
+outL = fn Str-><>
   out.$
-  out.'\n' }
+  out.'\n';
 
 
-assert = <Bool Str>-><> => {
+assert = fn <Bool Str>-><>
   if 0@$ ? {}
   { err.'assertion failed: '
     errL(1@$)
-    exit.1 }; }
+    exit.1 };;
 
 
 
-outL_Int = Int-><> => {
+outL_Int = fn Int-><>
   FS/write_Int(std_out $)
-  FS/write_Str(std_out '\n')
-}
+  FS/write_Str(std_out '\n');
 
 
 polyfn add;

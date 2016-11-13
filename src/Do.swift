@@ -2,17 +2,15 @@
 
 
 class Do: Form { // do block: `{…}`.
-  let exprs: [Expr]
+  let body: Body
 
-  init(_ syn: Syn, exprs: [Expr]) {
-    self.exprs = exprs
+  init(_ syn: Syn, body: Body) {
+    self.body = body
     super.init(syn)
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, exprs.isEmpty ? " {}\n" : "\n")
-    for e in exprs {
-      e.write(to: &stream, depth + 1)
-    }
+    writeHead(to: &stream, depth, "\n")
+    body.write(to: &stream, depth + 1)
   }
 }

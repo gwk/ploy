@@ -306,8 +306,8 @@ class Src: CustomStringConvertible {
 
   func parseDo(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
-    let (exprs, _, end) = parseBody(p)
-    return Do(synForTerminator(pos, end, "}", "do form"), exprs: exprs)
+    let body = parseBody(p, subj: "do form")
+    return Do(synForTerminator(pos, body.syn.end, "}", "do form"), body: body)
   }
 
   // MARK: keyword sentences.
@@ -317,6 +317,12 @@ class Src: CustomStringConvertible {
     var variants: [Par] = []
     let end = parseForms(&variants, nameSym.syn.end, "`enum` form", "variant parameter")
     return Enum(synForSemicolon(sym, end, "enum"), sym: nameSym, variants: variants)
+  }
+
+  func parseFn(_ sym: Sym) -> Form {
+    let sig: Sig = parseForm(sym.syn.end, "`fn` form", "function signature")
+    let body = parseBody(sig.syn.end, subj: "`fn` form")
+    return Fn(synForSemicolon(sym, body.syn.end, "fn"), sig: sig, body: body)
   }
 
   func parseHostType(_ sym: Sym) -> Form {
@@ -357,10 +363,9 @@ class Src: CustomStringConvertible {
   }
 
   func parseMethod(_ sym: Sym) -> Form {
-    let identifier = Identifier(form: parsePhrase(sym.syn.end),
-      subj: "`method` form", exp: "polyfn name or path identifier")
+    let identifier = Identifier(form: parsePhrase(sym.syn.end), subj: "`method` form", exp: "polyfn name or path identifier")
     let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature")
-    let body = parseBodyToImplicitDo(sig.syn.end)
+    let body = parseBody(sig.syn.end, subj: "`method` form")
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
   }
 
@@ -384,6 +389,7 @@ class Src: CustomStringConvertible {
 
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
     "enum"      : parseEnum,
+    "fn"        : parseFn,
     "host_type" : parseHostType,
     "host_val"  : parseHostVal,
     "if"        : parseIf,
@@ -450,8 +456,7 @@ class Src: CustomStringConvertible {
   }
 
   static let operatorGroups: [[(String, (Form, Form)->Form)]] = [
-    [ ("=>", Fn.mk),
-      ("=", Bind.mk),
+    [ ("=", Bind.mk),
       ("?", Case.mk)],
     [ (":", Ann.mk)],
     [ ("@", Acc.mk),
@@ -564,16 +569,10 @@ class Src: CustomStringConvertible {
     return (pars, end)
   }
 
-  func parseBody(_ pos: Pos) -> ([Expr], Pos, Pos) {
-    let (forms, end) = parseRawForms(pos)
-    let exprs = forms.map { Expr(form: $0, subj: "body") }
-    let visEnd = (exprs.last?.syn.end).or(end)
-    return (exprs, visEnd, end)
-  }
-
-  func parseBodyToImplicitDo(_ pos: Pos) -> Do {
-    let (exprs, visEnd, end) = parseBody(pos)
-    return Do(Syn(src: self, pos: pos, visEnd: visEnd, end: end), exprs: exprs)
+  func parseBody(_ pos: Pos, subj: String) -> Body {
+    var exprs: [Expr] = []
+    let end = parseFormsTo(&exprs, pos, subj: "body")
+    return Body(Syn(src: self, pos: pos, visEnd: (exprs.last?.syn.visEnd).or(pos), end: end), exprs: exprs)
   }
 
   func parseMain(verbose: Bool = false) -> (ins: [In], mainIn: In) {

@@ -1,9 +1,9 @@
-f = Int->Int =>
+f = fn Int->Int
   if eq_Int(0 0) ? 0
-    g.dec_Int.$;
+    g.dec_Int.$;;
 
-g = Int->Int =>
+g = fn Int->Int
   if eq_Int(0 0) ? 1
-    f.dec_Int.$;
+    f.dec_Int.$;;
 
 main = exit.f.100000
