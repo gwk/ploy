@@ -212,8 +212,8 @@ enum Expr: SubForm {
       bind.val.compile(ctx, em, depth + 1, isTail: false)
 
     case .call(let call):
-      call.callee.compile(ctx, em, depth + 1, isTail: false)
-      em.str(depth, "(")
+      call.callee.compile(ctx, em, depth, isTail: false)
+      em.append("(")
       call.arg.compile(ctx, em, depth + 1, isTail: false)
       em.append(")")
 
