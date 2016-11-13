@@ -15,6 +15,8 @@ class Syn: CustomStringConvertible {
   var visString: String { return String(src.text[visRange]) }
   var string: String { return String(src.text[range]) }
 
+  var visStringInline: String { return visString.replace("\n", with: " ") }
+
   init(src: Src, pos: Pos, visEnd: Pos, end: Pos) {
     self.src = src
     self.pos = pos

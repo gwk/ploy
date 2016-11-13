@@ -248,6 +248,8 @@ enum Expr: SubForm {
       em.append("})")
 
     case .hostVal(let hostVal):
+      let type_desc = hostVal.typeExpr.form.syn.visStringInline
+      em.append(" // \(type_desc).")
       em.str(0, hostVal.code.val)
 
     case .if_(let if_):
