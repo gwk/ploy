@@ -30,16 +30,6 @@ class Space: Scope {
     return nil
   }
 
-  func compileMain(mainIn: In) {
-    guard let def = defs["main"] else {
-      mainIn.failForm(prefix: "error", msg: "`main` is not defined in MAIN")
-    }
-    let record = getRecord(sym: def.sym)!
-    let em = Emitter(file: self.file)
-    compileSym(em, 0, scopeRecord: record, sym: def.sym, isTail: true)
-    em.flush()
-  }
-
   func extendRecord(record: ScopeRecord, method: Method) {
     switch record.kind {
     case .polyFn: break
@@ -103,5 +93,15 @@ class Space: Scope {
     let mainSpace = createSpace(pathNames: ["MAIN"], name: "MAIN", hostName: "MAIN")
     mainSpace.add(defs: mainIn.defs)
     return mainSpace
+  }
+
+  func compileMain(mainIn: In) {
+    guard let def = defs["main"] else {
+      mainIn.failForm(prefix: "error", msg: "`main` is not defined in MAIN")
+    }
+    let record = getRecord(sym: def.sym)!
+    let em = Emitter(file: self.file)
+    compileSym(em, 0, scopeRecord: record, sym: def.sym, isTail: true)
+    em.flush()
   }
 }
