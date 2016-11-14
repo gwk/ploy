@@ -17,11 +17,11 @@ class Emitter {
 
   func flush() {
     if !lines.isEmpty {
+      file.write("\n")
       for line in lines {
         file.write(line)
         file.write("\n")
       }
-      file.write("\n")
       lines.removeAll()
     }
   }
