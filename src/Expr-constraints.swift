@@ -146,6 +146,39 @@ extension Expr {
   func typeParForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypePar {
     return TypePar(index: index, label: label, type: genTypeConstraints(ctx, scope))
   }
+
+
+  func typeParForPar(_ scope: Scope, index: Int) -> TypePar {
+      var label: Sym? = nil
+      var type: Type
+
+      switch self {
+      case .ann(let ann):
+        guard case .sym(let sym) = ann.expr else {
+          ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
+        }
+        label = sym
+        type = ann.typeExpr.type(scope, "parameter annotated type")
+
+      case .bind(let bind):
+        switch bind.place {
+        case .ann(let ann):
+          guard case .sym(let sym) = ann.expr else {
+            ann.expr.form.failSyntax("annotated default parameter requires a label symbol.")
+          }
+          label = sym
+          type = ann.typeExpr.type(scope, "default parameter annotated type")
+        case .sym(let sym):
+          // TODO: for now assume the sym refers to a type. This is going to change.
+          type = scope.typeBinding(sym: sym, subj: "default parameter type")
+        }
+
+      default:
+        let typeExpr = Expr(form: form, subj: "parameter type")
+        type = typeExpr.type(scope, "parameter type")
+      }
+      return TypePar(index: index, label: label, type: type)
+  }
 }
 
 

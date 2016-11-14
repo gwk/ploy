@@ -300,7 +300,8 @@ class Src: CustomStringConvertible {
 
   func parseCmpdType(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
-    let (pars, end) = parsePars(p, "compound type")
+    var pars: [Expr] = []
+    let end = parseSubForms(&pars, p, subj: "compound type")
     return CmpdType(synForTerminator(pos, end, ">", "compound type"), pars: pars)
   }
 
@@ -314,8 +315,8 @@ class Src: CustomStringConvertible {
 
   func parseEnum(_ sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`enum` form", "name symbol")
-    var variants: [Par] = []
-    let end = parseForms(&variants, nameSym.syn.end, "`enum` form", "variant parameter")
+    var variants: [Expr] = []
+    let end = parseSubForms(&variants, nameSym.syn.end, subj: "`enum` form")
     return Enum(synForSemicolon(sym, end, "enum"), sym: nameSym, variants: variants)
   }
 
@@ -382,8 +383,8 @@ class Src: CustomStringConvertible {
 
   func parseStruct(_ sym: Sym) -> Form {
     let nameSym: Sym = parseForm(sym.syn.end, "`struct` form", "name symbol")
-    var fields: [Par] = []
-    let end = parseForms(&fields, nameSym.syn.end, "`struct` form", "field parameter")
+    var fields: [Expr] = []
+    let end = parseSubForms(&fields, nameSym.syn.end, subj: "`struct` form")
     return Struct(synForSemicolon(sym, end, "enum"), sym: nameSym, fields: fields)
   }
 
@@ -560,12 +561,6 @@ class Src: CustomStringConvertible {
     var forms: [Form] = []
     let end = parseForms(&forms, pos, "form", "any form (INTERNAL ERROR)")
     return (forms, end)
-  }
-
-  func parsePars(_ pos: Pos, _ subj: String) -> ([Par], Pos) {
-    let (forms, end) = parseRawForms(pos)
-    let pars = forms.map { Par.mk(form: $0, subj: subj) }
-    return (pars, end)
   }
 
   func parseBody(_ pos: Pos, subj: String) -> Body {

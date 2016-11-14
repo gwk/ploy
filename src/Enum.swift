@@ -3,9 +3,9 @@
 
 class Enum: Form { // enum declaration: `enum E variants…;`.
   let sym: Sym
-  let variants: [Par]
+  let variants: [Expr]
 
-  init(_ syn: Syn, sym: Sym, variants: [Par]) {
+  init(_ syn: Syn, sym: Sym, variants: [Expr]) {
     self.sym = sym
     self.variants = variants
     super.init(syn)

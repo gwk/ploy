@@ -2,9 +2,9 @@
 
 
 class CmpdType: Form { // compound type: `<A B>`.
-  let pars: [Par]
+  let pars: [Expr]
 
-  init(_ syn: Syn, pars: [Par]) {
+  init(_ syn: Syn, pars: [Expr]) {
     self.pars = pars
     super.init(syn)
   }

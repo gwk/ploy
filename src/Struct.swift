@@ -3,9 +3,9 @@
 
 class Struct: Form { // struct declaration: `struct S fields…;`.
   let sym: Sym
-  let fields: [Par]
+  let fields: [Expr]
 
-  init(_ syn: Syn, sym: Sym, fields: [Par]) {
+  init(_ syn: Syn, sym: Sym, fields: [Expr]) {
     self.sym = sym
     self.fields = fields
     super.init(syn)
