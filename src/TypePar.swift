@@ -21,7 +21,7 @@ class TypePar: CustomStringConvertible {
     }
   }
 
-  var accessorString: String { return (label?.name).or("\(index)") }
+  var accessorString: String { return (label?.name).or(String(index)) }
 
   var hostName: String { return (label?.name).or("_\(index)") }
 }
