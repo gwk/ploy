@@ -27,17 +27,21 @@ class TypeCtx {
 
   deinit { assert(isResolved) }
 
+
   func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(key: expr.form)) }
 
   func originalTypeForExpr(_ expr: Expr) -> Type { return exprOriginalTypes[expr.form]! }
+
 
   func resolvedType(_ type: Type) -> Type {
     return resolvedTypes[type].or(type)
   }
 
+
   func typeFor(expr: Expr) -> Type {
     return resolvedType(originalTypeForExpr(expr))
   }
+
 
   func addFreeType() -> Type {
     let t = Type.Free(freeTypes.count)
@@ -45,10 +49,12 @@ class TypeCtx {
     return t
   }
 
+
   func trackExpr(_ expr: Expr, type: Type) {
     exprOriginalTypes.insertNew(expr.form, value: type)
     trackFreeTypes(type)
   }
+
 
   func trackFreeTypes(_ type: Type) {
     for free in type.frees {
@@ -57,12 +63,14 @@ class TypeCtx {
     }
   }
 
+
   func constrain(_ actExpr: Expr, expForm: Form, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
       actForm: actExpr.form, actType: originalTypeForExpr(actExpr), actChain: .end,
       expForm: expForm, expType: expType, expChain: .end, desc: desc))
   }
+
 
   func constrain(form: Form, type: Type, expForm: Form, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
@@ -87,6 +95,7 @@ class TypeCtx {
     }
   }
 
+
   func resolveFreeType(_ freeType: Type, to resolved: Type) {
     // just for clarity / as an experiment, always prefer lower free indices.
     if case .free(let resolvedIndex) = resolved.kind {
@@ -97,6 +106,7 @@ class TypeCtx {
       }
     }
   }
+
 
   func resolveOpaqueConstraint(_ constraint: Constraint, actType: Type, expOpaqueType: Type) {
     switch actType.kind {
@@ -117,6 +127,7 @@ class TypeCtx {
     default: constraint.fail(act: actType, exp: expOpaqueType, "actual type is not expected opaque type")
     }
   }
+
 
   func resolveConstraint(_ constraint: Constraint) {
     let actType = resolvedType(constraint.actType)
@@ -185,6 +196,7 @@ class TypeCtx {
     }
     fatalError("resolveConstraint case not implemented;\n  actType: \(actType)\n  expType: \(expType)\n")
   }
+
 
   func resolve() {
 
