@@ -32,10 +32,9 @@ class Scope: CustomStringConvertible {
 
   func addRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
     if let existing = bindings[sym.name] {
-      if case .fwd = existing.kind {
-        assert(existing.sym?.name == sym.name)
-      } else {
-        sym.failRedef(original: existing.sym)
+      switch existing.kind {
+      case .fwd: assert(existing.sym?.name == sym.name)
+      default: sym.failRedef(original: existing.sym)
       }
     }
     let r = ScopeRecord(name: sym.name, hostName: hostPrefix + sym.hostName, sym: sym, kind: kind)
