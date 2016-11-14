@@ -114,7 +114,7 @@ extension Expr {
       em.str(depth, s)
 
     case .paren(let paren):
-      em.str(depth, "(")
+      em.str(depth, "(") // TODO: these should not be necessary.
       paren.expr.compile(ctx, em, depth + 1, isTail: isTail)
       em.append(")")
 
