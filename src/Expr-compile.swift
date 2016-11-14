@@ -3,6 +3,18 @@
 
 extension Expr {
 
+  var needsLazyDef: Bool {
+
+    switch self {
+    case .fn, .hostVal, .litNum, .litStr: return false
+    case .ann(let ann): return ann.expr.needsLazyDef
+    case .cmpd(let cmpd): return cmpd.args.any { $0.needsLazyDef }
+    case .paren(let paren): return paren.expr.needsLazyDef
+    default: return true
+    }
+  }
+
+
   func compile(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     switch self {

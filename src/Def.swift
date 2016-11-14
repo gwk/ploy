@@ -58,15 +58,10 @@ enum Def: SubForm {
       let _ = bind.val.genTypeConstraints(ctx, LocalScope(parent: space)) // initial root type is ignored.
       ctx.resolve()
       let type = ctx.typeFor(expr: bind.val)
-      let needsLazy: Bool
-      switch bind.val {
-        case .fn, .hostVal: needsLazy = false
-        default: needsLazy = true
-      }
       let em = Emitter(file: space.file)
       //let fullName = "\(space.name)/\(sym.name)"
       let hostName = "\(space.hostPrefix)\(sym.hostName)"
-      if needsLazy {
+      if bind.val.needsLazyDef {
         let acc = "\(hostName)__acc"
         em.str(0, "var \(acc) = function() {")
         em.str(0, " \(acc) = _lazy_sentinal;")
