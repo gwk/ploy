@@ -60,16 +60,16 @@ class Scope: CustomStringConvertible {
   func record(path: Path) -> ScopeRecord {
     var space: Space = globalSpace
     for (i, sym) in path.syms.enumerated() {
-      guard let r = space.getRecord(sym: sym) else {
+      guard let rec = space.getRecord(sym: sym) else {
         sym.failUndef()
       }
       if i == path.syms.lastIndex! {
-        return r
+        return rec
       }
-      if case .space(let s) = r.kind {
+      if case .space(let s) = rec.kind {
         space = s
       } else {
-        sym.failType("expected a space; found a \(r.kindDesc)")
+        sym.failType("expected a space; found a \(rec.kindDesc).")
       }
     }
     fatalError()
