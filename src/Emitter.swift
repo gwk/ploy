@@ -51,7 +51,8 @@ func compileProgram(file: OutFile, includePaths: [String], ins: [In], mainIn: In
   #endif
 
   file.writeL("\"use strict\";\n")
-  file.writeL("(function(){ // ploy scope.")
+  file.writeL("(function(){ // ploy scope.\n")
+  file.writeL("function _lazy_sentinal(msg) { throw 'INTERNAL RUNTIME ERROR: lazy value init recursed.' };")
 
   for path in includePaths {
     let name = path.withoutPathDir

@@ -7,7 +7,7 @@ struct ScopeRecord {
   typealias _Type = Type
 
   enum Kind {
-    case fwd(_Type) // TODO: distinguish between fwd types and fwd vals? is this even possible?
+    case fwd // TODO: is it possible distinguish between types and vals?
     case lazy(_Type)
     case polyFn(_Type)
     case space(_Space)

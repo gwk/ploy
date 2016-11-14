@@ -64,16 +64,16 @@ enum Def: SubForm {
         default: needsLazy = true
       }
       let em = Emitter(file: space.file)
-      let fullName = "\(space.name)/\(sym.name)"
+      //let fullName = "\(space.name)/\(sym.name)"
       let hostName = "\(space.hostPrefix)\(sym.hostName)"
       if needsLazy {
-        em.str(0, "var \(hostName)__acc = function() {")
-        em.str(0, " \(hostName)__acc = function() {")
-        em.str(0, "  throw \"error: lazy value '\(fullName)' recursively referenced during initialization.\" };")
+        let acc = "\(hostName)__acc"
+        em.str(0, "var \(acc) = function() {")
+        em.str(0, " \(acc) = _lazy_sentinal;")
         em.str(0, " let val =")
         bind.val.compile(ctx, em, 1, isTail: false)
         em.append(";")
-        em.str(0, " \(hostName)__acc = function() { return val };")
+        em.str(0, " \(acc) = function() { return val };")
         em.str(0, " return val; }")
         em.flush()
         return .lazy(type)

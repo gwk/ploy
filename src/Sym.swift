@@ -37,15 +37,15 @@ class Sym: Form { // symbol: `name`.
     switch scopeRecord.kind {
     case .lazy(let type): return type
     case .val(let type): return type
-    default: failType("expression expects a value; `\(name)` refers to a \(scopeRecord.kindDesc).")
+    default: failType("expected a value; `\(name)` refers to a \(scopeRecord.kindDesc).")
     }
   }
 
   func failUndef() -> Never {
-    failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope")
+    failForm(prefix: "scope error", msg: "`\(name)` is not defined in this scope.")
   }
 
   func failRedef(original: Sym?) -> Never {
-    failForm(prefix: "scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here"))
+    failForm(prefix: "scope error", msg: "redefinition of `\(name)`", notes: (original, "original definition here:"))
   }
 }

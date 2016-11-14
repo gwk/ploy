@@ -25,7 +25,9 @@ class Space: Scope {
       return r
     }
     if let def = defs[sym.name] {
-      return addRecord(sym: sym, kind: def.compileDef(self))
+      _ = addRecord(sym: sym, kind: .fwd)
+      let kind = def.compileDef(self)
+      return addRecord(sym: sym, kind: kind)
     }
     return nil
   }

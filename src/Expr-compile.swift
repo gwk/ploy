@@ -129,14 +129,14 @@ func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym,
   case .lazy:
     let s = "\(scopeRecord.hostName)__acc()"
     em.str(depth, "\(s)")
-  case .fwd:
-    sym.failType("expected a value; `\(sym.name)` refers to a forward declaration. INTERNAL ERROR?")
+  case .fwd: // should never be reached, because type checking should notice.
+    sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a forward declaration.")
   case .polyFn:
     em.str(depth, scopeRecord.hostName)
   case .space(_):
-    sym.failType("expected a value; `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace?
+    sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
   case .type(_):
-    sym.failType("expected a value; `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
+    sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
   }
 }
 

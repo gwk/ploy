@@ -24,6 +24,7 @@ extension Expr {
       return type
 
     case .bind(let bind):
+      _ = scope.addRecord(sym: bind.sym, kind: .fwd)
       let exprType = bind.val.genTypeConstraints(ctx, scope)
       _ = scope.addRecord(sym: bind.sym, kind: .val(exprType))
       return typeVoid
