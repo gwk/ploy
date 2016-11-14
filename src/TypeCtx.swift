@@ -115,9 +115,9 @@ class TypeCtx {
       case .cmpd(let pars, _, _):
         for par in pars {
           if par.accessorString == accessor.accessorString {
-            resolveConstraint(constraint.subConstraint(
+            resolveSub(constraint,
               actType: par.type, actDesc: "`\(par.accessorString)` property",
-              expType: expOpaqueType, expDesc: nil))
+              expType: expOpaqueType, expDesc: nil)
             return
           }
         }
@@ -135,10 +135,18 @@ class TypeCtx {
     if (actType == expType) {
       return
     }
-    // first eleminate the case where actType is free.
-    if case .free = actType.kind {
+
+    // TODO: unclear if it is better to start with actual or expected cases.
+    // current strategy is to whittle down actual first.
+    switch actType.kind {
+
+    //case .all(let members, _, _): break // TODO.
+
+    case .free:
       resolveFreeType(actType, to: expType)
       return
+
+    default: break
     }
 
     switch expType.kind {
@@ -160,9 +168,9 @@ class TypeCtx {
               "compound type field #\(actPar.index) has \(actPar.labelMsg); expected \(actPar.labelMsg).")
           }
           let index = actPar.index
-          resolveConstraint(constraint.subConstraint(
+          resolveSub(constraint,
             actType: actPar.type, actDesc: "compound field\(index)",
-            expType: expPar.type, expDesc: "compound field \(index)"))
+            expType: expPar.type, expDesc: "compound field \(index)")
         }
         return
       default: constraint.fail(act: actType, exp: expType, "actual type is not a compound")
@@ -180,12 +188,12 @@ class TypeCtx {
     case .sig(let expPar, let expRet, _, _):
       switch actType.kind {
       case .sig(let actPar, let actRet, _, _):
-        resolveConstraint(constraint.subConstraint(
+        resolveSub(constraint,
           actType: actPar, actDesc: "signature parameter",
-          expType: expPar, expDesc: "signature parameter"))
-        resolveConstraint(constraint.subConstraint(
+          expType: expPar, expDesc: "signature parameter")
+        resolveSub(constraint,
           actType: actRet, actDesc: "signature return",
-          expType: expRet, expDesc: "signature return"))
+          expType: expRet, expDesc: "signature return")
         return
       default: constraint.fail(act: actType, exp: expType, "actual type is not a signature")
       }
@@ -195,6 +203,25 @@ class TypeCtx {
       constraint.fail(act: actType, exp: expType, "var constraints not implemented")
     }
     fatalError("resolveConstraint case not implemented;\n  actType: \(actType)\n  expType: \(expType)\n")
+  }
+
+
+  func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) {
+    resolveConstraint(constraint.subConstraint(
+      actType: actType, actDesc: actDesc,
+      expType: expType, expDesc: expDesc))
+  }
+
+
+  func resolveSig(constraint: Constraint, actType: Type, expType: Type) {
+    guard case .sig(let actPar, let actRet, _, _) = actType.kind else { fatalError() }
+    guard case .sig(let expPar, let expRet, _, _) = expType.kind else { fatalError() }
+    resolveSub(constraint,
+      actType: actPar, actDesc: "signature parameter",
+      expType: expPar, expDesc: "signature parameter")
+    resolveSub(constraint,
+      actType: actRet, actDesc: "signature return",
+      expType: expRet, expDesc: "signature return")
   }
 
 

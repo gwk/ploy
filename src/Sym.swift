@@ -36,6 +36,7 @@ class Sym: Form { // symbol: `name`.
   func typeForExprRecord(_ scopeRecord: ScopeRecord) -> Type {
     switch scopeRecord.kind {
     case .lazy(let type): return type
+    case .polyFn(let type): return type
     case .val(let type): return type
     default: failType("expected a value; `\(name)` refers to a \(scopeRecord.kindDesc).")
     }
