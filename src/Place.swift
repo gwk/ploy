@@ -3,18 +3,18 @@
 
 enum Place: SubForm { // left side of a binding.
 
-  case sym(Sym)
   case ann(Ann)
+  case sym(Sym)
 
   init(form: Form, subj: String) {
-    if let form = form as? Sym {
-      self = .sym(form)
-    } else if let form = form as? Ann {
+    if let form = form as? Ann {
       guard case .sym = form.expr else {
         let expr = form.expr
         form.failSyntax("\(subj) annnoted place expects symbol but received \(expr.form.syntaxName).")
       }
       self = .ann(form)
+    } else if let form = form as? Sym {
+      self = .sym(form)
     } else {
       form.failSyntax("\(subj) expects symbol or annotated symbol but received \(form.syntaxName).")
     }
