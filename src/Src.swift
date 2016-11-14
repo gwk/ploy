@@ -463,7 +463,7 @@ class Src: CustomStringConvertible {
     [ ("@", Acc.mk),
       (".", Call.mk),
       ("^", Reify.mk),
-      ("->", Sig.mk)]
+      ("%", Sig.mk)]
     ]
 
   // note: currently unused.

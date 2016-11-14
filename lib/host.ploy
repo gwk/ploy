@@ -4,9 +4,9 @@ in FS
 host_type File;
 host_type _Fs;
 _fs = host_val _Fs "require('fs')";
-write_Bool = host_val <File Bool>-><> "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
-write_Int  = host_val <File Int>-><>  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
-write_Str  = host_val <File Str>-><>  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write_Bool = host_val <File Bool>%<> "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write_Int  = host_val <File Int>%<>  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write_Str  = host_val <File Str>%<>  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
 ;
 
 in HOST
@@ -18,26 +18,26 @@ in ROOT
 true  = host_val Bool "true";
 false = host_val Bool "false";
 
-not = host_val Bool->Bool "function($) { return !$; }";
+not = host_val Bool%Bool "function($) { return !$; }";
 
-dec_Int = host_val Int->Int "function($) { return $ - 1; }";
-inc_Int = host_val Int->Int "function($) { return $ + 1; }";
+dec_Int = host_val Int%Int "function($) { return $ - 1; }";
+inc_Int = host_val Int%Int "function($) { return $ + 1; }";
 
-add_Int = host_val <Int Int>->Int "function($) { return $._0 + $._1; }";
-sub_Int = host_val <Int Int>->Int "function($) { return $._0 - $._1; }";
-mul_Int = host_val <Int Int>->Int "function($) { return $._0 * $._1; }";
-div_Int = host_val <Int Int>->Int "function($) { return $._0 / $._1; }";
-mod_Int = host_val <Int Int>->Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
-rem_Int = host_val <Int Int>->Int "function($) { return $._0 % $._1; }";
+add_Int = host_val <Int Int>%Int "function($) { return $._0 + $._1; }";
+sub_Int = host_val <Int Int>%Int "function($) { return $._0 - $._1; }";
+mul_Int = host_val <Int Int>%Int "function($) { return $._0 * $._1; }";
+div_Int = host_val <Int Int>%Int "function($) { return $._0 / $._1; }";
+mod_Int = host_val <Int Int>%Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
+rem_Int = host_val <Int Int>%Int "function($) { return $._0 % $._1; }";
 
-eq_Int = host_val <Int Int>->Bool "function($) { return $._0 == $._1; }";
-ne_Int = host_val <Int Int>->Bool "function($) { return $._0 != $._1; }";
-ge_Int = host_val <Int Int>->Bool "function($) { return $._0 >= $._1; }";
-gt_Int = host_val <Int Int>->Bool "function($) { return $._0 >  $._1; }";
-le_Int = host_val <Int Int>->Bool "function($) { return $._0 <= $._1; }";
-lt_Int = host_val <Int Int>->Bool "function($) { return $._0 <  $._1; }";
+eq_Int = host_val <Int Int>%Bool "function($) { return $._0 == $._1; }";
+ne_Int = host_val <Int Int>%Bool "function($) { return $._0 != $._1; }";
+ge_Int = host_val <Int Int>%Bool "function($) { return $._0 >= $._1; }";
+gt_Int = host_val <Int Int>%Bool "function($) { return $._0 >  $._1; }";
+le_Int = host_val <Int Int>%Bool "function($) { return $._0 <= $._1; }";
+lt_Int = host_val <Int Int>%Bool "function($) { return $._0 <  $._1; }";
 
-exit = host_val Int-><> "function($) { HOST___process.exit($); }" HOST/_process;
+exit = host_val Int%<> "function($) { HOST___process.exit($); }" HOST/_process;
 std_out = host_val FS/File "HOST___process.stdout.fd" HOST/_process;
 std_err = host_val FS/File "HOST___process.stderr.fd" HOST/_process;
 ;

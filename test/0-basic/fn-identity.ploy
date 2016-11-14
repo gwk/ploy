@@ -1,1 +1,1 @@
-main = exit(fn Int->Int $;.0)
+main = exit(fn Int%Int $;.0)
