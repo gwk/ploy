@@ -18,7 +18,7 @@ class Scope: CustomStringConvertible {
     return "\(type(of: self)):\(pathNames.joined(separator: "/"))"
   }
 
-  func getRecord(sym: Sym) -> ScopeRecord? { fatalError() }
+  func getRecordInFrame(sym: Sym) -> ScopeRecord? { fatalError() }
 
   var name: String { return pathNames.joined(separator: "/") }
 
@@ -47,20 +47,20 @@ class Scope: CustomStringConvertible {
     bindings[name] = ScopeRecord(name: name, sym: nil, kind: .val(type))
   }
 
-  func record(sym: Sym) -> ScopeRecord {
-    if let r = getRecord(sym: sym) {
+  func getRecord(sym: Sym) -> ScopeRecord {
+    if let r = getRecordInFrame(sym: sym) {
       return r
     }
     if let parent = parent {
-      return parent.record(sym: sym)
+      return parent.getRecord(sym: sym)
     }
     sym.failUndef()
   }
 
-  func record(path: Path) -> ScopeRecord {
+  func getRecord(path: Path) -> ScopeRecord {
     var space: Space = globalSpace
     for (i, sym) in path.syms.enumerated() {
-      guard let rec = space.getRecord(sym: sym) else {
+      guard let rec = space.getRecordInFrame(sym: sym) else {
         sym.failUndef()
       }
       if i == path.syms.lastIndex! {
@@ -75,15 +75,15 @@ class Scope: CustomStringConvertible {
     fatalError()
   }
 
-  func record(identifier: Identifier) -> ScopeRecord {
+  func getRecord(identifier: Identifier) -> ScopeRecord {
     switch identifier {
-    case .sym(let sym): return record(sym: sym)
-    case .path(let path): return record(path: path)
+    case .sym(let sym): return getRecord(sym: sym)
+    case .path(let path): return getRecord(path: path)
     }
   }
 
   func typeBinding(sym: Sym, subj: String) -> Type {
-    let rec = record(sym: sym)
+    let rec = getRecord(sym: sym)
     switch rec.kind {
     case .type(let type): return type
     default: sym.failType("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
@@ -91,7 +91,7 @@ class Scope: CustomStringConvertible {
   }
 
   func typeBinding(path: Path, subj: String) -> Type {
-    let rec = record(path: path)
+    let rec = getRecord(path: path)
     switch rec.kind {
     case .type(let type): return type
     default: path.failType("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")

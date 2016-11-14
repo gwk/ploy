@@ -7,7 +7,7 @@ class LocalScope: Scope {
     super.init(pathNames: [], parent: parent)
   }
 
-  override func getRecord(sym: Sym) -> ScopeRecord? {
+  override func getRecordInFrame(sym: Sym) -> ScopeRecord? {
     return bindings[sym.name]
   }
 }

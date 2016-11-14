@@ -79,7 +79,7 @@ extension Expr {
 
     case .hostVal(let hostVal):
       for dep in hostVal.deps {
-        _ = scope.record(identifier: dep)
+        _ = scope.getRecord(identifier: dep)
       }
       let type = hostVal.typeExpr.type(scope, "host value declaration")
       return type
@@ -97,8 +97,8 @@ extension Expr {
       return type
 
     case .path(let path):
-      let record = scope.record(path: path)
-      let type = path.syms.last!.typeForExprRecord(scope.record(path: path))
+      let record = scope.getRecord(path: path)
+      let type = path.syms.last!.typeForExprRecord(scope.getRecord(path: path))
       ctx.pathRecords[path] = record
       return type
 
@@ -109,7 +109,7 @@ extension Expr {
       sig.failType("type signature cannot be used as a value expression (temporary)")
 
     case .sym(let sym):
-      let record = scope.record(sym: sym)
+      let record = scope.getRecord(sym: sym)
       let type = sym.typeForExprRecord(record)
       ctx.symRecords[sym] = record
       return type

@@ -20,7 +20,7 @@ class Space: Scope {
     super.init(pathNames: pathNames, parent: parent)
   }
 
-  override func getRecord(sym: Sym) -> ScopeRecord? {
+  override func getRecordInFrame(sym: Sym) -> ScopeRecord? {
     if let r = bindings[sym.name] {
       return r
     }
@@ -101,7 +101,7 @@ class Space: Scope {
     guard let def = defs["main"] else {
       mainIn.failForm(prefix: "error", msg: "`main` is not defined in MAIN")
     }
-    let record = getRecord(sym: def.sym)!
+    let record = getRecordInFrame(sym: def.sym)!
     let em = Emitter(file: self.file)
     compileSym(em, 0, scopeRecord: record, sym: def.sym, isTail: true)
     em.flush()
