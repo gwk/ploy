@@ -7,13 +7,10 @@ class LitNum: Form { // numeric literal: `0`.
   let val: Int
 
   init(_ syn: Syn, val: Int) {
-    assert(val >= 0)
     self.val = val
     super.init(syn)
   }
-  
-  //var description: String { return String(val) }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth, ": \(val)\n")
   }
