@@ -12,9 +12,4 @@ outPath="_build/_sh/$stem.js"
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
-_build/debug/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
-"$outPath" "$@"
-
-# TODO: move the profile dump.
-#prof_cwd_path = 'default.profraw' # llvm name is fixed; always outputs to cwd.
-#prof_path = exe_path + '.profraw'
+lldb --file _build/debug/ploy -- lib/*.ploy -main "$mainPath" -o "$outPath"
