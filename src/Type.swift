@@ -36,38 +36,42 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   let kind: Kind
   let globalIndex: Int
 
-  private init(_ description: String, _ kind: Kind) {
+  private init(_ description: String, kind: Kind) {
     self.description = description
     self.kind = kind
     self.globalIndex = Type.allTypes.count
-    assert(!Type.allTypes.contains(key: description))
+    assert(!Type.allTypes.contains(key: description), "type already exists with description: \(description)")
     Type.allTypes[description] = self
+  }
+
+  class func memoize(_ description: String, _ kind: @autoclosure ()->Kind) -> Type {
+    return allTypes[description].or(Type(description, kind: kind()))
   }
 
   class func All(_ members: Set<Type>) -> Type {
     let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    return allTypes[description].or(Type(description, .all(members: members,
-        frees: Set(members.flatMap { $0.frees }),
-        vars: Set(members.flatMap { $0.vars }))))
+    return memoize(description, .all(members: members,
+      frees: Set(members.flatMap { $0.frees }),
+      vars: Set(members.flatMap { $0.vars })))
   }
 
   class func Any_(_ members: Set<Type>) -> Type {
     let description = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    return allTypes[description].or(Type(description, .any(members: members,
+    return memoize(description, .any(members: members,
       frees: Set(members.flatMap { $0.frees }),
-      vars: Set(members.flatMap { $0.vars }))))
+      vars: Set(members.flatMap { $0.vars })))
   }
 
   class func Cmpd(_ pars: [TypePar]) -> Type {
     let description = "<\(pars.map({$0.description}).joined(separator: " "))>"
-    return allTypes[description].or(Type(description, .cmpd(pars: pars,
+    return memoize(description, .cmpd(pars: pars,
       frees: Set(pars.flatMap { $0.type.frees }),
-      vars: Set(pars.flatMap { $0.type.vars }))))
+      vars: Set(pars.flatMap { $0.type.vars })))
   }
 
   class func Enum(spacePathNames names: [String], sym: Sym) -> Type {
     let description = (names + [sym.name]).joined(separator: "/")
-    return Type(description, .enum_)
+    return Type(description, kind: .enum_)
   }
 
   class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
@@ -76,40 +80,40 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
     assert(index == allFreeTypes.count)
     let description = "*\(index)"
-    let t = Type(description, .free(index: index))
+    let t = Type(description, kind: .free(index: index))
     allFreeTypes.append(t)
     return t
   }
 
   class func Host(spacePathNames names: [String], sym: Sym) -> Type {
     let description = (names + [sym.name]).joined(separator: "/")
-    return Type(description, .host)
+    return Type(description, kind: .host)
   }
 
   class func Prim(_ name: String) -> Type {
-    return Type(name, .prim)
+    return Type(name, kind: .prim)
   }
 
   class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
     let description = ("\(accessor.accessorString)@\(type)")
-    return Type(description, .prop(accessor: accessor, type: type))
+    return memoize(description, .prop(accessor: accessor, type: type))
   }
 
   class func Sig(par: Type, ret: Type) -> Type {
     let description = "\(par.nestedSigDescription)%\(ret.nestedSigDescription)"
-    return allTypes[description].or(Type(description, .sig(par: par, ret: ret,
+    return memoize(description, .sig(par: par, ret: ret,
       frees: Set(sequences: [par.frees, ret.frees]),
-      vars: Set(sequences: [par.vars, ret.vars]))))
+      vars: Set(sequences: [par.vars, ret.vars])))
   }
 
   class func Struct(spacePathNames names: [String], sym: Sym) -> Type {
     let description = (names + [sym.name]).joined(separator: "/")
-    return Type(description, .struct_)
+    return Type(description, kind: .struct_)
   }
 
   class func Var(_ name: String) -> Type {
     let description = "*" + name
-    return Type(description, .var_(name: name))
+    return Type(description, kind: .var_(name: name))
   }
 
   var nestedSigDescription: String {

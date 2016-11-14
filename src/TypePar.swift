@@ -7,6 +7,14 @@ class TypePar: CustomStringConvertible {
   let label: Sym?
   let type: Type
 
+  var labelMsg: String {
+    if let label = label {
+      return "label `\(label.name)`"
+     } else {
+       return "no label"
+     }
+  }
+
   init(index: Int, label: Sym?, type: Type) {
     self.index = index
     self.label = label

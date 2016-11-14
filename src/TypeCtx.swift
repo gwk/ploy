@@ -64,10 +64,10 @@ class TypeCtx {
       expForm: expForm, expType: expType, expChain: .end, desc: desc))
   }
 
-  func constrain(body: Body, type: Type, expForm: Form, expType: Type, _ desc: String) {
+  func constrain(form: Form, type: Type, expForm: Form, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
-      actForm: body, actType: type, actChain: .end,
+      actForm: form, actType: type, actChain: .end,
       expForm: expForm, expType: expType, expChain: .end, desc: desc))
   }
 
@@ -136,10 +136,24 @@ class TypeCtx {
     case .any(let members, _, _):
       if members.contains(actType) { return }
       constraint.fail(act: actType, exp: expType, "actual type is not a member of `Any_` expected type")
-    case .cmpd(_ , _, _):
+    case .cmpd(let expPars, _, _):
       switch actType.kind {
-      case .cmpd(_, _, _):
-        constraint.fail(act: actType, exp: expType, "Cmpd type conversion not implemented")
+      case .cmpd(let actPars, _, _):
+        if expPars.count != actPars.count {
+          let actFields = pluralize(actPars.count, "fields")
+          constraint.fail(act: actType, exp: expType, "actual compound type has \(actFields); expected \(expPars.count).")
+        }
+        for (actPar, expPar) in zip(actPars, expPars) {
+          if actPar.label != expPar.label {
+            constraint.fail(act: actType, exp: expType,
+              "compound type field #\(actPar.index) has \(actPar.labelMsg); expected \(actPar.labelMsg).")
+          }
+          let index = actPar.index
+          resolveConstraint(constraint.subConstraint(
+            actType: actPar.type, actDesc: "compound field\(index)",
+            expType: expPar.type, expDesc: "compound field \(index)"))
+        }
+        return
       default: constraint.fail(act: actType, exp: expType, "actual type is not a compound")
       }
     case .enum_:
@@ -169,7 +183,7 @@ class TypeCtx {
     case .var_:
       constraint.fail(act: actType, exp: expType, "var constraints not implemented")
     }
-    fatalError()
+    fatalError("resolveConstraint case not implemented;\n  actType: \(actType)\n  expType: \(expType)\n")
   }
 
   func resolve() {

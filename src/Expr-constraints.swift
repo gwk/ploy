@@ -56,7 +56,7 @@ extension Expr {
       fnScope.addValRecord(name: "$", type: type.sigPar)
       fnScope.addValRecord(name: "self", type: type)
       let bodyType = genTypeConstraintsBody(ctx, fnScope, body: fn.body)
-      ctx.constrain(body: fn.body, type: bodyType, expForm: fn, expType: type.sigRet, "function body")
+      ctx.constrain(form: fn.body, type: bodyType, expForm: fn, expType: type.sigRet, "function body")
       return type
 
     case .if_(let if_):

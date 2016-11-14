@@ -1,7 +1,24 @@
 main = {
-  outL_Int.sub_Int(1 1)
-  outL_Int.add_Int(0 1)
-  outL_Int.mul_Int(1 2)
-  outL_Int.div_Int(6 2)
-  outL_Int.mod_Int(9 5)
+  assert_eq(0 add_Int(0 0) 'add 0 0')
+  assert_eq(3 add_Int(1 2) 'add 1 2')
+
+  assert_eq(0 sub_Int(0 0) 'sub 0 0')
+  assert_eq(1 sub_Int(3 2) 'sub 3 2')
+  assert_eq(-1 sub_Int(2 3) 'sub 2 3')
+
+  assert_eq(0 mul_Int(0 0) 'mul 0 0')
+  assert_eq(2 mul_Int(1 2) 'mul 1 2')
+
+  assert_eq(0 div_Int(0 1) 'div 0 1')
+  assert_eq(2 div_Int(4 2) 'div 4 2')
+
+  assert_eq( 1 mod_Int( 3  2) 'mod  3  2')
+  assert_eq( 1 mod_Int(-3  2) 'mod -3  2')
+  assert_eq(-1 mod_Int( 3 -2) 'mod  3 -2')
+  assert_eq(-1 mod_Int(-3 -2) 'mod -3 -2')
+
+  assert_eq( 1 rem_Int( 3  2) 'rem  3  2')
+  assert_eq(-1 rem_Int(-3  2) 'rem -3  2')
+  assert_eq( 1 rem_Int( 3 -2) 'rem  3 -2')
+  assert_eq(-1 rem_Int(-3 -2) 'rem -3 -2')
 }

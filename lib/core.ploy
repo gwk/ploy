@@ -12,18 +12,35 @@ outL = fn Str-><>
   out.$
   out.'\n';
 
+err_Int = fn Int-><> FS/write_Int(std_err $);
+out_Int = fn Int-><> FS/write_Int(std_out $);
 
-assert = fn <Bool Str>-><>
-  if 0@$ ? {}
-  { err.'assertion failed: '
-    errL(1@$)
-    exit.1 };;
-
-
+errL_Int = fn Int-><>
+  FS/write_Int(std_err $)
+  FS/write_Str(std_err '\n');
 
 outL_Int = fn Int-><>
   FS/write_Int(std_out $)
   FS/write_Str(std_out '\n');
+
+
+
+assert = fn <Bool Str>-><>
+  if not.0@$ ? {
+    err.'assert failed: '
+    errL(1@$)
+    exit.1 };;
+
+assert_eq = fn <Int Int Str>-><>
+  if ne_Int(0@$ 1@$) ? {
+    err.'assert_eq failed: '
+    err_Int.0@$
+    err.' != '
+    err_Int.1@$
+    err.'; '
+    errL(2@$)
+    exit.1 };;
+
 
 
 polyfn add;

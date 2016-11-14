@@ -34,7 +34,7 @@ class Method: Form { // method definition.
     fnScope.addValRecord(name: "self", type: polyFnType)
     let ctx = TypeCtx()
     let type = genTypeConstraintsBody(ctx, fnScope, body: body)
-    ctx.constrain(body: body, type: type, expForm: sig.ret.form, expType: retType, "method body")
+    ctx.constrain(form: body, type: type, expForm: sig.ret.form, expType: retType, "method body")
     ctx.resolve()
     let em = Emitter(file: space.file)
     em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")

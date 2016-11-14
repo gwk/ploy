@@ -18,6 +18,8 @@ in ROOT
 true  = host_val Bool "true";
 false = host_val Bool "false";
 
+not = host_val Bool->Bool "function($) { return !$; }";
+
 dec_Int = host_val Int->Int "function($) { return $ - 1; }";
 inc_Int = host_val Int->Int "function($) { return $ + 1; }";
 
