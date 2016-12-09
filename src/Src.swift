@@ -535,7 +535,12 @@ class Src: CustomStringConvertible {
   }
 
   func parseForm<T: Form>(_ pos: Pos, subj: String, exp: String) -> T {
-    return castForm(parsePhrase(pos), subj, exp)
+    let form = parsePhrase(pos)
+    if let form = form as? T {
+      return form
+    } else {
+      form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
+    }
   }
 
   func parseSubForm<T: SubForm>(_ pos: Pos, subj: String) -> T {
@@ -552,10 +557,10 @@ class Src: CustomStringConvertible {
       if !prevSpace {
         failParse(p, nil, "adjacent expressions require a separating space.")
       }
-      let form = parsePhrase(p)
+      let form: T = parseForm(p, subj: subj, exp: exp)
       p = form.syn.end
       prevSpace = form.syn.hasSpace
-      forms.append(castForm(form, subj, exp))
+      forms.append(form)
     }
     return p
   }

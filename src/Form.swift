@@ -62,13 +62,3 @@ class Form: Hashable, CustomStringConvertible {
 
 
 func ==(l: Form, r: Form) -> Bool { return l === r }
-
-
-/// castForm uses return type polymorphism to implicitly choose the protocol to cast to.
-func castForm<T: Form>(_ form: Form, _ subj: String, _ exp: String) -> T {
-  if let form = form as? T {
-    return form
-  } else {
-    form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
-  }
-}
