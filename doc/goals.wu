@@ -9,9 +9,9 @@ Ploy is an experiment, and broadly ambitious. Here are some of the topics that I
 
 # Namespaces and Generic Functions
 
-One major question is how generic functions work, and how they interact with namespaces interact. In particular I am interested in exploring the tension between extensibility of generic functions on the one hand, and static guarantees about correctness on the other. Furthermore, I am intrigued by the idea of defining type classes purely in terms of generic functions and their methods.
+One major question is how generic functions work, and how they interact with namespaces. In particular I am exploring the tension between extensibility of generic functions, and static guarantees about correctness. I am intrigued by the idea of defining type classes purely in terms of generic functions and their methods.
 
-In Swift, imagine a protocol P in a library L, which specifies some requirement for a method M. Importing L just makes P visible; to make your class C implement P, you must define C.M, either immediately in the class definition, or else in some extension. Fundamentally, C.M is attached to C, not P. This presents several problems:
+In Swift, imagine a protocol P in a library L, which specifies some requirement for a method M. Importing L just makes P visible; to make your class C implement P, you must define C.M, either in the class definition, or else in some extension to C. Fundamentally, C.M is attached to C, not P. This presents several problems:
 - If another protocol P1 specifies an unrelated requirement also named M, then the programmer cannot make C conform to both P and P1.
 - If two different libraries define extensions on C implementing M, then the compiler fails with a redefinition conflict.
 - Since the Swift type system employs inheritance, then adding implementations to intermediates in a typechain can cause subtle changes in behavior for subtypes. I believe that this concern applies to other subtyping mechanisms as well.
