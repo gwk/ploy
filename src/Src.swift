@@ -578,12 +578,6 @@ class Src: CustomStringConvertible {
     return p
   }
 
-  func parseRawForms(_ pos: Pos) -> ([Form], Pos) {
-    var forms: [Form] = []
-    let end = parseForms(&forms, pos, subj: "form", exp: "any form (INTERNAL ERROR)")
-    return (forms, end)
-  }
-
   func parseBody(_ pos: Pos, subj: String) -> Body {
     var exprs: [Expr] = []
     let end = parseSubForms(&exprs, pos, subj: "body")
@@ -591,7 +585,8 @@ class Src: CustomStringConvertible {
   }
 
   func parseMain(verbose: Bool = false) -> (ins: [In], mainIn: In) {
-    let (forms, end) = parseRawForms(startPos)
+    var forms: [Form] = []
+    let end = parseForms(&forms, startPos, subj: "form", exp: "any form (INTERNAL ERROR)")
     if hasSome(end) {
       failParse(end, nil, "unexpected terminator character: '\(char(end))'")
     }
