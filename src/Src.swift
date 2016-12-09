@@ -7,6 +7,7 @@ import Quilt
 let ployOctChars = Set("_01234567".characters)
 let ployDecChars = Set("_0123456789".characters)
 let ployHexChars = Set("_0123456789ABCDEFabcdef".characters)
+let ployNumHeadChars = ployDecChars.union(".".characters)
 let ploySymHeadChars = Set("_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".characters)
 let ploySymTailChars = ploySymHeadChars.union(ployDecChars)
 let ployTerminatorChars = Set(")>]};".characters)
@@ -164,10 +165,10 @@ class Src: CustomStringConvertible {
     return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: slice(pos, p))
   }
 
-  func parseLitNum(_ pos: Pos, foundDot: Bool = false) -> LitNum {
-    var foundDot = foundDot
+  func parseLitNum(_ pos: Pos) -> LitNum {
     let leadChar = char(pos)
-    assert(leadChar == "." || leadChar == "-" || ployDecChars.contains(leadChar))
+    assert(leadChar == "-" || ployNumHeadChars.contains(leadChar))
+    var foundDot = (leadChar == ".")
     var p = adv(pos)
     while hasSome(p) {
       let c = char(p)
@@ -286,8 +287,8 @@ class Src: CustomStringConvertible {
       failParse(pos, nil, "dangling dash at end of file.")
     }
     let nextChar = char(nextPos)
-    if ployDecChars.contains(nextChar) {
-      return parseLitNum(pos, foundDot: false)
+    if ployNumHeadChars.contains(nextChar) {
+      return parseLitNum(pos)
     }
     failParse(pos, nil, "unexpected dash.")
   }
@@ -443,14 +444,13 @@ class Src: CustomStringConvertible {
     if ploySymHeadChars.contains(c) {
       return parseSentenceSymOrPath(pos)
     }
-    if ployDecChars.contains(c) {
+    if ployNumHeadChars.contains(c) {
       return parseLitNum(pos)
     }
     if c == "\"" || c == "'" {
       return parseLitStr(pos)
     }
     switch c {
-    case ".": return parseLitNum(pos, foundDot: true)
     case "$": return parseBling(pos)
     case "-": return parseDash(pos)
     case "(": return parseCmpdOrParen(pos)
