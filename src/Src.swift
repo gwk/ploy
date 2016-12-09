@@ -543,7 +543,7 @@ class Src: CustomStringConvertible {
     return p
   }
 
-  func parseSubForms<T: SubForm>(_ forms: inout [T], _ pos: Pos, subj: String) -> Pos {
+  func parseSubForms<T: SubForm>(_ subForms: inout [T], _ pos: Pos, subj: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
     while hasSome(p) {
@@ -556,7 +556,7 @@ class Src: CustomStringConvertible {
       let form = parsePhrase(p)
       p = form.syn.end
       prevSpace = form.syn.hasSpace
-      forms.append(T(form: form, subj: subj))
+      subForms.append(T(form: form, subj: subj))
     }
     return p
   }
