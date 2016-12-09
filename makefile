@@ -1,12 +1,12 @@
-# © 2016 George King. Permission to use this file is granted in ploy/license.txt.
+# Dedicated to the public domain under CC0: https://creativecommons.org/publicdomain/zero/1.0/.
 
 # $@: The file name of the target of the rule.
 # $<: The name of the first prerequisite.
 # $^: The names of all the prerequisites, with spaces between them.
 
-.PHONY: default all build clean cov gen test
+.PHONY: _default all build clean cov gen test
 
-default: build
+_default: test
 
 all: clean gen build test
 
@@ -35,7 +35,7 @@ src/Lex.swift: ploy.legs
 	$^
 
 test: build
-	iotest test
+	iotest -fail-fast
 
 _build:
 	mkdir -p $@
