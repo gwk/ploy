@@ -415,29 +415,33 @@ class Src: CustomStringConvertible {
     failParse(pos, nil, "unexpected dash.")
   }
 
+  func parseSentenceSymOrPath(_ pos: Pos) -> Form {
+    var sym = parseSym(pos)
+    if let handler = Src.keywordSentenceHandlers[sym.name] {
+      return handler(self)(sym)
+    }
+    // path parsing.
+    var syms = [sym]
+    var p = sym.syn.end
+    while !sym.syn.hasSpace && hasSome(p) && char(p) == "/" {
+      p = adv(p)
+      sym = parseSym(p)
+      if Src.keywordSentenceHandlers.contains(key: sym.name) {
+        sym.failSyntax("reserved keyword name cannot appear in path")
+      }
+      syms.append(sym)
+      p = sym.syn.end
+    }
+    if syms.count > 1 {
+      return Path(Syn(src: self, pos: pos, visEnd: sym.syn.visEnd, end: sym.syn.end), syms: syms)
+    }
+    return sym // regular sym.
+  }
+
   func parsePoly(_ pos: Pos) -> Form {
     let c = char(pos)
     if ploySymHeadChars.contains(c) {
-      var sym = parseSym(pos)
-      if let handler = Src.keywordSentenceHandlers[sym.name] {
-        return handler(self)(sym)
-      }
-      // path parsing.
-      var syms = [sym]
-      var p = sym.syn.end
-      while !sym.syn.hasSpace && hasSome(p) && char(p) == "/" {
-        p = adv(p)
-        sym = parseSym(p)
-        if Src.keywordSentenceHandlers.contains(key: sym.name) {
-          sym.failSyntax("reserved keyword name cannot appear in path")
-        }
-        syms.append(sym)
-        p = sym.syn.end
-      }
-      if syms.count > 1 {
-        return Path(Syn(src: self, pos: pos, visEnd: sym.syn.visEnd, end: sym.syn.end), syms: syms)
-      }
-      return sym // regular sym.
+      return parseSentenceSymOrPath(pos)
     }
     if ployDecChars.contains(c) {
       return parseLitNum(pos)
