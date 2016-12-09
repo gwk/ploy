@@ -1,8 +1,11 @@
+# Dedicated to the public domain under CC0: https://creativecommons.org/publicdomain/zero/1.0/.
+
 # Finder.
 .DS_Store
 
 # Python.
-__pycache__
+__pycache__/
+*.egg-info/
 
 # Swift.
 Packages
@@ -12,11 +15,13 @@ xcuserdata
 profile
 project.xcworkspace
 
+# Project.
+_build/
+_misc/
+gh-pages/
+
 # Ploy.
-_build
-_misc
 _repro.ploy
 _repro-lib.ploy
 default.profraw
-gh-pages
 todo.txt
