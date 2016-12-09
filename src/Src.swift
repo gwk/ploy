@@ -280,6 +280,18 @@ class Src: CustomStringConvertible {
     return Sym(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), name: "$")
   }
 
+  func parseDash(_ pos: Pos) -> Form {
+    let nextPos = adv(pos)
+    if !hasSome(nextPos) {
+      failParse(pos, nil, "dangling dash at end of file.")
+    }
+    let nextChar = char(nextPos)
+    if ployDecChars.contains(nextChar) {
+      return parseLitNum(pos, foundDot: false)
+    }
+    failParse(pos, nil, "unexpected dash.")
+  }
+
   // MARK: nesting sentences.
 
   func parseCmpdOrParen(_ pos: Pos) -> Form {
@@ -403,18 +415,6 @@ class Src: CustomStringConvertible {
 
   // MARK: parse dispatch.
 
-  func parseDash(_ pos: Pos) -> Form {
-    let nextPos = adv(pos)
-    if !hasSome(nextPos) {
-      failParse(pos, nil, "dangling dash at end of file.")
-    }
-    let nextChar = char(nextPos)
-    if ployDecChars.contains(nextChar) {
-      return parseLitNum(pos, foundDot: false)
-    }
-    failParse(pos, nil, "unexpected dash.")
-  }
-
   func parseSentenceSymOrPath(_ pos: Pos) -> Form {
     var sym = parseSym(pos)
     if let handler = Src.keywordSentenceHandlers[sym.name] {
@@ -450,9 +450,9 @@ class Src: CustomStringConvertible {
       return parseLitStr(pos)
     }
     switch c {
-    case "-": return parseDash(pos)
     case ".": return parseLitNum(pos, foundDot: true)
     case "$": return parseBling(pos)
+    case "-": return parseDash(pos)
     case "(": return parseCmpdOrParen(pos)
     case "<": return parseCmpdType(pos)
     case "{": return parseDo(pos)
