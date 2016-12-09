@@ -435,7 +435,7 @@ class Src: CustomStringConvertible {
     // path parsing.
     var syms = [sym]
     var p = sym.syn.end
-    while !sym.syn.hasSpace && hasSome(p) && char(p) == "/" {
+    while !sym.syn.hasEndSpace && hasSome(p) && char(p) == "/" {
       p = adv(p)
       sym = parseSym(p)
       if Src.keywordSentenceHandlers.contains(key: sym.name) {
@@ -518,7 +518,7 @@ class Src: CustomStringConvertible {
         }
       }
       // adjacency operators have highest precedence.
-      if !left.syn.hasSpace {
+      if !left.syn.hasEndSpace {
         for (c, handler) in adjacencyOperators {
           if char(p) == c {
             let right = parsePhrase(p, precedence: Src.operatorGroups.count) // TODO: decide if this should call parsePoly instead.
@@ -558,7 +558,7 @@ class Src: CustomStringConvertible {
       }
       let form: T = parseForm(p, subj: subj, exp: exp)
       p = form.syn.end
-      prevSpace = form.syn.hasSpace
+      prevSpace = form.syn.hasEndSpace
       forms.append(form)
     }
     return p
@@ -576,7 +576,7 @@ class Src: CustomStringConvertible {
       }
       let form = parsePhrase(p)
       p = form.syn.end
-      prevSpace = form.syn.hasSpace
+      prevSpace = form.syn.hasEndSpace
       subForms.append(T(form: form, subj: subj))
     }
     return p
