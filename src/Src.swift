@@ -354,7 +354,7 @@ class Src: CustomStringConvertible {
   }
 
   func parseHostVal(_ sym: Sym) -> Form {
-    let typeExpr = Expr(form: parsePhrase(sym.syn.end), subj: "`host_val` form")
+    let typeExpr: Expr = parseSubForm(sym.syn.end, subj: "`host_val` form")
     let code: LitStr = parseForm(typeExpr.syn.end, subj: "`host_val` form", exp: "code string")
     var deps: [Identifier] = []
     let end = parseSubForms(&deps, code.syn.end, subj: "`host_val` form")
@@ -381,15 +381,14 @@ class Src: CustomStringConvertible {
   }
 
   func parseIn(_ sym: Sym) -> Form {
-    let identifier = Identifier(form: parsePhrase(sym.syn.end),
-      subj: "`in` form", exp: "namespace identifier")
+    let identifier: Identifier = parseSubForm(sym.syn.end, subj: "`in` form")
     var defs: [Def] = []
     let end = parseSubForms(&defs, identifier.syn.end, subj: "`in` form")
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
 
   func parseMethod(_ sym: Sym) -> Form {
-    let identifier = Identifier(form: parsePhrase(sym.syn.end), subj: "`method` form", exp: "polyfn name or path identifier")
+    let identifier: Identifier = parseSubForm(sym.syn.end, subj: "`method` form")
     let sig: Sig = parseForm(identifier.syn.end, subj: "`method` form", exp: "method signature")
     let body = parseBody(sig.syn.end, subj: "`method` form")
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
@@ -402,7 +401,7 @@ class Src: CustomStringConvertible {
   }
 
   func parsePub(_ sym: Sym) -> Form {
-    let def: Def = Def(form: parsePhrase(sym.syn.end), subj: "`pub` form")
+    let def: Def = parseSubForm(sym.syn.end, subj: "`pub` form")
     return Pub(Syn(sym.syn, def.syn), def: def)
   }
 

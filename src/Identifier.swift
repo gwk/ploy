@@ -5,16 +5,12 @@ enum Identifier: SubForm {
   case path(Path)
   case sym(Sym)
 
-  init(form: Form, subj: String, exp: String) {
+  init(form: Form, subj: String) {
     if let form = form as? Path     { self = .path(form) }
     else if let form = form as? Sym { self = .sym(form) }
     else {
-      form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expects identifier symbol or path but received \(form.syntaxName).")
     }
-  }
-
-  init(form: Form, subj: String) {
-    self.init(form: form, subj: subj, exp: "identifier")
   }
 
   var form: Form {
