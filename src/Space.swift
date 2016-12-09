@@ -48,9 +48,9 @@ class Space: Scope {
     return space
   }
 
-  func getOrCreateSpace(syms: [Sym]) -> Space {
+  func getOrCreateSpace(identifierSyms: [Sym]) -> Space {
     var space: Space = self
-    for (i, sym) in syms.enumerated() {
+    for (i, sym) in identifierSyms.enumerated() {
       if let r = space.bindings[sym.name] {
         switch r.kind {
         case .space(let next):
@@ -58,7 +58,7 @@ class Space: Scope {
         default: sym.failType("expected a space; found a \(r.kindDesc)")
         }
       } else {
-        space = space.createSpace(pathNames: syms[0...i].map { $0.name }, name: sym.name, hostName: sym.hostName)
+        space = space.createSpace(pathNames: identifierSyms[0...i].map { $0.name }, name: sym.name, hostName: sym.hostName)
       }
     }
     return space
@@ -70,7 +70,7 @@ class Space: Scope {
       if case .method(let method) = def {
         let syms = method.identifier.syms
         let targetSpaceSyms = Array(syms[0..<(syms.count - 1)])
-        let targetSpace = getOrCreateSpace(syms: targetSpaceSyms)
+        let targetSpace = getOrCreateSpace(identifierSyms: targetSpaceSyms)
         let name = method.identifier.name
         let methodList = targetSpace.methods.getDefault(name)
         methodList.pairs.append((self, method))
@@ -89,7 +89,7 @@ class Space: Scope {
       bindings[t.description] = rec
     }
     for i in ins {
-      let space = getOrCreateSpace(syms: i.identifier!.syms)
+      let space = getOrCreateSpace(identifierSyms: i.identifier!.syms)
       space.add(defs: i.defs)
     }
     let mainSpace = createSpace(pathNames: ["MAIN"], name: "MAIN", hostName: "MAIN")
