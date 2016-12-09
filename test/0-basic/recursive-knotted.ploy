@@ -1,9 +1,9 @@
 f = fn <g:Int%Int Int>%Int
   if eq_Int(0 0) ? 1
-    (g@$).dec_Int.1@$;;
+    / (g@$).dec_Int.1@$;;
 
 g = fn Int%Int
   if eq_Int(0 0) ? 0
-    f(self dec_Int.$);;
+    / f(self dec_Int.$);;
 
 main = exit.g.100000

@@ -24,6 +24,10 @@ class Syn: CustomStringConvertible {
     self.end = end
   }
 
+  convenience init(pos: Pos, bodySyn: Syn) {
+    self.init(src: bodySyn.src, pos: pos, visEnd: bodySyn.visEnd, end: bodySyn.end)
+  }
+
   convenience init(_ l: Syn, _ r: Syn) {
     self.init(src: l.src, pos: l.pos, visEnd: r.visEnd, end: r.end)
   }

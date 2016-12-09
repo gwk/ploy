@@ -82,7 +82,7 @@ extension Expr {
         em.append(" :")
       }
       if let dflt = if_.dflt {
-        dflt.compile(ctx, em, depth + 1, isTail: isTail)
+        dflt.expr.compile(ctx, em, depth + 1, isTail: isTail)
       } else {
         em.str(depth + 1, "undefined")
       }

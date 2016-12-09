@@ -3,9 +3,9 @@
 
 class If: Form { // if statement: `if cases… default;`.
   let cases: [Case]
-  let dflt: Expr?
+  let dflt: Default?
 
-  init(_ syn: Syn, cases: [Case], dflt: Expr?) {
+  init(_ syn: Syn, cases: [Case], dflt: Default?) {
     self.cases = cases
     self.dflt = dflt
     super.init(syn)

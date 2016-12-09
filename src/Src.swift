@@ -293,6 +293,15 @@ class Src: CustomStringConvertible {
     failParse(pos, nil, "unexpected dash.")
   }
 
+  func parseSlash(_ pos: Pos) -> Form {
+    let p = parseSpace(adv(pos))
+    if !hasSome(p) {
+      failParse(pos, nil, "dangling slash at end of file.")
+    }
+    let expr: Expr = parseSubForm(p, subj: "`/` form")
+    return Default(Syn(pos: pos, bodySyn: expr.syn), expr: expr)
+  }
+
   // MARK: nesting sentences.
 
   func parseCmpdOrParen(_ pos: Pos) -> Form {
@@ -353,16 +362,19 @@ class Src: CustomStringConvertible {
   }
 
   func parseIf(_ sym: Sym) -> Form {
-    let (forms, end) = parseRawForms(sym.syn.end)
+    var clauses: [Clause] = []
+    let end = parseSubForms(&clauses, sym.syn.end, subj: "`if` form")
     var cases: [Case] = []
-    var dflt: Expr? = nil
-    for (i, f) in forms.enumerated() {
-      if let c = f as? Case {
-        cases.append(c)
-      } else if i == forms.lastIndex {
-        dflt = Expr(form: f, subj: "`if` form", exp: "default expression")
-      } else {
-        f.failSyntax("`if` form expects `?` case but received \(f.syntaxName).")
+    var dflt: Default? = nil
+    for (i, clause) in clauses.enumerated() {
+      switch clause {
+      case .case_(let case_): cases.append(case_)
+      case .default_(let default_):
+        if i == clauses.lastIndex {
+          dflt = default_
+        } else {
+          default_.failSyntax("`if` form requires `?` case clauses in all but final position; received `/` default clause.")
+        }
       }
     }
     return If(synForSemicolon(sym, end, "`if` form"), cases: cases, dflt: dflt)
@@ -453,6 +465,7 @@ class Src: CustomStringConvertible {
     switch c {
     case "$": return parseBling(pos)
     case "-": return parseDash(pos)
+    case "/": return parseSlash(pos)
     case "(": return parseCmpdOrParen(pos)
     case "<": return parseCmpdType(pos)
     case "{": return parseDo(pos)
@@ -523,6 +536,10 @@ class Src: CustomStringConvertible {
 
   func parseForm<T: Form>(_ pos: Pos, subj: String, exp: String) -> T {
     return castForm(parsePhrase(pos), subj, exp)
+  }
+
+  func parseSubForm<T: SubForm>(_ pos: Pos, subj: String) -> T {
+    return T(form: parsePhrase(pos), subj: subj)
   }
 
   func parseForms<T: Form>(_ forms: inout [T], _ pos: Pos, subj: String, exp: String) -> Pos {

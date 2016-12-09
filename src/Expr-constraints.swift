@@ -72,8 +72,8 @@ extension Expr {
         ctx.constrain(cons, expForm: if_, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
-        let _ = dflt.genTypeConstraints(ctx, scope)
-        ctx.constrain(dflt, expForm: if_, expType: type, "if form default")
+        let _ = dflt.expr.genTypeConstraints(ctx, scope)
+        ctx.constrain(dflt.expr, expForm: if_, expType: type, "if form default")
       }
       return type
 
