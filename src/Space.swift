@@ -88,9 +88,9 @@ class Space: Scope {
       let rec = ScopeRecord(name: t.description, sym: nil, kind: .type(t))
       bindings[t.description] = rec
     }
-    for i in ins {
-      let space = getOrCreateSpace(identifierSyms: i.identifier!.syms)
-      space.add(defs: i.defs)
+    for in_ in ins {
+      let space = getOrCreateSpace(identifierSyms: in_.identifier!.syms)
+      space.add(defs: in_.defs)
     }
     let mainSpace = createSpace(pathNames: ["MAIN"], name: "MAIN", hostName: "MAIN")
     mainSpace.add(defs: mainIn.defs)
