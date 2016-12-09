@@ -40,14 +40,6 @@ class Space: Scope {
     }
   }
 
-  func createSpace(pathNames: [String], name: String, hostName: String) -> Space {
-    let space = Space(pathNames: pathNames, parent: self, file: file)
-    let record = ScopeRecord(name: name, hostName: space.hostPrefix + hostName, sym: nil, kind: .space(space))
-    bindings.insertNew(name, value: record)
-    // note: sym is nil because in forms can be declared in multiple locations.
-    return space
-  }
-
   func getOrCreateSpace(identifierSyms: [Sym]) -> Space {
     var space: Space = self
     for (i, sym) in identifierSyms.enumerated() {
@@ -58,52 +50,40 @@ class Space: Scope {
         default: sym.failType("expected a space; found a \(r.kindDesc)")
         }
       } else {
-        space = space.createSpace(pathNames: identifierSyms[0...i].map { $0.name }, name: sym.name, hostName: sym.hostName)
+        let name = sym.name
+        let pathNames = identifierSyms[0...i].map { $0.name }
+        space = Space(pathNames: pathNames, parent: self, file: file) // ROOT is always the parent of any named space.
+        let record = ScopeRecord(name: name, hostName: space.hostPrefix + sym.hostName, sym: nil, kind: .space(space))
+        // note: sym is nil because `in` forms can be declared in multiple locations.
+        bindings.insertNew(name, value: record)
       }
     }
     return space
   }
 
-  func add(defs defsList: [Def]) {
-
+  func add(defs defsList: [Def], root: Space) {
     for def in defsList {
-      if case .method(let method) = def {
+      switch def {
+
+      case .in_(let in_):
+        let space = root.getOrCreateSpace(identifierSyms: in_.identifier!.syms)
+        space.add(defs: in_.defs, root: root)
+
+      case .method(let method):
         let syms = method.identifier.syms
         let targetSpaceSyms = Array(syms[0..<(syms.count - 1)])
-        let targetSpace = getOrCreateSpace(identifierSyms: targetSpaceSyms)
+        let targetSpace = root.getOrCreateSpace(identifierSyms: targetSpaceSyms)
         let name = method.identifier.name
         let methodList = targetSpace.methods.getDefault(name)
         methodList.pairs.append((self, method))
-      } else if let existing = defs[def.sym.name] {
-        def.sym.failRedef(original: existing.sym)
-      } else {
-        defs[def.sym.name] = def
+
+      default:
+        if let existing = defs[def.sym.name] {
+          def.sym.failRedef(original: existing.sym)
+        } else {
+          defs[def.sym.name] = def
+        }
       }
     }
-  }
-
-  func setupRoot(ins: [In], mainIn: In) -> Space { // returns MAIN.
-    bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, kind: .space(self))
-    for t in intrinsicTypes {
-      let rec = ScopeRecord(name: t.description, sym: nil, kind: .type(t))
-      bindings[t.description] = rec
-    }
-    for in_ in ins {
-      let space = getOrCreateSpace(identifierSyms: in_.identifier!.syms)
-      space.add(defs: in_.defs)
-    }
-    let mainSpace = createSpace(pathNames: ["MAIN"], name: "MAIN", hostName: "MAIN")
-    mainSpace.add(defs: mainIn.defs)
-    return mainSpace
-  }
-
-  func compileMain(mainIn: In) {
-    guard let def = defs["main"] else {
-      mainIn.failForm(prefix: "error", msg: "`main` is not defined in MAIN")
-    }
-    let record = getRecordInFrame(sym: def.sym)!
-    let em = Emitter(file: self.file)
-    compileSym(em, 0, scopeRecord: record, sym: def.sym, isTail: true)
-    em.flush()
   }
 }

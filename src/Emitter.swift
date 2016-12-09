@@ -36,7 +36,7 @@ class Emitter {
 }
 
 
-func compileProgram(file: OutFile, includePaths: [String], ins: [In], mainIn: In) {
+func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace) {
   // normal shebang line cannot pass necessary flags to node,
   // because shebang only respects one argument.
   #if true // simple thing to do is just use the standard node install path.
@@ -62,8 +62,6 @@ func compileProgram(file: OutFile, includePaths: [String], ins: [In], mainIn: In
     file.writeL("// end: \(name).\n")
   }
 
-  let rootSpace = Space(pathNames: ["ROOT"], parent: nil, file: file)
-  let mainSpace = rootSpace.setupRoot(ins: ins, mainIn: mainIn)
-  mainSpace.compileMain(mainIn: mainIn)
+  mainSpace.compileMain()
   file.writeL("})();")
 }

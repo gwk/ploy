@@ -10,7 +10,7 @@ extension SubForm {
 
   var syn: Syn { return form.syn }
 
-  func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
+  func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int = 0) {
     form.write(to: &stream, depth)
   }
 }

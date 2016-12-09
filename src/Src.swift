@@ -546,24 +546,6 @@ class Src: CustomStringConvertible {
     return T(form: parsePhrase(pos), subj: subj)
   }
 
-  func parseForms<T: Form>(_ forms: inout [T], _ pos: Pos, subj: String, exp: String) -> Pos {
-    var p = parseSpace(pos)
-    var prevSpace = true
-    while hasSome(p) {
-      if ployTerminatorChars.contains(char(p)) {
-        break
-      }
-      if !prevSpace {
-        failParse(p, nil, "adjacent expressions require a separating space.")
-      }
-      let form: T = parseForm(p, subj: subj, exp: exp)
-      p = form.syn.end
-      prevSpace = form.syn.hasEndSpace
-      forms.append(form)
-    }
-    return p
-  }
-
   func parseSubForms<T: SubForm>(_ subForms: inout [T], _ pos: Pos, subj: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
@@ -572,12 +554,12 @@ class Src: CustomStringConvertible {
         break
       }
       if !prevSpace {
-        failParse(p, nil, "adjacent expressions require a separating space.")
+        failParse(p, nil, "adjacent forms require a separating space.")
       }
-      let form = parsePhrase(p)
+      let form: T = parseSubForm(p, subj: subj)
       p = form.syn.end
       prevSpace = form.syn.hasEndSpace
-      subForms.append(T(form: form, subj: subj))
+      subForms.append(form)
     }
     return p
   }
@@ -588,50 +570,17 @@ class Src: CustomStringConvertible {
     return Body(Syn(src: self, pos: pos, visEnd: (exprs.last?.syn.visEnd).or(pos), end: end), exprs: exprs)
   }
 
-  func parseMain(verbose: Bool = false) -> (ins: [In], mainIn: In) {
-    var forms: [Form] = []
-    let end = parseForms(&forms, startPos, subj: "form", exp: "any form (INTERNAL ERROR)")
-    if hasSome(end) {
-      failParse(end, nil, "unexpected terminator character: '\(char(end))'")
-    }
-    var ins: [In] = []
+  func parse(verbose: Bool = false) -> [Def] {
     var defs: [Def] = []
-    for form in forms {
-      if let in_ = form as? In {
-        if defs.count > 0 {
-          in_.failSyntax("`in` forms must precede all definitions in main.",
-            notes: (defs.first!.form, "first definition here"))
-        }
-        ins.append(in_)
-      } else {
-        let def = Def(form: form, subj: "main file")
-        defs.append(def)
-      }
-    }
-    let mainPos = (defs.first?.syn.pos).or(end)
-    let mainVisEnd = (defs.last?.syn.visEnd).or(end)
-    let mainEnd = (defs.last?.syn.end).or(end)
-    let mainIn = In(Syn(src: self, pos: mainPos, visEnd: mainVisEnd, end: mainEnd), identifier: nil, defs: defs)
-    if verbose {
-      for in_ in ins {
-        in_.write(to: &std_err)
-      }
-      mainIn.write(to: &std_err)
-    }
-    return (ins, mainIn)
-  }
-
-  func parseLib(verbose: Bool = false) -> [In] {
-    var ins: [In] = []
-    let end = parseForms(&ins, startPos, subj: "module", exp: "`in` statement")
+    let end = parseSubForms(&defs, startPos, subj: "top level")
     if hasSome(end) {
       failParse(end, nil, "unexpected terminator character: '\(char(end))'")
     }
     if verbose {
-      for i in ins {
-        i.write(to: &std_err)
+      for def in defs {
+        def.write(to: &std_err)
       }
     }
-    return ins
+    return defs
   }
 }

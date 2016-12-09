@@ -1,3 +1,1 @@
-error: test/2-error/empty.ploy:1:1: `main` is not defined in MAIN
-  
-  ^
+error: test/2-error/empty.ploy: `main` is not defined in MAIN (toplevel namespace).

@@ -46,11 +46,18 @@ func main() {
   let tmpPath = outPath + ".tmp"
   let tmpFile = guarded { try OutFile(path: tmpPath, create: 0o644) }
 
-  let (mainIns, mainIn) = Src(path: mainPath).parseMain(verbose: false)
+  let (rootSpace, mainSpace) = setupRootAndMain(mainPath: mainPath, outFile: tmpFile)
 
-  let ins = mainIns + libPaths.flatMap { Src(path: $0).parseLib(verbose: false) }
+  let mainDefs = Src(path: mainPath).parse(verbose: false)
+  mainSpace.add(defs: mainDefs, root: rootSpace)
+  _ = mainSpace.getMainDef() // check that we have `main` before doing additional work.
 
-  compileProgram(file: tmpFile, includePaths: includePaths, ins: ins, mainIn: mainIn)
+  for libPath in libPaths {
+    let libDefs = Src(path: libPath).parse(verbose: false)
+    mainSpace.add(defs: libDefs, root: rootSpace)
+  }
+
+  compileProgram(file: tmpFile, includePaths: includePaths, mainSpace: mainSpace)
 
   renameFileAtPath(tmpPath, toPath: outPath)
   do {

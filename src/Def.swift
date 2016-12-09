@@ -8,6 +8,7 @@ enum Def: SubForm {
   case bind(Bind)
   case enum_(Enum)
   case hostType(HostType)
+  case in_(In)
   case method(Method)
   case polyFn(PolyFn)
   case pub(Pub)
@@ -17,6 +18,7 @@ enum Def: SubForm {
     if let form = form as? Bind           { self = .bind(form) }
     else if let form = form as? Enum      { self = .enum_(form) }
     else if let form = form as? HostType  { self = .hostType(form) }
+    else if let form = form as? In        { self = .in_(form) }
     else if let form = form as? Method    { self = .method(form) }
     else if let form = form as? PolyFn    { self = .polyFn(form) }
     else if let form = form as? Pub       { self = .pub(form) }
@@ -31,6 +33,7 @@ enum Def: SubForm {
     case .bind(let bind): return bind
     case .enum_(let enum_): return enum_
     case .hostType(let hostType): return hostType
+    case .in_(let in_): return in_
     case .method(let method): return method
     case .polyFn(let polyFn): return polyFn
     case .pub(let pub): return pub
@@ -43,7 +46,8 @@ enum Def: SubForm {
     case .bind(let bind): return bind.sym
     case .enum_(let enum_): return enum_.sym
     case .hostType(let hostType): return hostType.sym
-    case .method: fatalError("Method is not an independent definition; sym should never be called.")
+    case .in_: fatalError("INTERNAL ERROR: In is not an individual definition; sym should never be called.")
+    case .method: fatalError("INTERNAL ERROR: Method is not an independent definition; sym should never be called.")
     case .polyFn(let polyFn): return polyFn.sym
     case .pub(let pub): return pub.def.sym
     case .struct_(let struct_): return struct_.sym
@@ -87,8 +91,11 @@ enum Def: SubForm {
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
+    case .in_:
+      fatalError("INTERNAL ERROR: In is not an independent definition; compileDef should never be called.")
+
     case .method:
-      fatalError("Method is not an independent definition; compileDef should never be called.")
+      fatalError("INTERNAL ERROR: Method is not an independent definition; compileDef should never be called.")
 
     case .polyFn(let polyFn):
       let hostName = "\(space.hostPrefix)\(sym.name)"
