@@ -314,26 +314,26 @@ class Src: CustomStringConvertible {
   // MARK: keyword sentences.
 
   func parseEnum(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`enum` form", "name symbol")
+    let nameSym: Sym = parseForm(sym.syn.end, subj: "`enum` form", exp: "name symbol")
     var variants: [Expr] = []
     let end = parseSubForms(&variants, nameSym.syn.end, subj: "`enum` form")
     return Enum(synForSemicolon(sym, end, "enum"), sym: nameSym, variants: variants)
   }
 
   func parseFn(_ sym: Sym) -> Form {
-    let sig: Sig = parseForm(sym.syn.end, "`fn` form", "function signature")
+    let sig: Sig = parseForm(sym.syn.end, subj: "`fn` form", exp: "function signature")
     let body = parseBody(sig.syn.end, subj: "`fn` form")
     return Fn(synForSemicolon(sym, body.syn.end, "fn"), sig: sig, body: body)
   }
 
   func parseHostType(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`host_type` form", "name symbol")
+    let nameSym: Sym = parseForm(sym.syn.end, subj: "`host_type` form", exp: "name symbol")
     return HostType(synForSemicolon(sym, nameSym.syn.end, "host_type"), sym: nameSym)
   }
 
   func parseHostVal(_ sym: Sym) -> Form {
     let typeExpr = Expr(form: parsePhrase(sym.syn.end), subj: "`host_val` form")
-    let code: LitStr = parseForm(typeExpr.syn.end, "`host_val` form", "code string")
+    let code: LitStr = parseForm(typeExpr.syn.end, subj: "`host_val` form", exp: "code string")
     var deps: [Identifier] = []
     let end = parseSubForms(&deps, code.syn.end, subj: "`host_val` form")
     return HostVal(synForSemicolon(sym, end, "host_val"), typeExpr: typeExpr, code: code, deps: deps)
@@ -365,7 +365,7 @@ class Src: CustomStringConvertible {
 
   func parseMethod(_ sym: Sym) -> Form {
     let identifier = Identifier(form: parsePhrase(sym.syn.end), subj: "`method` form", exp: "polyfn name or path identifier")
-    let sig: Sig = parseForm(identifier.syn.end, "`method` form", "method signature")
+    let sig: Sig = parseForm(identifier.syn.end, subj: "`method` form", exp: "method signature")
     let body = parseBody(sig.syn.end, subj: "`method` form")
     return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
   }
@@ -382,7 +382,7 @@ class Src: CustomStringConvertible {
   }
 
   func parseStruct(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, "`struct` form", "name symbol")
+    let nameSym: Sym = parseForm(sym.syn.end, subj: "`struct` form", exp: "name symbol")
     var fields: [Expr] = []
     let end = parseSubForms(&fields, nameSym.syn.end, subj: "`struct` form")
     return Struct(synForSemicolon(sym, end, "enum"), sym: nameSym, fields: fields)
@@ -517,11 +517,11 @@ class Src: CustomStringConvertible {
     return left
   }
 
-  func parseForm<T: Form>(_ pos: Pos, _ subj: String, _ exp: String) -> T {
+  func parseForm<T: Form>(_ pos: Pos, subj: String, exp: String) -> T {
     return castForm(parsePhrase(pos), subj, exp)
   }
 
-  func parseForms<T: Form>(_ forms: inout [T], _ pos: Pos, _ subj: String, _ exp: String) -> Pos {
+  func parseForms<T: Form>(_ forms: inout [T], _ pos: Pos, subj: String, exp: String) -> Pos {
     var p = parseSpace(pos)
     var prevSpace = true
     while hasSome(p) {
@@ -559,7 +559,7 @@ class Src: CustomStringConvertible {
 
   func parseRawForms(_ pos: Pos) -> ([Form], Pos) {
     var forms: [Form] = []
-    let end = parseForms(&forms, pos, "form", "any form (INTERNAL ERROR)")
+    let end = parseForms(&forms, pos, subj: "form", exp: "any form (INTERNAL ERROR)")
     return (forms, end)
   }
 
@@ -603,7 +603,7 @@ class Src: CustomStringConvertible {
 
   func parseLib(verbose: Bool = false) -> [In] {
     var ins: [In] = []
-    let end = parseForms(&ins, startPos, "module", "`in` statement")
+    let end = parseForms(&ins, startPos, subj: "module", exp: "`in` statement")
     if hasSome(end) {
       failParse(end, nil, "unexpected terminator character: '\(char(end))'")
     }
