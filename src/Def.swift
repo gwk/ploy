@@ -112,7 +112,7 @@ enum Def: SubForm {
       }
       em.append("}")
       em.str(0, "function \(hostName)($){")
-      em.str(0, " throw \"error: PolyFn dispatch not implemented\"") // TODO: dispatch.
+      em.str(0, "  throw \"INTERNAL ERROR: PolyFn dispatch not implemented\"") // TODO: dispatch.
       em.append("}")
       em.flush()
       return .polyFn(type)
