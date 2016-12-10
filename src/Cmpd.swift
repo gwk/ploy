@@ -2,16 +2,16 @@
 
 
 class Cmpd: Form { // compound value: `(a b)`.
-  let args: [Expr]
+  let fields: [Expr]
 
-  init(_ syn: Syn, args: [Expr]) {
-    self.args = args
+  init(_ syn: Syn, fields: [Expr]) {
+    self.fields = fields
     super.init(syn)
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, args.isEmpty ? " ()\n" : "\n")
-    for a in args {
+    writeHead(to: &stream, depth, fields.isEmpty ? " ()\n" : "\n")
+    for a in fields {
       a.write(to: &stream, depth + 1)
     }
   }
@@ -19,8 +19,8 @@ class Cmpd: Form { // compound value: `(a b)`.
   // MARK: Cmpd
 
   func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, argIndex: inout Int) {
-    if argIndex < args.count {
-      let arg = args[argIndex]
+    if argIndex < fields.count {
+      let arg = fields[argIndex]
       if let argLabel = arg.label {
         if let parLabel = par.label {
           if argLabel.name != parLabel.name {

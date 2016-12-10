@@ -306,17 +306,17 @@ class Src: CustomStringConvertible {
 
   func parseCmpdOrParen(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
-    var args: [Expr] = []
-    let end = parseSubForms(&args, p, subj: "parenthesized expression")
-    if args.count == 1 {
-      let expr = args[0]
+    var fields: [Expr] = []
+    let end = parseSubForms(&fields, p, subj: "parenthesized expression")
+    if fields.count == 1 {
+      let expr = fields[0]
       if let label = expr.label {
         label.failSyntax("label implies disallowed single-element compound expression")
       } else {
         return Paren(synForTerminator(pos, end, ")", "parenthesized expression"), expr: expr)
       }
     } else {
-      return Cmpd(synForTerminator(pos, end, ")", "compound expression"), args: args)
+      return Cmpd(synForTerminator(pos, end, ")", "compound expression"), fields: fields)
     }
   }
 

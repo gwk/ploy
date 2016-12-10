@@ -8,7 +8,7 @@ extension Expr {
     switch self {
     case .fn, .hostVal, .litNum, .litStr: return false
     case .ann(let ann): return ann.expr.needsLazyDef
-    case .cmpd(let cmpd): return cmpd.args.any { $0.needsLazyDef }
+    case .cmpd(let cmpd): return cmpd.fields.any { $0.needsLazyDef }
     case .paren(let paren): return paren.expr.needsLazyDef
     default: return true
     }

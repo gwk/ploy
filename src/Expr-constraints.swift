@@ -40,7 +40,7 @@ extension Expr {
       return type
 
     case .cmpd(let cmpd):
-      let pars = cmpd.args.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
+      let pars = cmpd.fields.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
       let type = Type.Cmpd(pars)
       return type
 
