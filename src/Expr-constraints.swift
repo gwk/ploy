@@ -139,7 +139,12 @@ extension Expr {
       return scope.typeBinding(sym: sym, subj: subj)
 
     default:
-      form.failType("not a type (TODO: IMPROVE)")
+      let suggest: String
+      switch self {
+        case .cmpd, .paren: suggest = " Did you mean `<...>`?"
+        default: suggest = ""
+      }
+      form.failType("\(subj) expects a type; received \(form.syntaxName).\(suggest)")
     }
   }
 
