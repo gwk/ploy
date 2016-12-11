@@ -39,14 +39,6 @@ extension Expr {
       ctx.constrain(call.arg, expForm: call, expType: parType, "argument")
       return type
 
-    case .cmpd(let cmpd):
-      let pars = cmpd.fields.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
-      let type = Type.Cmpd(pars)
-      return type
-
-    case .cmpdType(let cmpdType):
-      cmpdType.failType("type compound cannot be used as an expression (temporary).")
-
     case .do_(let do_):
       return genTypeConstraintsBody(ctx, scope, body: do_.body)
 
@@ -93,7 +85,12 @@ extension Expr {
       return type
 
     case .paren(let paren):
-      let type = paren.expr.genTypeConstraints(ctx, scope)
+      if paren.isUnary {
+        let type = paren.els[0].genTypeConstraints(ctx, scope)
+        return type
+      }
+      let pars = paren.els.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
+      let type = Type.Cmpd(pars)
       return type
 
     case .path(let path):
@@ -120,8 +117,11 @@ extension Expr {
   func type(_ scope: Scope, _ subj: String) -> Type {
     switch self {
 
-    case .cmpdType(let cmpdType):
-      return Type.Cmpd(cmpdType.pars.enumerated().map {
+    case .paren(let paren):
+      if paren.isUnary {
+        return paren.els[0].type(scope, subj)
+      }
+      return Type.Cmpd(paren.els.enumerated().map {
         (index, par) in
         return par.typeParForPar(scope, index: index)
       })
@@ -139,12 +139,7 @@ extension Expr {
       return scope.typeBinding(sym: sym, subj: subj)
 
     default:
-      let suggest: String
-      switch self {
-        case .cmpd, .paren: suggest = " Did you mean `<...>`?"
-        default: suggest = ""
-      }
-      form.failType("\(subj) expects a type; received \(form.syntaxName).\(suggest)")
+      form.failType("\(subj) expects a type; received \(form.syntaxName).")
     }
   }
 

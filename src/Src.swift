@@ -304,20 +304,11 @@ class Src: CustomStringConvertible {
 
   // MARK: nesting sentences.
 
-  func parseCmpdOrParen(_ pos: Pos) -> Form {
+  func parseCmpd(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
-    var fields: [Expr] = []
-    let end = parseSubForms(&fields, p, subj: "parenthesized expression")
-    if fields.count == 1 {
-      let expr = fields[0]
-      if let label = expr.label {
-        label.failSyntax("label implies disallowed single-element compound expression")
-      } else {
-        return Paren(synForTerminator(pos, end, ")", "parenthesized expression"), expr: expr)
-      }
-    } else {
-      return Cmpd(synForTerminator(pos, end, ")", "compound expression"), fields: fields)
-    }
+    var els: [Expr] = []
+    let end = parseSubForms(&els, p, subj: "parenthesized expression")
+    return Paren(synForTerminator(pos, end, ")", "parenthesized expression"), els: els)
   }
 
   func parseCmpdType(_ pos: Pos) -> Form {
@@ -465,7 +456,7 @@ class Src: CustomStringConvertible {
     case "$": return parseBling(pos)
     case "-": return parseDash(pos)
     case "/": return parseSlash(pos)
-    case "(": return parseCmpdOrParen(pos)
+    case "(": return parseCmpd(pos)
     case "<": return parseCmpdType(pos)
     case "{": return parseDo(pos)
     default: failParse(pos, nil, "unexpected character: '\(c)'.")

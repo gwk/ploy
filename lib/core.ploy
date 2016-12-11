@@ -1,37 +1,37 @@
 
 in ROOT
 
-err = fn Str%<> FS/write_Str(std_err $);
-out = fn Str%<> FS/write_Str(std_out $);
+err = fn Str%() FS/write_Str(std_err $);
+out = fn Str%() FS/write_Str(std_out $);
 
-errL = fn Str%<>
+errL = fn Str%()
   err.$
   err.'\n';
 
-outL = fn Str%<>
+outL = fn Str%()
   out.$
   out.'\n';
 
-err_Int = fn Int%<> FS/write_Int(std_err $);
-out_Int = fn Int%<> FS/write_Int(std_out $);
+err_Int = fn Int%() FS/write_Int(std_err $);
+out_Int = fn Int%() FS/write_Int(std_out $);
 
-errL_Int = fn Int%<>
+errL_Int = fn Int%()
   FS/write_Int(std_err $)
   FS/write_Str(std_err '\n');
 
-outL_Int = fn Int%<>
+outL_Int = fn Int%()
   FS/write_Int(std_out $)
   FS/write_Str(std_out '\n');
 
 
 
-assert = fn <Bool Str>%<>
+assert = fn (Bool Str)%()
   if not.0@$ ? {
     err.'assert failed: '
     errL(1@$)
     exit.1 };;
 
-assert_eq = fn <Int Int Str>%<>
+assert_eq = fn (Int Int Str)%()
   if ne_Int(0@$ 1@$) ? {
     err.'assert_eq failed: '
     err_Int.0@$
@@ -45,6 +45,6 @@ assert_eq = fn <Int Int Str>%<>
 
 polyfn add;
 
-method add <Int Int>%Int add_Int.$;
+method add (Int Int)%Int add_Int.$;
 
 ;

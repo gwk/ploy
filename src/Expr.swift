@@ -6,8 +6,7 @@ enum Expr: SubForm {
   case ann(Ann)
   case bind(Bind)
   case call(Call)
-  case cmpd(Cmpd)
-  case cmpdType(CmpdType)
+  //case cmpdType(CmpdType)
   case do_(Do)
   case fn(Fn)
   case hostVal(HostVal)
@@ -25,8 +24,7 @@ enum Expr: SubForm {
     else if let form = form as? Ann       { self = .ann(form) }
     else if let form = form as? Bind      { self = .bind(form) }
     else if let form = form as? Call      { self = .call(form) }
-    else if let form = form as? Cmpd      { self = .cmpd(form) }
-    else if let form = form as? CmpdType  { self = .cmpdType(form) }
+    //else if let form = form as? CmpdType  { self = .cmpdType(form) }
     else if let form = form as? Do        { self = .do_(form) }
     else if let form = form as? Fn        { self = .fn(form) }
     else if let form = form as? HostVal   { self = .hostVal(form) }
@@ -53,8 +51,7 @@ enum Expr: SubForm {
     case .ann(let ann): return ann
     case .bind(let bind): return bind
     case .call(let call): return call
-    case .cmpd(let cmpd): return cmpd
-    case .cmpdType(let cmpdType): return cmpdType
+    //case .cmpdType(let cmpdType): return cmpdType
     case .do_(let do_): return do_
     case .fn(let fn): return fn
     case .hostVal(let hostVal): return hostVal

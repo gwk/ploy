@@ -8,8 +8,7 @@ extension Expr {
     switch self {
     case .fn, .hostVal, .litNum, .litStr: return false
     case .ann(let ann): return ann.expr.needsLazyDef
-    case .cmpd(let cmpd): return cmpd.fields.any { $0.needsLazyDef }
-    case .paren(let paren): return paren.expr.needsLazyDef
+    case .paren(let paren): return paren.els.any { $0.needsLazyDef }
     default: return true
     }
   }
@@ -37,26 +36,6 @@ extension Expr {
       em.append("(")
       call.arg.compile(ctx, em, depth + 1, isTail: false)
       em.append(")")
-
-    case .cmpd(let cmpd):
-      let type = ctx.typeFor(expr: self)
-      em.str(depth, "{")
-      switch type.kind {
-      case .cmpd(let pars, _, _):
-        var argIndex = 0
-        for par in pars {
-          cmpd.compilePar(ctx, em, depth, par: par, argIndex: &argIndex)
-        }
-        if argIndex != pars.count {
-          cmpd.failType("expected \(pars.count) arguments; received \(argIndex)")
-        }
-      default:
-        cmpd.failType("expected type: \(type); received compound value.")
-      }
-      em.append("}")
-
-    case .cmpdType:
-      fatalError()
 
     case .do_(let do_):
       em.str(depth, "(function(){")
@@ -114,9 +93,26 @@ extension Expr {
       em.str(depth, s)
 
     case .paren(let paren):
-      em.str(depth, "(") // TODO: these should not be necessary.
-      paren.expr.compile(ctx, em, depth + 1, isTail: isTail)
-      em.append(")")
+      let type = ctx.typeFor(expr: self)
+      switch type.kind {
+
+      case .cmpd(let pars, _, _):
+        em.str(depth, "{")
+        var argIndex = 0
+        for par in pars {
+          paren.compilePar(ctx, em, depth, par: par, argIndex: &argIndex)
+        }
+        if argIndex != pars.count {
+          paren.failType("expected \(pars.count) arguments; received \(argIndex)")
+        }
+        em.append("}")
+
+      default:
+        if !paren.isUnary {
+          paren.failType("expected type: \(type); received compound value.")
+        }
+        paren.els[0].compile(ctx, em, depth, isTail: isTail)
+      }
 
     case .path(let path):
       compileSym(em, depth, scopeRecord: ctx.pathRecords[path]!, sym: path.syms.last!, isTail: isTail)
