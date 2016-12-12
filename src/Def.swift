@@ -114,8 +114,8 @@ enum Def: SubForm {
       let type = Type.All(Set(sigsToPairs.keys))
       let em = Emitter(file: space.file)
       em.str(0, "\(hostName)__table = {")
-      for (sig, pair) in sigsToPairs.pairsSortedByKey {
-        pair.method.compileMethod(space, polyFnType: type, sigType: sig, hostName: hostName)
+      for (sigType, pair) in sigsToPairs.pairsSortedByKey {
+        pair.method.compileMethod(space, polyFnType: type, sigType: sigType, hostName: hostName)
       }
       em.append("}")
       em.str(0, "function \(hostName)($){")

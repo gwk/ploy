@@ -27,17 +27,17 @@ class Method: Form { // method definition.
   }
 
   func compileMethod(_ space: Space, polyFnType: Type, sigType: Type, hostName: String) {
+    let sigTypeIndex = sigType.globalIndex
+    guard case .sig(let typeSig) = sigType.kind else { fatalError() }
     let fnScope = LocalScope(parent: space)
-    let parType = sigType.sigPar
-    let retType = sigType.sigRet
-    fnScope.addValRecord(name: "$", type: parType)
+    fnScope.addValRecord(name: "$", type: typeSig.send)
     fnScope.addValRecord(name: "self", type: polyFnType)
     let ctx = TypeCtx()
     let type = genTypeConstraintsBody(ctx, fnScope, body: body)
-    ctx.constrain(form: body, type: type, expForm: sig.ret.form, expType: retType, "method body")
+    ctx.constrain(form: body, type: type, expForm: sig.ret.form, expType: typeSig.ret, "method body")
     ctx.resolve()
     let em = Emitter(file: space.file)
-    em.str(0, "function \(hostName)__\(sigType.globalIndex)($){ // \(sigType)")
+    em.str(0, "function \(hostName)__\(sigTypeIndex)($){ // \(sigType)")
     em.str(1, "let self = \(hostName)")
     compileBody(ctx, em, 1, body: body, isTail: true)
     em.append("}")

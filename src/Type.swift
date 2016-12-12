@@ -1,6 +1,14 @@
 // © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
+struct TypeSig {
+  let send: Type
+  let ret: Type
+  let frees: Set<Type>
+  let vars: Set<Type>
+}
+
+
 class Type: CustomStringConvertible, Hashable, Comparable {
 
   enum PropAccessor {
@@ -24,7 +32,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case host
     case prim
     case prop(accessor: PropAccessor, type: Type)
-    case sig(par: Type, ret: Type, frees: Set<Type>, vars: Set<Type>)
+    case sig(TypeSig)
     case struct_ // TODO: vars
     case var_(name: String)
   }
@@ -100,11 +108,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return memoize(description, .prop(accessor: accessor, type: type))
   }
 
-  class func Sig(par: Type, ret: Type) -> Type {
-    let description = "\(par.nestedSigDescription)%\(ret.nestedSigDescription)"
-    return memoize(description, .sig(par: par, ret: ret,
-      frees: Set(sequences: [par.frees, ret.frees]),
-      vars: Set(sequences: [par.vars, ret.vars])))
+  class func Sig(send: Type, ret: Type) -> Type {
+    let description = "\(send.nestedSigDescription)%\(ret.nestedSigDescription)"
+    return memoize(description, .sig(TypeSig(send: send, ret: ret,
+      frees: Set(sequences: [send.frees, ret.frees]),
+      vars: Set(sequences: [send.vars, ret.vars]))))
   }
 
   class func Struct(spacePathNames names: [String], sym: Sym) -> Type {
@@ -134,7 +142,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .host: return []
     case .prim: return []
     case .prop(_, let type): return type.frees
-    case .sig(_, _, let frees, _): return frees
+    case .sig(let sig): return sig.frees
     case .struct_: return []
     case .var_: return []
     }
@@ -150,23 +158,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .host: return []
     case .prim: return []
     case .prop(_, let type): return type.vars
-    case .sig(_, _, _, let vars): return vars
+    case .sig(let sig): return sig.vars
     case .struct_: return [] // TODO: vars.
     case .var_: return [] // does not return self.
     }
   }
 
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
-
-  var sigPar: Type {
-    if case .sig(let par, _, _, _) = kind { return par }
-    fatalError()
-  }
-
-  var sigRet: Type {
-    if case .sig(_, let ret, _, _) = kind { return ret }
-    fatalError()
-  }
 
   var freeIndex: Int {
     if case .free(let index) = kind { return index }
@@ -189,9 +187,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       if frees.contains(target) || vars.contains(target) {
         return Type.Cmpd(pars.map() { self.refine(par: $0, replacement: replacement) })
       } else { return self }
-    case .sig(let par, let ret, let frees, let vars):
-      if frees.contains(target) || vars.contains(target) {
-        return Type.Sig(par: refine(par, with: replacement), ret: refine(ret, with: replacement))
+    case .sig(let sig):
+      if sig.frees.contains(target) || sig.vars.contains(target) {
+        return Type.Sig(send: refine(sig.send, with: replacement), ret: refine(sig.ret, with: replacement))
       } else { return self }
     case .enum_: return self // TODO: vars.
     case .struct_: return self // TODO: vars.

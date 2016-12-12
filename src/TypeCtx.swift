@@ -185,15 +185,15 @@ class TypeCtx {
       return
     case .prop(_, _):
       constraint.fail(act: actType, exp: expType, "prop constraints not implemented")
-    case .sig(let expPar, let expRet, _, _):
+    case .sig(let expSig):
       switch actType.kind {
-      case .sig(let actPar, let actRet, _, _):
+      case .sig(let actSig):
         resolveSub(constraint,
-          actType: actPar, actDesc: "signature parameter",
-          expType: expPar, expDesc: "signature parameter")
+          actType: actSig.send, actDesc: "signature parameter",
+          expType: expSig.send, expDesc: "signature parameter")
         resolveSub(constraint,
-          actType: actRet, actDesc: "signature return",
-          expType: expRet, expDesc: "signature return")
+          actType: actSig.ret, actDesc: "signature return",
+          expType: expSig.ret, expDesc: "signature return")
         return
       default: constraint.fail(act: actType, exp: expType, "actual type is not a signature")
       }
@@ -213,15 +213,13 @@ class TypeCtx {
   }
 
 
-  func resolveSig(constraint: Constraint, actType: Type, expType: Type) {
-    guard case .sig(let actPar, let actRet, _, _) = actType.kind else { fatalError() }
-    guard case .sig(let expPar, let expRet, _, _) = expType.kind else { fatalError() }
+  func resolveSig(constraint: Constraint, act: TypeSig, exp: TypeSig) {
     resolveSub(constraint,
-      actType: actPar, actDesc: "signature parameter",
-      expType: expPar, expDesc: "signature parameter")
+      actType: act.send, actDesc: "signature parameter",
+      expType: exp.send, expDesc: "signature parameter")
     resolveSub(constraint,
-      actType: actRet, actDesc: "signature return",
-      expType: expRet, expDesc: "signature return")
+      actType: act.ret, actDesc: "signature return",
+      expType: exp.ret, expDesc: "signature return")
   }
 
 
