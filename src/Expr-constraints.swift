@@ -46,12 +46,12 @@ extension Expr {
 
     case .fn(let fn):
       let type = Expr.sig(fn.sig).type(scope, "signature")
-      guard case .sig(let sig) = type.kind else { fatalError() }
+      guard case .sig(let send, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
-      fnScope.addValRecord(name: "$", type: sig.send)
+      fnScope.addValRecord(name: "$", type: send)
       fnScope.addValRecord(name: "self", type: type)
       let bodyType = genTypeConstraintsBody(ctx, fnScope, body: fn.body)
-      ctx.constrain(form: fn.body, type: bodyType, expForm: fn, expType: sig.ret, "function body")
+      ctx.constrain(form: fn.body, type: bodyType, expForm: fn, expType: ret, "function body")
       return type
 
     case .if_(let if_):

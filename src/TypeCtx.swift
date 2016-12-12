@@ -128,10 +128,10 @@ class TypeCtx {
 
     switch exp.kind {
 
-    case .all(_, _, _):
+    case .all(_):
       constraint.fail(act: act, exp: exp, "expected type of kind `All` not yet implemented")
 
-    case .any(let members, _, _):
+    case .any(let members):
       if !members.contains(act) {
         constraint.fail(act: act, exp: exp, "actual type is not a member of `Any` expected type")
       }
@@ -164,11 +164,11 @@ class TypeCtx {
 
 
   func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type) {
-    guard case .cmpd(let expPars, _, _) = exp.kind else { fatalError() }
+    guard case .cmpd(let expPars) = exp.kind else { fatalError() }
 
     switch act.kind {
 
-    case .cmpd(let actPars, _, _):
+    case .cmpd(let actPars):
       if expPars.count != actPars.count {
         let actFields = pluralize(actPars.count, "field")
         constraint.fail(act: act, exp: exp, "actual compound type has \(actFields); expected \(expPars.count).")
@@ -194,7 +194,7 @@ class TypeCtx {
     switch act.kind {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
-      case .cmpd(let pars, _, _):
+      case .cmpd(let pars):
         for par in pars {
           if par.accessorString == accessor.accessorString {
             resolveSub(constraint,
@@ -212,15 +212,15 @@ class TypeCtx {
 
 
   func resolveConstraintToSig(_ constraint: Constraint, act: Type, exp: Type) {
-    guard case .sig(let expSig) = exp.kind else { fatalError() }
+    guard case .sig(let expSend, let expRet) = exp.kind else { fatalError() }
     switch act.kind {
-    case .sig(let actSig):
+    case .sig(let actSend, let actRet):
       resolveSub(constraint,
-        actType: actSig.send, actDesc: "signature parameter",
-        expType: expSig.send, expDesc: "signature parameter")
+        actType: actSend, actDesc: "signature send",
+        expType: expSend, expDesc: "signature send")
       resolveSub(constraint,
-        actType: actSig.ret, actDesc: "signature return",
-        expType: expSig.ret, expDesc: "signature return")
+        actType: actRet, actDesc: "signature return",
+        expType: expRet, expDesc: "signature return")
       return
     default: constraint.fail(act: act, exp: exp, "actual type is not a signature")
     }

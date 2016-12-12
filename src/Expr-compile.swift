@@ -96,7 +96,7 @@ extension Expr {
       let type = ctx.typeFor(expr: self)
       switch type.kind {
 
-      case .cmpd(let pars, _, _):
+      case .cmpd(let pars):
         em.str(depth, "{")
         var argIndex = 0
         for par in pars {

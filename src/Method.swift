@@ -28,13 +28,13 @@ class Method: Form { // method definition.
 
   func compileMethod(_ space: Space, polyFnType: Type, sigType: Type, hostName: String) {
     let sigTypeIndex = sigType.globalIndex
-    guard case .sig(let typeSig) = sigType.kind else { fatalError() }
+    guard case .sig(let send, let ret) = sigType.kind else { fatalError() }
     let fnScope = LocalScope(parent: space)
-    fnScope.addValRecord(name: "$", type: typeSig.send)
+    fnScope.addValRecord(name: "$", type: send)
     fnScope.addValRecord(name: "self", type: polyFnType)
     let ctx = TypeCtx()
     let type = genTypeConstraintsBody(ctx, fnScope, body: body)
-    ctx.constrain(form: body, type: type, expForm: sig.ret.form, expType: typeSig.ret, "method body")
+    ctx.constrain(form: body, type: type, expForm: sig.ret.form, expType: ret, "method body")
     ctx.resolve()
     let em = Emitter(file: space.file)
     em.str(0, "function \(hostName)__\(sigTypeIndex)($){ // \(sigType)")

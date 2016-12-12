@@ -19,7 +19,7 @@ class Sym: Form { // symbol: `name`.
 
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
-    case .cmpd(let pars, _, _):
+    case .cmpd(let pars):
       for par in pars {
         if let label = par.label {
           if name == label {

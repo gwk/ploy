@@ -1,14 +1,6 @@
 // © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-struct TypeSig {
-  let send: Type
-  let ret: Type
-  let frees: Set<Type>
-  let vars: Set<Type>
-}
-
-
 class Type: CustomStringConvertible, Hashable, Comparable {
 
   enum PropAccessor {
@@ -24,15 +16,15 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   enum Kind {
-    case all(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
-    case any(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
-    case cmpd(pars: [TypeField], frees: Set<Type>, vars: Set<Type>)
+    case all(members: Set<Type>)
+    case any(members: Set<Type>)
+    case cmpd(pars: [TypeField])
     case enum_ // TODO: vars
     case free(index: Int)
     case host
     case prim
     case prop(accessor: PropAccessor, type: Type)
-    case sig(TypeSig)
+    case sig(send: Type, ret: Type)
     case struct_ // TODO: vars
     case var_(name: String)
   }
@@ -42,30 +34,42 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   let description: String
   let kind: Kind
+  let frees: Set<Type>
+  let vars: Set<Type>
   let globalIndex: Int
 
-  private init(_ description: String, kind: Kind) {
+  private init(_ description: String, kind: Kind, frees: Set<Type> = [], vars: Set<Type> = []) {
     self.description = description
     self.kind = kind
+    self.frees = frees
+    self.vars = vars
     self.globalIndex = Type.allTypes.count
     assert(!Type.allTypes.contains(key: description), "type already exists with description: \(description)")
     Type.allTypes[description] = self
   }
 
-  class func memoize(_ description: String, _ kind: @autoclosure ()->Kind) -> Type {
-    return allTypes[description].or(Type(description, kind: kind()))
+  class func memoize(_ description: String, _ parts: @autoclosure ()->(kind: Kind, frees: Set<Type>, vars: Set<Type>)) -> Type {
+    if let memo = allTypes[description] {
+      return memo
+    }
+    let (kind, frees, vars) = parts()
+    let type = Type(description, kind: kind, frees: frees, vars: vars)
+    allTypes[description] = type
+    return type
   }
 
   class func All(_ members: Set<Type>) -> Type {
     let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    return memoize(description, .all(members: members,
+    return memoize(description, (
+      kind: .all(members: members),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
 
   class func Any_(_ members: Set<Type>) -> Type {
     let description = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    return memoize(description, .any(members: members,
+    return memoize(description, (
+      kind: .any(members: members),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -73,7 +77,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func Cmpd(_ pars: [TypeField]) -> Type {
     let descs = pars.map({$0.description}).joined(separator: " ")
     let description = "(\(descs))"
-    return memoize(description, .cmpd(pars: pars,
+    return memoize(description, (
+      kind: .cmpd(pars: pars),
       frees: Set(pars.flatMap { $0.type.frees }),
       vars: Set(pars.flatMap { $0.type.vars })))
   }
@@ -105,14 +110,18 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
     let description = ("\(accessor.accessorString)@\(type)")
-    return memoize(description, .prop(accessor: accessor, type: type))
+    return memoize(description, (
+      kind: .prop(accessor: accessor, type: type),
+      frees: type.frees,
+      vars: type.vars))
   }
 
   class func Sig(send: Type, ret: Type) -> Type {
     let description = "\(send.nestedSigDescription)%\(ret.nestedSigDescription)"
-    return memoize(description, .sig(TypeSig(send: send, ret: ret,
-      frees: Set(sequences: [send.frees, ret.frees]),
-      vars: Set(sequences: [send.vars, ret.vars]))))
+    return memoize(description, (
+      kind: .sig(send: send, ret: ret),
+      frees: send.frees.union(ret.frees),
+      vars: send.vars.union(ret.vars)))
   }
 
   class func Struct(spacePathNames names: [String], sym: Sym) -> Type {
@@ -132,38 +141,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
-  var frees: Set<Type> {
-    switch kind {
-    case .all(_ , let frees, _): return frees
-    case .any(_ , let frees, _): return frees
-    case .cmpd(_ , let frees, _): return frees
-    case .enum_: return []
-    case .free: return [] // does not return self.
-    case .host: return []
-    case .prim: return []
-    case .prop(_, let type): return type.frees
-    case .sig(let sig): return sig.frees
-    case .struct_: return []
-    case .var_: return []
-    }
-  }
-
-  var vars: Set<Type> {
-    switch kind {
-    case .all(_ , _, let vars): return vars
-    case .any(_ , _, let vars): return vars
-    case .cmpd(_ , _, let vars): return vars
-    case .enum_: return [] // TODO: vars.
-    case .free: return []
-    case .host: return []
-    case .prim: return []
-    case .prop(_, let type): return type.vars
-    case .sig(let sig): return sig.vars
-    case .struct_: return [] // TODO: vars.
-    case .var_: return [] // does not return self.
-    }
-  }
-
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var freeIndex: Int {
@@ -175,25 +152,24 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     // within the receiver type, replace target type with replacement, returning a new type.
     switch kind {
     case .free, .var_: return (self == target) ? replacement : self
-    case .all(let members, let frees, let vars):
-      if frees.contains(target) || vars.contains(target) {
-        return Type.All(Set(members.map { self.refine($0, with: replacement) }))
-      } else { return self }
-    case .any(let members, let frees, let vars):
-      if frees.contains(target) || vars.contains(target) {
-        return Type.Any_(Set(members.map { self.refine($0, with: replacement) }))
-      } else { return self }
-    case .cmpd(let pars, let frees, let vars):
-      if frees.contains(target) || vars.contains(target) {
-        return Type.Cmpd(pars.map() { self.refine(par: $0, replacement: replacement) })
-      } else { return self }
-    case .sig(let sig):
-      if sig.frees.contains(target) || sig.vars.contains(target) {
-        return Type.Sig(send: refine(sig.send, with: replacement), ret: refine(sig.ret, with: replacement))
-      } else { return self }
-    case .enum_: return self // TODO: vars.
-    case .struct_: return self // TODO: vars.
+    case .all, .any, .cmpd, .sig: break
     default: return self
+    }
+    if !frees.contains(target) && !vars.contains(target) {
+      return self
+    }
+    switch kind {
+    case .all(let members):
+      return Type.All(Set(members.map { self.refine($0, with: replacement) }))
+    case .any(let members):
+      return Type.Any_(Set(members.map { self.refine($0, with: replacement) }))
+    case .cmpd(let pars):
+      return Type.Cmpd(pars.map() { self.refine(par: $0, replacement: replacement) })
+    case .prop(let accessor, let type):
+      return Type.Prop(accessor, type: self.refine(type, with: replacement))
+    case .sig(let send, let ret):
+      return Type.Sig(send: refine(send, with: replacement), ret: refine(ret, with: replacement))
+    default: fatalError()
     }
   }
 
