@@ -104,6 +104,8 @@ class TypeCtx {
       } else {
         resolveType(resolved, to: freeType)
       }
+    } else {
+      resolveType(freeType, to: resolved)
     }
   }
 
