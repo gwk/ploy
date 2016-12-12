@@ -91,7 +91,7 @@ extension Expr {
         let type = paren.els[0].genTypeConstraints(ctx, scope)
         return type
       }
-      let pars = paren.els.enumerated().map { $1.typeParForArg(ctx, scope, index: $0) }
+      let pars = paren.els.enumerated().map { $1.typeFieldForArg(ctx, scope, index: $0) }
       let type = Type.Cmpd(pars)
       return type
 
@@ -125,7 +125,7 @@ extension Expr {
       }
       return Type.Cmpd(paren.els.enumerated().map {
         (index, par) in
-        return par.typeParForPar(scope, index: index)
+        return par.typeFieldForPar(scope, index: index)
       })
 
     case .path(let path):
@@ -146,17 +146,17 @@ extension Expr {
   }
 
 
-  func typeParForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypePar {
+  func typeFieldForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypeField {
     let val: Expr
     switch self {
       case .bind(let bind): val = bind.val
       default: val = self
     }
-    return TypePar(index: index, label: argLabel, type: val.genTypeConstraints(ctx, scope))
+    return TypeField(index: index, label: argLabel, type: val.genTypeConstraints(ctx, scope))
   }
 
 
-  func typeParForPar(_ scope: Scope, index: Int) -> TypePar {
+  func typeFieldForPar(_ scope: Scope, index: Int) -> TypeField {
       var label: Sym? = nil
       var type: Type
 
@@ -185,7 +185,7 @@ extension Expr {
         let typeExpr = Expr(form: form, subj: "parameter type")
         type = typeExpr.type(scope, "parameter type")
       }
-      return TypePar(index: index, label: label, type: type)
+      return TypeField(index: index, label: label, type: type)
   }
 }
 

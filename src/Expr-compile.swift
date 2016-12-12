@@ -161,7 +161,7 @@ func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail
 }
 
 
-func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, paren: Paren, argIndex: inout Int) {
+func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypeField, paren: Paren, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr

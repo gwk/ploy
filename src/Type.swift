@@ -18,7 +18,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   enum Kind {
     case all(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
     case any(members: Set<Type>, frees: Set<Type>, vars: Set<Type>)
-    case cmpd(pars: [TypePar], frees: Set<Type>, vars: Set<Type>)
+    case cmpd(pars: [TypeField], frees: Set<Type>, vars: Set<Type>)
     case enum_ // TODO: vars
     case free(index: Int)
     case host
@@ -62,7 +62,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: Set(members.flatMap { $0.vars })))
   }
 
-  class func Cmpd(_ pars: [TypePar]) -> Type {
+  class func Cmpd(_ pars: [TypeField]) -> Type {
     let description = "<\(pars.map({$0.description}).joined(separator: " "))>"
     return memoize(description, .cmpd(pars: pars,
       frees: Set(pars.flatMap { $0.type.frees }),
@@ -198,9 +198,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
-  private func refine(par: TypePar, replacement: Type) -> TypePar {
+  private func refine(par: TypeField, replacement: Type) -> TypeField {
     let type = refine(par.type, with: replacement)
-    return (type == par.type) ? par : TypePar(index: par.index, label: par.label, type: type)
+    return (type == par.type) ? par : TypeField(index: par.index, label: par.label, type: type)
   }
 }
 
