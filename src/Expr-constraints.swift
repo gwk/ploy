@@ -85,7 +85,7 @@ extension Expr {
       return type
 
     case .paren(let paren):
-      if paren.isUnary {
+      if paren.isTrivial {
         let type = paren.els[0].genTypeConstraints(ctx, scope)
         return type
       }
@@ -118,7 +118,7 @@ extension Expr {
     switch self {
 
     case .paren(let paren):
-      if paren.isUnary {
+      if paren.isTrivial {
         return paren.els[0].type(scope, subj)
       }
       return Type.Cmpd(paren.els.enumerated().map {

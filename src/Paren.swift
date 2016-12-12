@@ -18,7 +18,9 @@ class Paren: Form { // parenthesized expression: `(a b)`.
 
   // MARK: Cmpd
 
-  var isUnary: Bool  { return els.count == 1 }
+  var isTrivial: Bool {
+    return els.count == 1 && els[0].label == nil
+  }
 
   func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, argIndex: inout Int) {
     if argIndex < els.count {

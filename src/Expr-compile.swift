@@ -108,7 +108,7 @@ extension Expr {
         em.append("}")
 
       default:
-        if !paren.isUnary {
+        if !paren.isTrivial {
           paren.failType("expected type: \(type); received compound value.")
         }
         paren.els[0].compile(ctx, em, depth, isTail: isTail)
