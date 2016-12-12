@@ -92,8 +92,8 @@ extension Expr {
         let type = paren.els[0].genTypeConstraints(ctx, scope)
         return type
       }
-      let pars = paren.els.enumerated().map { $1.typeFieldForArg(ctx, scope, index: $0) }
-      let type = Type.Cmpd(pars)
+      let fields = paren.els.enumerated().map { $1.typeFieldForArg(ctx, scope, index: $0) }
+      let type = Type.Cmpd(fields)
       return type
 
     case .path(let path):

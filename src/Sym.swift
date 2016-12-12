@@ -19,15 +19,15 @@ class Sym: Form { // symbol: `name`.
 
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
-    case .cmpd(let pars):
-      for par in pars {
-        if let label = par.label {
+    case .cmpd(let fields):
+      for field in fields {
+        if let label = field.label {
           if name == label {
-            return par.type
+            return field.type
           }
         }
       }
-      failType("symbol accessor does not match any parameter label of compound type: \(accesseeType)")
+      failType("symbol accessor does not match any field label of compound type: \(accesseeType)")
     default:
       failType("symbol cannot access into value of type: \(accesseeType)")
     }

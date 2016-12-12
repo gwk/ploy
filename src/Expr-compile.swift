@@ -96,14 +96,14 @@ extension Expr {
       let type = ctx.typeFor(expr: self)
       switch type.kind {
 
-      case .cmpd(let pars):
+      case .cmpd(let fields):
         em.str(depth, "{")
         var argIndex = 0
-        for par in pars {
-          compileCmpdField(ctx, em, depth, paren: paren, par: par, argIndex: &argIndex)
+        for field in fields {
+          compileCmpdField(ctx, em, depth, paren: paren, field: field, argIndex: &argIndex)
         }
-        if argIndex != pars.count {
-          paren.failType("expected \(pars.count) arguments; received \(argIndex)")
+        if argIndex != fields.count {
+          paren.failType("expected \(fields.count) arguments; received \(argIndex)")
         }
         em.append("}")
 
@@ -161,7 +161,7 @@ func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail
 }
 
 
-func compileCmpdField(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren, par: TypeField, argIndex: inout Int) {
+func compileCmpdField(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren, field: TypeField, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr
@@ -169,18 +169,18 @@ func compileCmpdField(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren,
 
     case .bind(let bind):
       let argLabel = bind.place.sym.name
-      if let parLabel = par.label {
-        if argLabel != parLabel {
-          bind.place.sym.failType("argument label does not match parameter label `(parLabel)`")
+      if let label = field.label {
+        if argLabel != label {
+          bind.place.sym.failType("argument label does not match type field label `(label)`")
         }
       } else {
-        bind.place.sym.failType("argument label does not match unlabeled parameter")
+        bind.place.sym.failType("argument label does not match unlabeled type field")
       }
       val = bind.val
 
     default: val = arg
     }
-    em.str(depth, " \(par.hostName):")
+    em.str(depth, " \(field.hostName):")
     val.compile(ctx, em, depth + 1, isTail: false)
     em.append(",")
     argIndex += 1

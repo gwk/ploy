@@ -164,24 +164,24 @@ class TypeCtx {
 
 
   func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type) {
-    guard case .cmpd(let expPars) = exp.kind else { fatalError() }
+    guard case .cmpd(let expFields) = exp.kind else { fatalError() }
 
     switch act.kind {
 
-    case .cmpd(let actPars):
-      if expPars.count != actPars.count {
-        let actFields = pluralize(actPars.count, "field")
-        constraint.fail(act: act, exp: exp, "actual compound type has \(actFields); expected \(expPars.count).")
+    case .cmpd(let actFields):
+      if expFields.count != actFields.count {
+        let actFields = pluralize(actFields.count, "field")
+        constraint.fail(act: act, exp: exp, "actual compound type has \(actFields); expected \(expFields.count).")
       }
-      for (actPar, expPar) in zip(actPars, expPars) {
-        if actPar.label != expPar.label {
+      for (actField, expField) in zip(actFields, expFields) {
+        if actField.label != expField.label {
           constraint.fail(act: act, exp: exp,
-            "compound field #\(actPar.index) has \(actPar.labelMsg); expected \(expPar.labelMsg).")
+            "compound field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg).")
         }
-        let index = actPar.index
+        let index = actField.index
         resolveSub(constraint,
-          actType: actPar.type, actDesc: "compound field \(index)",
-          expType: expPar.type, expDesc: "compound field \(index)")
+          actType: actField.type, actDesc: "compound field \(index)",
+          expType: expField.type, expDesc: "compound field \(index)")
       }
       return
 
@@ -194,11 +194,11 @@ class TypeCtx {
     switch act.kind {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
-      case .cmpd(let pars):
-        for par in pars {
-          if par.accessorString == accessor.accessorString {
+      case .cmpd(let fields):
+        for field in fields {
+          if field.accessorString == accessor.accessorString {
             resolveSub(constraint,
-              actType: par.type, actDesc: "`\(par.accessorString)` property",
+              actType: field.type, actDesc: "`\(field.accessorString)` property",
               expType: exp, expDesc: nil)
             return
           }

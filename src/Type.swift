@@ -18,7 +18,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   enum Kind {
     case all(members: Set<Type>)
     case any(members: Set<Type>)
-    case cmpd(pars: [TypeField])
+    case cmpd(fields: [TypeField])
     case enum_ // TODO: vars
     case free(index: Int)
     case host
@@ -74,13 +74,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: Set(members.flatMap { $0.vars })))
   }
 
-  class func Cmpd(_ pars: [TypeField]) -> Type {
-    let descs = pars.map({$0.description}).joined(separator: " ")
+  class func Cmpd(_ fields: [TypeField]) -> Type {
+    let descs = fields.map({$0.description}).joined(separator: " ")
     let description = "(\(descs))"
     return memoize(description, (
-      kind: .cmpd(pars: pars),
-      frees: Set(pars.flatMap { $0.type.frees }),
-      vars: Set(pars.flatMap { $0.type.vars })))
+      kind: .cmpd(fields: fields),
+      frees: Set(fields.flatMap { $0.type.frees }),
+      vars: Set(fields.flatMap { $0.type.vars })))
   }
 
   class func Enum(spacePathNames names: [String], sym: Sym) -> Type {
@@ -163,8 +163,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       return Type.All(Set(members.map { self.refine($0, with: replacement) }))
     case .any(let members):
       return Type.Any_(Set(members.map { self.refine($0, with: replacement) }))
-    case .cmpd(let pars):
-      return Type.Cmpd(pars.map() { self.refine(par: $0, replacement: replacement) })
+    case .cmpd(let fields):
+      return Type.Cmpd(fields.map() { self.refine(par: $0, replacement: replacement) })
     case .prop(let accessor, let type):
       return Type.Prop(accessor, type: self.refine(type, with: replacement))
     case .sig(let send, let ret):
