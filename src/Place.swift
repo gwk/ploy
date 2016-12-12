@@ -7,15 +7,15 @@ enum Place: SubForm { // left side of a binding.
   case sym(Sym)
 
   init(form: Form, subj: String) {
-    if let form = form as? Ann {
+    switch form {
+    case let form as Ann:
       guard case .sym = form.expr else {
         let expr = form.expr
         form.failSyntax("\(subj) annnoted place expects symbol but received \(expr.form.syntaxName).")
       }
       self = .ann(form)
-    } else if let form = form as? Sym {
-      self = .sym(form)
-    } else {
+    case let form as Sym: self = .sym(form)
+    default:
       form.failSyntax("\(subj) expects symbol or annotated symbol but received \(form.syntaxName).")
     }
   }

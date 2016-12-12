@@ -7,11 +7,10 @@ enum Clause: SubForm {
   case default_(Default)
 
   init(form: Form, subj: String) {
-    if let form = form as? Case {
-      self = .case_(form)
-    } else if let form = form as? Default {
-      self = .default_(form)
-    } else {
+    switch form {
+    case let form as Case:    self = .case_(form)
+    case let form as Default: self = .default_(form)
+    default:
       form.failSyntax("\(subj) expects case (`cond ? expr`) or default (`/ expr`) but received \(form.syntaxName).")
     }
   }

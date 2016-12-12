@@ -20,23 +20,24 @@ enum Expr: SubForm {
   case sym(Sym)
 
   init(form: Form, subj: String, exp: String) {
-    if let form = form as? Acc            { self = .acc(form) }
-    else if let form = form as? Ann       { self = .ann(form) }
-    else if let form = form as? Bind      { self = .bind(form) }
-    else if let form = form as? Call      { self = .call(form) }
-    //else if let form = form as? CmpdType  { self = .cmpdType(form) }
-    else if let form = form as? Do        { self = .do_(form) }
-    else if let form = form as? Fn        { self = .fn(form) }
-    else if let form = form as? HostVal   { self = .hostVal(form) }
-    else if let form = form as? If        { self = .if_(form) }
-    else if let form = form as? LitNum    { self = .litNum(form) }
-    else if let form = form as? LitStr    { self = .litStr(form) }
-    else if let form = form as? Paren     { self = .paren(form) }
-    else if let form = form as? Path      { self = .path(form) }
-    else if let form = form as? Reify     { self = .reify(form) }
-    else if let form = form as? Sig       { self = .sig(form) }
-    else if let form = form as? Sym       { self = .sym(form) }
-    else {
+    switch form {
+    case let form as Acc:     self = .acc(form)
+    case let form as Ann:     self = .ann(form)
+    case let form as Bind:    self = .bind(form)
+    case let form as Call:    self = .call(form)
+    //case let form asCmpdType: self = .cmpdType(form)
+    case let form as Do:      self = .do_(form)
+    case let form as Fn:      self = .fn(form)
+    case let form as HostVal: self = .hostVal(form)
+    case let form as If:      self = .if_(form)
+    case let form as LitNum:  self = .litNum(form)
+    case let form as LitStr:  self = .litStr(form)
+    case let form as Paren:   self = .paren(form)
+    case let form as Path:    self = .path(form)
+    case let form as Reify:   self = .reify(form)
+    case let form as Sig:     self = .sig(form)
+    case let form as Sym:     self = .sym(form)
+    default:
       form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
     }
   }

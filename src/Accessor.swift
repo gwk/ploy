@@ -7,11 +7,10 @@ enum Accessor: SubForm {
   case sym(Sym)
 
   init(form: Form, subj: String) {
-    if let form = form as? LitNum {
-      self = .litNum(form)
-    } else if let form = form as? Sym {
-      self = .sym(form)
-    } else {
+    switch form {
+    case let form as LitNum:  self = .litNum(form)
+    case let form as Sym:     self = .sym(form)
+    default:
       form.failSyntax("\(subj) expects accessor symbol or number literal but received \(form.syntaxName).")
     }
   }

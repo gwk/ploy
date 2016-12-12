@@ -15,15 +15,16 @@ enum Def: SubForm {
   case struct_(Struct)
 
   init(form: Form, subj: String) {
-    if let form = form as? Bind           { self = .bind(form) }
-    else if let form = form as? Enum      { self = .enum_(form) }
-    else if let form = form as? HostType  { self = .hostType(form) }
-    else if let form = form as? In        { self = .in_(form) }
-    else if let form = form as? Method    { self = .method(form) }
-    else if let form = form as? PolyFn    { self = .polyFn(form) }
-    else if let form = form as? Pub       { self = .pub(form) }
-    else if let form = form as? Struct    { self = .struct_(form) }
-    else {
+    switch form {
+    case let form as Bind:      self = .bind(form)
+    case let form as Enum:      self = .enum_(form)
+    case let form as HostType:  self = .hostType(form)
+    case let form as In:        self = .in_(form)
+    case let form as Method:    self = .method(form)
+    case let form as PolyFn:    self = .polyFn(form)
+    case let form as Pub:       self = .pub(form)
+    case let form as Struct:    self = .struct_(form)
+    default:
       form.failSyntax("\(subj) expects definition but received \(form.syntaxName).")
     }
   }
