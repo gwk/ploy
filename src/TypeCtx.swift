@@ -174,7 +174,7 @@ class TypeCtx {
         constraint.fail(act: act, exp: exp, "actual compound type has \(actFields); expected \(expPars.count).")
       }
       for (actPar, expPar) in zip(actPars, expPars) {
-        if actPar.label?.name != expPar.label?.name {
+        if actPar.label != expPar.label {
           constraint.fail(act: act, exp: exp,
             "compound field #\(actPar.index) has \(actPar.labelMsg); expected \(expPar.labelMsg).")
         }

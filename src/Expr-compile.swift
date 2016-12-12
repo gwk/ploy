@@ -100,7 +100,7 @@ extension Expr {
         em.str(depth, "{")
         var argIndex = 0
         for par in pars {
-          compilePar(ctx, em, depth, par: par, paren: paren, argIndex: &argIndex)
+          compileCmpdField(ctx, em, depth, paren: paren, par: par, argIndex: &argIndex)
         }
         if argIndex != pars.count {
           paren.failType("expected \(pars.count) arguments; received \(argIndex)")
@@ -161,20 +161,20 @@ func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail
 }
 
 
-func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypeField, paren: Paren, argIndex: inout Int) {
+func compileCmpdField(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren, par: TypeField, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr
     switch arg {
 
     case .bind(let bind):
-      let argLabel = bind.place.sym
+      let argLabel = bind.place.sym.name
       if let parLabel = par.label {
-        if argLabel.name != parLabel.name {
-          argLabel.failType("argument label does not match parameter label", notes: (parLabel, "parameter label"))
+        if argLabel != parLabel {
+          bind.place.sym.failType("argument label does not match parameter label `(parLabel)`")
         }
       } else {
-        argLabel.failType("argument label does not match unlabeled parameter", notes: (arg.form, "unlabeled parameter"))
+        bind.place.sym.failType("argument label does not match unlabeled parameter")
       }
       val = bind.val
 

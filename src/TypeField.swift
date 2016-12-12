@@ -4,18 +4,18 @@
 class TypeField: CustomStringConvertible {
 
   let index: Int
-  let label: Sym?
+  let label: String?
   let type: Type
 
   var labelMsg: String {
     if let label = label {
-      return "label `\(label.name)`"
+      return "label `\(label)`"
      } else {
        return "no label"
      }
   }
 
-  init(index: Int, label: Sym?, type: Type) {
+  init(index: Int, label: String?, type: Type) {
     self.index = index
     self.label = label
     self.type = type
@@ -23,13 +23,13 @@ class TypeField: CustomStringConvertible {
 
   var description: String {
     if let label = label {
-      return "\(label.name):\(type)"
+      return "\(label):\(type)"
     } else {
       return type.description
     }
   }
 
-  var accessorString: String { return (label?.name).or(String(index)) }
+  var accessorString: String { return label.or(String(index)) }
 
-  var hostName: String { return (label?.name).or("_\(index)") }
+  var hostName: String { return label.or("_\(index)") }
 }

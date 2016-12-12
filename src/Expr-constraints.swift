@@ -158,7 +158,7 @@ extension Expr {
 
 
   func typeFieldForPar(_ scope: Scope, index: Int) -> TypeField {
-      var label: Sym? = nil
+      var label: String? = nil
       var type: Type
 
       switch self {
@@ -166,7 +166,7 @@ extension Expr {
         guard case .sym(let sym) = ann.expr else {
           ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
         }
-        label = sym
+        label = sym.name
         type = ann.typeExpr.type(scope, "parameter annotated type")
 
       case .bind(let bind):
@@ -175,7 +175,7 @@ extension Expr {
           guard case .sym(let sym) = ann.expr else {
             ann.expr.form.failSyntax("annotated default parameter requires a label symbol.")
           }
-          label = sym
+          label = sym.name
           type = ann.typeExpr.type(scope, "default parameter annotated type")
         case .sym(let sym):
           // TODO: for now assume the sym refers to a type. This is going to change.

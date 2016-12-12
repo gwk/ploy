@@ -67,18 +67,18 @@ enum Expr: SubForm {
     }
   }
 
-  var argLabel: Sym? {
+  var argLabel: String? {
     switch self {
-    case .bind(let bind): return bind.place.sym
+    case .bind(let bind): return bind.place.sym.name
     default: return nil
     }
   }
 
-  var parLabel: Sym? {
+  var parLabel: String? {
     switch self {
     case .ann(let ann): return ann.parLabel
-    case .bind(let bind): return bind.place.sym
-    case .sym(let sym): return sym
+    case .bind(let bind): return bind.place.sym.name
+    case .sym(let sym): return sym.name
     default: return nil
     }
   }

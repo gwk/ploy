@@ -22,7 +22,7 @@ class Sym: Form { // symbol: `name`.
     case .cmpd(let pars, _, _):
       for par in pars {
         if let label = par.label {
-          if name == label.name {
+          if name == label {
             return par.type
           }
         }
