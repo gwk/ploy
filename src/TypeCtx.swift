@@ -159,17 +159,17 @@ class TypeCtx {
       switch actType.kind {
       case .cmpd(let actPars, _, _):
         if expPars.count != actPars.count {
-          let actFields = pluralize(actPars.count, "fields")
+          let actFields = pluralize(actPars.count, "field")
           constraint.fail(act: actType, exp: expType, "actual compound type has \(actFields); expected \(expPars.count).")
         }
         for (actPar, expPar) in zip(actPars, expPars) {
-          if actPar.label != expPar.label {
+          if actPar.label?.name != expPar.label?.name {
             constraint.fail(act: actType, exp: expType,
-              "compound type field #\(actPar.index) has \(actPar.labelMsg); expected \(actPar.labelMsg).")
+              "compound field #\(actPar.index) has \(actPar.labelMsg); expected \(expPar.labelMsg).")
           }
           let index = actPar.index
           resolveSub(constraint,
-            actType: actPar.type, actDesc: "compound field\(index)",
+            actType: actPar.type, actDesc: "compound field \(index)",
             expType: expPar.type, expDesc: "compound field \(index)")
         }
         return

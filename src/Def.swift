@@ -43,7 +43,7 @@ enum Def: SubForm {
 
   var sym: Sym {
     switch self {
-    case .bind(let bind): return bind.sym
+    case .bind(let bind): return bind.place.sym
     case .enum_(let enum_): return enum_.sym
     case .hostType(let hostType): return hostType.sym
     case .in_: fatalError("INTERNAL ERROR: In is not an individual definition; sym should never be called.")

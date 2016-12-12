@@ -24,6 +24,4 @@ class Bind: Form { // value binding: `name=expr`.
     place.write(to: &stream, depth + 1)
     val.write(to: &stream, depth + 1)
   }
-
-  var sym: Sym { return place.sym }
 }

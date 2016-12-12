@@ -22,4 +22,11 @@ class Ann: Form { // annotation: `expr:Type`.
     expr.write(to: &stream, depth + 1)
     typeExpr.write(to: &stream, depth + 1)
   }
+
+  var parLabel: Sym? {
+    switch expr {
+    case .sym(let sym): return sym
+    default: return nil
+    }
+  }
 }

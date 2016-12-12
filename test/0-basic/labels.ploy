@@ -1,0 +1,12 @@
+
+f = fn (x:Int)%Int x@$;
+
+g = fn (x:Int y:Int)%() {
+  outL_Int.x@$
+  outL_Int.y@$
+};
+
+main = {
+  outL_Int.f(x=0)
+  g(x=0 y=1)
+}

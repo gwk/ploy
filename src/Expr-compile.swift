@@ -28,7 +28,7 @@ extension Expr {
       ann.expr.compile(ctx, em, depth, isTail: isTail)
 
     case .bind(let bind):
-      em.str(depth, "let \(bind.sym.hostName) =")
+      em.str(depth, "let \(bind.place.sym.hostName) =")
       bind.val.compile(ctx, em, depth + 1, isTail: false)
 
     case .call(let call):
@@ -100,7 +100,7 @@ extension Expr {
         em.str(depth, "{")
         var argIndex = 0
         for par in pars {
-          paren.compilePar(ctx, em, depth, par: par, argIndex: &argIndex)
+          compilePar(ctx, em, depth, par: par, paren: paren, argIndex: &argIndex)
         }
         if argIndex != pars.count {
           paren.failType("expected \(pars.count) arguments; received \(argIndex)")
@@ -108,7 +108,7 @@ extension Expr {
         em.append("}")
 
       default:
-        if !paren.isTrivial {
+        if !paren.isScalarType {
           paren.failType("expected type: \(type); received compound value.")
         }
         paren.els[0].compile(ctx, em, depth, isTail: isTail)
@@ -157,5 +157,34 @@ func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail
     }
     expr.compile(ctx, em, depth, isTail: isLast && isTail)
     em.append(isLast ? ")" : ";")
+  }
+}
+
+
+func compilePar(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, par: TypePar, paren: Paren, argIndex: inout Int) {
+  if argIndex < paren.els.count {
+    let arg = paren.els[argIndex]
+    let val: Expr
+    switch arg {
+
+    case .bind(let bind):
+      let argLabel = bind.place.sym
+      if let parLabel = par.label {
+        if argLabel.name != parLabel.name {
+          argLabel.failType("argument label does not match parameter label", notes: (parLabel, "parameter label"))
+        }
+      } else {
+        argLabel.failType("argument label does not match unlabeled parameter", notes: (arg.form, "unlabeled parameter"))
+      }
+      val = bind.val
+
+    default: val = arg
+    }
+    em.str(depth, " \(par.hostName):")
+    val.compile(ctx, em, depth + 1, isTail: false)
+    em.append(",")
+    argIndex += 1
+  } else { // TODO: support default arguments.
+    paren.failType("missing argument for parameter")
   }
 }

@@ -1,5 +1,7 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
+import Quilt
+
 
 extension Expr {
 
@@ -24,9 +26,9 @@ extension Expr {
       return type
 
     case .bind(let bind):
-      _ = scope.addRecord(sym: bind.sym, kind: .fwd)
+      _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
       let exprType = bind.val.genTypeConstraints(ctx, scope)
-      _ = scope.addRecord(sym: bind.sym, kind: .val(exprType))
+      _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
       return typeVoid
 
     case .call(let call):
@@ -85,7 +87,7 @@ extension Expr {
       return type
 
     case .paren(let paren):
-      if paren.isTrivial {
+      if paren.isScalarValue {
         let type = paren.els[0].genTypeConstraints(ctx, scope)
         return type
       }
@@ -118,7 +120,7 @@ extension Expr {
     switch self {
 
     case .paren(let paren):
-      if paren.isTrivial {
+      if paren.isScalarType {
         return paren.els[0].type(scope, subj)
       }
       return Type.Cmpd(paren.els.enumerated().map {
@@ -145,7 +147,12 @@ extension Expr {
 
 
   func typeParForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypePar {
-    return TypePar(index: index, label: label, type: genTypeConstraints(ctx, scope))
+    let val: Expr
+    switch self {
+      case .bind(let bind): val = bind.val
+      default: val = self
+    }
+    return TypePar(index: index, label: argLabel, type: val.genTypeConstraints(ctx, scope))
   }
 
 
