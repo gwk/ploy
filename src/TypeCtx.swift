@@ -110,7 +110,87 @@ class TypeCtx {
   }
 
 
-  func resolveOpaqueConstraint(_ constraint: Constraint, actType: Type, expOpaqueType: Type) {
+  func resolveConstraint(_ constraint: Constraint) {
+    let actType = resolvedType(constraint.actType)
+    let expType = resolvedType(constraint.expType)
+    if (actType == expType) {
+      return
+    }
+
+    switch actType.kind {
+
+    case .free:
+      resolveFreeType(actType, to: expType)
+      return
+
+    default: break
+    }
+
+    switch expType.kind {
+
+    case .all(_, _, _):
+      constraint.fail(act: actType, exp: expType, "expected type of kind `All` not yet implemented")
+
+    case .any(let members, _, _):
+      if !members.contains(actType) {
+        constraint.fail(act: actType, exp: expType, "actual type is not a member of `Any` expected type")
+      }
+
+    case .cmpd:
+      resolveConstraintToCmpd(constraint, actType: actType, expType: expType)
+
+    case .enum_:
+      constraint.fail(act: actType, exp: expType, "enum constraints not implemented")
+
+    case .free:
+      resolveType(expType, to: actType)
+
+    case .host, .prim:
+      resolveConstraintToOpaque(constraint, actType: actType, expOpaqueType: expType)
+
+    case .prop(_, _):
+      constraint.fail(act: actType, exp: expType, "prop constraints not implemented")
+
+    case .sig:
+      resolveConstraintToSig(constraint, act: actType, exp: expType)
+
+    case .struct_:
+      constraint.fail(act: actType, exp: expType, "struct constraints not implemented")
+
+    case .var_:
+      constraint.fail(act: actType, exp: expType, "var constraints not implemented")
+    }
+  }
+
+
+  func resolveConstraintToCmpd(_ constraint: Constraint, actType: Type, expType: Type) {
+    guard case .cmpd(let expPars, _, _) = expType.kind else { fatalError() }
+
+    switch actType.kind {
+
+    case .cmpd(let actPars, _, _):
+      if expPars.count != actPars.count {
+        let actFields = pluralize(actPars.count, "field")
+        constraint.fail(act: actType, exp: expType, "actual compound type has \(actFields); expected \(expPars.count).")
+      }
+      for (actPar, expPar) in zip(actPars, expPars) {
+        if actPar.label?.name != expPar.label?.name {
+          constraint.fail(act: actType, exp: expType,
+            "compound field #\(actPar.index) has \(actPar.labelMsg); expected \(expPar.labelMsg).")
+        }
+        let index = actPar.index
+        resolveSub(constraint,
+          actType: actPar.type, actDesc: "compound field \(index)",
+          expType: expPar.type, expDesc: "compound field \(index)")
+      }
+      return
+
+    default: constraint.fail(act: actType, exp: expType, "actual type is not a compound")
+    }
+  }
+
+
+  func resolveConstraintToOpaque(_ constraint: Constraint, actType: Type, expOpaqueType: Type) {
     switch actType.kind {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
@@ -131,80 +211,19 @@ class TypeCtx {
   }
 
 
-  func resolveConstraint(_ constraint: Constraint) {
-    let actType = resolvedType(constraint.actType)
-    let expType = resolvedType(constraint.expType)
-    if (actType == expType) {
+  func resolveConstraintToSig(_ constraint: Constraint, act: Type, exp: Type) {
+    guard case .sig(let expSig) = exp.kind else { fatalError() }
+    switch act.kind {
+    case .sig(let actSig):
+      resolveSub(constraint,
+        actType: actSig.send, actDesc: "signature parameter",
+        expType: expSig.send, expDesc: "signature parameter")
+      resolveSub(constraint,
+        actType: actSig.ret, actDesc: "signature return",
+        expType: expSig.ret, expDesc: "signature return")
       return
+    default: constraint.fail(act: act, exp: exp, "actual type is not a signature")
     }
-
-    // TODO: unclear if it is better to start with actual or expected cases.
-    // current strategy is to whittle down actual first.
-    switch actType.kind {
-
-    //case .all(let members, _, _): break // TODO.
-
-    case .free:
-      resolveFreeType(actType, to: expType)
-      return
-
-    default: break
-    }
-
-    switch expType.kind {
-    case .all(_, _, _):
-      constraint.fail(act: actType, exp: expType, "expected type of kind `All` not yet implemented")
-    case .any(let members, _, _):
-      if members.contains(actType) { return }
-      constraint.fail(act: actType, exp: expType, "actual type is not a member of `Any_` expected type")
-    case .cmpd(let expPars, _, _):
-      switch actType.kind {
-      case .cmpd(let actPars, _, _):
-        if expPars.count != actPars.count {
-          let actFields = pluralize(actPars.count, "field")
-          constraint.fail(act: actType, exp: expType, "actual compound type has \(actFields); expected \(expPars.count).")
-        }
-        for (actPar, expPar) in zip(actPars, expPars) {
-          if actPar.label?.name != expPar.label?.name {
-            constraint.fail(act: actType, exp: expType,
-              "compound field #\(actPar.index) has \(actPar.labelMsg); expected \(expPar.labelMsg).")
-          }
-          let index = actPar.index
-          resolveSub(constraint,
-            actType: actPar.type, actDesc: "compound field \(index)",
-            expType: expPar.type, expDesc: "compound field \(index)")
-        }
-        return
-      default: constraint.fail(act: actType, exp: expType, "actual type is not a compound")
-      }
-    case .enum_:
-      constraint.fail(act: actType, exp: expType, "enum constraints not implemented")
-    case .free:
-      resolveType(expType, to: actType)
-      return
-    case .host, .prim:
-      resolveOpaqueConstraint(constraint, actType: actType, expOpaqueType: expType)
-      return
-    case .prop(_, _):
-      constraint.fail(act: actType, exp: expType, "prop constraints not implemented")
-    case .sig(let expSig):
-      switch actType.kind {
-      case .sig(let actSig):
-        resolveSub(constraint,
-          actType: actSig.send, actDesc: "signature parameter",
-          expType: expSig.send, expDesc: "signature parameter")
-        resolveSub(constraint,
-          actType: actSig.ret, actDesc: "signature return",
-          expType: expSig.ret, expDesc: "signature return")
-        return
-      default: constraint.fail(act: actType, exp: expType, "actual type is not a signature")
-      }
-    case .struct_:
-      constraint.fail(act: actType, exp: expType, "struct constraints not implemented")
-    case .var_:
-      constraint.fail(act: actType, exp: expType, "var constraints not implemented")
-    }
-    fatalError("resolveConstraint case not implemented;\n  actType: \(actType)\n  expType: \(expType)\n")
   }
 
 
@@ -212,16 +231,6 @@ class TypeCtx {
     resolveConstraint(constraint.subConstraint(
       actType: actType, actDesc: actDesc,
       expType: expType, expDesc: expDesc))
-  }
-
-
-  func resolveSig(constraint: Constraint, act: TypeSig, exp: TypeSig) {
-    resolveSub(constraint,
-      actType: act.send, actDesc: "signature parameter",
-      expType: exp.send, expDesc: "signature parameter")
-    resolveSub(constraint,
-      actType: act.ret, actDesc: "signature return",
-      expType: exp.ret, expDesc: "signature return")
   }
 
 
