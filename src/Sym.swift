@@ -13,6 +13,10 @@ class Sym: Form { // symbol: `name`.
     writeHead(to: &stream, depth, ": \(name)\n")
   }
 
+  // MARK: Sym
+
+  var hostName: String { return name }
+
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
     case .cmpd(let pars, _, _):
@@ -28,10 +32,6 @@ class Sym: Form { // symbol: `name`.
       failType("symbol cannot access into value of type: \(accesseeType)")
     }
   }
-
-  // MARK: Sym
-
-  var hostName: String { return name }
 
   func typeForExprRecord(_ scopeRecord: ScopeRecord) -> Type {
     switch scopeRecord.kind {

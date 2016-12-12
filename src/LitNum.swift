@@ -15,6 +15,8 @@ class LitNum: Form { // numeric literal: `0`.
     writeHead(to: &stream, depth, ": \(val)\n")
   }
 
+  // MARK: LitNum.
+
   func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
     case .cmpd(let pars, _, _):
