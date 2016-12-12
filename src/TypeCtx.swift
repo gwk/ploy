@@ -111,71 +111,71 @@ class TypeCtx {
 
 
   func resolveConstraint(_ constraint: Constraint) {
-    let actType = resolvedType(constraint.actType)
-    let expType = resolvedType(constraint.expType)
-    if (actType == expType) {
+    let act = resolvedType(constraint.actType)
+    let exp = resolvedType(constraint.expType)
+    if (act == exp) {
       return
     }
 
-    switch actType.kind {
+    switch act.kind {
 
     case .free:
-      resolveFreeType(actType, to: expType)
+      resolveFreeType(act, to: exp)
       return
 
     default: break
     }
 
-    switch expType.kind {
+    switch exp.kind {
 
     case .all(_, _, _):
-      constraint.fail(act: actType, exp: expType, "expected type of kind `All` not yet implemented")
+      constraint.fail(act: act, exp: exp, "expected type of kind `All` not yet implemented")
 
     case .any(let members, _, _):
-      if !members.contains(actType) {
-        constraint.fail(act: actType, exp: expType, "actual type is not a member of `Any` expected type")
+      if !members.contains(act) {
+        constraint.fail(act: act, exp: exp, "actual type is not a member of `Any` expected type")
       }
 
     case .cmpd:
-      resolveConstraintToCmpd(constraint, actType: actType, expType: expType)
+      resolveConstraintToCmpd(constraint, act: act, exp: exp)
 
     case .enum_:
-      constraint.fail(act: actType, exp: expType, "enum constraints not implemented")
+      constraint.fail(act: act, exp: exp, "enum constraints not implemented")
 
     case .free:
-      resolveType(expType, to: actType)
+      resolveType(exp, to: act)
 
     case .host, .prim:
-      resolveConstraintToOpaque(constraint, actType: actType, expOpaqueType: expType)
+      resolveConstraintToOpaque(constraint, act: act, exp: exp)
 
     case .prop(_, _):
-      constraint.fail(act: actType, exp: expType, "prop constraints not implemented")
+      constraint.fail(act: act, exp: exp, "prop constraints not implemented")
 
     case .sig:
-      resolveConstraintToSig(constraint, act: actType, exp: expType)
+      resolveConstraintToSig(constraint, act: act, exp: exp)
 
     case .struct_:
-      constraint.fail(act: actType, exp: expType, "struct constraints not implemented")
+      constraint.fail(act: act, exp: exp, "struct constraints not implemented")
 
     case .var_:
-      constraint.fail(act: actType, exp: expType, "var constraints not implemented")
+      constraint.fail(act: act, exp: exp, "var constraints not implemented")
     }
   }
 
 
-  func resolveConstraintToCmpd(_ constraint: Constraint, actType: Type, expType: Type) {
-    guard case .cmpd(let expPars, _, _) = expType.kind else { fatalError() }
+  func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type) {
+    guard case .cmpd(let expPars, _, _) = exp.kind else { fatalError() }
 
-    switch actType.kind {
+    switch act.kind {
 
     case .cmpd(let actPars, _, _):
       if expPars.count != actPars.count {
         let actFields = pluralize(actPars.count, "field")
-        constraint.fail(act: actType, exp: expType, "actual compound type has \(actFields); expected \(expPars.count).")
+        constraint.fail(act: act, exp: exp, "actual compound type has \(actFields); expected \(expPars.count).")
       }
       for (actPar, expPar) in zip(actPars, expPars) {
         if actPar.label?.name != expPar.label?.name {
-          constraint.fail(act: actType, exp: expType,
+          constraint.fail(act: act, exp: exp,
             "compound field #\(actPar.index) has \(actPar.labelMsg); expected \(expPar.labelMsg).")
         }
         let index = actPar.index
@@ -185,13 +185,13 @@ class TypeCtx {
       }
       return
 
-    default: constraint.fail(act: actType, exp: expType, "actual type is not a compound")
+    default: constraint.fail(act: act, exp: exp, "actual type is not a compound")
     }
   }
 
 
-  func resolveConstraintToOpaque(_ constraint: Constraint, actType: Type, expOpaqueType: Type) {
-    switch actType.kind {
+  func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) {
+    switch act.kind {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
       case .cmpd(let pars, _, _):
@@ -199,14 +199,14 @@ class TypeCtx {
           if par.accessorString == accessor.accessorString {
             resolveSub(constraint,
               actType: par.type, actDesc: "`\(par.accessorString)` property",
-              expType: expOpaqueType, expDesc: nil)
+              expType: exp, expDesc: nil)
             return
           }
         }
-        constraint.fail(act: accesseeType, exp: expOpaqueType, "actual type has no field matching accessor") // TODO: this should be caught earlier.
-      default: constraint.fail(act: accesseeType, exp: expOpaqueType, "actual type is not an accessible type")
+        constraint.fail(act: accesseeType, exp: exp, "actual type has no field matching accessor") // TODO: this should be caught earlier.
+      default: constraint.fail(act: accesseeType, exp: exp, "actual type is not an accessible type")
       }
-    default: constraint.fail(act: actType, exp: expOpaqueType, "actual type is not expected opaque type")
+    default: constraint.fail(act: act, exp: exp, "actual type is not expected opaque type")
     }
   }
 
