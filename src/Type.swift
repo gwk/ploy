@@ -63,7 +63,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Cmpd(_ pars: [TypeField]) -> Type {
-    let description = "<\(pars.map({$0.description}).joined(separator: " "))>"
+    let descs = pars.map({$0.description}).joined(separator: " ")
+    let description = "(\(descs))"
     return memoize(description, .cmpd(pars: pars,
       frees: Set(pars.flatMap { $0.type.frees }),
       vars: Set(pars.flatMap { $0.type.vars })))
