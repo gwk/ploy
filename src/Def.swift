@@ -58,10 +58,11 @@ enum Def: SubForm {
       let em = Emitter(file: space.file)
       //let fullName = "\(space.name)/\(sym.name)"
       let hostName = "\(space.hostPrefix)\(sym.hostName)"
-      if bind.val.needsLazyDef {
+      let isMain = (hostName == "MAIN__main")
+      if bind.val.needsLazyDef && !isMain {
         let acc = "\(hostName)__acc"
         em.str(0, "var \(acc) = function() {")
-        em.str(0, " \(acc) = _lazy_sentinal;")
+        em.str(0, " \(acc) = $lazy_sentinal;")
         em.str(0, " let val =")
         bind.val.compile(ctx, em, 1, isTail: false)
         em.append(";")

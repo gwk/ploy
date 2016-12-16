@@ -52,7 +52,8 @@ func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace)
 
   file.writeL("\"use strict\";\n")
   file.writeL("(()=>{ // ploy scope.\n")
-  file.writeL("function _lazy_sentinal() { throw 'INTERNAL RUNTIME ERROR: lazy value init recursed.' };")
+  file.writeL("function $lazy_sentinal() { throw 'INTERNAL RUNTIME ERROR: lazy value init recursed.' };")
+  file.writeL("function $assert(cond) { if (!cond) { throw 'INTERNAL RUNTIME ERROR: assertion failed.' }; };")
 
   for path in includePaths {
     let name = path.withoutPathDir
@@ -63,5 +64,6 @@ func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace)
   }
 
   mainSpace.compileMain()
+  file.writeL("$assert(MAIN__main === undefined);")
   file.writeL("})();")
 }
