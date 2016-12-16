@@ -20,6 +20,7 @@ class TypeCtx {
   private var resolvedTypes: [Type:Type] = [:] // maps all types containing free types to partially or completely resolved types.
   private var freeIndicesToUnresolvedTypes: DictOfSet<Int, Type> = [:] // maps free types to all types containing them.
   private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
+  private var exprConversions = [Form:Conversion]() // maps forms to legal, inferred conversions.
   private var isResolved = false
 
   var symRecords = [Sym:ScopeRecord]()
@@ -40,6 +41,11 @@ class TypeCtx {
 
   func typeFor(expr: Expr) -> Type {
     return resolvedType(originalTypeForExpr(expr))
+  }
+
+
+  func conversionFor(expr: Expr) -> Conversion? {
+    return exprConversions[expr.form]
   }
 
 
@@ -167,15 +173,12 @@ class TypeCtx {
         let actFields = pluralize(actFields.count, "field")
         constraint.fail(act: act, exp: exp, "actual compound type has \(actFields); expected \(expFields.count).")
       }
+      var needsConversion = false
       for (actField, expField) in zip(actFields, expFields) {
-        if actField.label != expField.label {
-          constraint.fail(act: act, exp: exp,
-            "compound field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg).")
-        }
-        let index = actField.index
-        resolveSub(constraint,
-          actType: actField.type, actDesc: "compound field \(index)",
-          expType: expField.type, expDesc: "compound field \(index)")
+        needsConversion = resolveField(constraint, act: act, exp: exp, actField: actField, expField: expField) || needsConversion
+      }
+      if needsConversion {
+        exprConversions[constraint.actForm] = Conversion(orig: act, conv: exp)
       }
       return
 
@@ -183,6 +186,22 @@ class TypeCtx {
     }
   }
 
+  func resolveField(_ constraint: Constraint, act: Type, exp: Type, actField: TypeField, expField: TypeField) -> Bool {
+    var needsConversion = false
+    if actField.label != nil {
+      if actField.label != expField.label {
+        constraint.fail(act: act, exp: exp,
+          "compound field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg)")
+      }
+    } else if expField.label != nil { // convert unlabeled to labeled.
+      needsConversion = true
+    }
+    let index = actField.index
+    resolveSub(constraint,
+      actType: actField.type, actDesc: "compound field \(index)",
+      expType: expField.type, expDesc: "compound field \(index)")
+    return needsConversion
+  }
 
   func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) {
     switch act.kind {

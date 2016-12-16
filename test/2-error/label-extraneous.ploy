@@ -1,0 +1,3 @@
+f = fn (Int Int)%Int add_Int.$;
+
+main = exit.f(i=0 j=0)

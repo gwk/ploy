@@ -16,6 +16,11 @@ extension Expr {
 
   func compile(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
+    let conversion = ctx.conversionFor(expr: self)
+    if let conversion = conversion {
+      em.str(depth, "(function(){ let $C = // \(conversion)")
+    }
+
     switch self {
 
     case .acc(let acc):
@@ -125,6 +130,21 @@ extension Expr {
 
     case .sym(let sym):
       compileSym(em, depth, scopeRecord: ctx.symRecords[sym]!, sym: sym, isTail: isTail)
+    }
+
+    if let conversion = conversion {
+      em.append(";")
+      switch (conversion.orig.kind, conversion.conv.kind) {
+
+      case (.cmpd(let origFields), .cmpd(let convFields)):
+        em.str(depth, "return {")
+        for (o, c) in zip(origFields, convFields) {
+          em.append(" \(c.hostName): $C.\(o.hostName),")
+        }
+        em.append(" };")
+        default: fatalError("impossible conversion: \(conversion)")
+      }
+      em.append("})()")
     }
   }
 }

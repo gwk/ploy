@@ -1,0 +1,3 @@
+f = fn (i:Int j:Int)%Int add_Int(i@$ j@$);
+
+main = exit.f(0 0)
