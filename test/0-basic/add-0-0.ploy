@@ -1,1 +1,1 @@
-main = add(0 0)
+main = exit.add(0 0)
