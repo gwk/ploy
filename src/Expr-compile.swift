@@ -18,7 +18,7 @@ extension Expr {
     ctx.assertIsTracking(self)
     let conversion = ctx.conversionFor(expr: self)
     if let conversion = conversion {
-      em.str(depth, "(function(){ let $C = // \(conversion)")
+      em.str(depth, "(()=>{ let $C = // \(conversion)")
     }
 
     switch self {
@@ -43,7 +43,7 @@ extension Expr {
       em.append(")")
 
     case .do_(let do_):
-      em.str(depth, "(function(){")
+      em.str(depth, "(()=>{")
       compileBody(ctx, em, depth + 1, body: do_.body, isTail: isTail)
       em.append("})()")
 
