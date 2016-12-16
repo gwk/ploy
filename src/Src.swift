@@ -414,7 +414,10 @@ class Src: CustomStringConvertible {
       p = adv(p)
       sym = parseSym(p)
       if Src.keywordSentenceHandlers.contains(key: sym.name) {
-        sym.failSyntax("reserved keyword name cannot appear in path")
+        sym.failSyntax("reserved keyword")
+      }
+      if jsReservedWords.contains(sym.name) {
+        sym.failSyntax("reserved word (temporary requirment for JavaScript compatibility)")
       }
       syms.append(sym)
       p = sym.syn.end
