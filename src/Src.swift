@@ -304,7 +304,7 @@ class Src: CustomStringConvertible {
 
   // MARK: nesting sentences.
 
-  func parseCmpd(_ pos: Pos) -> Form {
+  func parseParen(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
     var els: [Expr] = []
     let end = parseSubForms(&els, p, subj: "parenthesized expression")
@@ -443,7 +443,7 @@ class Src: CustomStringConvertible {
     case "$": return parseBling(pos)
     case "-": return parseDash(pos)
     case "/": return parseSlash(pos)
-    case "(": return parseCmpd(pos)
+    case "(": return parseParen(pos)
     case "<": return parseCmpdType(pos)
     case "{": return parseDo(pos)
     default: failParse(pos, nil, "unexpected character: '\(c)'.")

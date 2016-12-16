@@ -171,7 +171,7 @@ class TypeCtx {
     case .cmpd(let actFields):
       if expFields.count != actFields.count {
         let actFields = pluralize(actFields.count, "field")
-        constraint.fail(act: act, exp: exp, "actual compound type has \(actFields); expected \(expFields.count).")
+        constraint.fail(act: act, exp: exp, "actual struct type has \(actFields); expected \(expFields.count).")
       }
       var needsConversion = false
       for (actField, expField) in zip(actFields, expFields) {
@@ -182,7 +182,7 @@ class TypeCtx {
       }
       return
 
-    default: constraint.fail(act: act, exp: exp, "actual type is not a compound")
+    default: constraint.fail(act: act, exp: exp, "actual type is not a struct")
     }
   }
 
@@ -191,15 +191,15 @@ class TypeCtx {
     if actField.label != nil {
       if actField.label != expField.label {
         constraint.fail(act: act, exp: exp,
-          "compound field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg)")
+          "struct field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg)")
       }
     } else if expField.label != nil { // convert unlabeled to labeled.
       needsConversion = true
     }
     let index = actField.index
     resolveSub(constraint,
-      actType: actField.type, actDesc: "compound field \(index)",
-      expType: expField.type, expDesc: "compound field \(index)")
+      actType: actField.type, actDesc: "struct field \(index)",
+      expType: expField.type, expDesc: "struct field \(index)")
     return needsConversion
   }
 

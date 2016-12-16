@@ -114,7 +114,7 @@ extension Expr {
 
       default:
         if !paren.isScalarType {
-          paren.failType("expected type: \(type); received compound value.")
+          paren.failType("expected type: \(type); received a struct value.")
         }
         paren.els[0].compile(ctx, em, depth, isTail: isTail)
       }

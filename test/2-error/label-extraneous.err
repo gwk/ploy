@@ -1,4 +1,4 @@
-type error: test/2-error/label-extraneous.ploy:3:14-22: compound field #0 has label `i`; expected no label;
+type error: test/2-error/label-extraneous.ploy:3:14-22: struct field #0 has label `i`; expected no label;
 argument;
 resolved type: (i:Int j:Int)
   main = exit.f(i=0 j=0)
