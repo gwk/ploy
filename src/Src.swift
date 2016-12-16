@@ -326,13 +326,6 @@ class Src: CustomStringConvertible {
 
   // MARK: keyword sentences.
 
-  func parseEnum(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, subj: "`enum` form", exp: "name symbol")
-    var variants: [Expr] = []
-    let end = parseSubForms(&variants, nameSym.syn.end, subj: "`enum` form")
-    return Enum(synForSemicolon(sym, end, "enum"), sym: nameSym, variants: variants)
-  }
-
   func parseFn(_ sym: Sym) -> Form {
     let sig: Sig = parseForm(sym.syn.end, subj: "`fn` form", exp: "function signature")
     let body = parseBody(sig.syn.end, subj: "`fn` form")
@@ -396,15 +389,7 @@ class Src: CustomStringConvertible {
     return Pub(Syn(sym.syn, def.syn), def: def)
   }
 
-  func parseStruct(_ sym: Sym) -> Form {
-    let nameSym: Sym = parseForm(sym.syn.end, subj: "`struct` form", exp: "name symbol")
-    var fields: [Expr] = []
-    let end = parseSubForms(&fields, nameSym.syn.end, subj: "`struct` form")
-    return Struct(synForSemicolon(sym, end, "enum"), sym: nameSym, fields: fields)
-  }
-
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
-    "enum"      : parseEnum,
     "fn"        : parseFn,
     "host_type" : parseHostType,
     "host_val"  : parseHostVal,
@@ -413,7 +398,6 @@ class Src: CustomStringConvertible {
     "method"    : parseMethod,
     "polyfn"    : parsePolyFn,
     "pub"       : parsePub,
-    "struct"    : parseStruct,
   ]
 
   // MARK: parse dispatch.

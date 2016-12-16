@@ -19,13 +19,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case all(members: Set<Type>)
     case any(members: Set<Type>)
     case cmpd(fields: [TypeField])
-    case enum_ // TODO: vars
     case free(index: Int)
     case host
     case prim
     case prop(accessor: PropAccessor, type: Type)
     case sig(send: Type, ret: Type)
-    case struct_ // TODO: vars
     case var_(name: String)
   }
 
@@ -83,11 +81,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: Set(fields.flatMap { $0.type.vars })))
   }
 
-  class func Enum(spacePathNames names: [String], sym: Sym) -> Type {
-    let description = (names + [sym.name]).joined(separator: "/")
-    return Type(description, kind: .enum_)
-  }
-
   class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
     if index < allFreeTypes.count {
       return allFreeTypes[index]
@@ -122,11 +115,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       kind: .sig(send: send, ret: ret),
       frees: send.frees.union(ret.frees),
       vars: send.vars.union(ret.vars)))
-  }
-
-  class func Struct(spacePathNames names: [String], sym: Sym) -> Type {
-    let description = (names + [sym.name]).joined(separator: "/")
-    return Type(description, kind: .struct_)
   }
 
   class func Var(_ name: String) -> Type {

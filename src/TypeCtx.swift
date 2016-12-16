@@ -139,9 +139,6 @@ class TypeCtx {
     case .cmpd:
       resolveConstraintToCmpd(constraint, act: act, exp: exp)
 
-    case .enum_:
-      constraint.fail(act: act, exp: exp, "enum constraints not implemented")
-
     case .free:
       resolveType(exp, to: act)
 
@@ -153,9 +150,6 @@ class TypeCtx {
 
     case .sig:
       resolveConstraintToSig(constraint, act: act, exp: exp)
-
-    case .struct_:
-      constraint.fail(act: act, exp: exp, "struct constraints not implemented")
 
     case .var_:
       constraint.fail(act: act, exp: exp, "var constraints not implemented")

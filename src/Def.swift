@@ -6,24 +6,20 @@ import Quilt
 enum Def: SubForm {
 
   case bind(Bind)
-  case enum_(Enum)
   case hostType(HostType)
   case in_(In)
   case method(Method)
   case polyFn(PolyFn)
   case pub(Pub)
-  case struct_(Struct)
 
   init(form: Form, subj: String) {
     switch form {
     case let form as Bind:      self = .bind(form)
-    case let form as Enum:      self = .enum_(form)
     case let form as HostType:  self = .hostType(form)
     case let form as In:        self = .in_(form)
     case let form as Method:    self = .method(form)
     case let form as PolyFn:    self = .polyFn(form)
     case let form as Pub:       self = .pub(form)
-    case let form as Struct:    self = .struct_(form)
     default:
       form.failSyntax("\(subj) expects definition but received \(form.syntaxName).")
     }
@@ -32,26 +28,22 @@ enum Def: SubForm {
  var form: Form {
     switch self {
     case .bind(let bind): return bind
-    case .enum_(let enum_): return enum_
     case .hostType(let hostType): return hostType
     case .in_(let in_): return in_
     case .method(let method): return method
     case .polyFn(let polyFn): return polyFn
     case .pub(let pub): return pub
-    case .struct_(let struct_): return struct_
     }
   }
 
   var sym: Sym {
     switch self {
     case .bind(let bind): return bind.place.sym
-    case .enum_(let enum_): return enum_.sym
     case .hostType(let hostType): return hostType.sym
     case .in_: fatalError("INTERNAL ERROR: In is not an individual definition; sym should never be called.")
     case .method: fatalError("INTERNAL ERROR: Method is not an independent definition; sym should never be called.")
     case .polyFn(let polyFn): return polyFn.sym
     case .pub(let pub): return pub.def.sym
-    case .struct_(let struct_): return struct_.sym
     }
   }
 
@@ -84,10 +76,6 @@ enum Def: SubForm {
         em.flush()
         return .val(type)
       }
-
-    case .enum_:
-      // TODO.
-      return .type(Type.Enum(spacePathNames: space.pathNames, sym: sym))
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
@@ -127,10 +115,6 @@ enum Def: SubForm {
 
     case .pub:
       fatalError()
-
-    case .struct_:
-      // TODO.
-      return .type(Type.Struct(spacePathNames: space.pathNames, sym: sym))
     }
   }
 }
