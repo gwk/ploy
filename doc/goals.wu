@@ -83,7 +83,7 @@ One design priority of Ploy is to enable automatic, useful calculations about co
 
 The cost of compiling a program should depend on the amount of code actually used by the program, not the taxonomic structure of all the code in all the libraries that the program references. To this end, all top/module-level syntactic definitions map directly to individual symbols. This allows the compiler to assemble a mapping from symbols to syntactic forms, which in turn allows it to only emit code for those symbols that are actually used by the program.
 
-This design requires that global values have lazy initialization semantics, or else pure initializers free of side effects; Ploy currently uses lazy initialization for non-function values to fulfill this requirement. This should greatly reduce the time to compile; however currently all code in all source files must still be parsed. The grammar is simple, which should make the parser very fast; furthermore, it should be possible to cache parsing results to further reduce copmilation times.
+This design requires that global values have lazy initialization semantics, or else pure initializers free of side effects; Ploy currently uses lazy initialization for non-function values to fulfill this requirement. This should greatly reduce the time to compile; however currently all code in all source files must still be parsed. The grammar is simple, which should make the parser very fast; furthermore, it should be possible to cache parsing results to further reduce compilation times.
 
 ## Dependency Queries
 
