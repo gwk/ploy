@@ -264,7 +264,7 @@ class TypeCtx {
     }
     for (index, set) in freeIndicesToUnresolvedTypes {
       for type in set.val {
-        errL("freeIndicesToUnResolvedType: \(index): \(type)")
+        errL("freeIndicesToUnresolvedType: \(index): \(type)")
       }
     }
     check(freeIndicesToUnresolvedTypes.isEmpty)
