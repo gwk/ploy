@@ -21,7 +21,7 @@ struct Constraint {
       expForm: expForm, expType: expType, expChain: (expDesc == nil) ? expChain : .link(expDesc!, expChain), desc: desc)
   }
 
-  func fail(act: Type, exp: Type, _ msg: String) -> Never {
+  func fail(act: Type, exp: Type, msg: String) -> Never {
     actForm.failType(
       "\(msg);\n\(actDesc)\(desc);\nresolved type: \(act)",
       notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(exp)"))
