@@ -28,9 +28,9 @@ class Method: Form { // method definition.
 
   func compileMethod(_ space: Space, polyFnType: Type, sigType: Type, hostName: String) {
     let sigTypeIndex = sigType.globalIndex
-    guard case .sig(let send, let ret) = sigType.kind else { fatalError() }
+    guard case .sig(let dom, let ret) = sigType.kind else { fatalError() }
     let fnScope = LocalScope(parent: space)
-    fnScope.addValRecord(name: "$", type: send)
+    fnScope.addValRecord(name: "$", type: dom)
     fnScope.addValRecord(name: "self", type: polyFnType)
     let ctx = TypeCtx()
     let type = genTypeConstraintsBody(ctx, fnScope, body: body)

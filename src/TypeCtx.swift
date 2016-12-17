@@ -142,8 +142,8 @@ class TypeCtx {
         return (constraint, "actual type is not a member of `Any` expected type")
       }
 
-    case .cmpd:
-      return resolveConstraintToCmpd(constraint, act: act, exp: exp)
+    case .cmpd(let expFields):
+      return resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
 
     case .free:
       return resolveType(exp, to: act).and { (constraint, $0) }
@@ -154,8 +154,8 @@ class TypeCtx {
     case .prop(_, _):
       return (constraint, "prop constraints not implemented")
 
-    case .sig:
-      return resolveConstraintToSig(constraint, act: act, exp: exp)
+    case .sig(let expDom, let expRet):
+      return resolveConstraintToSig(constraint, act: act, expDom: expDom, expRet: expRet)
 
     case .var_:
       return (constraint, "var constraints not implemented")
@@ -164,8 +164,7 @@ class TypeCtx {
   }
 
 
-  func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type) -> (Constraint, String)? {
-    guard case .cmpd(let expFields) = exp.kind else { fatalError() }
+  func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type, expFields: [TypeField]) -> (Constraint, String)? {
 
     switch act.kind {
 
@@ -177,7 +176,7 @@ class TypeCtx {
       }
       var needsConversion = false
       for (actField, expField) in zip(actFields, expFields) {
-        switch resolveField(constraint, act: act, exp: exp, actField: actField, expField: expField) {
+        switch resolveField(constraint, actField: actField, expField: expField) {
         case .ok: break
         case .convert: needsConversion = true
         case .failure(let failure): return failure
@@ -198,7 +197,7 @@ class TypeCtx {
     case failure((Constraint, String))
   }
 
-  func resolveField(_ constraint: Constraint, act: Type, exp: Type, actField: TypeField, expField: TypeField) -> FieldResolution {
+  func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField) -> FieldResolution {
     var res: FieldResolution = .ok
     if actField.label != nil {
       if actField.label != expField.label {
@@ -239,14 +238,13 @@ class TypeCtx {
   }
 
 
-  func resolveConstraintToSig(_ constraint: Constraint, act: Type, exp: Type) -> (Constraint, String)? {
-    guard case .sig(let expSend, let expRet) = exp.kind else { fatalError() }
+  func resolveConstraintToSig(_ constraint: Constraint, act: Type, expDom: Type, expRet: Type) -> (Constraint, String)? {
     switch act.kind {
 
-    case .sig(let actSend, let actRet):
+    case .sig(let actDom, let actRet):
       if let failure = resolveSub(constraint,
-        actType: actSend, actDesc: "signature send",
-        expType: expSend, expDesc: "signature send") {
+        actType: actDom, actDesc: "signature domain",
+        expType: expDom, expDesc: "signature domain") {
           return failure
       }
       if let failure = resolveSub(constraint,

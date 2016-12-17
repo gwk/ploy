@@ -34,11 +34,11 @@ extension Expr {
     case .call(let call):
       let _ = call.callee.genTypeConstraints(ctx, scope)
       let _ = call.arg.genTypeConstraints(ctx, scope)
-      let sendType = ctx.addFreeType()
+      let domType = ctx.addFreeType()
       let type = ctx.addFreeType()
-      let sigType = Type.Sig(send: sendType, ret: type)
+      let sigType = Type.Sig(dom: domType, ret: type)
       ctx.constrain(call.callee, expForm: call, expType: sigType, "callee")
-      ctx.constrain(call.arg, expForm: call, expType: sendType, "argument")
+      ctx.constrain(call.arg, expForm: call, expType: domType, "argument")
       return type
 
     case .do_(let do_):
@@ -46,9 +46,9 @@ extension Expr {
 
     case .fn(let fn):
       let type = Expr.sig(fn.sig).type(scope, "signature")
-      guard case .sig(let send, let ret) = type.kind else { fatalError() }
+      guard case .sig(let dom, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
-      fnScope.addValRecord(name: "$", type: send)
+      fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
       let bodyType = genTypeConstraintsBody(ctx, fnScope, body: fn.body)
       ctx.constrain(form: fn.body, type: bodyType, expForm: fn, expType: ret, "function body")
@@ -136,7 +136,7 @@ extension Expr {
       fatalError()
 
     case .sig(let sig):
-      return Type.Sig(send: sig.send.type(scope, "signature send"), ret: sig.ret.type(scope, "signature return"))
+      return Type.Sig(dom: sig.dom.type(scope, "signature domain"), ret: sig.ret.type(scope, "signature return"))
 
     case .sym(let sym):
       return scope.typeBinding(sym: sym, subj: subj)

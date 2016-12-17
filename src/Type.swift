@@ -23,7 +23,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case host
     case prim
     case prop(accessor: PropAccessor, type: Type)
-    case sig(send: Type, ret: Type)
+    case sig(dom: Type, ret: Type)
     case var_(name: String)
   }
 
@@ -109,12 +109,12 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: type.vars))
   }
 
-  class func Sig(send: Type, ret: Type) -> Type {
-    let description = "\(send.nestedSigDescription)%\(ret.nestedSigDescription)"
+  class func Sig(dom: Type, ret: Type) -> Type {
+    let description = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
     return memoize(description, (
-      kind: .sig(send: send, ret: ret),
-      frees: send.frees.union(ret.frees),
-      vars: send.vars.union(ret.vars)))
+      kind: .sig(dom: dom, ret: ret),
+      frees: dom.frees.union(ret.frees),
+      vars: dom.vars.union(ret.vars)))
   }
 
   class func Var(_ name: String) -> Type {
@@ -155,8 +155,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       return Type.Cmpd(fields.map() { self.refine(par: $0, replacement: replacement) })
     case .prop(let accessor, let type):
       return Type.Prop(accessor, type: self.refine(type, with: replacement))
-    case .sig(let send, let ret):
-      return Type.Sig(send: refine(send, with: replacement), ret: refine(ret, with: replacement))
+    case .sig(let dom, let ret):
+      return Type.Sig(dom: refine(dom, with: replacement), ret: refine(ret, with: replacement))
     default: fatalError()
     }
   }
