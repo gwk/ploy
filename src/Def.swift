@@ -51,32 +51,7 @@ enum Def: SubForm {
     switch self {
 
     case .bind(let bind):
-      let ctx = TypeCtx()
-      let _ = bind.val.genTypeConstraints(ctx, LocalScope(parent: space)) // initial root type is ignored.
-      ctx.resolve()
-      let type = ctx.typeFor(expr: bind.val)
-      let em = Emitter(file: space.file)
-      //let fullName = "\(space.name)/\(sym.name)"
-      let hostName = "\(space.hostPrefix)\(sym.hostName)"
-      let isMain = (hostName == "MAIN__main")
-      if bind.val.needsLazyDef && !isMain {
-        let acc = "\(hostName)__acc"
-        em.str(0, "var \(acc) = function() {")
-        em.str(0, " \(acc) = $lazy_sentinal;")
-        em.str(0, " let val =")
-        bind.val.compile(ctx, em, 1, isTail: false)
-        em.append(";")
-        em.str(0, " \(acc) = function() { return val };")
-        em.str(0, " return val; }")
-        em.flush()
-        return .lazy(type)
-      } else {
-        em.str(0, "let \(hostName) =")
-        bind.val.compile(ctx, em, 1, isTail: false)
-        em.append(";")
-        em.flush()
-        return .val(type)
-      }
+      return compileBindingVal(space: space, sym: bind.place.sym, val: bind.val, suffix: "")
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
@@ -117,5 +92,35 @@ enum Def: SubForm {
     case .pub:
       fatalError()
     }
+  }
+}
+
+
+func compileBindingVal(space: Space, sym: Sym, val: Expr, suffix: String) -> ScopeRecord.Kind {
+  let ctx = TypeCtx()
+  let _ = val.genTypeConstraints(ctx, LocalScope(parent: space)) // initial root type is ignored.
+  ctx.resolve()
+  let type = ctx.typeFor(expr: val)
+  let em = Emitter(file: space.file)
+  //let fullName = "\(space.name)/\(sym.name)"
+  let hostName = "\(space.hostPrefix)\(sym.hostName)"
+  let isMain = (hostName == "MAIN__main")
+  if val.needsLazyDef && !isMain {
+    let acc = "\(hostName)__acc"
+    em.str(0, "var \(acc) = function() {")
+    em.str(0, " \(acc) = $lazy_sentinal;")
+    em.str(0, " let val =")
+    val.compile(ctx, em, 1, isTail: false)
+    em.append(";")
+    em.str(0, " \(acc) = function() { return val };")
+    em.str(0, " return val; }")
+    em.flush()
+    return .lazy(type)
+  } else {
+    em.str(0, "let \(hostName) =")
+    val.compile(ctx, em, 1, isTail: false)
+    em.append(";")
+    em.flush()
+    return .val(type)
   }
 }
