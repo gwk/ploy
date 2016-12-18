@@ -172,8 +172,8 @@ func ==(l: Type, r: Type) -> Bool { return l === r }
 func <(l: Type, r: Type) -> Bool { return l.description < r.description }
 
 
-let typeEmpty = Type.Any_([]) // aka "Bottom type".
-let typeEvery = Type.All([]) // aka "Top type".
+let typeEmpty = Type.Any_([]) // aka "Bottom type"; the set of all objects.
+let typeEvery = Type.All([]) // aka "Top type"; the empty set.
 let typeVoid = Type.Cmpd([])
 
 let typeBool      = Type.Prim("Bool")
