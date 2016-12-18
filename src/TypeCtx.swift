@@ -20,7 +20,8 @@ class TypeCtx {
   private var resolvedTypes: [Type:Type] = [:] // maps all types containing free types to partially or completely resolved types.
   private var freeIndicesToUnresolvedTypes: DictOfSet<Int, Type> = [:] // maps free types to all types containing them.
   private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
-  private var exprConversions = [Form:Conversion]() // maps forms to legal, inferred conversions.
+  private var exprSubtypes = [Form:Type]() // maps forms to legal, inferred compile time narrowing.
+  private var exprConversions = [Form:Conversion]() // maps forms to legal, inferred runtime conversions.
   private var isResolved = false
 
   var symRecords = [Sym:ScopeRecord]()
@@ -40,7 +41,8 @@ class TypeCtx {
 
 
   func typeFor(expr: Expr) -> Type {
-    return resolvedType(originalTypeForExpr(expr))
+    let type = exprSubtypes[expr.form].or(originalTypeForExpr(expr))
+    return resolvedType(type)
   }
 
 
@@ -129,6 +131,22 @@ class TypeCtx {
     case .free:
       return resolveFreeType(act, to: exp).and { (constraint, $0) }
 
+    case .poly(let morphs):
+      var match: Type? = nil
+      for morph in morphs {
+        if resolveSub(constraint, actType: morph, actDesc: "morph", expType: exp, expDesc: "expected type") != nil {
+          continue // TODO: this is broken because we should be unwinding any resolved types.
+        }
+        if let prev = match { return (constraint, "multiple morphs match expected: \(prev); \(morph)") }
+        match = morph
+      }
+      guard let morph = match else { return (constraint, "no morphs match expected") }
+      if let existing = exprSubtypes[constraint.actForm] {
+        return (constraint, "multiple subtype resolutions: \(existing); \(morph)")
+      }
+      exprSubtypes[constraint.actForm] = morph
+      return nil
+
     default: break
     }
 
@@ -150,6 +168,9 @@ class TypeCtx {
 
     case .host, .prim:
       return resolveConstraintToOpaque(constraint, act: act, exp: exp)
+
+    case .poly:
+      return (constraint, "expected `Poly` type is not implemented")
 
     case .prop(_, _):
       return (constraint, "prop constraints not implemented")

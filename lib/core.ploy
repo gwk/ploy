@@ -43,8 +43,8 @@ assert_eq = fn (Int Int Str)%()
 
 
 
-polyfn add;
+extensible add; # TODO: type constraints.
 
-method add (Int Int)%Int add_Int.$;
+add += fn (Int Int)%Int add_Int.$;
 
 ;

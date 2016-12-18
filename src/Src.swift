@@ -326,6 +326,13 @@ class Src: CustomStringConvertible {
 
   // MARK: keyword sentences.
 
+  func parseExtensible(_ sym: Sym) -> Form {
+    var constraints: [Expr] = []
+    let nameSym: Sym = parseForm(sym.syn.end, subj: "`extensible` form", exp: "name symbol")
+    let end = parseSubForms(&constraints, nameSym.syn.end, subj: "extensible type constraints")
+    return Extensible(synForSemicolon(sym, end, "extensible"), sym: nameSym, constraints: constraints)
+  }
+
   func parseFn(_ sym: Sym) -> Form {
     let sig: Sig = parseForm(sym.syn.end, subj: "`fn` form", exp: "function signature")
     let body = parseBody(sig.syn.end, subj: "`fn` form")
@@ -371,33 +378,19 @@ class Src: CustomStringConvertible {
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
 
-  func parseMethod(_ sym: Sym) -> Form {
-    let identifier: Identifier = parseSubForm(sym.syn.end, subj: "`method` form")
-    let sig: Sig = parseForm(identifier.syn.end, subj: "`method` form", exp: "method signature")
-    let body = parseBody(sig.syn.end, subj: "`method` form")
-    return Method(synForSemicolon(sym, body.syn.end, "method"), identifier: identifier, sig: sig, body: body)
-  }
-
-  func parsePolyFn(_ sym: Sym) -> Form {
-    let nameSym = parseSym(sym.syn.end)
-    // TODO: type constraint.
-    return PolyFn(synForSemicolon(sym, nameSym.syn.end, "polyfn"), sym: nameSym)
-  }
-
   func parsePub(_ sym: Sym) -> Form {
     let def: Def = parseSubForm(sym.syn.end, subj: "`pub` form")
     return Pub(Syn(sym.syn, def.syn), def: def)
   }
 
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
-    "fn"        : parseFn,
-    "host_type" : parseHostType,
-    "host_val"  : parseHostVal,
-    "if"        : parseIf,
-    "in"        : parseIn,
-    "method"    : parseMethod,
-    "polyfn"    : parsePolyFn,
-    "pub"       : parsePub,
+    "extensible"  : parseExtensible,
+    "fn"          : parseFn,
+    "host_type"   : parseHostType,
+    "host_val"    : parseHostVal,
+    "if"          : parseIf,
+    "in"          : parseIn,
+    "pub"         : parsePub,
   ]
 
   // MARK: parse dispatch.
@@ -452,6 +445,7 @@ class Src: CustomStringConvertible {
 
   static let operatorGroups: [[(String, (Form, Form)->Form)]] = [
     [ ("=", Bind.mk),
+      ("+=", Extension.mk),
       ("?", Case.mk)],
     [ (":", Ann.mk)],
     [ ("@", Acc.mk),

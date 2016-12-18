@@ -21,6 +21,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case cmpd(fields: [TypeField])
     case free(index: Int)
     case host
+    case poly(members: Set<Type>)
     case prim
     case prop(accessor: PropAccessor, type: Type)
     case sig(dom: Type, ret: Type)
@@ -101,6 +102,14 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return Type(name, kind: .prim)
   }
 
+  class func Poly(_ members: Set<Type>) -> Type {
+    let description = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+    return memoize(description, (
+      kind: .poly(members: members),
+      frees: Set(members.flatMap { $0.frees }),
+      vars: Set(members.flatMap { $0.vars })))
+  }
+
   class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
     let description = ("\(accessor.accessorString)@\(type)")
     return memoize(description, (
@@ -153,6 +162,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       return Type.Any_(Set(members.map { self.refine($0, with: replacement) }))
     case .cmpd(let fields):
       return Type.Cmpd(fields.map() { self.refine(par: $0, replacement: replacement) })
+    case .poly(let members):
+      return Type.Poly(Set(members.map { self.refine($0, with: replacement) }))
     case .prop(let accessor, let type):
       return Type.Prop(accessor, type: self.refine(type, with: replacement))
     case .sig(let dom, let ret):

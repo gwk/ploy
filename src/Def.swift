@@ -6,20 +6,20 @@ import Quilt
 enum Def: SubForm {
 
   case bind(Bind)
+  case ext(Extension)
+  case extensible(Extensible)
   case hostType(HostType)
   case in_(In)
-  case method(Method)
-  case polyFn(PolyFn)
   case pub(Pub)
 
   init(form: Form, subj: String) {
     switch form {
-    case let form as Bind:      self = .bind(form)
-    case let form as HostType:  self = .hostType(form)
-    case let form as In:        self = .in_(form)
-    case let form as Method:    self = .method(form)
-    case let form as PolyFn:    self = .polyFn(form)
-    case let form as Pub:       self = .pub(form)
+    case let form as Bind:        self = .bind(form)
+    case let form as Extension:   self = .ext(form)
+    case let form as Extensible:  self = .extensible(form)
+    case let form as HostType:    self = .hostType(form)
+    case let form as In:          self = .in_(form)
+    case let form as Pub:         self = .pub(form)
     default:
       form.failSyntax("\(subj) expects definition but received \(form.syntaxName).")
     }
@@ -28,10 +28,10 @@ enum Def: SubForm {
  var form: Form {
     switch self {
     case .bind(let bind): return bind
+    case .ext(let ext): return ext
+    case .extensible(let extensible): return extensible
     case .hostType(let hostType): return hostType
     case .in_(let in_): return in_
-    case .method(let method): return method
-    case .polyFn(let polyFn): return polyFn
     case .pub(let pub): return pub
     }
   }
@@ -39,55 +39,62 @@ enum Def: SubForm {
   var sym: Sym {
     switch self {
     case .bind(let bind): return bind.place.sym
+    case .ext(let ext): fatalError("INTERNAL ERROR: Extensions are not yet referenceable; sym should never be called: \(ext).")
+    case .extensible(let extensible): return extensible.sym
     case .hostType(let hostType): return hostType.sym
-    case .in_: fatalError("INTERNAL ERROR: In is not an individual definition; sym should never be called.")
-    case .method: fatalError("INTERNAL ERROR: Method is not an independent definition; sym should never be called.")
-    case .polyFn(let polyFn): return polyFn.sym
+    case .in_(let in_): fatalError("INTERNAL ERROR: In is not an individual definition; sym should never be called: \(in_).")
     case .pub(let pub): return pub.def.sym
     }
   }
+
 
   func compileDef(_ space: Space) -> ScopeRecord.Kind {
     switch self {
 
     case .bind(let bind):
-      return compileBindingVal(space: space, sym: bind.place.sym, val: bind.val, suffix: "")
+      let (type, needsLazy) = compileBindingVal(space: space, sym: bind.place.sym, val: bind.val, addTypeSuffix: false)
+      if needsLazy {
+        return .lazy(type)
+      } else {
+        return .val(type)
+      }
+
+    case .ext(let ext):
+      fatalError("INTERNAL ERROR: Extension is not an independent definition; compileDef should never be called: \(ext).")
+
+    case .extensible(let extensible):
+      let exts = space.exts.getDefault(sym.name, dflt: Ref<[Extension]>()).val
+      var typesToExts: [Type:Extension] = [:]
+      var typesToNeedsLazy: [Type:Bool] = [:]
+      for ext in exts {
+        // TODO: this is problematic because we emit all extensions as soon as the extensible is referenced.
+        // However, lazy emission is more complicated.
+        let (type, needsLazy) = compileBindingVal(space: space, sym: ext.place.sym, val: ext.val, addTypeSuffix: true)
+        if let existing = typesToExts[type] {
+          extensible.failType("extensible has duplicate type: \(type)", notes:
+            (existing, "conflicting extension"),
+            (ext, "conflicting extension"))
+        }
+        typesToExts[type] = ext
+        typesToNeedsLazy[type] = needsLazy
+      }
+      let type = Type.Poly(Set(typesToNeedsLazy.keys))
+      let em = Emitter(file: space.file)
+      let hostName = "\(space.hostPrefix)\(sym.hostName)"
+      em.str(0, "let \(hostName)__$table = {")
+      // TODO: emit table contents.
+      em.append("}")
+      em.str(0, "function \(hostName)($){")
+      em.str(0, "  throw \"INTERNAL ERROR: extensible dispatch not implemented\"") // TODO: dispatch.
+      em.append("}")
+      em.flush()
+      return .poly(type, variantsToNeedsLazy: typesToNeedsLazy)
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
-    case .in_:
-      fatalError("INTERNAL ERROR: In is not an independent definition; compileDef should never be called.")
-
-    case .method:
-      fatalError("INTERNAL ERROR: Method is not an independent definition; compileDef should never be called.")
-
-    case .polyFn(let polyFn):
-      let hostName = "\(space.hostPrefix)\(sym.name)"
-      let methodList = space.methods.getDefault(sym.name)
-      var sigsToPairs: [Type: MethodList.Pair]
-      do {
-        sigsToPairs = try methodList.pairs.mapUniquesToDict() {
-          (pair) in
-          (pair.method.typeForMethodSig(pair.space), pair)
-        }
-      } catch let e as DuplicateKeyError<Type, MethodList.Pair> {
-        polyFn.failType("method has duplicate type: \(e.key)", notes:
-          (e.existing.method, "conflicting method definition"),
-          (e.incoming.method, "conflicting method definition"))
-      } catch { fatalError() }
-      let type = Type.All(Set(sigsToPairs.keys))
-      let em = Emitter(file: space.file)
-      em.str(0, "\(hostName)__table = {")
-      for (sigType, pair) in sigsToPairs.pairsSortedByKey {
-        pair.method.compileMethod(space, polyFnType: type, sigType: sigType, hostName: hostName)
-      }
-      em.append("}")
-      em.str(0, "function \(hostName)($){")
-      em.str(0, "  throw \"INTERNAL ERROR: PolyFn dispatch not implemented\"") // TODO: dispatch.
-      em.append("}")
-      em.flush()
-      return .polyFn(type)
+    case .in_(let in_):
+      fatalError("INTERNAL ERROR: In is not an independent definition; compileDef should never be called: \(in_).")
 
     case .pub:
       fatalError()
@@ -96,31 +103,32 @@ enum Def: SubForm {
 }
 
 
-func compileBindingVal(space: Space, sym: Sym, val: Expr, suffix: String) -> ScopeRecord.Kind {
+func compileBindingVal(space: Space, sym: Sym, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
   let ctx = TypeCtx()
   let _ = val.genTypeConstraints(ctx, LocalScope(parent: space)) // initial root type is ignored.
   ctx.resolve()
   let type = ctx.typeFor(expr: val)
+  let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
   let em = Emitter(file: space.file)
   //let fullName = "\(space.name)/\(sym.name)"
-  let hostName = "\(space.hostPrefix)\(sym.hostName)"
+  let hostName = "\(space.hostPrefix)\(sym.hostName)\(suffix)"
   let isMain = (hostName == "MAIN__main")
   if val.needsLazyDef && !isMain {
     let acc = "\(hostName)__acc"
     em.str(0, "var \(acc) = function() {")
     em.str(0, " \(acc) = $lazy_sentinal;")
-    em.str(0, " let val =")
+    em.str(0, " let val = // \(type)")
     val.compile(ctx, em, 1, isTail: false)
     em.append(";")
     em.str(0, " \(acc) = function() { return val };")
     em.str(0, " return val; }")
     em.flush()
-    return .lazy(type)
+    return (type, needsLazy: true)
   } else {
-    em.str(0, "let \(hostName) =")
+    em.str(0, "let \(hostName) = // \(type)")
     val.compile(ctx, em, 1, isTail: false)
     em.append(";")
     em.flush()
-    return .val(type)
+    return (type, needsLazy: false)
   }
 }

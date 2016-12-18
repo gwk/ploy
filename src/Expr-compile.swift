@@ -53,9 +53,7 @@ extension Expr {
       em.append("})")
 
     case .hostVal(let hostVal):
-      let type_desc = hostVal.typeExpr.form.syn.visStringInline
-      em.append(" // \(type_desc).")
-      em.str(0, hostVal.code.val)
+      em.str(0, hostVal.code.val) // zero indent so that multiline host code is indented as written.
 
     case .if_(let if_):
       em.str(depth, "(")
@@ -120,7 +118,7 @@ extension Expr {
       }
 
     case .path(let path):
-      compileSym(em, depth, scopeRecord: ctx.pathRecords[path]!, sym: path.syms.last!)
+      compileSym(ctx, em, depth, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!)
 
     case .reify:
       fatalError()
@@ -129,7 +127,7 @@ extension Expr {
       fatalError()
 
     case .sym(let sym):
-      compileSym(em, depth, scopeRecord: ctx.symRecords[sym]!, sym: sym)
+      compileSym(ctx, em, depth, sym: sym, scopeRecord: ctx.symRecords[sym]!)
     }
 
     if let conversion = conversion {
@@ -147,24 +145,28 @@ extension Expr {
       em.append("})()")
     }
   }
-}
 
 
-func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym) {
-  switch scopeRecord.kind {
-  case .val:
-    em.str(depth, scopeRecord.hostName)
-  case .lazy:
-    let s = "\(scopeRecord.hostName)__acc()"
-    em.str(depth, "\(s)")
-  case .fwd: // should never be reached, because type checking should notice.
-    sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a forward declaration.")
-  case .polyFn:
-    em.str(depth, scopeRecord.hostName)
-  case .space(_):
-    sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
-  case .type(_):
-    sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
+  func compileSym(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, sym: Sym, scopeRecord: ScopeRecord) {
+    switch scopeRecord.kind {
+    case .val:
+      em.str(depth, scopeRecord.hostName)
+    case .lazy:
+      let s = "\(scopeRecord.hostName)__acc()"
+      em.str(depth, "\(s)")
+    case .fwd: // should never be reached, because type checking should notice.
+      sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a forward declaration.")
+    case .poly(let polyType, let variantsToNeedsLazy):
+      let variantType = ctx.typeFor(expr: self)
+      assert(polyType != variantType)
+      let needsLazy = variantsToNeedsLazy[variantType]!
+      let lazySuffix = (needsLazy ? "__acc()" : "")
+      em.str(depth, "\(scopeRecord.hostName)__\(variantType.globalIndex)\(lazySuffix)")
+    case .space(_):
+      sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
+    case .type(_):
+      sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
+    }
   }
 }
 

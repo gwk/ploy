@@ -3,17 +3,11 @@
 import Quilt
 
 
-final class MethodList: DefaultInitializable {
-  typealias Pair = (space: Space, method: Method)
-  var pairs: [Pair] = []
-}
-
-
 class Space: Scope {
 
   let file: OutFile
   var defs: [String: Def] = [:]
-  var methods: [String: MethodList] = [:]
+  var exts: [String: Ref<[Extension]>] = [:]
 
   init(pathNames: [String], parent: Space?, file: OutFile) {
     self.file = file
@@ -30,14 +24,6 @@ class Space: Scope {
       return addRecord(sym: sym, kind: kind)
     }
     return nil
-  }
-
-  func extendRecord(record: ScopeRecord, method: Method) {
-    switch record.kind {
-    case .polyFn: break
-    default: method.identifier.form.failType("definition is not extensible",
-      notes: (record.sym, "definition is here"))
-    }
   }
 
   func getOrCreateSpace(identifierSyms: [Sym]) -> Space {
@@ -69,13 +55,9 @@ class Space: Scope {
         let space = root.getOrCreateSpace(identifierSyms: in_.identifier!.syms)
         space.add(defs: in_.defs, root: root)
 
-      case .method(let method):
-        let syms = method.identifier.syms
-        let targetSpaceSyms = Array(syms[0..<(syms.count - 1)])
-        let targetSpace = root.getOrCreateSpace(identifierSyms: targetSpaceSyms)
-        let name = method.identifier.name
-        let methodList = targetSpace.methods.getDefault(name)
-        methodList.pairs.append((self, method))
+      case .ext(let ext):
+        let extsRef = exts.getDefault(ext.place.sym.name, dflt: Ref<[Extension]>())
+        extsRef.val.append(ext)
 
       default:
         if let existing = defs[def.sym.name] {
