@@ -21,10 +21,7 @@ class MainSpace: Space {
 
   func compileMain() {
     let def = getMainDef()
-    let record = getRecordInFrame(sym: def.sym)!
-    let em = Emitter(file: self.file)
-    compileSym(em, 0, scopeRecord: record, sym: def.sym, isTail: true)
-    em.flush()
+    let _ = getRecordInFrame(sym: def.sym)!
   }
 }
 
