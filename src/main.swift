@@ -13,8 +13,7 @@ let validOpts = Set([
 
 func main() {
   var ployPath: String! = nil
-  var includePaths: [String] = []
-  var libPaths: [String] = []
+  var srcPaths: [String] = []
   var opts: [String: String] = [:]
 
   var opt: String? = nil
@@ -28,12 +27,8 @@ func main() {
       opt = arg
     } else if arg.hasPrefix("-") {
       fail("unrecognized option: '\(arg)'")
-    } else if arg.pathExt == ".js" {
-      includePaths.append(arg)
-    } else if arg.pathExt == ".ploy" {
-      libPaths.append(arg)
     } else {
-      fail("invalid path extension: '\(arg)'")
+      srcPaths.append(arg)
     }
   }
   _ = ployPath
@@ -43,21 +38,39 @@ func main() {
   guard let mainPath = opts["-main"] else { fail("`-main main-src-path` argument is required.") }
   guard let outPath = opts["-o"] else { fail("`-o out-path` argument is required.") }
 
+  var libPaths: [String] = []
+  var incPaths: [String] = []
+
+  let known_exts = Set([".ploy", ".js", ""])
+  for path in srcPaths {
+    let ext = path.pathExt
+    if !known_exts.contains(ext) {
+      fail("invalid path extension: '\(path)'")
+    }
+  }
+  let allSrcPaths = guarded { try walkPaths(roots: srcPaths) }
+  for path in allSrcPaths {
+    let ext = path.pathExt
+    if ext == ".ploy" {
+      libPaths.append(path)
+    } else if ext == ".js" {
+      incPaths.append(path)
+    }
+  }
+
+  let mainDefs = Src(path: mainPath).parse(verbose: false)
+  let libDefs = libPaths.flatMap { Src(path: $0).parse(verbose: false) }
+
   let tmpPath = outPath + ".tmp"
   let tmpFile = guarded { try OutFile(path: tmpPath, create: 0o644) }
 
   let (rootSpace, mainSpace) = setupRootAndMain(mainPath: mainPath, outFile: tmpFile)
 
-  let mainDefs = Src(path: mainPath).parse(verbose: false)
   mainSpace.add(defs: mainDefs, root: rootSpace)
   _ = mainSpace.getMainDef() // check that we have `main` before doing additional work.
+  mainSpace.add(defs: libDefs, root: rootSpace)
 
-  for libPath in libPaths {
-    let libDefs = Src(path: libPath).parse(verbose: false)
-    mainSpace.add(defs: libDefs, root: rootSpace)
-  }
-
-  compileProgram(file: tmpFile, includePaths: includePaths, mainSpace: mainSpace)
+  compileProgram(file: tmpFile, includePaths: incPaths, mainSpace: mainSpace)
 
   renameFileAtPath(tmpPath, toPath: outPath)
   do {

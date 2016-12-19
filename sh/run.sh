@@ -12,7 +12,7 @@ outPath="_build/_sh/$stem.js"
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
-_build/debug/ploy lib/*.ploy -main "$mainPath" -o "$outPath"
+_build/debug/ploy lib -main "$mainPath" -o "$outPath"
 "$outPath" "$@"
 
 # TODO: move the profile dump.

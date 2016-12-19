@@ -1,4 +1,5 @@
 {
-  'compile': ['$PLOY lib/core.ploy lib/host.ploy -main $SRC -o $NAME'],
   'env': { 'PLOY': '$PROJ/_build/debug/ploy' },
+  'compile': ['$PLOY lib -main $SRC -o $NAME'],
+  'links': { 'lib', 'test' }
 }
