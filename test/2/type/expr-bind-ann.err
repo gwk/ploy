@@ -1,0 +1,6 @@
+type error: test/2/type/expr-bind-ann.ploy:2:12-12: type annotation actual type is not expected opaque type. actual type: Int
+    x: Str = 0
+             ~
+note: test/2/type/expr-bind-ann.ploy:2:6-8: expected type: Str
+    x: Str = 0
+       ~~~

@@ -1,3 +1,0 @@
-type error: test/2-error/circular-def-do.ploy:1:7-7: expected a value; `x` refers to a forward declaration.
-  x = { x }
-        ~

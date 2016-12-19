@@ -1,3 +1,0 @@
-parse error: test/2-error/adjacent-sym-num.ploy:1:6: adjacent forms require a separating space.
-  x = 0a
-       ^

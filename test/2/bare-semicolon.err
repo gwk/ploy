@@ -1,0 +1,3 @@
+parse error: test/2/bare-semicolon.ploy:1:1: unexpected terminator character: ';'
+  ;
+  ^

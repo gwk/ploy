@@ -1,0 +1,3 @@
+type error: test/2/label-extraneous.ploy:3:14-22: argument struct field #0 has label `i`; expected no label. actual type: (i:Int j:Int); expected type: (Int Int).
+  main = exit.f(i=0 j=0)
+               ~~~~~~~~~
