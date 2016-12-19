@@ -2,17 +2,14 @@
 
 
 struct ScopeRecord {
-  // types get masked by the variant names.
-  typealias _Space = Space
-  typealias _Type = Type
 
   enum Kind {
     case fwd // TODO: is it possible distinguish between types and vals?
-    case lazy(_Type)
-    case polyFn(_Type)
-    case space(_Space)
-    case type(_Type)
-    case val(_Type)
+    case lazy(Type)
+    case polyFn(Type)
+    case space(Space)
+    case type(Type)
+    case val(Type)
   }
 
   let name: String
