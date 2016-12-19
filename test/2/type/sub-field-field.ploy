@@ -1,0 +1,5 @@
+
+s:(Int (Int Int)) = (0 (0 0 0))
+
+main = exit.0@s
+

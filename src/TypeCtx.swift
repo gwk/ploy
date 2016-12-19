@@ -196,7 +196,7 @@ class TypeCtx {
     case .cmpd(let actFields):
       if expFields.count != actFields.count {
         let actFields = pluralize(actFields.count, "field")
-        return (constraint, "actual struct type has \(actFields); expected \(expFields.count).")
+        return (constraint, "actual struct type has \(actFields); expected \(expFields.count)")
         // TODO: should not be formatting potentially unused errors.
       }
       var needsConversion = false

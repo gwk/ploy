@@ -12,8 +12,8 @@ struct Constraint {
   let expChain: Chain<String>
   let desc: String
 
-  var actDesc: String { return actChain.map({"\($0) "}).join() }
-  var expDesc: String { return expChain.map({"\($0) "}).join() }
+  var actDesc: String { return actChain.map({"\($0) -> "}).join() }
+  var expDesc: String { return expChain.map({"\($0) -> "}).join() }
 
   func subConstraint(actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Constraint {
     return Constraint(form: form, expForm: expForm,
