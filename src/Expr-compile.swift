@@ -162,9 +162,9 @@ extension Expr {
       let needsLazy = variantsToNeedsLazy[variantType]!
       let lazySuffix = (needsLazy ? "__acc()" : "")
       em.str(depth, "\(scopeRecord.hostName)__\(variantType.globalIndex)\(lazySuffix)")
-    case .space(_):
+    case .space:
       sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
-    case .type(_):
+    case .type:
       sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
   }

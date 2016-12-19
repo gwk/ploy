@@ -152,7 +152,7 @@ class TypeCtx {
 
     switch exp.kind {
 
-    case .all(_):
+    case .all:
       return (constraint, "expected type of kind `All` not yet implemented")
 
     case .any(let members):
