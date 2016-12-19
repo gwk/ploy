@@ -120,7 +120,7 @@ extension Expr {
       }
 
     case .path(let path):
-      compileSym(em, depth, scopeRecord: ctx.pathRecords[path]!, sym: path.syms.last!, isTail: isTail)
+      compileSym(em, depth, scopeRecord: ctx.pathRecords[path]!, sym: path.syms.last!)
 
     case .reify:
       fatalError()
@@ -129,7 +129,7 @@ extension Expr {
       fatalError()
 
     case .sym(let sym):
-      compileSym(em, depth, scopeRecord: ctx.symRecords[sym]!, sym: sym, isTail: isTail)
+      compileSym(em, depth, scopeRecord: ctx.symRecords[sym]!, sym: sym)
     }
 
     if let conversion = conversion {
@@ -150,7 +150,7 @@ extension Expr {
 }
 
 
-func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym, isTail: Bool) {
+func compileSym(_ em: Emitter, _ depth: Int, scopeRecord: ScopeRecord, sym: Sym) {
   switch scopeRecord.kind {
   case .val:
     em.str(depth, scopeRecord.hostName)
