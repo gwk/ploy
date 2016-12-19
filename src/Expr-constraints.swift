@@ -37,8 +37,8 @@ extension Expr {
       let domType = ctx.addFreeType()
       let type = ctx.addFreeType()
       let sigType = Type.Sig(dom: domType, ret: type)
-      ctx.constrain(call.callee, expForm: call, expType: sigType, "callee")
-      ctx.constrain(call.arg, expForm: call, expType: domType, "argument")
+      ctx.constrain(call.callee, expType: sigType, "callee")
+      ctx.constrain(call.arg, expType: domType, "argument")
       return type
 
     case .do_(let do_):
@@ -51,7 +51,7 @@ extension Expr {
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
       let bodyType = genTypeConstraintsBody(ctx, fnScope, body: fn.body)
-      ctx.constrain(form: fn.body, type: bodyType, expForm: fn, expType: ret, "function body")
+      ctx.constrain(form: fn.body, type: bodyType, expType: ret, "function body")
       return type
 
     case .if_(let if_):
@@ -63,12 +63,12 @@ extension Expr {
         let cons = case_.consequence
         let _ = cond.genTypeConstraints(ctx, scope)
         let _ = cons.genTypeConstraints(ctx, scope)
-        ctx.constrain(cond, expForm: case_, expType: typeBool, "if form condition")
-        ctx.constrain(cons, expForm: if_, expType: type, "if form consequence")
+        ctx.constrain(cond, expType: typeBool, "if form condition")
+        ctx.constrain(cons, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
         let _ = dflt.expr.genTypeConstraints(ctx, scope)
-        ctx.constrain(dflt.expr, expForm: if_, expType: type, "if form default")
+        ctx.constrain(dflt.expr, expType: type, "if form default")
       }
       return type
 
@@ -195,7 +195,7 @@ func genTypeConstraintsBody(_ ctx: TypeCtx, _ scope: LocalScope, body: Body) -> 
   for (i, expr) in body.exprs.enumerated() {
     if i == body.exprs.count - 1 { break }
     let _ = expr.genTypeConstraints(ctx, scope)
-    ctx.constrain(expr, expForm: body, expType: typeVoid, "statement")
+    ctx.constrain(expr, expType: typeVoid, "statement")
   }
   let type: Type
   if let last = body.exprs.last {

@@ -1,10 +1,6 @@
-type error: test/2-error/ann-Int-Str.ploy:1:8-8: actual type is not expected opaque type;
-type annotation;
-actual type: Int
+type error: test/2-error/ann-Int-Str.ploy:1:8-8: type annotation actual type is not expected opaque type. actual type: Int
   main = 0:Str
          ~
-note: test/2-error/ann-Int-Str.ploy:1:10-12:
-type annotation;
-expected type: Str
+note: test/2-error/ann-Int-Str.ploy:1:10-12: expected type: Str
   main = 0:Str
            ~~~

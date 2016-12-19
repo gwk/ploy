@@ -72,19 +72,23 @@ class TypeCtx {
   }
 
 
-  func constrain(_ actExpr: Expr, expForm: Form, expType: Type, _ desc: String) {
+  func constrain(_ actExpr: Expr, expForm: Form? = nil, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
-      actForm: actExpr.form, actType: originalTypeForExpr(actExpr), actChain: .end,
-      expForm: expForm, expType: expType, expChain: .end, desc: desc))
+      form: actExpr.form, expForm: expForm,
+      actType: originalTypeForExpr(actExpr), actChain: .end,
+      expType: expType, expChain: .end,
+      desc: desc))
   }
 
 
-  func constrain(form: Form, type: Type, expForm: Form, expType: Type, _ desc: String) {
+  func constrain(form: Form, type: Type, expForm: Form? = nil, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
-      actForm: form, actType: type, actChain: .end,
-      expForm: expForm, expType: expType, expChain: .end, desc: desc))
+      form: form, expForm: expForm,
+      actType: type, actChain: .end,
+      expType: expType, expChain: .end,
+      desc: desc))
   }
 
 
@@ -141,10 +145,10 @@ class TypeCtx {
         match = morph
       }
       guard let morph = match else { return (constraint, "no morphs match expected") }
-      if let existing = exprSubtypes[constraint.actForm] {
+      if let existing = exprSubtypes[constraint.form] {
         return (constraint, "multiple subtype resolutions: \(existing); \(morph)")
       }
-      exprSubtypes[constraint.actForm] = morph
+      exprSubtypes[constraint.form] = morph
       return nil
 
     default: break
@@ -204,7 +208,7 @@ class TypeCtx {
         }
       }
       if needsConversion {
-        exprConversions[constraint.actForm] = Conversion(orig: act, conv: exp)
+        exprConversions[constraint.form] = Conversion(orig: act, conv: exp)
       }
       return nil
 
