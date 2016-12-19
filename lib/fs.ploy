@@ -1,0 +1,10 @@
+# © 2015 George King. Permission to use this file is granted in ploy/license.txt.
+
+in FS
+host_type File;
+host_type _Fs;
+_fs = host_val _Fs "require('fs')";
+write_Bool = host_val (File Bool)%() "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write_Int  = host_val (File Int)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write_Str  = host_val (File Str)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+;
