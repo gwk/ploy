@@ -23,7 +23,7 @@ struct Constraint {
 
   func fail(act: Type, exp: Type, msg: String) -> Never {
     actForm.failType(
-      "\(msg);\n\(actDesc)\(desc);\nresolved type: \(act)",
+      "\(msg);\n\(actDesc)\(desc);\nactual type: \(act)",
       notes: (expForm, "\n\(expDesc)\(desc);\nexpected type: \(exp)"))
   }
 }
