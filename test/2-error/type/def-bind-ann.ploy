@@ -1,0 +1,3 @@
+x: Str = 0
+
+main = outL.x

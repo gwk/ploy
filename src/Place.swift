@@ -35,4 +35,11 @@ enum Place: SubForm { // left side of a binding.
         return sym
     }
   }
+
+  var ann: Ann? {
+    switch self {
+      case .sym: return nil
+      case .ann(let ann): return ann
+    }
+  }
 }

@@ -1,0 +1,4 @@
+main = {
+  x: Str = 0
+  outL.x
+}

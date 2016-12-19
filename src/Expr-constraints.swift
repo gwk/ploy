@@ -21,13 +21,15 @@ extension Expr {
 
     case .ann(let ann):
       let _ = ann.expr.genTypeConstraints(ctx, scope)
-      let type = ann.typeExpr.type(scope, "type annotation")
-      ctx.constrain(ann.expr, expForm: ann.typeExpr.form, expType: type, "type annotation")
+      let type = ann.expr.addAnnConstraint(ctx, scope, ann: ann)
       return type
 
     case .bind(let bind):
       _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
-      let exprType = bind.val.genTypeConstraints(ctx, scope)
+      var exprType = bind.val.genTypeConstraints(ctx, scope)
+      if let ann = bind.place.ann {
+        exprType = bind.val.addAnnConstraint(ctx, scope, ann: ann)
+      }
       _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
       return typeVoid
 
@@ -114,6 +116,13 @@ extension Expr {
       ctx.symRecords[sym] = record
       return type
     }
+  }
+
+
+  func addAnnConstraint(_ ctx: TypeCtx, _ scope: Scope, ann: Ann) -> Type {
+    let type = ann.typeExpr.type(scope, "type annotation")
+    ctx.constrain(self, expForm: ann.typeExpr.form, expType: type, "type annotation")
+    return type
   }
 
 

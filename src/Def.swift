@@ -52,7 +52,7 @@ enum Def: SubForm {
     switch self {
 
     case .bind(let bind):
-      let (type, needsLazy) = compileBindingVal(space: space, sym: bind.place.sym, val: bind.val, addTypeSuffix: false)
+      let (type, needsLazy) = compileBindingVal(space: space, place: bind.place, val: bind.val, addTypeSuffix: false)
       if needsLazy {
         return .lazy(type)
       } else {
@@ -69,7 +69,7 @@ enum Def: SubForm {
       for ext in exts {
         // TODO: this is problematic because we emit all extensions as soon as the extensible is referenced.
         // However, lazy emission is more complicated.
-        let (type, needsLazy) = compileBindingVal(space: space, sym: ext.place.sym, val: ext.val, addTypeSuffix: true)
+        let (type, needsLazy) = compileBindingVal(space: space, place: ext.place, val: ext.val, addTypeSuffix: true)
         if let existing = typesToExts[type] {
           extensible.failType("extensible has duplicate type: \(type)", notes:
             (existing, "conflicting extension"),
@@ -103,15 +103,18 @@ enum Def: SubForm {
 }
 
 
-func compileBindingVal(space: Space, sym: Sym, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
+func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
   let ctx = TypeCtx()
   let _ = val.genTypeConstraints(ctx, LocalScope(parent: space)) // initial root type is ignored.
+  if let ann = place.ann {
+    _ = val.addAnnConstraint(ctx, space, ann: ann)
+  }
   ctx.resolve()
   let type = ctx.typeFor(expr: val)
   let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
   let em = Emitter(file: space.file)
-  //let fullName = "\(space.name)/\(sym.name)"
-  let hostName = "\(space.hostPrefix)\(sym.hostName)\(suffix)"
+  //let fullName = "\(space.name)/\(place.sym.name)"
+  let hostName = "\(space.hostPrefix)\(place.sym.hostName)\(suffix)"
   let isMain = (hostName == "MAIN__main")
   if val.needsLazyDef && !isMain {
     let acc = "\(hostName)__acc"
