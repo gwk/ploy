@@ -20,7 +20,7 @@ extension Expr {
       return type
 
     case .ann(let ann):
-      let _ = ann.expr.genTypeConstraints(ctx, scope)
+      _ = ann.expr.genTypeConstraints(ctx, scope)
       let type = ann.expr.addAnnConstraint(ctx, scope, ann: ann)
       return type
 
@@ -34,8 +34,8 @@ extension Expr {
       return typeVoid
 
     case .call(let call):
-      let _ = call.callee.genTypeConstraints(ctx, scope)
-      let _ = call.arg.genTypeConstraints(ctx, scope)
+      _ = call.callee.genTypeConstraints(ctx, scope)
+      _ = call.arg.genTypeConstraints(ctx, scope)
       let domType = ctx.addFreeType()
       let type = ctx.addFreeType()
       let sigType = Type.Sig(dom: domType, ret: type)
@@ -63,13 +63,13 @@ extension Expr {
       for case_ in if_.cases {
         let cond = case_.condition
         let cons = case_.consequence
-        let _ = cond.genTypeConstraints(ctx, scope)
-        let _ = cons.genTypeConstraints(ctx, scope)
+        _ = cond.genTypeConstraints(ctx, scope)
+        _ = cons.genTypeConstraints(ctx, scope)
         ctx.constrain(cond, expType: typeBool, "if form condition")
         ctx.constrain(cons, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
-        let _ = dflt.expr.genTypeConstraints(ctx, scope)
+        _ = dflt.expr.genTypeConstraints(ctx, scope)
         ctx.constrain(dflt.expr, expType: type, "if form default")
       }
       return type
@@ -203,7 +203,7 @@ extension Expr {
 func genTypeConstraintsBody(_ ctx: TypeCtx, _ scope: LocalScope, body: Body) -> Type {
   for (i, expr) in body.exprs.enumerated() {
     if i == body.exprs.count - 1 { break }
-    let _ = expr.genTypeConstraints(ctx, scope)
+    _ = expr.genTypeConstraints(ctx, scope)
     ctx.constrain(expr, expType: typeVoid, "statement")
   }
   let type: Type

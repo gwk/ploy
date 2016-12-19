@@ -36,7 +36,7 @@ func main() {
       fail("invalid path extension: '\(arg)'")
     }
   }
-  let _ = ployPath
+  _ = ployPath
 
   check(opt == nil, "dangling option flag: '\(opt)'")
 

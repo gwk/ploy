@@ -21,7 +21,7 @@ class MainSpace: Space {
 
   func compileMain() {
     let def = getMainDef()
-    let _ = getRecordInFrame(sym: def.sym)!
+    _ = getRecordInFrame(sym: def.sym)!
   }
 }
 
