@@ -58,12 +58,12 @@ extension Expr {
       let type = (if_.dflt == nil) ? typeVoid: ctx.addFreeType() // all cases must return same type.
       // TODO: much more to do here when default is missing;
       // e.g. inferring complete case coverage without default, typeHalt support, etc.
-      for c in if_.cases {
-        let cond = c.condition
-        let cons = c.consequence
+      for case_ in if_.cases {
+        let cond = case_.condition
+        let cons = case_.consequence
         let _ = cond.genTypeConstraints(ctx, scope)
         let _ = cons.genTypeConstraints(ctx, scope)
-        ctx.constrain(cond, expForm: c, expType: typeBool, "if form condition")
+        ctx.constrain(cond, expForm: case_, expType: typeBool, "if form condition")
         ctx.constrain(cons, expForm: if_, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
