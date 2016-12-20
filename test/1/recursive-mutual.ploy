@@ -1,9 +1,9 @@
 f = fn Int%Int
-  if eq_Int(0 0) ? 0
-    / g.dec_Int.$;;
+  if eq(0 0) ? 0
+    / g.dec.$;;
 
 g = fn Int%Int
-  if eq_Int(0 0) ? 1
-    / f.dec_Int.$;;
+  if eq(0 0) ? 1
+    / f.dec.$;;
 
 main = exit.f.100000

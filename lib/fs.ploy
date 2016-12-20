@@ -4,7 +4,13 @@ in FS
 host_type File;
 host_type _Fs;
 _fs = host_val _Fs "require('fs')";
-write_Bool = host_val (File Bool)%() "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
-write_Int  = host_val (File Int)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
-write_Str  = host_val (File Str)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+
+extensible write; # TODO: constraints.
+write += host_val (File Bool)%() "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write += host_val (File Int)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write += host_val (File Str)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+
+write_Bool: (File Bool)%()  = write # TEMP.
+write_Int:  (File Int)%()   = write # TEMP.
+write_Str:  (File Str)%()   = write # TEMP.
 ;
