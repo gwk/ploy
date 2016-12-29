@@ -17,7 +17,7 @@ class LitNum: Form { // numeric literal: `0`.
 
   // MARK: LitNum.
 
-  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
+  func typeForAccess(ctx: inout TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
     case .cmpd(let fields):
       if let field = fields.optEl(val) {

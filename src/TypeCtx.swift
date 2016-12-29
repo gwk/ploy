@@ -3,7 +3,7 @@
 import Quilt
 
 
-class TypeCtx {
+struct TypeCtx {
 
   struct Err: Error {
     let constraint: Constraint
@@ -22,12 +22,9 @@ class TypeCtx {
   private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
   private var exprSubtypes = [Form:Type]() // maps forms to legal, inferred compile time narrowing.
   private var exprConversions = [Form:Conversion]() // maps forms to legal, inferred runtime conversions.
-  private var isResolved = false
 
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
-
-  deinit { assert(isResolved) }
 
 
   func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(key: expr.form)) }
@@ -51,20 +48,20 @@ class TypeCtx {
   }
 
 
-  func addFreeType() -> Type {
+  mutating func addFreeType() -> Type {
     let t = Type.Free(freeTypes.count)
     freeTypes.append(t)
     return t
   }
 
 
-  func trackExpr(_ expr: Expr, type: Type) {
+  mutating func trackExpr(_ expr: Expr, type: Type) {
     exprOriginalTypes.insertNew(expr.form, value: type)
     trackFreeTypes(type)
   }
 
 
-  func trackFreeTypes(_ type: Type) {
+  mutating func trackFreeTypes(_ type: Type) {
     for free in type.frees {
       guard case .free(let index) = free.kind else { fatalError() }
       freeIndicesToUnresolvedTypes.insert(index, member: type)
@@ -72,7 +69,7 @@ class TypeCtx {
   }
 
 
-  func constrain(_ actExpr: Expr, expForm: Form? = nil, expType: Type, _ desc: String) {
+  mutating func constrain(_ actExpr: Expr, expForm: Form? = nil, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
       form: actExpr.form, expForm: expForm,
@@ -82,7 +79,7 @@ class TypeCtx {
   }
 
 
-  func constrain(form: Form, type: Type, expForm: Form? = nil, expType: Type, _ desc: String) {
+  mutating func constrain(form: Form, type: Type, expForm: Form? = nil, expType: Type, _ desc: String) {
     trackFreeTypes(expType)
     constraints.append(Constraint(
       form: form, expForm: expForm,
@@ -92,7 +89,7 @@ class TypeCtx {
   }
 
 
-  func resolveType(_ type: Type, to resolved: Type) -> String? {
+  mutating func resolveType(_ type: Type, to resolved: Type) -> String? {
     if let existing = resolvedTypes[type] {
       return "multiple resolutions not yet supported;\n  original: \(type)\n  existing: \(existing)\n  incoming: \(resolved)"
     }
@@ -109,7 +106,7 @@ class TypeCtx {
   }
 
 
-  func resolveFreeType(_ freeType: Type, to resolved: Type) -> String? {
+  mutating func resolveFreeType(_ freeType: Type, to resolved: Type) -> String? {
     // just for clarity / as an experiment, always prefer lower free indices.
     if case .free(let resolvedIndex) = resolved.kind {
       if freeType.freeIndex > resolvedIndex {
@@ -123,7 +120,7 @@ class TypeCtx {
   }
 
 
-  func resolveConstraint(_ constraint: Constraint) -> (Constraint, String)? {
+  mutating func resolveConstraint(_ constraint: Constraint) -> (Constraint, String)? {
     let act = resolvedType(constraint.actType)
     let exp = resolvedType(constraint.expType)
     if (act == exp) {
@@ -189,7 +186,7 @@ class TypeCtx {
   }
 
 
-  func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type, expFields: [TypeField]) -> (Constraint, String)? {
+  mutating func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type, expFields: [TypeField]) -> (Constraint, String)? {
 
     switch act.kind {
 
@@ -222,7 +219,7 @@ class TypeCtx {
     case failure((Constraint, String))
   }
 
-  func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField) -> FieldResolution {
+  mutating func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField) -> FieldResolution {
     var res: FieldResolution = .ok
     if actField.label != nil {
       if actField.label != expField.label {
@@ -240,7 +237,7 @@ class TypeCtx {
     return res
   }
 
-  func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) -> (Constraint, String)? {
+  mutating func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) -> (Constraint, String)? {
     switch act.kind {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
@@ -263,7 +260,7 @@ class TypeCtx {
   }
 
 
-  func resolveConstraintToSig(_ constraint: Constraint, act: Type, expDom: Type, expRet: Type) -> (Constraint, String)? {
+  mutating func resolveConstraintToSig(_ constraint: Constraint, act: Type, expDom: Type, expRet: Type) -> (Constraint, String)? {
     switch act.kind {
 
     case .sig(let actDom, let actRet):
@@ -284,14 +281,14 @@ class TypeCtx {
   }
 
 
-  func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> (Constraint, String)? {
+  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> (Constraint, String)? {
     return resolveConstraint(constraint.subConstraint(
       actType: actType, actDesc: actDesc,
       expType: expType, expDesc: expDesc))
   }
 
 
-  func resolve() {
+  mutating func resolve() {
 
     for constraint in constraints {
       if let (constraint, msg) = resolveConstraint(constraint) {
@@ -316,6 +313,5 @@ class TypeCtx {
       }
     }
     check(freeIndicesToUnresolvedTypes.isEmpty)
-    isResolved = true
   }
 }

@@ -17,7 +17,7 @@ class Sym: Form { // symbol: `name`.
 
   var hostName: String { return name }
 
-  func typeForAccess(ctx: TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
+  func typeForAccess(ctx: inout TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
     switch accesseeType.kind {
     case .cmpd(let fields):
       for field in fields {

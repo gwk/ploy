@@ -14,7 +14,7 @@ extension Expr {
   }
 
 
-  func compile(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
+  func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     ctx.assertIsTracking(self)
     let conversion = ctx.conversionFor(expr: self)
     if let conversion = conversion {
@@ -25,31 +25,31 @@ extension Expr {
 
     case .acc(let acc):
       em.str(depth, "(")
-      acc.accessee.compile(ctx, em, depth + 1, isTail: false)
+      acc.accessee.compile(&ctx, em, depth + 1, isTail: false)
       em.str(depth + 1, acc.accessor.hostAccessor)
       em.append(")")
 
     case .ann(let ann):
-      ann.expr.compile(ctx, em, depth, isTail: isTail)
+      ann.expr.compile(&ctx, em, depth, isTail: isTail)
 
     case .bind(let bind):
       em.str(depth, "let \(bind.place.sym.hostName) =")
-      bind.val.compile(ctx, em, depth + 1, isTail: false)
+      bind.val.compile(&ctx, em, depth + 1, isTail: false)
 
     case .call(let call):
-      call.callee.compile(ctx, em, depth, isTail: false)
+      call.callee.compile(&ctx, em, depth, isTail: false)
       em.append("(")
-      call.arg.compile(ctx, em, depth + 1, isTail: false)
+      call.arg.compile(&ctx, em, depth + 1, isTail: false)
       em.append(")")
 
     case .do_(let do_):
       em.str(depth, "(()=>{")
-      compileBody(ctx, em, depth + 1, body: do_.body, isTail: isTail)
+      compileBody(&ctx, em, depth + 1, body: do_.body, isTail: isTail)
       em.append("})()")
 
     case .fn(let fn):
       em.str(depth,  "(function self($){")
-      compileBody(ctx, em, depth + 1, body: fn.body, isTail: isTail)
+      compileBody(&ctx, em, depth + 1, body: fn.body, isTail: isTail)
       em.append("})")
 
     case .hostVal(let hostVal):
@@ -58,13 +58,13 @@ extension Expr {
     case .if_(let if_):
       em.str(depth, "(")
       for c in if_.cases {
-        c.condition.compile(ctx, em, depth + 1, isTail: false)
+        c.condition.compile(&ctx, em, depth + 1, isTail: false)
         em.append(" ?")
-        c.consequence.compile(ctx, em, depth + 1, isTail: isTail)
+        c.consequence.compile(&ctx, em, depth + 1, isTail: isTail)
         em.append(" :")
       }
       if let dflt = if_.dflt {
-        dflt.expr.compile(ctx, em, depth + 1, isTail: isTail)
+        dflt.expr.compile(&ctx, em, depth + 1, isTail: isTail)
       } else {
         em.str(depth + 1, "undefined")
       }
@@ -103,7 +103,7 @@ extension Expr {
         em.str(depth, "{")
         var argIndex = 0
         for field in fields {
-          compileCmpdField(ctx, em, depth, paren: paren, field: field, argIndex: &argIndex)
+          compileCmpdField(&ctx, em, depth, paren: paren, field: field, argIndex: &argIndex)
         }
         if argIndex != fields.count {
           paren.failType("expected \(fields.count) arguments; received \(argIndex)")
@@ -114,11 +114,11 @@ extension Expr {
         if !paren.isScalarType {
           paren.failType("expected type: \(type); received a struct value.")
         }
-        paren.els[0].compile(ctx, em, depth, isTail: isTail)
+        paren.els[0].compile(&ctx, em, depth, isTail: isTail)
       }
 
     case .path(let path):
-      compileSym(ctx, em, depth, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!)
+      compileSym(&ctx, em, depth, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!)
 
     case .reify:
       fatalError()
@@ -127,7 +127,7 @@ extension Expr {
       fatalError()
 
     case .sym(let sym):
-      compileSym(ctx, em, depth, sym: sym, scopeRecord: ctx.symRecords[sym]!)
+      compileSym(&ctx, em, depth, sym: sym, scopeRecord: ctx.symRecords[sym]!)
     }
 
     if let conversion = conversion {
@@ -147,7 +147,7 @@ extension Expr {
   }
 
 
-  func compileSym(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, sym: Sym, scopeRecord: ScopeRecord) {
+  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, sym: Sym, scopeRecord: ScopeRecord) {
     switch scopeRecord.kind {
     case .val:
       em.str(depth, scopeRecord.hostName)
@@ -171,19 +171,19 @@ extension Expr {
 }
 
 
-func compileBody(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail: Bool) {
+func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail: Bool) {
   for (i, expr) in body.exprs.enumerated() {
     let isLast = (i == body.exprs.lastIndex)
     if isLast {
       em.str(depth, "return (")
     }
-    expr.compile(ctx, em, depth, isTail: isLast && isTail)
+    expr.compile(&ctx, em, depth, isTail: isLast && isTail)
     em.append(isLast ? ")" : ";")
   }
 }
 
 
-func compileCmpdField(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren, field: TypeField, argIndex: inout Int) {
+func compileCmpdField(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren, field: TypeField, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr
@@ -203,7 +203,7 @@ func compileCmpdField(_ ctx: TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren,
     default: val = arg
     }
     em.str(depth, " \(field.hostName):")
-    val.compile(ctx, em, depth + 1, isTail: false)
+    val.compile(&ctx, em, depth + 1, isTail: false)
     em.append(",")
     argIndex += 1
   } else { // TODO: support default arguments.

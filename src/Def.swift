@@ -104,10 +104,10 @@ enum Def: SubForm {
 
 
 func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
-  let ctx = TypeCtx()
-  _ = val.genTypeConstraints(ctx, LocalScope(parent: space)) // initial root type is ignored.
+  var ctx = TypeCtx()
+  _ = val.genTypeConstraints(&ctx, LocalScope(parent: space)) // initial root type is ignored.
   if let ann = place.ann {
-    _ = val.addAnnConstraint(ctx, space, ann: ann)
+    _ = val.addAnnConstraint(&ctx, space, ann: ann)
   }
   ctx.resolve()
   let type = ctx.typeFor(expr: val)
@@ -121,7 +121,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     em.str(0, "var \(acc) = function() {")
     em.str(0, " \(acc) = $lazy_sentinal;")
     em.str(0, " let val = // \(type)")
-    val.compile(ctx, em, 1, isTail: false)
+    val.compile(&ctx, em, 1, isTail: false)
     em.append(";")
     em.str(0, " \(acc) = function() { return val };")
     em.str(0, " return val; }")
@@ -129,7 +129,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     return (type, needsLazy: true)
   } else {
     em.str(0, "let \(hostName) = // \(type)")
-    val.compile(ctx, em, 1, isTail: false)
+    val.compile(&ctx, em, 1, isTail: false)
     em.append(";")
     em.flush()
     return (type, needsLazy: false)

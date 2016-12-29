@@ -5,37 +5,37 @@ import Quilt
 
 extension Expr {
 
-  func genTypeConstraints(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
-    let type = genTypeConstraintsDisp(ctx, scope)
+  func genTypeConstraints(_ ctx: inout TypeCtx, _ scope: LocalScope) -> Type {
+    let type = genTypeConstraintsDisp(&ctx, scope)
     ctx.trackExpr(self, type: type)
     return type
   }
 
-  func genTypeConstraintsDisp(_ ctx: TypeCtx, _ scope: LocalScope) -> Type {
+  func genTypeConstraintsDisp(_ ctx: inout TypeCtx, _ scope: LocalScope) -> Type {
     switch self {
 
     case .acc(let acc):
-      let accesseeType = acc.accessee.genTypeConstraints(ctx, scope)
+      let accesseeType = acc.accessee.genTypeConstraints(&ctx, scope)
       let type = Type.Prop(acc.accessor.propAccessor, type: accesseeType)
       return type
 
     case .ann(let ann):
-      _ = ann.expr.genTypeConstraints(ctx, scope)
-      let type = ann.expr.addAnnConstraint(ctx, scope, ann: ann)
+      _ = ann.expr.genTypeConstraints(&ctx, scope)
+      let type = ann.expr.addAnnConstraint(&ctx, scope, ann: ann)
       return type
 
     case .bind(let bind):
       _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
-      var exprType = bind.val.genTypeConstraints(ctx, scope)
+      var exprType = bind.val.genTypeConstraints(&ctx, scope)
       if let ann = bind.place.ann {
-        exprType = bind.val.addAnnConstraint(ctx, scope, ann: ann)
+        exprType = bind.val.addAnnConstraint(&ctx, scope, ann: ann)
       }
       _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
       return typeVoid
 
     case .call(let call):
-      _ = call.callee.genTypeConstraints(ctx, scope)
-      _ = call.arg.genTypeConstraints(ctx, scope)
+      _ = call.callee.genTypeConstraints(&ctx, scope)
+      _ = call.arg.genTypeConstraints(&ctx, scope)
       let domType = ctx.addFreeType()
       let type = ctx.addFreeType()
       let sigType = Type.Sig(dom: domType, ret: type)
@@ -44,7 +44,7 @@ extension Expr {
       return type
 
     case .do_(let do_):
-      return genTypeConstraintsBody(ctx, scope, body: do_.body)
+      return genTypeConstraintsBody(&ctx, scope, body: do_.body)
 
     case .fn(let fn):
       let type = Expr.sig(fn.sig).type(scope, "signature")
@@ -52,7 +52,7 @@ extension Expr {
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
-      let bodyType = genTypeConstraintsBody(ctx, fnScope, body: fn.body)
+      let bodyType = genTypeConstraintsBody(&ctx, fnScope, body: fn.body)
       ctx.constrain(form: fn.body, type: bodyType, expType: ret, "function body")
       return type
 
@@ -63,13 +63,13 @@ extension Expr {
       for case_ in if_.cases {
         let cond = case_.condition
         let cons = case_.consequence
-        _ = cond.genTypeConstraints(ctx, scope)
-        _ = cons.genTypeConstraints(ctx, scope)
+        _ = cond.genTypeConstraints(&ctx, scope)
+        _ = cons.genTypeConstraints(&ctx, scope)
         ctx.constrain(cond, expType: typeBool, "if form condition")
         ctx.constrain(cons, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
-        _ = dflt.expr.genTypeConstraints(ctx, scope)
+        _ = dflt.expr.genTypeConstraints(&ctx, scope)
         ctx.constrain(dflt.expr, expType: type, "if form default")
       }
       return type
@@ -91,10 +91,10 @@ extension Expr {
 
     case .paren(let paren):
       if paren.isScalarValue {
-        let type = paren.els[0].genTypeConstraints(ctx, scope)
+        let type = paren.els[0].genTypeConstraints(&ctx, scope)
         return type
       }
-      let fields = paren.els.enumerated().map { $1.typeFieldForArg(ctx, scope, index: $0) }
+      let fields = paren.els.enumerated().map { $1.typeFieldForArg(&ctx, scope, index: $0) }
       let type = Type.Cmpd(fields)
       return type
 
@@ -119,7 +119,7 @@ extension Expr {
   }
 
 
-  func addAnnConstraint(_ ctx: TypeCtx, _ scope: Scope, ann: Ann) -> Type {
+  func addAnnConstraint(_ ctx: inout TypeCtx, _ scope: Scope, ann: Ann) -> Type {
     let type = ann.typeExpr.type(scope, "type annotation")
     ctx.constrain(self, expForm: ann.typeExpr.form, expType: type, "type annotation")
     return type
@@ -157,13 +157,13 @@ extension Expr {
   }
 
 
-  func typeFieldForArg(_ ctx: TypeCtx, _ scope: LocalScope, index: Int) -> TypeField {
+  func typeFieldForArg(_ ctx: inout TypeCtx, _ scope: LocalScope, index: Int) -> TypeField {
     let val: Expr
     switch self {
       case .bind(let bind): val = bind.val
       default: val = self
     }
-    return TypeField(index: index, label: argLabel, type: val.genTypeConstraints(ctx, scope))
+    return TypeField(index: index, label: argLabel, type: val.genTypeConstraints(&ctx, scope))
   }
 
 
@@ -201,15 +201,15 @@ extension Expr {
 }
 
 
-func genTypeConstraintsBody(_ ctx: TypeCtx, _ scope: LocalScope, body: Body) -> Type {
+func genTypeConstraintsBody(_ ctx: inout TypeCtx, _ scope: LocalScope, body: Body) -> Type {
   for (i, expr) in body.exprs.enumerated() {
     if i == body.exprs.count - 1 { break }
-    _ = expr.genTypeConstraints(ctx, scope)
+    _ = expr.genTypeConstraints(&ctx, scope)
     ctx.constrain(expr, expType: typeVoid, "statement")
   }
   let type: Type
   if let last = body.exprs.last {
-    type = last.genTypeConstraints(ctx, LocalScope(parent: scope))
+    type = last.genTypeConstraints(&ctx, LocalScope(parent: scope))
   } else {
     type = typeVoid
   }
