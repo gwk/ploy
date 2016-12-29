@@ -127,6 +127,7 @@ extension Expr {
 
 
   func type(_ scope: Scope, _ subj: String) -> Type {
+    // evaluate `self` as a type expression.
     switch self {
 
     case .paren(let paren):
