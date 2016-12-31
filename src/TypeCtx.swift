@@ -23,7 +23,7 @@ struct TypeCtx {
   }
 
   private var constraints: [Constraint] = []
-  private var freeTypes: [Type] = []
+  private var freeTypeCount = 0
   private var resolvedTypes: [Type:Type] = [:] // maps all types containing free types to partially or completely resolved types.
   private var freeIndicesToUnresolvedTypes: DictOfSet<Int, Type> = [:] // maps free types to all types containing them.
   private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
@@ -56,8 +56,8 @@ struct TypeCtx {
 
 
   mutating func addFreeType() -> Type {
-    let t = Type.Free(freeTypes.count)
-    freeTypes.append(t)
+    let t = Type.Free(freeTypeCount)
+    freeTypeCount += 1
     return t
   }
 
@@ -305,7 +305,8 @@ struct TypeCtx {
     }
 
     // check that resolution is complete.
-    for type in freeTypes {
+    for i in 0..<freeTypeCount {
+      let type = Type.Free(i)
       guard let resolved = resolvedTypes[type] else {
         fatalError("unresolved free type: \(type)")
       }
