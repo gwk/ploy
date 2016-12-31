@@ -5,13 +5,20 @@ import Quilt
 
 struct TypeCtx {
 
+  typealias MsgThunk = () ->String
+
   struct Err: Error {
     let constraint: Constraint
-    let msg: String
+    let msgThunk: MsgThunk
 
-    init(_ constraint: Constraint, _ msg: String) {
+    init(_ constraint: Constraint, msgThunk: @escaping MsgThunk) {
       self.constraint = constraint
-      self.msg = msg
+      self.msgThunk = msgThunk
+    }
+
+    init(_ constraint: Constraint, _ msgThunk: @escaping @autoclosure ()->String) {
+      self.constraint = constraint
+      self.msgThunk = msgThunk
     }
   }
 
@@ -89,9 +96,9 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveType(_ type: Type, to resolved: Type) -> String? {
+  mutating func resolveType(_ type: Type, to resolved: Type) -> MsgThunk? {
     if let existing = resolvedTypes[type] {
-      return "multiple resolutions not yet supported;\n  original: \(type)\n  existing: \(existing)\n  incoming: \(resolved)"
+      return {"multiple resolutions not yet supported;\n  original: \(type)\n  existing: \(existing)\n  incoming: \(resolved)"}
     }
     resolvedTypes[type] = resolved
     if case .free(let index) = resolved.kind {
@@ -106,7 +113,7 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveFreeType(_ freeType: Type, to resolved: Type) -> String? {
+  mutating func resolveFreeType(_ freeType: Type, to resolved: Type) -> MsgThunk? {
     // just for clarity / as an experiment, always prefer lower free indices.
     if case .free(let resolvedIndex) = resolved.kind {
       if freeType.freeIndex > resolvedIndex {
@@ -120,7 +127,7 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveConstraint(_ constraint: Constraint) -> (Constraint, String)? {
+  mutating func resolveConstraint(_ constraint: Constraint) -> Err? {
     let act = resolvedType(constraint.actType)
     let exp = resolvedType(constraint.expType)
     if (act == exp) {
@@ -130,7 +137,7 @@ struct TypeCtx {
     switch act.kind {
 
     case .free:
-      return resolveFreeType(act, to: exp).and { (constraint, $0) }
+      return resolveFreeType(act, to: exp).and { Err(constraint, msgThunk: $0) }
 
     case .poly(let morphs):
       var match: Type? = nil
@@ -138,12 +145,12 @@ struct TypeCtx {
         if resolveSub(constraint, actType: morph, actDesc: "morph", expType: exp, expDesc: "expected type") != nil {
           continue // TODO: this is broken because we should be unwinding any resolved types.
         }
-        if let prev = match { return (constraint, "multiple morphs match expected: \(prev); \(morph)") }
+        if let prev = match { return Err(constraint, "multiple morphs match expected: \(prev); \(morph)") }
         match = morph
       }
-      guard let morph = match else { return (constraint, "no morphs match expected") }
+      guard let morph = match else { return Err(constraint, "no morphs match expected") }
       if let existing = exprSubtypes[constraint.form] {
-        return (constraint, "multiple subtype resolutions: \(existing); \(morph)")
+        return Err(constraint, "multiple subtype resolutions: \(existing); \(morph)")
       }
       exprSubtypes[constraint.form] = morph
       return nil
@@ -154,54 +161,53 @@ struct TypeCtx {
     switch exp.kind {
 
     case .all:
-      return (constraint, "expected type of kind `All` not yet implemented")
+      return Err(constraint, "expected type of kind `All` not yet implemented")
 
     case .any(let members):
       if !members.contains(act) {
-        return (constraint, "actual type is not a member of `Any` expected type")
+        return Err(constraint, "actual type is not a member of `Any` expected type")
       }
 
     case .cmpd(let expFields):
       return resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
 
     case .free:
-      return resolveType(exp, to: act).and { (constraint, $0) }
+      return resolveType(exp, to: act).and { Err(constraint, msgThunk: $0) }
 
     case .host, .prim:
       return resolveConstraintToOpaque(constraint, act: act, exp: exp)
 
     case .poly:
-      return (constraint, "expected `Poly` type is not implemented")
+      return Err(constraint, "expected `Poly` type is not implemented")
 
     case .prop(_, _):
-      return (constraint, "prop constraints not implemented")
+      return Err(constraint, "prop constraints not implemented")
 
     case .sig(let expDom, let expRet):
       return resolveConstraintToSig(constraint, act: act, expDom: expDom, expRet: expRet)
 
     case .var_:
-      return (constraint, "var constraints not implemented")
+      return Err(constraint, "var constraints not implemented")
     }
     fatalError("unreachable.")
   }
 
 
-  mutating func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type, expFields: [TypeField]) -> (Constraint, String)? {
+  mutating func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type, expFields: [TypeField]) -> Err? {
 
     switch act.kind {
 
     case .cmpd(let actFields):
       if expFields.count != actFields.count {
         let actFields = pluralize(actFields.count, "field")
-        return (constraint, "actual struct type has \(actFields); expected \(expFields.count)")
-        // TODO: should not be formatting potentially unused errors.
+        return Err(constraint, "actual struct type has \(actFields); expected \(expFields.count)")
       }
       var needsConversion = false
       for (actField, expField) in zip(actFields, expFields) {
         switch resolveField(constraint, actField: actField, expField: expField) {
         case .ok: break
         case .convert: needsConversion = true
-        case .failure(let failure): return failure
+        case .failure(let err): return err
         }
       }
       if needsConversion {
@@ -209,21 +215,21 @@ struct TypeCtx {
       }
       return nil
 
-    default: return (constraint, "actual type is not a struct")
+    default: return Err(constraint, "actual type is not a struct")
     }
   }
 
   enum FieldResolution {
     case ok
     case convert
-    case failure((Constraint, String))
+    case failure(Err)
   }
 
   mutating func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField) -> FieldResolution {
     var res: FieldResolution = .ok
     if actField.label != nil {
       if actField.label != expField.label {
-        return .failure((constraint, "struct field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg)"))
+        return .failure(Err(constraint, "struct field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg)"))
       }
     } else if expField.label != nil { // convert unlabeled to labeled.
       res = .convert
@@ -237,7 +243,7 @@ struct TypeCtx {
     return res
   }
 
-  mutating func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) -> (Constraint, String)? {
+  mutating func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) -> Err? {
     switch act.kind {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
@@ -252,15 +258,15 @@ struct TypeCtx {
             return nil
           }
         }
-        return (constraint, "actual type has no field matching accessor") // TODO: this should be caught earlier.
-      default: return (constraint, "actual type is not an accessible type")
+        return Err(constraint, "actual type has no field matching accessor") // TODO: this should be caught earlier.
+      default: return Err(constraint, "actual type is not an accessible type")
       }
-    default: return (constraint, "actual type is not expected opaque type")
+    default: return Err(constraint, "actual type is not expected opaque type")
     }
   }
 
 
-  mutating func resolveConstraintToSig(_ constraint: Constraint, act: Type, expDom: Type, expRet: Type) -> (Constraint, String)? {
+  mutating func resolveConstraintToSig(_ constraint: Constraint, act: Type, expDom: Type, expRet: Type) -> Err? {
     switch act.kind {
 
     case .sig(let actDom, let actRet):
@@ -276,12 +282,12 @@ struct TypeCtx {
       }
       return nil
 
-    default: return (constraint, "actual type is not a signature")
+    default: return Err(constraint, "actual type is not a signature")
     }
   }
 
 
-  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> (Constraint, String)? {
+  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Err? {
     return resolveConstraint(constraint.subConstraint(
       actType: actType, actDesc: actDesc,
       expType: expType, expDesc: expDesc))
@@ -291,10 +297,10 @@ struct TypeCtx {
   mutating func resolve() {
 
     for constraint in constraints {
-      if let (constraint, msg) = resolveConstraint(constraint) {
-        let act = resolvedType(constraint.actType)
-        let exp = resolvedType(constraint.expType)
-        constraint.fail(act: act, exp: exp, msg: msg)
+      if let err = resolveConstraint(constraint) {
+        let act = resolvedType(err.constraint.actType)
+        let exp = resolvedType(err.constraint.expType)
+        err.constraint.fail(act: act, exp: exp, msg: err.msgThunk())
       }
     }
 
