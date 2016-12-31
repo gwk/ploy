@@ -104,10 +104,11 @@ assert_eq = fn (Int Int Str)%()
   if ne(0@$ 1@$) ? {
     err_Str.'assert_eq failed: '
     err_Int.0@$
-    err.' != '
+    err_Str.' != '
     err_Int.1@$
-    err.'; '
-    errL(2@$)
+    err_Str.'; '
+    err_Str.2@$
+    err_Str('\n')
     exit.1 };;
 
 ;
