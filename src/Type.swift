@@ -98,16 +98,16 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return Type(description, kind: .host)
   }
 
-  class func Prim(_ name: String) -> Type {
-    return Type(name, kind: .prim)
-  }
-
   class func Poly(_ members: Set<Type>) -> Type {
     let description = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(description, (
       kind: .poly(members: members),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
+  }
+
+  class func Prim(_ name: String) -> Type {
+    return Type(name, kind: .prim)
   }
 
   class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
