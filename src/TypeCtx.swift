@@ -24,8 +24,7 @@ struct TypeCtx {
 
   private var constraints: [Constraint] = []
   private var freeTypeCount = 0
-  private var resolvedTypes: [Type:Type] = [:] // maps all types containing free types to partially or completely resolved types.
-  private var freeIndicesToUnresolvedTypes: DictOfSet<Int, Type> = [:] // maps free types to all types containing them.
+  private var freeUnifications: [Int:Type] = [:]
   private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
   private var exprSubtypes = [Form:Type]() // maps forms to legal, inferred compile time narrowing.
   private var exprConversions = [Form:Conversion]() // maps forms to legal, inferred runtime conversions.
@@ -36,17 +35,14 @@ struct TypeCtx {
 
   func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(key: expr.form)) }
 
-  func originalTypeForExpr(_ expr: Expr) -> Type { return exprOriginalTypes[expr.form]! }
+  private func origTypeFor(expr: Expr) -> Type { return exprOriginalTypes[expr.form]! }
 
-
-  func resolvedType(_ type: Type) -> Type {
-    return resolvedTypes[type].or(type)
-  }
+  private func subtypeFor(expr: Expr) -> Type? { return exprSubtypes[expr.form] }
 
 
   func typeFor(expr: Expr) -> Type {
-    let type = exprSubtypes[expr.form].or(originalTypeForExpr(expr))
-    return resolvedType(type)
+    let type = subtypeFor(expr: expr).or(origTypeFor(expr: expr))
+    return resolved(type: type)
   }
 
 
@@ -64,30 +60,19 @@ struct TypeCtx {
 
   mutating func trackExpr(_ expr: Expr, type: Type) {
     exprOriginalTypes.insertNew(expr.form, value: type)
-    trackFreeTypes(type)
-  }
-
-
-  mutating func trackFreeTypes(_ type: Type) {
-    for free in type.frees {
-      guard case .free(let index) = free.kind else { fatalError() }
-      freeIndicesToUnresolvedTypes.insert(index, member: type)
-    }
   }
 
 
   mutating func constrain(_ actExpr: Expr, expForm: Form? = nil, expType: Type, _ desc: String) {
-    trackFreeTypes(expType)
     constraints.append(Constraint(
       form: actExpr.form, expForm: expForm,
-      actType: originalTypeForExpr(actExpr), actChain: .end,
+      actType: origTypeFor(expr: actExpr), actChain: .end,
       expType: expType, expChain: .end,
       desc: desc))
   }
 
 
   mutating func constrain(form: Form, type: Type, expForm: Form? = nil, expType: Type, _ desc: String) {
-    trackFreeTypes(expType)
     constraints.append(Constraint(
       form: form, expForm: expForm,
       actType: type, actChain: .end,
@@ -96,40 +81,56 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveType(_ type: Type, to resolved: Type) -> MsgThunk? {
-    if let existing = resolvedTypes[type] {
-      return {"multiple resolutions not yet supported;\n  original: \(type)\n  existing: \(existing)\n  incoming: \(resolved)"}
+  private func resolved(type: Type) -> Type {
+    // TODO: need to track types to prevent/handle recursion.
+    switch type.kind {
+    case .all(let members):
+      return Type.All(Set(members.map { self.resolved(type: $0) }))
+    case .any(let members):
+      return Type.Any_(Set(members.map { self.resolved(type: $0) }))
+    case .cmpd(let fields):
+      return Type.Cmpd(fields.map() { self.resolved(par: $0) })
+    case .free(let freeIndex):
+      return freeUnifications[freeIndex].or(type)
+    case .host:
+      return type
+    case .poly(let members):
+      return Type.Poly(Set(members.map { self.resolved(type: $0) }))
+    case .prim:
+      return type
+    case .prop(let accessor, let type):
+      return Type.Prop(accessor, type: resolved(type: type))
+    case .sig(let dom, let ret):
+      return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
+    case .var_: return type
     }
-    resolvedTypes[type] = resolved
-    if case .free(let index) = resolved.kind {
-      let unresolvedTypes = (freeIndicesToUnresolvedTypes[index]?.val).or([])
-      for el in unresolvedTypes {
-        let elResolved = el.refine(type, with: resolved)
-        if let msg = resolveType(el, to: elResolved) { return msg }
+  }
+
+  private func resolved(par: TypeField) -> TypeField {
+    let type = resolved(type: par.type)
+    return (type == par.type) ? par : TypeField(index: par.index, label: par.label, type: type)
+  }
+
+
+  mutating func unify(freeType: Type, to type: Type) -> MsgThunk? {
+    let freeIndex = freeType.freeIndex
+    // TODO: determine whether always resolving to lower index is necessary.
+    if case .free(let index) = type.kind {
+      if freeIndex > index { // swap.
+        assert(!freeUnifications.contains(key: index))
+        freeUnifications[index] = freeType
+        return nil
       }
-      _ = freeIndicesToUnresolvedTypes.removeValue(index)
     }
+    assert(!freeUnifications.contains(key: freeIndex))
+    freeUnifications[freeIndex] = type
     return nil
   }
 
 
-  mutating func resolveFreeType(_ freeType: Type, to resolved: Type) -> MsgThunk? {
-    // just for clarity / as an experiment, always prefer lower free indices.
-    if case .free(let resolvedIndex) = resolved.kind {
-      if freeType.freeIndex > resolvedIndex {
-        return resolveType(freeType, to: resolved)
-      } else {
-        return resolveType(resolved, to: freeType)
-      }
-    } else {
-      return resolveType(freeType, to: resolved)
-    }
-  }
-
-
   mutating func resolveConstraint(_ constraint: Constraint) -> Err? {
-    let act = resolvedType(constraint.actType)
-    let exp = resolvedType(constraint.expType)
+    let act = resolved(type: constraint.actType)
+    let exp = resolved(type: constraint.expType)
     if (act == exp) {
       return nil
     }
@@ -137,7 +138,7 @@ struct TypeCtx {
     switch act.kind {
 
     case .free:
-      return resolveFreeType(act, to: exp).and { Err(constraint, msgThunk: $0) }
+      return unify(freeType: act, to: exp).and { Err(constraint, msgThunk: $0) }
 
     case .poly(let morphs):
       var match: Type? = nil
@@ -172,7 +173,7 @@ struct TypeCtx {
       return resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
 
     case .free:
-      return resolveType(exp, to: act).and { Err(constraint, msgThunk: $0) }
+      return unify(freeType: exp, to: act).and { Err(constraint, msgThunk: $0) }
 
     case .host, .prim:
       return resolveConstraintToOpaque(constraint, act: act, exp: exp)
@@ -298,27 +299,18 @@ struct TypeCtx {
 
     for constraint in constraints {
       if let err = resolveConstraint(constraint) {
-        let act = resolvedType(err.constraint.actType)
-        let exp = resolvedType(err.constraint.expType)
+        let act = resolved(type: err.constraint.actType)
+        let exp = resolved(type: err.constraint.expType)
         err.constraint.fail(act: act, exp: exp, msg: err.msgThunk())
       }
     }
 
     // check that resolution is complete.
-    for i in 0..<freeTypeCount {
-      let type = Type.Free(i)
-      guard let resolved = resolvedTypes[type] else {
-        fatalError("unresolved free type: \(type)")
-      }
-      if case .free = resolved.kind {
-        fatalError("free type resolved to free type: \(type) -> \(resolved)")
+    for form in exprOriginalTypes.keys {
+      let type = typeFor(expr: Expr(form: form, subj: "RESOLVE CHECK"))
+      if type.frees.count > 0 {
+        fatalError("unresolved frees in type: \(type)")
       }
     }
-    for (index, set) in freeIndicesToUnresolvedTypes {
-      for type in set.val {
-        errL("freeIndicesToUnresolvedType: \(index): \(type)")
-      }
-    }
-    check(freeIndicesToUnresolvedTypes.isEmpty)
   }
 }

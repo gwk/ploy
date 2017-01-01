@@ -144,38 +144,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     if case .free(let index) = kind { return index }
     fatalError()
   }
-
-  func refine(_ target: Type, with replacement: Type) -> Type {
-    // within the receiver type, replace target type with replacement, returning a new type.
-    switch kind {
-    case .free, .var_: return (self == target) ? replacement : self
-    case .all, .any, .cmpd, .sig: break
-    default: return self
-    }
-    if !frees.contains(target) && !vars.contains(target) {
-      return self
-    }
-    switch kind {
-    case .all(let members):
-      return Type.All(Set(members.map { self.refine($0, with: replacement) }))
-    case .any(let members):
-      return Type.Any_(Set(members.map { self.refine($0, with: replacement) }))
-    case .cmpd(let fields):
-      return Type.Cmpd(fields.map() { self.refine(par: $0, replacement: replacement) })
-    case .poly(let members):
-      return Type.Poly(Set(members.map { self.refine($0, with: replacement) }))
-    case .prop(let accessor, let type):
-      return Type.Prop(accessor, type: self.refine(type, with: replacement))
-    case .sig(let dom, let ret):
-      return Type.Sig(dom: refine(dom, with: replacement), ret: refine(ret, with: replacement))
-    default: fatalError()
-    }
-  }
-
-  private func refine(par: TypeField, replacement: Type) -> TypeField {
-    let type = refine(par.type, with: replacement)
-    return (type == par.type) ? par : TypeField(index: par.index, label: par.label, type: type)
-  }
 }
 
 func ==(l: Type, r: Type) -> Bool { return l === r }
