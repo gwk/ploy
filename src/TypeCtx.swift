@@ -108,7 +108,7 @@ struct TypeCtx {
 
   private func resolved(par: TypeField) -> TypeField {
     let type = resolved(type: par.type)
-    return (type == par.type) ? par : TypeField(index: par.index, label: par.label, type: type)
+    return (type == par.type) ? par : TypeField(label: par.label, type: type)
   }
 
 
@@ -204,8 +204,8 @@ struct TypeCtx {
         return Err(constraint, "actual struct type has \(actFields); expected \(expFields.count)")
       }
       var needsConversion = false
-      for (actField, expField) in zip(actFields, expFields) {
-        switch resolveField(constraint, actField: actField, expField: expField) {
+      for (i, (actField, expField)) in zip(actFields, expFields).enumerated() {
+        switch resolveField(constraint, actField: actField, expField: expField, index: i) {
         case .ok: break
         case .convert: needsConversion = true
         case .failure(let err): return err
@@ -226,16 +226,15 @@ struct TypeCtx {
     case failure(Err)
   }
 
-  mutating func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField) -> FieldResolution {
+  mutating func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField, index: Int) -> FieldResolution {
     var res: FieldResolution = .ok
     if actField.label != nil {
       if actField.label != expField.label {
-        return .failure(Err(constraint, "struct field #\(actField.index) has \(actField.labelMsg); expected \(expField.labelMsg)"))
+        return .failure(Err(constraint, "struct field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)"))
       }
     } else if expField.label != nil { // convert unlabeled to labeled.
       res = .convert
     }
-    let index = actField.index
     if let failure = resolveSub(constraint,
       actType: actField.type, actDesc: "struct field \(index)",
       expType: expField.type, expDesc: "struct field \(index)") {
@@ -249,10 +248,10 @@ struct TypeCtx {
     case .prop(let accessor, let accesseeType):
       switch accesseeType.kind {
       case .cmpd(let fields):
-        for field in fields {
-          if field.accessorString == accessor.accessorString {
+        for (i, field) in fields.enumerated() {
+          if field.accessorString(index: i) == accessor.accessorString {
             if let failure = resolveSub(constraint,
-              actType: field.type, actDesc: "`\(field.accessorString)` property",
+              actType: field.type, actDesc: "`\(field.accessorString(index: i))` property",
               expType: exp, expDesc: nil) {
                 return failure
             }

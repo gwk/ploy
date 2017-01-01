@@ -163,7 +163,7 @@ extension Expr {
       case .bind(let bind): val = bind.val
       default: val = self
     }
-    return TypeField(index: index, label: argLabel, type: val.genTypeConstraints(&ctx, scope))
+    return TypeField(label: argLabel, type: val.genTypeConstraints(&ctx, scope))
   }
 
 
@@ -196,7 +196,7 @@ extension Expr {
         let typeExpr = Expr(form: form, subj: "parameter type")
         type = typeExpr.type(scope, "parameter type")
       }
-      return TypeField(index: index, label: label, type: type)
+      return TypeField(label: label, type: type)
   }
 }
 

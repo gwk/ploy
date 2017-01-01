@@ -102,8 +102,8 @@ extension Expr {
       case .cmpd(let fields):
         em.str(depth, "{")
         var argIndex = 0
-        for field in fields {
-          compileCmpdField(&ctx, em, depth, paren: paren, field: field, argIndex: &argIndex)
+        for (i, field) in fields.enumerated() {
+          compileCmpdField(&ctx, em, depth, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
         }
         if argIndex != fields.count {
           paren.failType("expected \(fields.count) arguments; received \(argIndex)")
@@ -136,8 +136,8 @@ extension Expr {
 
       case (.cmpd(let origFields), .cmpd(let convFields)):
         em.str(depth, "return {")
-        for (o, c) in zip(origFields, convFields) {
-          em.append(" \(c.hostName): $C.\(o.hostName),")
+        for (i, (o, c)) in zip(origFields, convFields).enumerated() {
+          em.append(" \(c.hostName(index: i)): $C.\(o.hostName(index: i)),")
         }
         em.append(" };")
         default: fatalError("impossible conversion: \(conversion)")
@@ -183,7 +183,7 @@ func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, body: Body, 
 }
 
 
-func compileCmpdField(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren, field: TypeField, argIndex: inout Int) {
+func compileCmpdField(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, paren: Paren, field: TypeField, parIndex: Int, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr
@@ -202,7 +202,7 @@ func compileCmpdField(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, paren: 
 
     default: val = arg
     }
-    em.str(depth, " \(field.hostName):")
+    em.str(depth, " \(field.hostName(index: parIndex)):")
     val.compile(&ctx, em, depth + 1, isTail: false)
     em.append(",")
     argIndex += 1

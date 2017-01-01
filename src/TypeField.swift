@@ -1,9 +1,8 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class TypeField: CustomStringConvertible {
+struct TypeField: CustomStringConvertible {
 
-  let index: Int
   let label: String?
   let type: Type
 
@@ -15,8 +14,7 @@ class TypeField: CustomStringConvertible {
      }
   }
 
-  init(index: Int, label: String?, type: Type) {
-    self.index = index
+  init(label: String?, type: Type) {
     self.label = label
     self.type = type
   }
@@ -29,7 +27,7 @@ class TypeField: CustomStringConvertible {
     }
   }
 
-  var accessorString: String { return label.or(String(index)) }
+  func accessorString(index: Int) -> String { return label.or(String(index)) }
 
-  var hostName: String { return label.or("_\(index)") }
+  func hostName(index: Int) -> String { return label.or("_\(index)") }
 }
