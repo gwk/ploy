@@ -137,17 +137,14 @@ extension TypeCtx {
 
 
   mutating func genConstraintsBody(_ scope: LocalScope, body: Body) -> Type {
-    for (i, expr) in body.exprs.enumerated() {
-      if i == body.exprs.count - 1 { break }
-      _ = genConstraints(scope, expr: expr)
-      self.constrain(expr, expType: typeVoid, "statement")
+    for stmt in body.stmts {
+      _ = genConstraints(scope, expr: stmt)
+      self.constrain(stmt, expType: typeVoid, "statement")
     }
-    let type: Type
-    if let last = body.exprs.last {
-      type = genConstraints(LocalScope(parent: scope), expr: last)
+    if let expr = body.expr {
+      return genConstraints(LocalScope(parent: scope), expr: expr)
     } else {
-      type = typeVoid
+      return typeVoid
     }
-    return type
   }
 }

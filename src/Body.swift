@@ -2,17 +2,27 @@
 
 
 class Body: Form { // body of statements and final expression.
-  let exprs: [Expr]
+  let stmts: [Expr]
+  let expr: Expr?
 
   init(_ syn: Syn, exprs: [Expr]) {
-    self.exprs = exprs
+    if exprs.isEmpty {
+      self.stmts = []
+      self.expr = nil
+    } else {
+      self.stmts = Array(exprs[0..<exprs.lastIndex!])
+      self.expr = exprs.last
+    }
     super.init(syn)
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, exprs.isEmpty ? "(empty)\n" : "\n")
-    for e in exprs {
-      e.write(to: &stream, depth + 1)
+    writeHead(to: &stream, depth, (expr == nil) ? "(empty)\n" : "\n")
+    for s in stmts {
+      s.write(to: &stream, depth + 1)
+    }
+    if let expr = expr {
+      expr.write(to: &stream, depth + 1)
     }
   }
 }

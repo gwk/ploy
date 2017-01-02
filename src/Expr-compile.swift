@@ -172,13 +172,14 @@ extension Expr {
 
 
 func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, body: Body, isTail: Bool) {
-  for (i, expr) in body.exprs.enumerated() {
-    let isLast = (i == body.exprs.lastIndex)
-    if isLast {
-      em.str(depth, "return (")
-    }
-    expr.compile(&ctx, em, depth, isTail: isLast && isTail)
-    em.append(isLast ? ")" : ";")
+  for stmt in body.stmts {
+    stmt.compile(&ctx, em, depth, isTail: false)
+    em.append(";")
+  }
+  if let expr = body.expr {
+    em.str(depth, "return (")
+    expr.compile(&ctx, em, depth, isTail: isTail)
+    em.append(")")
   }
 }
 
