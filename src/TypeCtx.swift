@@ -127,12 +127,12 @@ struct TypeCtx {
       return nil
     }
 
-    switch act.kind {
+    switch (act.kind, exp.kind) {
 
-    case .free:
+    case (.free, _):
       return unify(freeType: act, to: exp).and { Err(constraint, msgThunk: $0) }
 
-    case .poly(let morphs):
+    case (.poly(let morphs), _):
       var match: Type? = nil
       for morph in morphs {
         if resolveSub(constraint, actType: morph, actDesc: "morph", expType: exp, expDesc: "expected type") != nil {
@@ -148,38 +148,33 @@ struct TypeCtx {
       exprSubtypes[constraint.actExpr] = morph
       return nil
 
-    default: break
-    }
-
-    switch exp.kind {
-
-    case .all:
+    case (_, .all):
       return Err(constraint, "expected type of kind `All` not yet implemented")
 
-    case .any(let members):
+    case (_, .any(let members)):
       if !members.contains(act) {
         return Err(constraint, "actual type is not a member of `Any` expected type")
       }
 
-    case .cmpd(let expFields):
+    case (_, .cmpd(let expFields)):
       return resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
 
-    case .free:
+    case (_, .free):
       return unify(freeType: exp, to: act).and { Err(constraint, msgThunk: $0) }
 
-    case .host, .prim:
+    case (_, .host), (_, .prim):
       return resolveConstraintToOpaque(constraint, act: act, exp: exp)
 
-    case .poly:
+    case (_, .poly):
       return Err(constraint, "expected `Poly` type is not implemented")
 
-    case .prop(_, _):
-      return Err(constraint, "prop constraints not implemented")
+    case (_, .prop(_, _)):
+      return Err(constraint, "expected prop constraints not implemented")
 
-    case .sig(let expDom, let expRet):
+    case (_, .sig(let expDom, let expRet)):
       return resolveConstraintToSig(constraint, act: act, expDom: expDom, expRet: expRet)
 
-    case .var_:
+    case (_, .var_):
       return Err(constraint, "var constraints not implemented")
     }
     fatalError("unreachable.")
