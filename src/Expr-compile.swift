@@ -128,6 +128,9 @@ extension Expr {
 
     case .sym(let sym):
       compileSym(&ctx, em, depth, sym: sym, scopeRecord: ctx.symRecords[sym]!)
+
+    case .void:
+      em.str(depth, "undefined")
     }
 
     if let conversion = conversion {
@@ -176,11 +179,9 @@ func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, body: Body, 
     stmt.compile(&ctx, em, depth, isTail: false)
     em.append(";")
   }
-  if let expr = body.expr {
-    em.str(depth, "return (")
-    expr.compile(&ctx, em, depth, isTail: isTail)
-    em.append(")")
-  }
+  em.str(depth, "return (")
+  body.expr.compile(&ctx, em, depth, isTail: isTail)
+  em.append(")")
 }
 
 

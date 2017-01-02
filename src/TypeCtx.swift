@@ -72,16 +72,6 @@ struct TypeCtx {
   }
 
 
-  mutating func constrain(emptyBody: Body, expForm: Form, expType: Type, _ desc: String) {
-    assert(emptyBody.expr == nil)
-    constraints.append(Constraint(
-      form: emptyBody, expForm: expForm,
-      actType: typeVoid, actChain: .end,
-      expType: expType, expChain: .end,
-      desc: desc))
-  }
-
-
   private func resolved(type: Type) -> Type {
     // TODO: need to track types to prevent/handle recursion.
     switch type.kind {

@@ -18,6 +18,7 @@ enum Expr: SubForm {
   case reify(Reify)
   case sig(Sig)
   case sym(Sym)
+  case void(ImplicitVoid)
 
   init(form: Form, subj: String, exp: String) {
     switch form {
@@ -37,6 +38,7 @@ enum Expr: SubForm {
     case let form as Reify:   self = .reify(form)
     case let form as Sig:     self = .sig(form)
     case let form as Sym:     self = .sym(form)
+    case let form as ImplicitVoid: self = .void(form)
     default:
       form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
     }
@@ -64,6 +66,7 @@ enum Expr: SubForm {
     case .reify(let reify): return reify
     case .sig(let sig): return sig
     case .sym(let sym): return sym
+    case .void(let void): return void
     }
   }
 

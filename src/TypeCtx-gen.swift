@@ -52,13 +52,8 @@ extension TypeCtx {
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
-      let bodyType = genConstraintsBody(fnScope, body: fn.body)
-      if let bodyExpr = fn.body.expr {
-        constrain(bodyExpr, expForm: fn.sig.ret.form, expType: ret, "function body")
-      } else {
-        assert(bodyType == typeVoid)
-        constrain(emptyBody: fn.body, expForm: fn.sig.ret.form, expType: ret, "empty function body")
-      }
+      _ = genConstraintsBody(fnScope, body: fn.body)
+      constrain(fn.body.expr, expForm: fn.sig.ret.form, expType: ret, "function body")
       return type
 
     case .if_(let if_):
@@ -120,6 +115,9 @@ extension TypeCtx {
       let type = sym.typeForExprRecord(record)
       symRecords[sym] = record
       return type
+
+    case .void:
+      return typeVoid
     }
   }
 
@@ -146,10 +144,6 @@ extension TypeCtx {
       _ = genConstraints(scope, expr: stmt)
       self.constrain(stmt, expType: typeVoid, "statement")
     }
-    if let expr = body.expr {
-      return genConstraints(LocalScope(parent: scope), expr: expr)
-    } else {
-      return typeVoid
-    }
+    return genConstraints(LocalScope(parent: scope), expr: body.expr)
   }
 }
