@@ -105,9 +105,9 @@ enum Def: SubForm {
 
 func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
   var ctx = TypeCtx()
-  _ = val.genTypeConstraints(&ctx, LocalScope(parent: space)) // initial root type is ignored.
+  _ = ctx.genTypeConstraints(LocalScope(parent: space), expr: val) // initial root type is ignored.
   if let ann = place.ann {
-    _ = val.addAnnConstraint(&ctx, space, ann: ann)
+    _ = ctx.addAnnConstraint(space, expr: val, ann: ann)
   }
   ctx.resolve()
   let type = ctx.typeFor(expr: val)
