@@ -1,6 +1,6 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
-enum Expr: SubForm {
+enum Expr: SubForm, Hashable {
 
   case acc(Acc)
   case ann(Ann)
@@ -70,6 +70,8 @@ enum Expr: SubForm {
     }
   }
 
+  var hashValue: Int { return form.hashValue }
+
   var argLabel: String? {
     switch self {
     case .bind(let bind): return bind.place.sym.name
@@ -86,3 +88,5 @@ enum Expr: SubForm {
     }
   }
 }
+
+func ==(l: Expr, r: Expr) -> Bool { return l.form === r.form }

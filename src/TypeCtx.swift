@@ -25,19 +25,19 @@ struct TypeCtx {
   private var constraints: [Constraint] = []
   private var freeTypeCount = 0
   private var freeUnifications: [Int:Type] = [:]
-  private var exprOrigTypes = [Form:Type]() // maps forms to original types.
-  private var exprSubtypes = [Form:Type]() // maps forms to legal, inferred compile time narrowing.
-  private var exprConversions = [Form:Conversion]() // maps forms to legal, inferred runtime conversions.
+  private var exprOrigTypes = [Expr:Type]() // maps forms to original types.
+  private var exprSubtypes = [Expr:Type]() // maps forms to legal, inferred compile time narrowing.
+  private var exprConversions = [Expr:Conversion]() // maps forms to legal, inferred runtime conversions.
 
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
 
 
-  func assertIsTracking(_ expr: Expr) { assert(exprOrigTypes.contains(key: expr.form)) }
+  func assertIsTracking(_ expr: Expr) { assert(exprOrigTypes.contains(key: expr)) }
 
-  private func origTypeFor(expr: Expr) -> Type { return exprOrigTypes[expr.form]! }
+  private func origTypeFor(expr: Expr) -> Type { return exprOrigTypes[expr]! }
 
-  private func subtypeFor(expr: Expr) -> Type? { return exprSubtypes[expr.form] }
+  private func subtypeFor(expr: Expr) -> Type? { return exprSubtypes[expr] }
 
 
   func typeFor(expr: Expr) -> Type {
@@ -47,7 +47,7 @@ struct TypeCtx {
 
 
   func conversionFor(expr: Expr) -> Conversion? {
-    return exprConversions[expr.form]
+    return exprConversions[expr]
   }
 
 
@@ -59,13 +59,13 @@ struct TypeCtx {
 
 
   mutating func trackExpr(_ expr: Expr, type: Type) {
-    exprOrigTypes.insertNew(expr.form, value: type)
+    exprOrigTypes.insertNew(expr, value: type)
   }
 
 
   mutating func constrain(_ actExpr: Expr, expForm: Form? = nil, expType: Type, _ desc: String) {
     constraints.append(Constraint(
-      form: actExpr.form, expForm: expForm,
+      actExpr: actExpr, expForm: expForm,
       actType: origTypeFor(expr: actExpr), actChain: .end,
       expType: expType, expChain: .end,
       desc: desc))
@@ -141,10 +141,10 @@ struct TypeCtx {
         match = morph
       }
       guard let morph = match else { return Err(constraint, "no morphs match expected") }
-      if let existing = exprSubtypes[constraint.form] {
+      if let existing = subtypeFor(expr: constraint.actExpr) {
         return Err(constraint, "multiple subtype resolutions: \(existing); \(morph)")
       }
-      exprSubtypes[constraint.form] = morph
+      exprSubtypes[constraint.actExpr] = morph
       return nil
 
     default: break
@@ -203,7 +203,7 @@ struct TypeCtx {
         }
       }
       if needsConversion {
-        exprConversions[constraint.form] = Conversion(orig: act, conv: exp)
+        exprConversions[constraint.actExpr] = Conversion(orig: act, conv: exp)
       }
       return nil
 
@@ -296,8 +296,8 @@ struct TypeCtx {
     }
 
     // check that resolution is complete.
-    for form in exprOrigTypes.keys {
-      let type = typeFor(expr: Expr(form: form, subj: "RESOLVE CHECK"))
+    for expr in exprOrigTypes.keys {
+      let type = typeFor(expr: expr)
       if type.frees.count > 0 {
         fatalError("unresolved frees in type: \(type)")
       }
