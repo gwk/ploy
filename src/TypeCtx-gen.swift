@@ -16,13 +16,11 @@ extension TypeCtx {
 
     case .acc(let acc):
       let accesseeType = genConstraints(scope, expr: acc.accessee)
-      let type = Type.Prop(acc.accessor.propAccessor, type: accesseeType)
-      return type
+      return Type.Prop(acc.accessor.propAccessor, type: accesseeType)
 
     case .ann(let ann):
       _ = genConstraints(scope, expr: ann.expr)
-      let type = addAnnConstraint(scope, expr: ann.expr, ann: ann)
-      return type
+      return addAnnConstraint(scope, expr: ann.expr, ann: ann)
 
     case .bind(let bind):
       _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
@@ -78,31 +76,25 @@ extension TypeCtx {
       for dep in hostVal.deps {
         _ = scope.getRecord(identifier: dep)
       }
-      let type = hostVal.typeExpr.type(scope, "host value declaration")
-      return type
+      return hostVal.typeExpr.type(scope, "host value declaration")
 
     case .litNum:
-      let type = typeInt
-      return type
+      return typeInt
 
     case .litStr:
-      let type = typeStr
-      return type
+      return typeStr
 
     case .paren(let paren):
       if paren.isScalarValue {
-        let type = genConstraints(scope, expr: paren.els[0])
-        return type
+        return genConstraints(scope, expr: paren.els[0])
       }
       let fields = paren.els.enumerated().map { self.typeFieldForArg(scope, arg: $1, index: $0) }
-      let type = Type.Cmpd(fields)
-      return type
+      return Type.Cmpd(fields)
 
     case .path(let path):
       let record = scope.getRecord(path: path)
-      let type = path.syms.last!.typeForExprRecord(scope.getRecord(path: path))
       pathRecords[path] = record
-      return type
+      return path.syms.last!.typeForExprRecord(scope.getRecord(path: path))
 
     case .reify(let reify):
       reify.failType("type reification cannot be used as a value expression (temporary)")
@@ -112,9 +104,8 @@ extension TypeCtx {
 
     case .sym(let sym):
       let record = scope.getRecord(sym: sym)
-      let type = sym.typeForExprRecord(record)
       symRecords[sym] = record
-      return type
+      return sym.typeForExprRecord(record)
 
     case .void:
       return typeVoid
