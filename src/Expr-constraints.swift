@@ -168,35 +168,35 @@ extension Expr {
 
 
   func typeFieldForPar(_ scope: Scope, index: Int) -> TypeField {
-      var label: String? = nil
-      var type: Type
+    var label: String? = nil
+    var type: Type
 
-      switch self {
+    switch self {
+    case .ann(let ann):
+      guard case .sym(let sym) = ann.expr else {
+        ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
+      }
+      label = sym.name
+      type = ann.typeExpr.type(scope, "parameter annotated type")
+
+    case .bind(let bind):
+      switch bind.place {
       case .ann(let ann):
         guard case .sym(let sym) = ann.expr else {
-          ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
+          ann.expr.form.failSyntax("annotated default parameter requires a label symbol.")
         }
         label = sym.name
-        type = ann.typeExpr.type(scope, "parameter annotated type")
-
-      case .bind(let bind):
-        switch bind.place {
-        case .ann(let ann):
-          guard case .sym(let sym) = ann.expr else {
-            ann.expr.form.failSyntax("annotated default parameter requires a label symbol.")
-          }
-          label = sym.name
-          type = ann.typeExpr.type(scope, "default parameter annotated type")
-        case .sym(let sym):
-          // TODO: for now assume the sym refers to a type. This is going to change.
-          type = scope.typeBinding(sym: sym, subj: "default parameter type")
-        }
-
-      default:
-        let typeExpr = Expr(form: form, subj: "parameter type")
-        type = typeExpr.type(scope, "parameter type")
+        type = ann.typeExpr.type(scope, "default parameter annotated type")
+      case .sym(let sym):
+        // TODO: for now assume the sym refers to a type. This is going to change.
+        type = scope.typeBinding(sym: sym, subj: "default parameter type")
       }
-      return TypeField(label: label, type: type)
+
+    default:
+      let typeExpr = Expr(form: form, subj: "parameter type")
+      type = typeExpr.type(scope, "parameter type")
+    }
+    return TypeField(label: label, type: type)
   }
 }
 
