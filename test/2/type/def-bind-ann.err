@@ -1,4 +1,4 @@
-type error: test/2/type/def-bind-ann.ploy:1:10-10: type annotation actual type is not expected opaque type. actual type: Int
+type error: test/2/type/def-bind-ann.ploy:1:10-10: type annotation actual type is not expected type. actual type: Int
   x: Str = 0
            ~
 note: test/2/type/def-bind-ann.ploy:1:4-6: expected type: Str

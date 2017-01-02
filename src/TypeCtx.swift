@@ -145,6 +145,24 @@ struct TypeCtx {
       exprSubtypes[constraint.actExpr] = morph
       return nil
 
+    case (.prop(let accessor, let accesseeType), _):
+      let accType = resolved(type: accesseeType)
+      switch accType.kind {
+      case .cmpd(let fields):
+        for (i, field) in fields.enumerated() {
+          if field.accessorString(index: i) == accessor.accessorString {
+            if let failure = resolveSub(constraint,
+              actType: field.type, actDesc: "`\(field.accessorString(index: i))` property",
+              expType: exp, expDesc: nil) {
+                return failure
+            }
+            return nil
+          }
+        }
+        return Err(constraint, "actual type has no field matching accessor")
+      default: return Err(constraint, "actual type is not an accessible type")
+      }
+
     case (_, .any(let members)):
       if !members.contains(act) {
         return Err(constraint, "actual type is not a member of `Any` expected type")
@@ -153,9 +171,6 @@ struct TypeCtx {
 
     case (_, .cmpd(let expFields)):
       return resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
-
-    case (_, .host), (_, .prim):
-      return resolveConstraintToOpaque(constraint, act: act, exp: exp)
 
     case (_, .sig(let expDom, let expRet)):
       return resolveConstraintToSig(constraint, act: act, expDom: expDom, expRet: expRet)
@@ -213,29 +228,6 @@ struct TypeCtx {
         return .failure(failure)
     }
     return res
-  }
-
-
-  mutating func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) -> Err? {
-    switch act.kind {
-    case .prop(let accessor, let accesseeType):
-      switch accesseeType.kind {
-      case .cmpd(let fields):
-        for (i, field) in fields.enumerated() {
-          if field.accessorString(index: i) == accessor.accessorString {
-            if let failure = resolveSub(constraint,
-              actType: field.type, actDesc: "`\(field.accessorString(index: i))` property",
-              expType: exp, expDesc: nil) {
-                return failure
-            }
-            return nil
-          }
-        }
-        return Err(constraint, "actual type has no field matching accessor") // TODO: this should be caught earlier.
-      default: return Err(constraint, "actual type is not an accessible type")
-      }
-    default: return Err(constraint, "actual type is not expected opaque type")
-    }
   }
 
 
