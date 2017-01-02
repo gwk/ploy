@@ -98,6 +98,7 @@ struct TypeCtx {
     }
   }
 
+
   private func resolved(par: TypeField) -> TypeField {
     let type = resolved(type: par.type)
     return (type == par.type) ? par : TypeField(label: par.label, type: type)
@@ -207,6 +208,7 @@ struct TypeCtx {
     }
   }
 
+
   enum FieldResolution {
     case ok
     case convert
@@ -229,6 +231,7 @@ struct TypeCtx {
     }
     return res
   }
+
 
   mutating func resolveConstraintToOpaque(_ constraint: Constraint, act: Type, exp: Type) -> Err? {
     switch act.kind {
