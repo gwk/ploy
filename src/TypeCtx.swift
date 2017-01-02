@@ -25,7 +25,7 @@ struct TypeCtx {
   private var constraints: [Constraint] = []
   private var freeTypeCount = 0
   private var freeUnifications: [Int:Type] = [:]
-  private var exprOriginalTypes = [Form:Type]() // maps forms to original types.
+  private var exprOrigTypes = [Form:Type]() // maps forms to original types.
   private var exprSubtypes = [Form:Type]() // maps forms to legal, inferred compile time narrowing.
   private var exprConversions = [Form:Conversion]() // maps forms to legal, inferred runtime conversions.
 
@@ -33,9 +33,9 @@ struct TypeCtx {
   var pathRecords = [Path:ScopeRecord]()
 
 
-  func assertIsTracking(_ expr: Expr) { assert(exprOriginalTypes.contains(key: expr.form)) }
+  func assertIsTracking(_ expr: Expr) { assert(exprOrigTypes.contains(key: expr.form)) }
 
-  private func origTypeFor(expr: Expr) -> Type { return exprOriginalTypes[expr.form]! }
+  private func origTypeFor(expr: Expr) -> Type { return exprOrigTypes[expr.form]! }
 
   private func subtypeFor(expr: Expr) -> Type? { return exprSubtypes[expr.form] }
 
@@ -59,7 +59,7 @@ struct TypeCtx {
 
 
   mutating func trackExpr(_ expr: Expr, type: Type) {
-    exprOriginalTypes.insertNew(expr.form, value: type)
+    exprOrigTypes.insertNew(expr.form, value: type)
   }
 
 
@@ -305,7 +305,7 @@ struct TypeCtx {
     }
 
     // check that resolution is complete.
-    for form in exprOriginalTypes.keys {
+    for form in exprOrigTypes.keys {
       let type = typeFor(expr: Expr(form: form, subj: "RESOLVE CHECK"))
       if type.frees.count > 0 {
         fatalError("unresolved frees in type: \(type)")
