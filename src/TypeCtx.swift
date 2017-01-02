@@ -156,6 +156,7 @@ struct TypeCtx {
       if !members.contains(act) {
         return Err(constraint, "actual type is not a member of `Any` expected type")
       }
+      return nil
 
     case (_, .cmpd(let expFields)):
       return resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
@@ -177,8 +178,9 @@ struct TypeCtx {
 
     case (_, .var_):
       return Err(constraint, "var constraints not implemented")
+
+    default: fatalError("unreachable.")
     }
-    fatalError("unreachable.")
   }
 
 
