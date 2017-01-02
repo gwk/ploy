@@ -1,0 +1,10 @@
+
+f = fn (x:Int)%Int x@$;
+
+g = fn (x:Int y:Int)%Int
+  add(x@$ y@$);
+
+main = {
+  assert_eq(0 f(x=0) 'f')
+  assert_eq(1 g(x=0 y=1) 'g')
+}
