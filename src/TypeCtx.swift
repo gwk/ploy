@@ -65,7 +65,8 @@ struct TypeCtx {
 
   mutating func constrain(_ actExpr: Expr, expForm: Form? = nil, expType: Type, _ desc: String) {
     constraints.append(Constraint(
-      actExpr: actExpr, expForm: expForm,
+      actExpr: actExpr,
+      expForm: expForm,
       actType: origTypeFor(expr: actExpr), actChain: .end,
       expType: expType, expChain: .end,
       desc: desc))
