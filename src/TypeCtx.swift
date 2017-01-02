@@ -105,16 +105,7 @@ struct TypeCtx {
   }
 
 
-  mutating func unify(freeType: Type, to type: Type) -> MsgThunk? {
-    let freeIndex = freeType.freeIndex
-    // TODO: determine whether always resolving to lower index is necessary.
-    if case .free(let index) = type.kind {
-      if freeIndex > index { // swap.
-        assert(!freeUnifications.contains(key: index))
-        freeUnifications[index] = freeType
-        return nil
-      }
-    }
+  mutating func unify(freeIndex: Int, to type: Type) -> MsgThunk? {
     assert(!freeUnifications.contains(key: freeIndex))
     freeUnifications[freeIndex] = type
     return nil
@@ -130,8 +121,13 @@ struct TypeCtx {
 
     switch (act.kind, exp.kind) {
 
-    case (.free, _):
-      return unify(freeType: act, to: exp).and { Err(constraint, msgThunk: $0) }
+    case (.free(let ia), .free(let ie)):
+      // TODO: determine whether always resolving to lower index is necessary.
+      if ia > ie { return unify(freeIndex: ie, to: act).and { Err(constraint, msgThunk: $0) }
+      } else {     return unify(freeIndex: ia, to: exp).and { Err(constraint, msgThunk: $0) } }
+
+    case (.free(let ia), _): return unify(freeIndex: ia, to: exp).and { Err(constraint, msgThunk: $0) }
+    case (_, .free(let ie)): return unify(freeIndex: ie, to: act).and { Err(constraint, msgThunk: $0) }
 
     case (.poly(let morphs), _):
       var match: Type? = nil
@@ -160,9 +156,6 @@ struct TypeCtx {
 
     case (_, .cmpd(let expFields)):
       return resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
-
-    case (_, .free):
-      return unify(freeType: exp, to: act).and { Err(constraint, msgThunk: $0) }
 
     case (_, .host), (_, .prim):
       return resolveConstraintToOpaque(constraint, act: act, exp: exp)
