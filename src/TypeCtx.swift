@@ -5,7 +5,7 @@ import Quilt
 
 struct TypeCtx {
 
-  typealias MsgThunk = () ->String
+  typealias MsgThunk = ()->String
 
   struct Err: Error {
     let constraint: Constraint
