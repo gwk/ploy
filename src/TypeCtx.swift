@@ -145,9 +145,6 @@ struct TypeCtx {
       exprSubtypes[constraint.actExpr] = morph
       return nil
 
-    case (_, .all):
-      return Err(constraint, "expected type of kind `All` not yet implemented")
-
     case (_, .any(let members)):
       if !members.contains(act) {
         return Err(constraint, "actual type is not a member of `Any` expected type")
@@ -160,19 +157,10 @@ struct TypeCtx {
     case (_, .host), (_, .prim):
       return resolveConstraintToOpaque(constraint, act: act, exp: exp)
 
-    case (_, .poly):
-      return Err(constraint, "expected `Poly` type is not implemented")
-
-    case (_, .prop(_, _)):
-      return Err(constraint, "expected prop constraints not implemented")
-
     case (_, .sig(let expDom, let expRet)):
       return resolveConstraintToSig(constraint, act: act, expDom: expDom, expRet: expRet)
 
-    case (_, .var_):
-      return Err(constraint, "var constraints not implemented")
-
-    default: fatalError("unreachable.")
+    default: return Err(constraint, "actual type is not expected type")
     }
   }
 
