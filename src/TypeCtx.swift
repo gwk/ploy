@@ -72,10 +72,11 @@ struct TypeCtx {
   }
 
 
-  mutating func constrain(form: Form, type: Type, expForm: Form? = nil, expType: Type, _ desc: String) {
+  mutating func constrain(emptyBody: Body, expForm: Form, expType: Type, _ desc: String) {
+    assert(emptyBody.expr == nil)
     constraints.append(Constraint(
-      form: form, expForm: expForm,
-      actType: type, actChain: .end,
+      form: emptyBody, expForm: expForm,
+      actType: typeVoid, actChain: .end,
       expType: expType, expChain: .end,
       desc: desc))
   }

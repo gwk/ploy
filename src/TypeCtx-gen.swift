@@ -53,7 +53,12 @@ extension TypeCtx {
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
       let bodyType = genConstraintsBody(fnScope, body: fn.body)
-      constrain(form: fn.body, type: bodyType, expType: ret, "function body")
+      if let bodyExpr = fn.body.expr {
+        constrain(bodyExpr, expForm: fn.sig.ret.form, expType: ret, "function body")
+      } else {
+        assert(bodyType == typeVoid)
+        constrain(emptyBody: fn.body, expForm: fn.sig.ret.form, expType: ret, "empty function body")
+      }
       return type
 
     case .if_(let if_):
