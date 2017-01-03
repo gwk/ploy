@@ -15,10 +15,12 @@ extension Expr {
 
 
   func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
-    ctx.assertIsTracking(self)
-    let conversion = ctx.conversionFor(expr: self)
-    if let conversion = conversion {
-      em.str(depth, "(()=>{ let $C = // \(conversion)")
+    var type = ctx.typeFor(expr: self)
+    var castType: Type? = nil
+    if case .conv(let origType, let _castType) = type.kind {
+      castType = _castType
+      em.str(depth, "(()=>{ let $C = // \(type)")
+      type = origType
     }
 
     switch self {
@@ -96,7 +98,6 @@ extension Expr {
       em.str(depth, s)
 
     case .paren(let paren):
-      let type = ctx.typeFor(expr: self)
       switch type.kind {
 
       case .cmpd(let fields):
@@ -133,17 +134,17 @@ extension Expr {
       em.str(depth, "undefined")
     }
 
-    if let conversion = conversion {
+    if let castType = castType { // conversion.
       em.append(";")
-      switch (conversion.orig.kind, conversion.conv.kind) {
+      switch (type.kind, castType.kind) {
 
-      case (.cmpd(let origFields), .cmpd(let convFields)):
+      case (.cmpd(let origFields), .cmpd(let castFields)):
         em.str(depth, "return {")
-        for (i, (o, c)) in zip(origFields, convFields).enumerated() {
+        for (i, (o, c)) in zip(origFields, castFields).enumerated() {
           em.append(" \(c.hostName(index: i)): $C.\(o.hostName(index: i)),")
         }
         em.append(" };")
-        default: fatalError("impossible conversion: \(conversion)")
+        default: form.fatal("impossible conversion: \(type)~>\(castType)")
       }
       em.append("})()")
     }

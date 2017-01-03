@@ -19,6 +19,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case all(members: Set<Type>)
     case any(members: Set<Type>)
     case cmpd(fields: [TypeField])
+    case conv(orig: Type, cast: Type)
     case free(index: Int)
     case host
     case poly(members: Set<Type>)
@@ -80,6 +81,14 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       kind: .cmpd(fields: fields),
       frees: Set(fields.flatMap { $0.type.frees }),
       vars: Set(fields.flatMap { $0.type.vars })))
+  }
+
+  class func Conv(orig: Type, cast: Type) -> Type {
+    let description = "\(orig.description)~>\(cast.description)"
+    return memoize(description, (
+      kind: .conv(orig: orig, cast: cast),
+      frees: orig.frees.union(cast.frees),
+      vars: orig.vars.union(cast.vars)))
   }
 
   class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.

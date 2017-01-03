@@ -25,29 +25,19 @@ struct TypeCtx {
   private var constraints: [Constraint] = []
   private var freeTypeCount = 0
   private var freeUnifications: [Int:Type] = [:]
-  private var exprOrigTypes = [Expr:Type]() // maps forms to original types.
+  private var exprTypes = [Expr:Type]() // maps expressions to their latest types.
   private var exprSubtypes = [Expr:Type]() // maps forms to legal, inferred compile time narrowing.
-  private var exprConversions = [Expr:Conversion]() // maps forms to legal, inferred runtime conversions.
 
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
 
 
-  func assertIsTracking(_ expr: Expr) { assert(exprOrigTypes.contains(key: expr)) }
-
-  private func origTypeFor(expr: Expr) -> Type { return exprOrigTypes[expr]! }
-
   private func subtypeFor(expr: Expr) -> Type? { return exprSubtypes[expr] }
 
 
   func typeFor(expr: Expr) -> Type {
-    let type = subtypeFor(expr: expr).or(origTypeFor(expr: expr))
+    let type = subtypeFor(expr: expr).or(exprTypes[expr]!)
     return resolved(type: type)
-  }
-
-
-  func conversionFor(expr: Expr) -> Conversion? {
-    return exprConversions[expr]
   }
 
 
@@ -59,7 +49,7 @@ struct TypeCtx {
 
 
   mutating func trackExpr(_ expr: Expr, type: Type) {
-    exprOrigTypes.insertNew(expr, value: type)
+    exprTypes.insertNew(expr, value: type)
   }
 
 
@@ -67,7 +57,7 @@ struct TypeCtx {
     constraints.append(Constraint(
       actExpr: actExpr,
       expForm: expForm,
-      actType: origTypeFor(expr: actExpr), actChain: .end,
+      actType: typeFor(expr: actExpr), actChain: .end,
       expType: expType, expChain: .end,
       desc: desc))
   }
@@ -82,6 +72,8 @@ struct TypeCtx {
       return Type.Any_(Set(members.map { self.resolved(type: $0) }))
     case .cmpd(let fields):
       return Type.Cmpd(fields.map() { self.resolved(par: $0) })
+    case .conv(let orig, let cast):
+      return Type.Conv(orig: resolved(type: orig), cast: resolved(type: cast))
     case .free(let freeIndex):
       return freeUnifications[freeIndex].or(type)
     case .host:
@@ -209,7 +201,7 @@ struct TypeCtx {
         }
       }
       if needsConversion {
-        exprConversions[constraint.actExpr] = Conversion(orig: act, conv: exp)
+        exprTypes[constraint.actExpr] = Type.Conv(orig: act, cast: exp)
       }
       return nil
 
@@ -286,7 +278,7 @@ struct TypeCtx {
     }
 
     // check that resolution is complete.
-    for expr in exprOrigTypes.keys {
+    for expr in exprTypes.keys {
       let type = typeFor(expr: expr)
       if type.frees.count > 0 {
         fatalError("unresolved frees in type: \(type)")
