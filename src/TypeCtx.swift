@@ -91,7 +91,17 @@ struct TypeCtx {
     case .prim:
       return type
     case .prop(let accessor, let type):
-      return Type.Prop(accessor, type: resolved(type: type))
+      let accesseeType = resolved(type: type)
+      switch accesseeType.kind {
+      case .cmpd(let fields):
+        for (i, field) in fields.enumerated() {
+          if field.accessorString(index: i) == accessor.accessorString {
+            return field.type
+          }
+        }
+        fallthrough
+      default:  return Type.Prop(accessor, type: accesseeType)
+      }
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
     case .var_: return type
