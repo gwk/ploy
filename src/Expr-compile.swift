@@ -184,9 +184,15 @@ func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, body: Body, 
     stmt.compile(&ctx, em, depth, isTail: false)
     em.append(";")
   }
-  em.str(depth, "return (")
+  let type = ctx.typeFor(expr: body.expr)
+  let hasRet = (type != typeVoid)
+  if hasRet {
+    em.str(depth, "return (")
+  }
   body.expr.compile(&ctx, em, depth, isTail: isTail)
-  em.append(")")
+  if hasRet {
+    em.append(")")
+  }
 }
 
 
