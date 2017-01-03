@@ -15,15 +15,6 @@ struct Constraint {
   var actDesc: String { return actChain.map({"\($0) -> "}).join() }
   var expDesc: String { return expChain.map({"\($0) -> "}).join() }
 
-  func subConstraint(actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Constraint {
-    return Constraint(
-      actExpr: actExpr,
-      expForm: expForm,
-      actType: actType, actChain: (actDesc == nil) ? actChain : .link(actDesc!, actChain),
-      expType: expType, expChain: (expDesc == nil) ? expChain : .link(expDesc!, expChain),
-      desc: desc)
-  }
-
   func fail(act: Type, exp: Type, msg: String) -> Never {
     if let expForm = expForm {
       actExpr.form.failType("\(desc) \(msg). \(actDesc)actual type: \(act)",

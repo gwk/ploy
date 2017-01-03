@@ -253,9 +253,13 @@ struct TypeCtx {
 
 
   mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Err? {
-    return resolveConstraint(constraint.subConstraint(
-      actType: actType, actDesc: actDesc,
-      expType: expType, expDesc: expDesc))
+    let sub = Constraint(
+      actExpr: constraint.actExpr,
+      expForm: constraint.expForm,
+      actType: actType, actChain: constraint.actChain.prepend(opt: actDesc),
+      expType: expType, expChain: constraint.expChain.prepend(opt: expDesc),
+      desc: constraint.desc)
+    return resolveConstraint(sub)
   }
 
 
