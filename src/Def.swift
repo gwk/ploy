@@ -39,10 +39,10 @@ enum Def: SubForm {
   var sym: Sym {
     switch self {
     case .bind(let bind): return bind.place.sym
-    case .ext(let ext): fatalError("INTERNAL ERROR: Extensions are not yet referenceable; sym should never be called: \(ext).")
+    case .ext(let ext): form.fatal("Extensions are not yet referenceable; sym should never be called: \(ext).")
     case .extensible(let extensible): return extensible.sym
     case .hostType(let hostType): return hostType.sym
-    case .in_(let in_): fatalError("INTERNAL ERROR: In is not an individual definition; sym should never be called: \(in_).")
+    case .in_(let in_): form.fatal("`in` is not an individual definition; sym should never be called: \(in_).")
     case .pub(let pub): return pub.def.sym
     }
   }
@@ -60,7 +60,7 @@ enum Def: SubForm {
       }
 
     case .ext(let ext):
-      fatalError("INTERNAL ERROR: Extension is not an independent definition; compileDef should never be called: \(ext).")
+      form.fatal("Extension is not an independent definition; compileDef should never be called: \(ext).")
 
     case .extensible(let extensible):
       let exts = space.exts.getDefault(sym.name, dflt: Ref<[Extension]>()).val
@@ -85,7 +85,7 @@ enum Def: SubForm {
       // TODO: emit table contents.
       em.append("}")
       em.str(0, "function \(hostName)($){")
-      em.str(0, "  throw \"INTERNAL ERROR: extensible dispatch not implemented\"") // TODO: dispatch.
+      em.str(0, "  throw \"INTERNAL RUNTIME ERROR: extensible dispatch not implemented\"") // TODO: dispatch.
       em.append("}")
       em.flush()
       return .poly(type, variantsToNeedsLazy: typesToNeedsLazy)
@@ -94,7 +94,7 @@ enum Def: SubForm {
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
     case .in_(let in_):
-      fatalError("INTERNAL ERROR: In is not an independent definition; compileDef should never be called: \(in_).")
+      form.fatal("`in` is not an independent definition; compileDef should never be called: \(in_).")
 
     case .pub:
       fatalError()

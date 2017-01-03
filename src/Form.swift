@@ -58,6 +58,10 @@ class Form: Hashable, CustomStringConvertible {
   func failType(_ msg: String, notes: (Form?, String)...) -> Never {
     failForm(prefix: "type error", msg: msg, notes: notes)
   }
+
+  func fatal(_ msg: String, notes: (Form?, String)...) -> Never {
+    failForm(prefix: "INTERNAL ERROR", msg: msg, notes: notes)
+  }
 }
 
 

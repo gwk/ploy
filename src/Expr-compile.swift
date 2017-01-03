@@ -106,7 +106,7 @@ extension Expr {
           compileCmpdField(&ctx, em, depth, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
         }
         if argIndex != fields.count {
-          paren.failType("expected \(fields.count) arguments; received \(argIndex)")
+          paren.fatal("expected \(fields.count) arguments; received \(argIndex)")
         }
         em.append("}")
 
@@ -158,7 +158,7 @@ extension Expr {
       let s = "\(scopeRecord.hostName)__acc()"
       em.str(depth, "\(s)")
     case .fwd: // should never be reached, because type checking should notice.
-      sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a forward declaration.")
+      sym.fatal("`\(sym.name)` refers to a forward declaration.")
     case .poly(let polyType, let variantsToNeedsLazy):
       let variantType = ctx.typeFor(expr: self)
       assert(polyType != variantType)
@@ -166,9 +166,9 @@ extension Expr {
       let lazySuffix = (needsLazy ? "__acc()" : "")
       em.str(depth, "\(scopeRecord.hostName)__\(variantType.globalIndex)\(lazySuffix)")
     case .space:
-      sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
+      sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:
-      sym.failType("INTERNAL ERROR: `\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
+      sym.fatal("`\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
   }
 }
