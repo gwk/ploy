@@ -26,18 +26,13 @@ struct TypeCtx {
   private var freeTypeCount = 0
   private var freeUnifications: [Int:Type] = [:]
   private var exprTypes = [Expr:Type]() // maps expressions to their latest types.
-  private var exprSubtypes = [Expr:Type]() // maps forms to legal, inferred compile time narrowing.
 
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
 
 
-  private func subtypeFor(expr: Expr) -> Type? { return exprSubtypes[expr] }
-
-
   func typeFor(expr: Expr) -> Type {
-    let type = subtypeFor(expr: expr).or(exprTypes[expr]!)
-    return resolved(type: type)
+    return resolved(type: exprTypes[expr]!)
   }
 
 
@@ -96,6 +91,8 @@ struct TypeCtx {
       }
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
+    case .sub(let orig, let cast):
+      return Type.Sub(orig: resolved(type: orig), cast: resolved(type: cast))
     case .var_: return type
     }
   }
@@ -107,6 +104,14 @@ struct TypeCtx {
   }
 
 
+  private func resolved(actType: Type) -> Type {
+    switch actType.kind {
+    case .conv(_, let cast), .sub(_, let cast):
+      return resolved(actType: cast)
+    default: return resolved(type: actType)
+    }
+  }
+
   mutating func unify(freeIndex: Int, to type: Type) -> MsgThunk? {
     assert(!freeUnifications.contains(key: freeIndex))
     freeUnifications[freeIndex] = type
@@ -115,7 +120,7 @@ struct TypeCtx {
 
 
   mutating func resolveConstraint(_ constraint: Constraint) -> Err? {
-    let act = resolved(type: constraint.actType)
+    let act = resolved(actType: constraint.actType)
     let exp = resolved(type: constraint.expType)
     if (act == exp) {
       return nil
@@ -141,10 +146,7 @@ struct TypeCtx {
         match = morph
       }
       guard let morph = match else { return Err(constraint, "no morphs match expected") }
-      if let existing = subtypeFor(expr: constraint.actExpr) {
-        return Err(constraint, "multiple subtype resolutions: \(existing); \(morph)")
-      }
-      exprSubtypes[constraint.actExpr] = morph
+      exprTypes[constraint.actExpr] = Type.Sub(orig: act, cast: morph)
       return nil
 
     case (.prop(let accessor, let accesseeType), _):

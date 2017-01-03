@@ -161,11 +161,15 @@ extension Expr {
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
     case .poly(let polyType, let morphsToNeedsLazy):
-      let morphType = ctx.typeFor(expr: self)
-      assert(polyType != morphType)
-      let needsLazy = morphsToNeedsLazy[morphType]!
-      let lazySuffix = (needsLazy ? "__acc()" : "")
-      em.str(depth, "\(scopeRecord.hostName)__\(morphType.globalIndex)\(lazySuffix)")
+      let type = ctx.typeFor(expr: self)
+      switch type.kind {
+      case .sub(let origType, let morphType):
+        assert(origType == polyType)
+        let needsLazy = morphsToNeedsLazy[morphType]!
+        let lazySuffix = (needsLazy ? "__acc()" : "")
+        em.str(depth, "\(scopeRecord.hostName)__\(morphType.globalIndex)\(lazySuffix)")
+      default: sym.fatal("`\(sym.name)` refers to a polytype: \(polyType); usage resolved to non-subtype: \(type)")
+      }
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:

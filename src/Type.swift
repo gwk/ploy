@@ -26,6 +26,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case prim
     case prop(accessor: PropAccessor, type: Type)
     case sig(dom: Type, ret: Type)
+    case sub(orig: Type, cast: Type)
     case var_(name: String)
   }
 
@@ -133,6 +134,14 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       kind: .sig(dom: dom, ret: ret),
       frees: dom.frees.union(ret.frees),
       vars: dom.vars.union(ret.vars)))
+  }
+
+  class func Sub(orig: Type, cast: Type) -> Type {
+    let description = "\(orig.description)->\(cast.description)"
+    return memoize(description, (
+      kind: .sub(orig: orig, cast: cast),
+      frees: orig.frees.union(cast.frees),
+      vars: orig.vars.union(cast.vars)))
   }
 
   class func Var(_ name: String) -> Type {
