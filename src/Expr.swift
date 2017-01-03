@@ -72,6 +72,13 @@ enum Expr: SubForm, Hashable {
 
   var hashValue: Int { return form.hashValue }
 
+  var cmpdFields: [Expr]? {
+    switch self {
+    case .paren(let paren): return paren.els
+    default: return nil
+    }
+  }
+
   var argLabel: String? {
     switch self {
     case .bind(let bind): return bind.place.sym.name

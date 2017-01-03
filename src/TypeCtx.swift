@@ -190,8 +190,9 @@ struct TypeCtx {
         return Err(constraint, "actual struct type has \(actFields); expected \(expFields.count)")
       }
       var needsConversion = false
+      let lexFields = constraint.actExpr.cmpdFields
       for (i, (actField, expField)) in zip(actFields, expFields).enumerated() {
-        switch resolveField(constraint, actField: actField, expField: expField, index: i) {
+        switch resolveField(constraint, actField: actField, expField: expField, lexField: lexFields?[i], index: i) {
         case .ok: break
         case .convert: needsConversion = true
         case .failure(let err): return err
@@ -213,7 +214,7 @@ struct TypeCtx {
     case failure(Err)
   }
 
-  mutating func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField, index: Int) -> FieldResolution {
+  mutating func resolveField(_ constraint: Constraint, actField: TypeField, expField: TypeField, lexField: Expr?, index: Int) -> FieldResolution {
     var res: FieldResolution = .ok
     if actField.label != nil {
       if actField.label != expField.label {
@@ -222,6 +223,7 @@ struct TypeCtx {
     } else if expField.label != nil { // convert unlabeled to labeled.
       res = .convert
     }
+    // TODO: if let lexField = lexField...
     if let failure = resolveSub(constraint,
       actType: actField.type, actDesc: "struct field \(index)",
       expType: expField.type, expDesc: "struct field \(index)") {
