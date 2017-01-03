@@ -160,12 +160,12 @@ extension Expr {
       em.str(depth, "\(s)")
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
-    case .poly(let polyType, let variantsToNeedsLazy):
-      let variantType = ctx.typeFor(expr: self)
-      assert(polyType != variantType)
-      let needsLazy = variantsToNeedsLazy[variantType]!
+    case .poly(let polyType, let morphsToNeedsLazy):
+      let morphType = ctx.typeFor(expr: self)
+      assert(polyType != morphType)
+      let needsLazy = morphsToNeedsLazy[morphType]!
       let lazySuffix = (needsLazy ? "__acc()" : "")
-      em.str(depth, "\(scopeRecord.hostName)__\(variantType.globalIndex)\(lazySuffix)")
+      em.str(depth, "\(scopeRecord.hostName)__\(morphType.globalIndex)\(lazySuffix)")
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:

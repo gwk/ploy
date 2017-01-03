@@ -6,7 +6,7 @@ struct ScopeRecord {
   enum Kind {
     case fwd // TODO: is it possible distinguish between types and vals?
     case lazy(Type)
-    case poly(Type, variantsToNeedsLazy: [Type:Bool])
+    case poly(Type, morphsToNeedsLazy: [Type:Bool])
     case space(Space)
     case type(Type)
     case val(Type)

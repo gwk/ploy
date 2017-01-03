@@ -88,7 +88,7 @@ enum Def: SubForm {
       em.str(0, "  throw \"INTERNAL RUNTIME ERROR: extensible dispatch not implemented\"") // TODO: dispatch.
       em.append("}")
       em.flush()
-      return .poly(type, variantsToNeedsLazy: typesToNeedsLazy)
+      return .poly(type, morphsToNeedsLazy: typesToNeedsLazy)
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
