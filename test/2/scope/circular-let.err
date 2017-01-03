@@ -1,0 +1,3 @@
+scope error: test/2/scope/circular-let.ploy:1:14-14: expected a value; `x` refers to a forward declaration.
+  main = { x = x }
+               ~

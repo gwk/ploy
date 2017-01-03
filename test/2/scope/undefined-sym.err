@@ -1,0 +1,3 @@
+scope error: test/2/scope/undefined-sym.ploy:2:3-11: `undefined` is not defined in this scope.
+    undefined
+    ~~~~~~~~~

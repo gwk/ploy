@@ -1,0 +1,3 @@
+parse error: test/2/parse/sym-double-under.ploy:1:3: symbols cannot contain repeated '_' characters.
+  a__
+    ^

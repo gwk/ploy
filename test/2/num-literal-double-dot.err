@@ -1,3 +1,0 @@
-parse error: test/2/num-literal-double-dot.ploy:1:1-4: repeated '.' in number literal.
-  0.0.0
-  ~~~~

@@ -47,16 +47,16 @@ class Form: Hashable, CustomStringConvertible {
     exit(1)
   }
 
-  func failForm(prefix: String, msg: String, notes: (Form?, String)...) -> Never {
-    failForm(prefix: prefix, msg: msg, notes: notes)
-  }
-
   func failSyntax(_ msg: String, notes: (Form?, String)...) -> Never {
     failForm(prefix: "syntax error", msg: msg, notes: notes)
   }
 
   func failType(_ msg: String, notes: (Form?, String)...) -> Never {
     failForm(prefix: "type error", msg: msg, notes: notes)
+  }
+
+  func failScope(_ msg: String, notes: (Form?, String)...) -> Never {
+    failForm(prefix: "scope error", msg: msg, notes: notes)
   }
 
   func fatal(_ msg: String, notes: (Form?, String)...) -> Never {

@@ -69,7 +69,7 @@ class Scope: CustomStringConvertible {
       if case .space(let s) = rec.kind {
         space = s
       } else {
-        sym.failType("expected a space; found a \(rec.kindDesc).")
+        sym.failScope("expected a space; found a \(rec.kindDesc).")
       }
     }
     fatalError()
@@ -86,7 +86,7 @@ class Scope: CustomStringConvertible {
     let rec = getRecord(sym: sym)
     switch rec.kind {
     case .type(let type): return type
-    default: sym.failType("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
+    default: sym.failScope("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
     }
   }
 
@@ -94,7 +94,7 @@ class Scope: CustomStringConvertible {
     let rec = getRecord(path: path)
     switch rec.kind {
     case .type(let type): return type
-    default: path.failType("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
+    default: path.failScope("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
     }
   }
 }

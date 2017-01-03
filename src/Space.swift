@@ -31,7 +31,7 @@ class Space: Scope {
         switch r.kind {
         case .space(let next):
           space = next
-        default: sym.failType("expected a space; found a \(r.kindDesc)")
+        default: sym.failScope("expected a space; found a \(r.kindDesc)")
         }
       } else {
         let name = sym.name
