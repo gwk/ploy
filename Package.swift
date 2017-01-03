@@ -5,7 +5,5 @@ import PackageDescription
 
 let package = Package(
   name: "ploy",
-  dependencies: [
-    .Package(url: "git@github.com:gwk/quilt.git", majorVersion: 0)
-  ]
+  exclude: ["quilt"]
 )

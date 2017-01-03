@@ -1,7 +1,5 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
-import Quilt
-
 
 class Emitter {
   let file: OutFile
