@@ -45,8 +45,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     self.frees = frees
     self.vars = vars
     self.globalIndex = Type.allTypes.count
-    assert(!Type.allTypes.contains(key: description), "type already exists with description: \(description)")
-    Type.allTypes[description] = self
+    Type.allTypes.insertNew(description, self)
   }
 
   class func memoize(_ description: String, _ parts: @autoclosure ()->(kind: Kind, frees: Set<Type>, vars: Set<Type>)) -> Type {
