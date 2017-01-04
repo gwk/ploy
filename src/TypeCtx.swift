@@ -75,17 +75,17 @@ struct TypeCtx {
       return Type.Poly(Set(members.map { self.resolved(type: $0) }))
     case .prim:
       return type
-    case .prop(let accessor, let type):
-      let accesseeType = resolved(type: type)
-      switch accesseeType.kind {
+    case .prop(let accessor, let accesseeType):
+      let accType = resolved(type: accesseeType)
+      switch accType.kind {
       case .cmpd(let fields):
         for (i, field) in fields.enumerated() {
           if field.accessorString(index: i) == accessor.accessorString {
             return field.type
           }
         }
-        fallthrough
-      default:  return Type.Prop(accessor, type: accesseeType)
+        fatalError("impossible prop type (TODO): \(type)")
+      default: return Type.Prop(accessor, type: accType)
       }
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
