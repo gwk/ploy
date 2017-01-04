@@ -189,6 +189,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     if case .var_ = self.kind { s.insert(self) }
     return s
   }
+
+  var convFnName: String {
+    switch self.kind {
+    case .conv(let orig, let cast): return "$c_\(orig.globalIndex)_\(cast.globalIndex)"
+    default: fatalError()
+    }
+  }
 }
 
 func ==(l: Type, r: Type) -> Bool { return l === r }

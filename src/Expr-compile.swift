@@ -16,12 +16,14 @@ extension Expr {
 
   func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     var type = ctx.typeFor(expr: self)
-    var castName = ""
-    if case .conv(let origType, let castType) = type.kind {
-      castName = "$c_\(origType.globalIndex)_\(castType.globalIndex)"
-      ctx.globalCtx.addConversion(castName, type)
-      em.str(depth, "(\(castName)(")
-      type = origType
+    let isConv: Bool
+    if case .conv(let orig, _) = type.kind {
+      isConv = true
+      ctx.globalCtx.addConversion(type)
+      em.str(depth, "(\(type.convFnName)(")
+      type = orig
+    } else {
+      isConv = false
     }
 
     switch self {
@@ -135,7 +137,7 @@ extension Expr {
       em.str(depth, "undefined")
     }
 
-    if !castName.isEmpty { // conversion.
+    if isConv {
       em.append("))")
     }
   }

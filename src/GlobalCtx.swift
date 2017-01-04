@@ -4,29 +4,27 @@
 class GlobalCtx {
   let mainPath: String
   let file: OutFile
-  var conversions: [String:Type] = [:]
+  var conversions: Set<Type> = []
 
   init(mainPath: String, file: OutFile) {
     self.mainPath = mainPath
     self.file = file
   }
 
-  func addConversion(_ castName: String, _ type: Type) {
-    if !conversions.contains(key: castName) {
-      conversions[castName] = type
-    }
+  func addConversion(_ type: Type) {
+    conversions.insert(type)
   }
 
   func emitConversions() {
-    for (name, type) in conversions.sorted(by: {$0.0 < $1.0}) {
-      emitConversion(name, type)
+    for type in conversions.sorted(by: {$0.globalIndex < $1.globalIndex}) {
+      emitConversion(type: type)
     }
   }
 
-  func emitConversion(_ name: String, _ type: Type) {
+  func emitConversion(type: Type) {
     guard case .conv(let orig, let cast) = type.kind else { fatalError() }
     let em = Emitter(file: file)
-    em.str(0, "function \(name)($) { // \(type)")
+    em.str(0, "function \(type.convFnName)($) { // \(type)")
 
     switch (orig.kind, cast.kind) {
 
