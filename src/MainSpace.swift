@@ -13,6 +13,7 @@ class MainSpace: Space {
   func compileMain() {
     let def = getMainDef()
     _ = getRecordInFrame(sym: def.sym)!
+    ctx.emitConversions()
   }
 }
 

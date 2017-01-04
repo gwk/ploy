@@ -20,6 +20,7 @@ struct TypeCtx {
     }
   }
 
+  let globalCtx: GlobalCtx
   private var constraints: [Constraint] = []
   private var freeTypeCount = 0
   private var freeUnifications: [Int:Type] = [:]
@@ -27,6 +28,11 @@ struct TypeCtx {
 
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
+
+
+  init(globalCtx: GlobalCtx) {
+    self.globalCtx = globalCtx
+  }
 
 
   func typeFor(expr: Expr) -> Type {

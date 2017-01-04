@@ -16,10 +16,11 @@ extension Expr {
 
   func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     var type = ctx.typeFor(expr: self)
-    var castType: Type? = nil
-    if case .conv(let origType, let _castType) = type.kind {
-      castType = _castType
-      em.str(depth, "(()=>{ let $C = // \(type)")
+    var castName = ""
+    if case .conv(let origType, let castType) = type.kind {
+      castName = "$c_\(origType.globalIndex)_\(castType.globalIndex)"
+      ctx.globalCtx.addConversion(castName, type)
+      em.str(depth, "(\(castName)(")
       type = origType
     }
 
@@ -134,22 +135,10 @@ extension Expr {
       em.str(depth, "undefined")
     }
 
-    if let castType = castType { // conversion.
-      em.append(";")
-      switch (type.kind, castType.kind) {
-
-      case (.cmpd(let origFields), .cmpd(let castFields)):
-        em.str(depth, "return {")
-        for (i, (o, c)) in zip(origFields, castFields).enumerated() {
-          em.append(" \(c.hostName(index: i)): $C.\(o.hostName(index: i)),")
-        }
-        em.append(" };")
-        default: form.fatal("impossible conversion: \(type)~>\(castType)")
-      }
-      em.append("})()")
+    if !castName.isEmpty { // conversion.
+      em.append("))")
     }
   }
-
 
   func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, sym: Sym, scopeRecord: ScopeRecord) {
     switch scopeRecord.kind {
