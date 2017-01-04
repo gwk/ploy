@@ -36,16 +36,16 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   let description: String
   let kind: Kind
   let childConvs: Set<Type>
-  let frees: Set<Type>
-  let vars: Set<Type>
+  let childFrees: Set<Type>
+  let childVars: Set<Type>
   let globalIndex: Int
 
   private init(_ description: String, kind: Kind, convs: Set<Type> = [], frees: Set<Type> = [], vars: Set<Type> = []) {
     self.description = description
     self.kind = kind
     self.childConvs = convs
-    self.frees = frees
-    self.vars = vars
+    self.childFrees = frees
+    self.childVars = vars
     self.globalIndex = Type.allTypes.count
     Type.allTypes.insertNew(description, value: self)
   }
@@ -175,6 +175,18 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   var convs: Set<Type> {
     var s = childConvs
     if case .conv = self.kind { s.insert(self) }
+    return s
+  }
+
+  var frees: Set<Type> {
+    var s = childFrees
+    if case .free = self.kind { s.insert(self) }
+    return s
+  }
+
+  var vars: Set<Type> {
+    var s = childVars
+    if case .var_ = self.kind { s.insert(self) }
     return s
   }
 }
