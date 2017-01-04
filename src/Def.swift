@@ -77,7 +77,7 @@ enum Def: SubForm {
         typesToNeedsLazy[type] = needsLazy
       }
       let type = Type.Poly(Set(typesToNeedsLazy.keys))
-      let em = Emitter(file: space.file)
+      let em = Emitter(file: space.ctx.file)
       let hostName = "\(space.hostPrefix)\(sym.hostName)"
       em.str(0, "let \(hostName)__$table = {")
       // TODO: emit table contents.
@@ -110,11 +110,10 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
   ctx.resolve()
   let type = ctx.typeFor(expr: val)
   let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
-  let em = Emitter(file: space.file)
+  let em = Emitter(file: space.ctx.file)
   //let fullName = "\(space.name)/\(place.sym.name)"
   let hostName = "\(space.hostPrefix)\(place.sym.hostName)\(suffix)"
-  let isMain = (hostName == "MAIN__main")
-  if val.needsLazyDef && !isMain {
+  if val.needsLazyDef {
     let acc = "\(hostName)__acc"
     em.str(0, "var \(acc) = function() {")
     em.str(0, " \(acc) = $lazy_sentinal;")

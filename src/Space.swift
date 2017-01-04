@@ -3,12 +3,12 @@
 
 class Space: Scope {
 
-  let file: OutFile
+  let ctx: GlobalCtx
   var defs: [String: Def] = [:]
   var exts: [String: Ref<[Extension]>] = [:]
 
-  init(pathNames: [String], parent: Space?, file: OutFile) {
-    self.file = file
+  init(_ ctx: GlobalCtx, pathNames: [String], parent: Space?) {
+    self.ctx = ctx
     super.init(pathNames: pathNames, parent: parent)
   }
 
@@ -36,7 +36,7 @@ class Space: Scope {
       } else {
         let name = sym.name
         let pathNames = identifierSyms[0...i].map { $0.name }
-        space = Space(pathNames: pathNames, parent: self, file: file) // ROOT is always the parent of any named space.
+        space = Space(ctx, pathNames: pathNames, parent: self) // ROOT is always the parent of any named space.
         let record = ScopeRecord(name: name, hostName: space.hostPrefix + sym.hostName, sym: nil, kind: .space(space))
         // note: sym is nil because `in` forms can be declared in multiple locations.
         bindings.insertNew(name, value: record)

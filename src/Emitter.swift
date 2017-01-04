@@ -63,6 +63,7 @@ func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace)
 
   mainSpace.compileMain()
   file.writeL("")
-  file.writeL("$assert(MAIN__main === undefined);")
+  file.writeL("let $m = MAIN__main__acc()")
+  file.writeL("$assert($m === undefined);")
   file.writeL("})();")
 }

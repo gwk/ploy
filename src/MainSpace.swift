@@ -3,16 +3,9 @@
 
 class MainSpace: Space {
 
-  let filePath: String
-
-  init(filePath: String, rootSpace: Space, file: OutFile) {
-    self.filePath = filePath
-    super.init(pathNames: ["MAIN"], parent: rootSpace, file: file)
-  }
-
   func getMainDef() -> Def {
     guard let def = defs["main"] else {
-      fail("\(filePath): `main` is not defined in MAIN (toplevel namespace).")
+      fail("\(ctx.mainPath): `main` is not defined in MAIN (toplevel namespace).")
     }
     return def
   }
@@ -25,14 +18,15 @@ class MainSpace: Space {
 
 
 func setupRootAndMain(mainPath: String, outFile: OutFile) -> (root: Space, main: MainSpace) {
-  let root = Space(pathNames: ["ROOT"], parent: nil, file: outFile)
+  let ctx = GlobalCtx(mainPath: mainPath, file: outFile)
+  let root = Space(ctx, pathNames: ["ROOT"], parent: nil)
   root.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, kind: .space(root)) // NOTE: reference cycle.
   // TODO: could fix the reference cycle by making a special case for "ROOT" just before lookup failure.
   for t in intrinsicTypes {
     let rec = ScopeRecord(name: t.description, sym: nil, kind: .type(t))
     root.bindings[t.description] = rec
   }
-  let mainSpace = MainSpace(filePath: mainPath, rootSpace: root, file: outFile)
+  let mainSpace = MainSpace(ctx, pathNames: ["MAIN"], parent: root)
   root.bindings["MAIN"] = ScopeRecord(name: "MAIN", sym: nil, kind: .space(mainSpace))
   return (root, mainSpace)
 }
