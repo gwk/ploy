@@ -77,6 +77,7 @@ enum Def: SubForm {
         typesToNeedsLazy[type] = needsLazy
       }
       let type = Type.Poly(Set(typesToNeedsLazy.keys))
+      #if false
       let em = Emitter(file: space.ctx.file)
       let hostName = "\(space.hostPrefix)\(sym.hostName)"
       em.str(0, "let \(hostName)__$table = {")
@@ -86,6 +87,7 @@ enum Def: SubForm {
       em.str(0, "  throw \"INTERNAL RUNTIME ERROR: extensible dispatch not implemented\"") // TODO: dispatch.
       em.append("}")
       em.flush()
+      #endif
       return .poly(type, morphsToNeedsLazy: typesToNeedsLazy)
 
     case .hostType:
