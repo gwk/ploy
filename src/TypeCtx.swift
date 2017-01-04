@@ -46,10 +46,10 @@ struct TypeCtx {
   }
 
 
-  mutating func constrain(_ actExpr: Expr, expForm: Form? = nil, expType: Type, _ desc: String) {
+  mutating func constrain(_ actExpr: Expr, expExpr: Expr? = nil, expType: Type, _ desc: String) {
     constraints.append(Constraint(
       actExpr: actExpr,
-      expForm: expForm,
+      expExpr: expExpr,
       actType: typeFor(expr: actExpr), actChain: .end,
       expType: expType, expChain: .end,
       desc: desc))
@@ -259,7 +259,7 @@ struct TypeCtx {
   mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Err? {
     let sub = Constraint(
       actExpr: constraint.actExpr,
-      expForm: constraint.expForm,
+      expExpr: constraint.expExpr,
       actType: actType, actChain: constraint.actChain.prepend(opt: actDesc),
       expType: expType, expChain: constraint.expChain.prepend(opt: expDesc),
       desc: constraint.desc)
@@ -275,9 +275,9 @@ struct TypeCtx {
         let act = resolved(type: c.actType)
         let exp = resolved(type: c.expType)
         let msg = err.msgThunk()
-        if let expForm = err.constraint.expForm {
+        if let expExpr = err.constraint.expExpr {
           c.actExpr.form.failType("\(c.desc) \(msg). \(c.actDesc)actual type: \(act)",
-            notes: (expForm, "\(c.expDesc)expected type: \(exp)"))
+            notes: (expExpr.form, "\(c.expDesc)expected type: \(exp)"))
         } else {
           c.actExpr.form.failType("\(c.desc) \(msg). \(c.actDesc)actual type: \(act); \(c.expDesc)expected type: \(exp).")
         }

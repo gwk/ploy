@@ -3,7 +3,7 @@
 
 struct Constraint {
   let actExpr: Expr
-  let expForm: Form?
+  let expExpr: Expr?
   let actType: Type
   let actChain: Chain<String>
   let expType: Type

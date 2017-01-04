@@ -49,7 +49,7 @@ extension TypeCtx {
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
       _ = genConstraintsBody(fnScope, body: fn.body)
-      constrain(fn.body.expr, expForm: fn.sig.ret.form, expType: ret, "function body")
+      constrain(fn.body.expr, expExpr: fn.sig.ret, expType: ret, "function body")
       return type
 
     case .if_(let if_):
@@ -113,7 +113,7 @@ extension TypeCtx {
 
   mutating func addAnnConstraint(_ scope: Scope, expr: Expr, ann: Ann) -> Type {
     let type = ann.typeExpr.type(scope, "type annotation")
-    constrain(expr, expForm: ann.typeExpr.form, expType: type, "type annotation")
+    constrain(expr, expExpr: ann.typeExpr, expType: type, "type annotation")
     return type
   }
 
