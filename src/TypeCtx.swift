@@ -135,7 +135,7 @@ struct TypeCtx {
     case (.poly(let morphs), _):
       var match: Type? = nil
       for morph in morphs {
-        if resolveSub(constraint, actType: morph, actDesc: "morph", expType: exp, expDesc: "expected type") != nil {
+        if resolveSub(constraint, actType: morph, actDesc: "morph") != nil {
           continue // TODO: this is broken because we should be unwinding any resolved types.
         }
         if let prev = match { return Err(constraint, "multiple morphs match expected: \(prev); \(morph)") }
@@ -150,12 +150,10 @@ struct TypeCtx {
       switch accType.kind {
       case .cmpd(let fields):
         for (i, field) in fields.enumerated() {
-          if field.accessorString(index: i) == accessor.accessorString {
-            if let failure = resolveSub(constraint,
-              actType: field.type, actDesc: "`\(field.accessorString(index: i))` property",
-              expType: exp, expDesc: nil) {
-                return failure
-            }
+          if field.accessorString(index: i) != accessor.accessorString { continue }
+          if let failure = resolveSub(constraint, actType: field.type, actDesc: "`\(field.accessorString(index: i))` property") {
+              return failure
+          } else {
             return nil
           }
         }
@@ -254,12 +252,22 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Err? {
+  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String, expType: Type, expDesc: String) -> Err? {
     let a = constraint.act
     let e = constraint.exp
     let sub = Constraint(
-      act: Constraint.Side(expr: a.expr, type: actType, chain: a.chain.prepend(opt: actDesc)),
-      exp: Constraint.Side(expr: e.expr, type: expType, chain: e.chain.prepend(opt: expDesc)),
+      act: Constraint.Side(expr: a.expr, type: actType, chain: .link(actDesc, a.chain)),
+      exp: Constraint.Side(expr: e.expr, type: expType, chain: .link(expDesc, a.chain)),
+      desc: constraint.desc)
+    return resolveConstraint(sub)
+  }
+
+
+  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String) -> Err? {
+    let a = constraint.act
+    let sub = Constraint(
+      act: Constraint.Side(expr: a.expr, type: actType, chain: .link(actDesc, a.chain)),
+      exp: constraint.exp,
       desc: constraint.desc)
     return resolveConstraint(sub)
   }
