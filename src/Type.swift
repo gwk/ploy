@@ -33,20 +33,20 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   static var allTypes: [String: Type] = [:]
   static var allFreeTypes: [Type] = []
 
+  let globalIndex: Int
   let description: String
   let kind: Kind
   let childConvs: Set<Type>
   let childFrees: Set<Type>
   let childVars: Set<Type>
-  let globalIndex: Int
 
   private init(_ description: String, kind: Kind, convs: Set<Type> = [], frees: Set<Type> = [], vars: Set<Type> = []) {
+    self.globalIndex = Type.allTypes.count
     self.description = description
     self.kind = kind
     self.childConvs = convs
     self.childFrees = frees
     self.childVars = vars
-    self.globalIndex = Type.allTypes.count
     Type.allTypes.insertNew(description, value: self)
   }
 
