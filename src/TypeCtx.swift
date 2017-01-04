@@ -271,9 +271,16 @@ struct TypeCtx {
 
     for constraint in constraints {
       if let err = resolveConstraint(constraint) {
-        let act = resolved(type: err.constraint.actType)
-        let exp = resolved(type: err.constraint.expType)
-        err.constraint.fail(act: act, exp: exp, msg: err.msgThunk())
+        let c = err.constraint
+        let act = resolved(type: c.actType)
+        let exp = resolved(type: c.expType)
+        let msg = err.msgThunk()
+        if let expForm = err.constraint.expForm {
+          c.actExpr.form.failType("\(c.desc) \(msg). \(c.actDesc)actual type: \(act)",
+            notes: (expForm, "\(c.expDesc)expected type: \(exp)"))
+        } else {
+          c.actExpr.form.failType("\(c.desc) \(msg). \(c.actDesc)actual type: \(act); \(c.expDesc)expected type: \(exp).")
+        }
       }
     }
 
