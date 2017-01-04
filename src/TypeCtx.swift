@@ -48,10 +48,8 @@ struct TypeCtx {
 
   mutating func constrain(_ actExpr: Expr, expExpr: Expr? = nil, expType: Type, _ desc: String) {
     constraints.append(Constraint(
-      actExpr: actExpr,
-      expExpr: expExpr,
-      actType: typeFor(expr: actExpr), actChain: .end,
-      expType: expType, expChain: .end,
+      act: Constraint.Side(expr: actExpr, type: typeFor(expr: actExpr)),
+      exp: Constraint.Side(expr: expExpr.or(actExpr), type: expType),
       desc: desc))
   }
 
@@ -118,8 +116,8 @@ struct TypeCtx {
 
 
   mutating func resolveConstraint(_ constraint: Constraint) -> Err? {
-    let act = resolved(actType: constraint.actType)
-    let exp = resolved(type: constraint.expType)
+    let act = resolved(actType: constraint.act.type)
+    let exp = resolved(type: constraint.exp.type)
     if (act == exp) {
       return nil
     }
@@ -144,7 +142,7 @@ struct TypeCtx {
         match = morph
       }
       guard let morph = match else { return Err(constraint, "no morphs match expected") }
-      exprTypes[constraint.actExpr] = Type.Sub(orig: act, cast: morph)
+      exprTypes[constraint.act.expr] = Type.Sub(orig: act, cast: morph)
       return nil
 
     case (.prop(let accessor, let accesseeType), _):
@@ -192,7 +190,7 @@ struct TypeCtx {
         return Err(constraint, "actual struct type has \(actFields); expected \(expFields.count)")
       }
       var needsConversion = false
-      let lexFields = constraint.actExpr.cmpdFields
+      let lexFields = constraint.act.expr.cmpdFields
       for (i, (actField, expField)) in zip(actFields, expFields).enumerated() {
         switch resolveField(constraint, actField: actField, expField: expField, lexField: lexFields?[i], index: i) {
         case .ok: break
@@ -201,7 +199,7 @@ struct TypeCtx {
         }
       }
       if needsConversion {
-        exprTypes[constraint.actExpr] = Type.Conv(orig: act, cast: exp)
+        exprTypes[constraint.act.expr] = Type.Conv(orig: act, cast: exp)
       }
       return nil
 
@@ -257,11 +255,11 @@ struct TypeCtx {
 
 
   mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String?, expType: Type, expDesc: String?) -> Err? {
+    let a = constraint.act
+    let e = constraint.exp
     let sub = Constraint(
-      actExpr: constraint.actExpr,
-      expExpr: constraint.expExpr,
-      actType: actType, actChain: constraint.actChain.prepend(opt: actDesc),
-      expType: expType, expChain: constraint.expChain.prepend(opt: expDesc),
+      act: Constraint.Side(expr: a.expr, type: actType, chain: a.chain.prepend(opt: actDesc)),
+      exp: Constraint.Side(expr: e.expr, type: expType, chain: e.chain.prepend(opt: expDesc)),
       desc: constraint.desc)
     return resolveConstraint(sub)
   }
@@ -272,17 +270,17 @@ struct TypeCtx {
     for constraint in constraints {
       if let err = resolveConstraint(constraint) {
         let c = err.constraint
-        let act = resolved(type: c.actType)
-        let exp = resolved(type: c.expType)
+        let act = resolved(type: c.act.type)
+        let exp = resolved(type: c.exp.type)
         let msg = err.msgThunk()
-        let actDesc = actChain.map({"\($0) -> "}).join()
-        let expDesc = expChain.map({"\($0) -> "}).join()
+        let actDesc = c.act.chain.map({"\($0) -> "}).join()
+        let expDesc = c.exp.chain.map({"\($0) -> "}).join()
 
-        if let expExpr = err.constraint.expExpr {
-          c.actExpr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act)",
-            notes: (expExpr.form, "\(expDesc)expected type: \(exp)"))
+        if c.act.expr != c.exp.expr {
+          c.act.expr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act)",
+            notes: (c.exp.expr.form, "\(expDesc)expected type: \(exp)"))
         } else {
-          c.actExpr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act); \(expDesc)expected type: \(exp).")
+          c.act.expr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act); \(expDesc)expected type: \(exp).")
         }
       }
     }
