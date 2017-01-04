@@ -275,11 +275,14 @@ struct TypeCtx {
         let act = resolved(type: c.actType)
         let exp = resolved(type: c.expType)
         let msg = err.msgThunk()
+        let actDesc = actChain.map({"\($0) -> "}).join()
+        let expDesc = expChain.map({"\($0) -> "}).join()
+
         if let expExpr = err.constraint.expExpr {
-          c.actExpr.form.failType("\(c.desc) \(msg). \(c.actDesc)actual type: \(act)",
-            notes: (expExpr.form, "\(c.expDesc)expected type: \(exp)"))
+          c.actExpr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act)",
+            notes: (expExpr.form, "\(expDesc)expected type: \(exp)"))
         } else {
-          c.actExpr.form.failType("\(c.desc) \(msg). \(c.actDesc)actual type: \(act); \(c.expDesc)expected type: \(exp).")
+          c.actExpr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act); \(expDesc)expected type: \(exp).")
         }
       }
     }
