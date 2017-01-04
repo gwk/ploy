@@ -105,7 +105,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
   var ctx = TypeCtx()
   _ = ctx.genConstraints(LocalScope(parent: space), expr: val) // initial root type is ignored.
   if let ann = place.ann {
-    _ = ctx.addAnnConstraint(space, expr: val, ann: ann)
+    _ = ctx.constrainAnn(space, expr: val, ann: ann)
   }
   ctx.resolve()
   let type = ctx.typeFor(expr: val)

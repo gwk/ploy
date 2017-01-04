@@ -18,13 +18,13 @@ extension TypeCtx {
 
     case .ann(let ann):
       _ = genConstraints(scope, expr: ann.expr)
-      return addAnnConstraint(scope, expr: ann.expr, ann: ann)
+      return constrainAnn(scope, expr: ann.expr, ann: ann)
 
     case .bind(let bind):
       _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
       var exprType = genConstraints(scope, expr: bind.val)
       if let ann = bind.place.ann {
-        exprType = addAnnConstraint(scope, expr: bind.val, ann: ann)
+        exprType = constrainAnn(scope, expr: bind.val, ann: ann)
       }
       _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
       return typeVoid
@@ -111,7 +111,7 @@ extension TypeCtx {
   }
 
 
-  mutating func addAnnConstraint(_ scope: Scope, expr: Expr, ann: Ann) -> Type {
+  mutating func constrainAnn(_ scope: Scope, expr: Expr, ann: Ann) -> Type {
     let type = ann.typeExpr.type(scope, "type annotation")
     constrain(expr, expExpr: ann.typeExpr, expType: type, "type annotation")
     return type
