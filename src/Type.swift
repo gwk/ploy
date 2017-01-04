@@ -35,25 +35,27 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   let description: String
   let kind: Kind
+  let childConvs: Set<Type>
   let frees: Set<Type>
   let vars: Set<Type>
   let globalIndex: Int
 
-  private init(_ description: String, kind: Kind, frees: Set<Type> = [], vars: Set<Type> = []) {
+  private init(_ description: String, kind: Kind, convs: Set<Type> = [], frees: Set<Type> = [], vars: Set<Type> = []) {
     self.description = description
     self.kind = kind
+    self.childConvs = convs
     self.frees = frees
     self.vars = vars
     self.globalIndex = Type.allTypes.count
-    Type.allTypes.insertNew(description, self)
+    Type.allTypes.insertNew(description, value: self)
   }
 
-  class func memoize(_ description: String, _ parts: @autoclosure ()->(kind: Kind, frees: Set<Type>, vars: Set<Type>)) -> Type {
+  class func memoize(_ description: String, _ parts: @autoclosure ()->(kind: Kind, convs: Set<Type>, frees: Set<Type>, vars: Set<Type>)) -> Type {
     if let memo = allTypes[description] {
       return memo
     }
-    let (kind, frees, vars) = parts()
-    let type = Type(description, kind: kind, frees: frees, vars: vars)
+    let (kind, convs, frees, vars) = parts()
+    let type = Type(description, kind: kind, convs: convs, frees: frees, vars: vars)
     allTypes[description] = type
     return type
   }
@@ -62,6 +64,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(description, (
       kind: .all(members: members),
+      convs: Set(members.flatMap { $0.convs }),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -70,6 +73,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(description, (
       kind: .any(members: members),
+      convs: Set(members.flatMap { $0.convs }),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -79,6 +83,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = "(\(descs))"
     return memoize(description, (
       kind: .cmpd(fields: fields),
+      convs: Set(fields.flatMap { $0.type.convs }),
       frees: Set(fields.flatMap { $0.type.frees }),
       vars: Set(fields.flatMap { $0.type.vars })))
   }
@@ -87,6 +92,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = "\(orig.description)~>\(cast.description)"
     return memoize(description, (
       kind: .conv(orig: orig, cast: cast),
+      convs: orig.convs.union(cast.convs), // TODO: this sees wrong.
       frees: orig.frees.union(cast.frees),
       vars: orig.vars.union(cast.vars)))
   }
@@ -111,6 +117,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(description, (
       kind: .poly(members: members),
+      convs: Set(members.flatMap { $0.convs }),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -123,6 +130,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = ("\(accessor.accessorString)@\(type)")
     return memoize(description, (
       kind: .prop(accessor: accessor, type: type),
+      convs: type.convs,
       frees: type.frees,
       vars: type.vars))
   }
@@ -131,6 +139,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
     return memoize(description, (
       kind: .sig(dom: dom, ret: ret),
+      convs: dom.convs.union(ret.convs),
       frees: dom.frees.union(ret.frees),
       vars: dom.vars.union(ret.vars)))
   }
@@ -139,6 +148,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let description = "\(orig.description)->\(cast.description)"
     return memoize(description, (
       kind: .sub(orig: orig, cast: cast),
+      convs: orig.convs.union(cast.convs),
       frees: orig.frees.union(cast.frees),
       vars: orig.vars.union(cast.vars)))
   }
@@ -160,6 +170,12 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   var freeIndex: Int {
     if case .free(let index) = kind { return index }
     fatalError()
+  }
+
+  var convs: Set<Type> {
+    var s = childConvs
+    if case .conv = self.kind { s.insert(self) }
+    return s
   }
 }
 
