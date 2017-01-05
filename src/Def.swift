@@ -105,12 +105,12 @@ enum Def: SubForm {
 
 func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
   var ctx = TypeCtx(globalCtx: space.ctx)
-  _ = ctx.genConstraints(LocalScope(parent: space), expr: val) // initial root type is ignored.
+  var type = ctx.genConstraints(LocalScope(parent: space), expr: val)
   if let ann = place.ann {
-    _ = ctx.constrainAnn(space, expr: val, ann: ann)
+    type = ctx.constrainAnn(space, expr: val, type: type, ann: ann)
   }
   ctx.resolve()
-  let type = ctx.typeFor(expr: val)
+  type = ctx.typeFor(expr: val)
   let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
   let em = Emitter(file: space.ctx.file)
   //let fullName = "\(space.name)/\(place.sym.name)"

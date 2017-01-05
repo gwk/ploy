@@ -52,9 +52,9 @@ struct TypeCtx {
   }
 
 
-  mutating func constrain(_ actExpr: Expr, expExpr: Expr? = nil, expType: Type, _ desc: String) {
+  mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
     constraints.append(Constraint(
-      act: Constraint.Side(expr: actExpr, type: typeFor(expr: actExpr)),
+      act: Constraint.Side(expr: actExpr, type: actType),
       exp: Constraint.Side(expr: expExpr.or(actExpr), type: expType),
       desc: desc))
   }

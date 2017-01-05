@@ -17,27 +17,27 @@ extension TypeCtx {
       return Type.Prop(acc.accessor.propAccessor, type: accesseeType)
 
     case .ann(let ann):
-      _ = genConstraints(scope, expr: ann.expr)
-      return constrainAnn(scope, expr: ann.expr, ann: ann)
+      let type = genConstraints(scope, expr: ann.expr)
+      return constrainAnn(scope, expr: ann.expr, type: type, ann: ann)
 
     case .bind(let bind):
       _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
       var exprType = genConstraints(scope, expr: bind.val)
       if let ann = bind.place.ann {
-        exprType = constrainAnn(scope, expr: bind.val, ann: ann)
+        exprType = constrainAnn(scope, expr: bind.val, type: exprType, ann: ann)
       }
       _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
       return typeVoid
 
     case .call(let call):
-      _ = genConstraints(scope, expr: call.callee)
-      _ = genConstraints(scope, expr: call.arg)
-      let domType = addFreeType()
-      let type = addFreeType()
-      let sigType = Type.Sig(dom: domType, ret: type)
-      constrain(call.callee, expType: sigType, "callee")
-      constrain(call.arg, expType: domType, "argument")
-      return type
+      let calleeType = genConstraints(scope, expr: call.callee)
+      let argType = genConstraints(scope, expr: call.arg)
+      let domType = addFreeType() // TODO: this should be unnecessary.
+      let retType = addFreeType()
+      let sigType = Type.Sig(dom: domType, ret: retType)
+      constrain(call.callee, actType: calleeType, expType: sigType, "callee")
+      constrain(call.arg, actType: argType, expType: domType, "argument")
+      return retType
 
     case .do_(let do_):
       return genConstraintsBody(scope, body: do_.body)
@@ -48,25 +48,25 @@ extension TypeCtx {
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
-      _ = genConstraintsBody(fnScope, body: fn.body)
-      constrain(fn.body.expr, expExpr: fn.sig.ret, expType: ret, "function body")
+      let bodyType = genConstraintsBody(fnScope, body: fn.body)
+      constrain(fn.body.expr, actType: bodyType, expExpr: fn.sig.ret, expType: ret, "function body")
       return type
 
     case .if_(let if_):
-      let type = (if_.dflt == nil) ? typeVoid: addFreeType() // all cases must return same type.
+      let type = (if_.dflt == nil) ? typeVoid: addFreeType() // all cases must return same type. // TODO: always free?
       // TODO: much more to do here when default is missing;
       // e.g. inferring complete case coverage without default, typeHalt support, etc.
       for case_ in if_.cases {
         let cond = case_.condition
         let cons = case_.consequence
-        _ = genConstraints(scope, expr: cond)
-        _ = genConstraints(scope, expr: cons)
-        constrain(cond, expType: typeBool, "if form condition")
-        constrain(cons, expType: type, "if form consequence")
+        let condType = genConstraints(scope, expr: cond)
+        let consType = genConstraints(scope, expr: cons)
+        constrain(cond, actType: condType, expType: typeBool, "if form condition")
+        constrain(cons, actType: consType, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
-        _ = genConstraints(scope, expr: dflt.expr)
-        constrain(dflt.expr, expType: type, "if form default")
+        let dfltType = genConstraints(scope, expr: dflt.expr)
+        constrain(dflt.expr, actType: dfltType, expType: type, "if form default")
       }
       return type
 
@@ -111,10 +111,10 @@ extension TypeCtx {
   }
 
 
-  mutating func constrainAnn(_ scope: Scope, expr: Expr, ann: Ann) -> Type {
-    let type = ann.typeExpr.type(scope, "type annotation")
-    constrain(expr, expExpr: ann.typeExpr, expType: type, "type annotation")
-    return type
+  mutating func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
+    let annType = ann.typeExpr.type(scope, "type annotation")
+    constrain(expr, actType: type, expExpr: ann.typeExpr, expType: annType, "type annotation")
+    return annType
   }
 
 
@@ -130,8 +130,8 @@ extension TypeCtx {
 
   mutating func genConstraintsBody(_ scope: LocalScope, body: Body) -> Type {
     for stmt in body.stmts {
-      _ = genConstraints(scope, expr: stmt)
-      self.constrain(stmt, expType: typeVoid, "statement")
+      let type = genConstraints(scope, expr: stmt)
+      self.constrain(stmt, actType: type, expType: typeVoid, "statement")
     }
     return genConstraints(LocalScope(parent: scope), expr: body.expr)
   }
