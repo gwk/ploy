@@ -108,8 +108,7 @@ struct TypeCtx {
 
   private func resolved(actType: Type) -> Type {
     switch actType.kind {
-    case .conv(_, let cast), .sub(_, let cast):
-      return resolved(actType: cast)
+    case .conv(_, let cast), .sub(_, let cast): return resolved(actType: cast)
     default: return resolved(type: actType)
     }
   }
