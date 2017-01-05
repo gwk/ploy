@@ -8,7 +8,7 @@ make build
 
 mainPath="$1"; shift
 stem=${mainPath%.ploy}
-outPath="_build/_sh/$stem.js"
+outPath="_build/$stem.js"
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
