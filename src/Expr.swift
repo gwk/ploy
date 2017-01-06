@@ -88,7 +88,11 @@ enum Expr: SubForm, Hashable {
 
   var parLabel: String? {
     switch self {
-    case .ann(let ann): return ann.parLabel
+    case .ann(let ann):
+      switch ann.expr {
+      case .sym(let sym): return sym.name
+      default: return nil
+      }
     case .bind(let bind): return bind.place.sym.name
     case .sym(let sym): return sym.name
     default: return nil
