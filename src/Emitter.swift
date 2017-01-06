@@ -24,8 +24,16 @@ class Emitter {
     }
   }
 
-  func str(_ depth: Int, _ string: String) {
-    lines.append(String(indent: depth) + string)
+  func str(_ indent: Int, _ string: String) {
+    if let i = lines.lastIndex {
+      let last = lines[i]
+      let diff = indent - last.characters.count
+      if diff >= 0 { // inline.
+        lines[i] = last + String(char: " ", count: diff) + string
+        return
+      }
+    }
+    lines.append(String(char: " ", count: indent) + string)
   }
 
   func append(_ string: String) {
