@@ -3,17 +3,6 @@
 
 extension Expr {
 
-  var needsLazyDef: Bool {
-
-    switch self {
-    case .fn, .hostVal, .litNum, .litStr: return false
-    case .ann(let ann): return ann.expr.needsLazyDef
-    case .paren(let paren): return paren.els.any { $0.needsLazyDef }
-    default: return true
-    }
-  }
-
-
   func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     var type = ctx.typeFor(expr: self)
     let hasConv = type.hasConv

@@ -115,7 +115,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
   let em = Emitter(file: space.ctx.file)
   //let fullName = "\(space.name)/\(place.sym.name)"
   let hostName = "\(space.hostPrefix)\(place.sym.hostName)\(suffix)"
-  if val.needsLazyDef {
+  if needsLazyDef(val: val, type: type) {
     let acc = "\(hostName)__acc"
     em.str(0, "var \(acc) = function() {")
     em.str(0, " \(acc) = $lazy_sentinal;")
@@ -132,5 +132,31 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     em.append(";")
     em.flush()
     return (type, needsLazy: false)
+  }
+}
+
+
+func needsLazyDef(val: Expr, type: Type) -> Bool {
+  switch val {
+  case .fn, .hostVal, .litNum, .litStr: return false
+  case .ann(let ann): return needsLazyDef(val: ann.expr, type: type)
+  case .paren(let paren):
+    if paren.isScalarValue {
+      return needsLazyDef(val: paren.els[0], type: type)
+    } else {
+      for (fieldVal, typeField) in zipFields(paren: paren, type: type) {
+        if needsLazyDef(val: fieldVal, type: typeField.type) {
+          return true
+        }
+      }
+      return false
+    }
+  case .sym:
+    switch type.kind {
+    case .sig: return false
+    case .sub(_, let cast): return needsLazyDef(val: val, type: cast) // TODO: should conv, sub have been previously eliminated from type cases?
+    default: return true
+    }
+  default: return true
   }
 }

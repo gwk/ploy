@@ -66,3 +66,13 @@ extension Expr {
     return TypeField(label: label, type: type)
   }
 }
+
+
+func zipFields(paren: Paren, type: Type) -> Zip2Sequence<[Expr], [TypeField]> {
+  switch type.kind {
+  case .cmpd(let fields):
+    assert(paren.els.count == fields.count)
+    return zip(paren.els, fields)
+  default: fatalError()
+  }
+}
