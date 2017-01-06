@@ -16,15 +16,12 @@ extension Expr {
 
   func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ depth: Int, isTail: Bool) {
     var type = ctx.typeFor(expr: self)
-    let isConv: Bool
-    if case .conv(let orig, _) = type.kind {
-      isConv = true
+    let hasConv = type.hasConv
+    if hasConv {
       ctx.globalCtx.addConversion(type)
-      em.str(depth, "(\(type.convFnName)(")
-      type = orig
-    } else {
-      isConv = false
+      em.str(depth, "(\(type.hostConvName)(")
     }
+    if case .conv(let orig, _) = type.kind { type = orig }
 
     switch self {
 
@@ -137,7 +134,7 @@ extension Expr {
       em.str(depth, "undefined")
     }
 
-    if isConv {
+    if hasConv {
       em.append("))")
     }
   }

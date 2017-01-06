@@ -61,27 +61,29 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func All(_ members: Set<Type>) -> Type {
-    let description = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    return memoize(description, (
+    let desc = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+    members.forEach { assert(!$0.hasConv, "Type.all cannot contain convs: \(desc)") }
+    return memoize(desc, (
       kind: .all(members: members),
-      convs: Set(members.flatMap { $0.convs }),
+      convs: [],
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
 
   class func Any_(_ members: Set<Type>) -> Type {
-    let description = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    return memoize(description, (
+    let desc = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+    members.forEach { assert(!$0.hasConv, "Type.any cannot contain convs: \(desc)") }
+    return memoize(desc, (
       kind: .any(members: members),
-      convs: Set(members.flatMap { $0.convs }),
+      convs: [],
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
 
   class func Cmpd(_ fields: [TypeField]) -> Type {
     let descs = fields.map({$0.description}).joined(separator: " ")
-    let description = "(\(descs))"
-    return memoize(description, (
+    let desc = "(\(descs))"
+    return memoize(desc, (
       kind: .cmpd(fields: fields),
       convs: Set(fields.flatMap { $0.type.convs }),
       frees: Set(fields.flatMap { $0.type.frees }),
@@ -89,10 +91,12 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Conv(orig: Type, cast: Type) -> Type {
-    let description = "\(orig.description)~>\(cast.description)"
-    return memoize(description, (
+    let desc = "\(orig.description)~>\(cast.description)"
+    assert(!orig.hasConv, "Type.conv orig cannot contain convs: \(desc)")
+    assert(!cast.hasConv, "Type.conv cast cannot contain convs: \(desc)")
+    return memoize(desc, (
       kind: .conv(orig: orig, cast: cast),
-      convs: orig.convs.union(cast.convs), // TODO: this sees wrong.
+      convs: [],
       frees: orig.frees.union(cast.frees),
       vars: orig.vars.union(cast.vars)))
   }
@@ -102,22 +106,23 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       return allFreeTypes[index]
     }
     assert(index == allFreeTypes.count)
-    let description = "*\(index)"
-    let t = Type(description, kind: .free(index: index))
+    let desc = "*\(index)"
+    let t = Type(desc, kind: .free(index: index))
     allFreeTypes.append(t)
     return t
   }
 
   class func Host(spacePathNames names: [String], sym: Sym) -> Type {
-    let description = (names + [sym.name]).joined(separator: "/")
-    return Type(description, kind: .host)
+    let desc = (names + [sym.name]).joined(separator: "/")
+    return Type(desc, kind: .host)
   }
 
   class func Poly(_ members: Set<Type>) -> Type {
-    let description = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    return memoize(description, (
+    let desc = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+    members.forEach { assert(!$0.hasConv, "Type.poly cannot contain convs: \(desc)") }
+    return memoize(desc, (
       kind: .poly(members: members),
-      convs: Set(members.flatMap { $0.convs }),
+      convs: [],
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -127,8 +132,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
-    let description = ("\(accessor.accessorString)@\(type)")
-    return memoize(description, (
+    let desc = ("\(accessor.accessorString)@\(type)")
+    assert(!type.hasConv, "Type.prop type cannot contain convs: \(desc)")
+    return memoize(desc, (
       kind: .prop(accessor: accessor, type: type),
       convs: type.convs,
       frees: type.frees,
@@ -136,26 +142,30 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Sig(dom: Type, ret: Type) -> Type {
-    let description = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
-    return memoize(description, (
+    let desc = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
+    assert(!dom.hasConv, "Type.sig dom cannot contain convs: \(desc)")
+    assert(!ret.hasConv, "Type.sig ret cannot contain convs: \(desc)")
+    return memoize(desc, (
       kind: .sig(dom: dom, ret: ret),
-      convs: dom.convs.union(ret.convs),
+      convs: [],
       frees: dom.frees.union(ret.frees),
       vars: dom.vars.union(ret.vars)))
   }
 
   class func Sub(orig: Type, cast: Type) -> Type {
-    let description = "\(orig.description)->\(cast.description)"
-    return memoize(description, (
+    let desc = "\(orig.description)->\(cast.description)"
+    assert(!orig.hasConv, "Type.sub orig cannot contain convs: \(desc)")
+    assert(!cast.hasConv, "Type.sub cast cannot contain convs: \(desc)")
+    return memoize(desc, (
       kind: .sub(orig: orig, cast: cast),
-      convs: orig.convs.union(cast.convs),
+      convs: [],
       frees: orig.frees.union(cast.frees),
       vars: orig.vars.union(cast.vars)))
   }
 
   class func Var(_ name: String) -> Type {
-    let description = "*" + name
-    return Type(description, kind: .var_(name: name))
+    let desc = "*" + name
+    return Type(desc, kind: .var_(name: name))
   }
 
   var nestedSigDescription: String {
@@ -190,13 +200,14 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return s
   }
 
-  var convFnName: String {
-    switch self.kind {
-    case .conv(let orig, let cast): return "$c_\(orig.globalIndex)_\(cast.globalIndex)"
-    default: fatalError()
-    }
+  var hasConv: Bool {
+    if case .conv = self.kind { return true }
+    return !childConvs.isEmpty
   }
+
+  var hostConvName: String { return "$c\(globalIndex)" }
 }
+
 
 func ==(l: Type, r: Type) -> Bool { return l === r }
 

@@ -12,32 +12,46 @@ class GlobalCtx {
   }
 
   func addConversion(_ type: Type) {
-    conversions.insert(type)
+    conversions.formUnion(type.convs)
   }
 
   func emitConversions() {
     for type in conversions.sorted(by: {$0.globalIndex < $1.globalIndex}) {
-      emitConversion(type: type)
+      let em = Emitter(file: file)
+      em.str(0, "let \(type.hostConvName) = $=>({ // \(type)")
+      switch type.kind {
+      case .conv(let orig, let cast): emitConv(em, type: type, orig: orig, cast: cast)
+      case .cmpd(let fields): emitCmpdConv(em, fields: fields)
+      default: fatalError()
+      }
+      em.append("})")
+      em.flush()
     }
   }
 
-  func emitConversion(type: Type) {
-    guard case .conv(let orig, let cast) = type.kind else { fatalError() }
-    let em = Emitter(file: file)
-    em.str(0, "function \(type.convFnName)($) { // \(type)")
-
+  func emitConv(_ em: Emitter, type: Type, orig: Type, cast: Type) {
     switch (orig.kind, cast.kind) {
-
     case (.cmpd(let origFields), .cmpd(let castFields)):
-      em.str(1, "return {")
       for (i, (o, c)) in zip(origFields, castFields).enumerated() {
-        em.str(2, "\(c.hostName(index: i)): $.\(o.hostName(index: i)),")
+        assert(!o.type.hasConv)
+        assert(!c.type.hasConv)
+        let cName = c.hostName(index: i)
+        let oName = o.hostName(index: i)
+        em.str(2, "\(cName): $.\(oName),")
       }
-      em.append("};")
-
     default: fatalError("impossible conversion: \(type)")
     }
-    em.append("}")
-    em.flush()
+  }
+
+  func emitCmpdConv(_ em: Emitter, fields: [TypeField]) {
+    for (i, field) in fields.enumerated() {
+      let name = field.hostName(index: i)
+      if field.type.hasConv {
+        assert(conversions.contains(field.type))
+        em.str(2, "\(name): \(field.type.hostConvName)($.\(name))")
+      } else {
+        em.str(2, "\(name): $.\(name)")
+      }
+    }
   }
 }
