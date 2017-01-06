@@ -1,6 +1,7 @@
 {
   "search.exclude": {
     "_build": true,
+    "_build/_repro.js": false,
     "**/_misc": true
   }
 }
