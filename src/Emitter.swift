@@ -58,6 +58,8 @@ func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace)
 
   file.writeL("\"use strict\";\n")
   file.writeL("(()=>{ // ploy scope.\n")
+  file.writeL("let $g = global;")
+  file.writeL("let $require = require;")
   file.writeL("function $lazy_sentinal() { throw 'INTERNAL RUNTIME ERROR: lazy value init recursed.' };")
   file.writeL("function $assert(cond) { if (!cond) { throw 'INTERNAL RUNTIME ERROR: assertion failed.' }; };")
 
@@ -71,7 +73,7 @@ func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace)
 
   mainSpace.compileMain()
   file.writeL("")
-  file.writeL("let $m = MAIN__main__acc()")
+  file.writeL("let $m = MAIN__main__acc();")
   file.writeL("$assert($m === undefined);")
   file.writeL("})();")
 }

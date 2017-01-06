@@ -3,5 +3,5 @@
 in HOST
 
 host_type _Process;
-_process = host_val _Process "process";
+_process = host_val _Process "$g.process";
 ;

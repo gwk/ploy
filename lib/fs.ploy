@@ -3,12 +3,14 @@
 in FS
 host_type File;
 host_type _Fs;
-_fs = host_val _Fs "require('fs')";
+host_type _WriteSync; # cannot yet treat native js multiparameter functions as ploy functions.
+_fs = host_val _Fs "$require('fs')";
+_writeSync = host_val _WriteSync "FS___fs.writeSync" _fs;
 
 extensible write; # TODO: constraints.
-write += host_val (File Bool)%() "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
-write += host_val (File Int)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
-write += host_val (File Str)%()  "function($) { FS___fs.writeSync($._0, $._1); return undefined; }" FS/_fs;
+write += host_val (File Bool)%() "function($) { FS___writeSync($._0, $._1) }" _writeSync;
+write += host_val (File Int)%()  "function($) { FS___writeSync($._0, $._1) }" _writeSync;
+write += host_val (File Str)%()  "function($) { FS___writeSync($._0, $._1) }" _writeSync;
 
 write_Bool: (File Bool)%()  = write # TEMP.
 write_Int:  (File Int)%()   = write # TEMP.
