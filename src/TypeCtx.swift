@@ -168,70 +168,58 @@ struct TypeCtx {
       }
       return act
 
-    case (_, .cmpd(let expFields)):
-      return try resolveConstraintToCmpd(constraint, act: act, exp: exp, expFields: expFields)
+    case (.cmpd(let actFields), .cmpd(let expFields)):
+      return try resolveCmpdToCmpd(constraint, act: act, actFields: actFields, expFields: expFields)
 
-    case (_, .sig(let expDom, let expRet)):
-      return try resolveConstraintToSig(constraint, act: act, expDom: expDom, expRet: expRet)
+    case (.sig(let actDom, let actRet), .sig(let expDom, let expRet)):
+      return try resolveSigToSig(constraint, actDom: actDom, actRet: actRet, expDom: expDom, expRet: expRet)
 
     default: throw Err(constraint, "actual type is not expected type")
     }
   }
 
 
-  mutating func resolveConstraintToCmpd(_ constraint: Constraint, act: Type, exp: Type, expFields: [TypeField]) throws -> Type {
-    switch act.kind {
-
-    case .cmpd(let actFields):
-      if expFields.count != actFields.count {
-        let actFields = pluralize(actFields.count, "field")
-        throw Err(constraint, "actual struct has \(actFields); expected \(expFields.count)")
-      }
-      var isConv = false
-      //let lexFields = constraint.act.expr.cmpdFields
-      let fields = try enumZip(actFields, expFields).map {
-        (index, actField, expField) -> TypeField in
-        //let lexField = lexFields?[index]
-        if actField.label != nil {
-          if actField.label != expField.label {
-            throw Err(constraint, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
-          }
-        } else if expField.label != nil { // convert unlabeled to labeled.
-          isConv = true
-        }
-        // TODO: if let lexField = lexField...
-        let fieldType = try resolveSub(constraint,
-          actType: actField.type, actDesc: "field \(index)",
-          expType: expField.type, expDesc: "field \(index)")
-        return TypeField(label: expField.label, type: fieldType)
-      }
-      var type = Type.Cmpd(fields)
-      if isConv {
-        type = Type.Conv(orig: act, cast: type)
-        assert(constraint.act.chain == .end)
-        exprTypes[constraint.act.expr] = type
-      }
-      return type
-
-    default: throw Err(constraint, "actual type is not a struct")
+  mutating func resolveCmpdToCmpd(_ constraint: Constraint, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Type {
+    if expFields.count != actFields.count {
+      let nFields = pluralize(actFields.count, "field")
+      throw Err(constraint, "actual struct has \(nFields); expected \(expFields.count)")
     }
+    var isConv = false
+    //let lexFields = constraint.act.expr.cmpdFields
+    let fields = try enumZip(actFields, expFields).map {
+      (index, actField, expField) -> TypeField in
+      //let lexField = lexFields?[index]
+      if actField.label != nil {
+        if actField.label != expField.label {
+          throw Err(constraint, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
+        }
+      } else if expField.label != nil { // convert unlabeled to labeled.
+        isConv = true
+      }
+      // TODO: if let lexField = lexField...
+      let fieldType = try resolveSub(constraint,
+        actType: actField.type, actDesc: "field \(index)",
+        expType: expField.type, expDesc: "field \(index)")
+      return TypeField(label: expField.label, type: fieldType)
+    }
+    var type = Type.Cmpd(fields)
+    if isConv {
+      type = Type.Conv(orig: act, cast: type)
+      assert(constraint.act.chain == .end)
+      exprTypes[constraint.act.expr] = type
+    }
+    return type
   }
 
 
-  mutating func resolveConstraintToSig(_ constraint: Constraint, act: Type, expDom: Type, expRet: Type) throws -> Type {
-    switch act.kind {
-
-    case .sig(let actDom, let actRet):
-      let domType = try resolveSub(constraint,
-        actType: actDom, actDesc: "signature domain",
-        expType: expDom, expDesc: "signature domain")
-      let retType = try resolveSub(constraint,
-        actType: actRet, actDesc: "signature return",
-        expType: expRet, expDesc: "signature return")
-      return Type.Sig(dom: domType, ret: retType)
-
-    default: throw Err(constraint, "actual type is not a signature")
-    }
+  mutating func resolveSigToSig(_ constraint: Constraint, actDom: Type, actRet: Type, expDom: Type, expRet: Type) throws -> Type {
+    let domType = try resolveSub(constraint,
+      actType: actDom, actDesc: "signature domain",
+      expType: expDom, expDesc: "signature domain")
+    let retType = try resolveSub(constraint,
+      actType: actRet, actDesc: "signature return",
+      expType: expRet, expDesc: "signature return")
+    return Type.Sig(dom: domType, ret: retType)
   }
 
 
