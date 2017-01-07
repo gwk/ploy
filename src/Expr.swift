@@ -1,6 +1,6 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
-enum Expr: SubForm, Hashable {
+enum Expr: SubForm, Hashable, CustomStringConvertible {
 
   case acc(Acc)
   case ann(Ann)
@@ -71,6 +71,8 @@ enum Expr: SubForm, Hashable {
   }
 
   var hashValue: Int { return form.hashValue }
+
+  var description: String { return "Expr(\(form))" }
 
   var cmpdFields: [Expr]? {
     switch self {

@@ -32,7 +32,7 @@ class Form: Hashable, CustomStringConvertible {
   func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String = "\n") {
     stream.write(String(indent: depth))
     stream.write(String(describing: type(of: self)))
-    stream.write(" ")
+    stream.write(":")
     stream.write(String(describing: syn))
     stream.write(suffix)
   }
