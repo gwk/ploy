@@ -1,4 +1,4 @@
-type error: test/2/type/sub-sig-field.ploy:2:12-32: type annotation actual struct type has 2 fields; expected 0. signature domain -> actual type: (Int Int)
+type error: test/2/type/sub-sig-field.ploy:2:12-32: type annotation actual struct has 2 fields; expected 0. signature domain -> actual type: (Int Int)
   f:()%Int = fn (Int Int)%Int 0@$;
              ~~~~~~~~~~~~~~~~~~~~~
 note: test/2/type/sub-sig-field.ploy:2:3-8: signature domain -> expected type: ()

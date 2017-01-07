@@ -185,7 +185,7 @@ struct TypeCtx {
     case .cmpd(let actFields):
       if expFields.count != actFields.count {
         let actFields = pluralize(actFields.count, "field")
-        throw Err(constraint, "actual struct type has \(actFields); expected \(expFields.count)")
+        throw Err(constraint, "actual struct has \(actFields); expected \(expFields.count)")
       }
       var isConv = false
       //let lexFields = constraint.act.expr.cmpdFields
@@ -194,15 +194,15 @@ struct TypeCtx {
         //let lexField = lexFields?[index]
         if actField.label != nil {
           if actField.label != expField.label {
-            throw Err(constraint, "struct field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
+            throw Err(constraint, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
           }
         } else if expField.label != nil { // convert unlabeled to labeled.
           isConv = true
         }
         // TODO: if let lexField = lexField...
         let fieldType = try resolveSub(constraint,
-          actType: actField.type, actDesc: "struct field \(index)",
-          expType: expField.type, expDesc: "struct field \(index)")
+          actType: actField.type, actDesc: "field \(index)",
+          expType: expField.type, expDesc: "field \(index)")
         return TypeField(label: expField.label, type: fieldType)
       }
       var type = Type.Cmpd(fields)
@@ -268,7 +268,7 @@ struct TypeCtx {
       c.act.expr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act)",
         notes: (c.exp.expr.form, "\(expDesc)expected type: \(exp)"))
     } else {
-      c.act.expr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act); \(expDesc)expected type: \(exp).")
+      c.act.expr.form.failType("\(c.desc) \(msg).\n  \(actDesc)actual type:   \(act);\n  \(expDesc)expected type: \(exp).")
     }
   }
 
