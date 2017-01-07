@@ -74,6 +74,22 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
 
   var description: String { return "Expr(\(form))" }
 
+  var sigDom: Expr? {
+    switch self {
+    case .fn(let fn): return fn.sig.dom
+    case .sig(let sig): return sig.dom
+    default: return nil
+    }
+  }
+
+  var sigRet: Expr? {
+    switch self {
+    case .fn(let fn): return fn.sig.ret
+    case .sig(let sig): return sig.ret
+    default: return nil
+    }
+  }
+
   var cmpdFields: [Expr]? {
     switch self {
     case .paren(let paren): return paren.els

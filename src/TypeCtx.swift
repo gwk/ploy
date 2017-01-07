@@ -146,7 +146,7 @@ struct TypeCtx {
       }
       guard let morph = match else { throw Err(constraint, "no morphs match expected") }
       let sub = Type.Sub(orig: act, cast: morph)
-      assert(constraint.act.chain == .end)
+      assert(constraint.act.chain == .end, "polymorph subconstraint cannot write expr type.")
       exprTypes[constraint.act.expr] = sub
       return sub
 
@@ -185,10 +185,10 @@ struct TypeCtx {
       throw Err(constraint, "actual struct has \(nFields); expected \(expFields.count)")
     }
     var isConv = false
-    //let lexFields = constraint.act.expr.cmpdFields
+    let litActFields = constraint.act.litExpr?.cmpdFields
+    let litExpFields = constraint.exp.litExpr?.cmpdFields
     let fields = try enumZip(actFields, expFields).map {
       (index, actField, expField) -> TypeField in
-      //let lexField = lexFields?[index]
       if actField.label != nil {
         if actField.label != expField.label {
           throw Err(constraint, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
@@ -196,16 +196,15 @@ struct TypeCtx {
       } else if expField.label != nil { // convert unlabeled to labeled.
         isConv = true
       }
-      // TODO: if let lexField = lexField...
       let fieldType = try resolveSub(constraint,
-        actType: actField.type, actDesc: "field \(index)",
-        expType: expField.type, expDesc: "field \(index)")
+        actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
+        expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
       return TypeField(label: expField.label, type: fieldType)
     }
     var type = Type.Cmpd(fields)
     if isConv {
       type = Type.Conv(orig: act, cast: type)
-      assert(constraint.act.chain == .end)
+      assert(constraint.act.chain == .end, "cmpd subconstraint cannot write expr type.")
       exprTypes[constraint.act.expr] = type
     }
     return type
@@ -214,21 +213,21 @@ struct TypeCtx {
 
   mutating func resolveSigToSig(_ constraint: Constraint, actDom: Type, actRet: Type, expDom: Type, expRet: Type) throws -> Type {
     let domType = try resolveSub(constraint,
-      actType: actDom, actDesc: "signature domain",
-      expType: expDom, expDesc: "signature domain")
+      actExpr: constraint.act.litExpr?.sigDom, actType: actDom, actDesc: "signature domain",
+      expExpr: constraint.exp.litExpr?.sigDom, expType: expDom, expDesc: "signature domain")
     let retType = try resolveSub(constraint,
-      actType: actRet, actDesc: "signature return",
-      expType: expRet, expDesc: "signature return")
+      actExpr: constraint.act.litExpr?.sigRet, actType: actRet, actDesc: "signature return",
+      expExpr: constraint.exp.litExpr?.sigRet, expType: expRet, expDesc: "signature return")
     return Type.Sig(dom: domType, ret: retType)
   }
 
 
-  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String, expType: Type, expDesc: String) throws -> Type {
-    let a = constraint.act
-    let e = constraint.exp
+  mutating func resolveSub(_ constraint: Constraint,
+   actExpr: Expr?, actType: Type, actDesc: String,
+   expExpr: Expr?, expType: Type, expDesc: String) throws -> Type {
     let sub = Constraint(
-      act: Constraint.Side(expr: a.expr, type: actType, chain: .link(actDesc, a.chain)),
-      exp: Constraint.Side(expr: e.expr, type: expType, chain: .link(expDesc, a.chain)),
+      act: constraint.act.sub(expr: actExpr, type: actType, desc: actDesc),
+      exp: constraint.exp.sub(expr: expExpr, type: expType, desc: expDesc),
       desc: constraint.desc)
     return try resolveConstraint(sub)
   }

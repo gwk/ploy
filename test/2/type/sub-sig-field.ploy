@@ -1,4 +1,3 @@
-
 f:()%Int = fn (Int Int)%Int 0@$;
 
 main = exit.f(i=0 j=0)

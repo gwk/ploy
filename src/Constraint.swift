@@ -14,10 +14,25 @@ struct Constraint {
       self.chain = chain
     }
 
+    func sub(expr: Expr?, type: Type, desc: String) -> Side {
+      if let expr = expr {
+        return Side(expr: expr, type: type)
+      } else {
+        return Side(expr: self.expr, type: type, chain: .link(desc, chain))
+      }
+    }
+
     var isSub: Bool {
       switch chain {
       case .link: return true
       case .end: return false
+      }
+    }
+
+    var litExpr: Expr? {
+      switch chain {
+      case.link: return nil
+      case .end: return expr
       }
     }
   }
