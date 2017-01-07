@@ -116,7 +116,16 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveConstraint(_ constraint: Constraint) throws -> Type {
+  mutating func resolve(_ constraint: Constraint) throws -> Type {
+    let type = try resolveDisp(constraint: constraint)
+    if let expr = constraint.act.litExpr {
+      exprTypes[expr] = type
+    }
+    return type
+  }
+
+
+  mutating func resolveDisp(constraint: Constraint) throws -> Type {
     let act = resolved(actType: constraint.act.type)
     let exp = resolved(type: constraint.exp.type)
     if (act == exp) {
@@ -204,8 +213,6 @@ struct TypeCtx {
     var type = Type.Cmpd(fields)
     if isConv {
       type = Type.Conv(orig: act, cast: type)
-      assert(constraint.act.chain == .end, "cmpd subconstraint cannot write expr type.")
-      exprTypes[constraint.act.expr] = type
     }
     return type
   }
@@ -229,7 +236,7 @@ struct TypeCtx {
       act: constraint.act.sub(expr: actExpr, type: actType, desc: actDesc),
       exp: constraint.exp.sub(expr: expExpr, type: expType, desc: expDesc),
       desc: constraint.desc)
-    return try resolveConstraint(sub)
+    return try resolve(sub)
   }
 
 
@@ -239,7 +246,7 @@ struct TypeCtx {
       act: Constraint.Side(expr: a.expr, type: actType, chain: .link(actDesc, a.chain)),
       exp: constraint.exp,
       desc: constraint.desc)
-    return try resolveConstraint(sub)
+    return try resolve(sub)
   }
 
 
@@ -260,11 +267,11 @@ struct TypeCtx {
   }
 
 
-  mutating func resolve() {
+  mutating func resolveAll() {
 
     for constraint in constraints {
       do {
-        _ = try resolveConstraint(constraint)
+        _ = try resolve(constraint)
       } catch let err as Err {
         error(err: err)
       } catch { fatalError() }

@@ -136,7 +136,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     assert(!type.hasConv, "Type.prop type cannot contain convs: \(desc)")
     return memoize(desc, (
       kind: .prop(accessor: accessor, type: type),
-      convs: type.convs,
+      convs: [],
       frees: type.frees,
       vars: type.vars))
   }
@@ -206,6 +206,25 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   var hostConvName: String { return "$c\(globalIndex)" }
+
+  func addTypesContainingConvs(set: inout Set<Type>) -> Bool {
+    switch self.kind {
+    case .conv:
+      set.insert(self)
+      assert(self.childConvs.isEmpty)
+      return true
+    case .cmpd(let fields):
+      var hasConv = false
+      for field in fields {
+        hasConv = field.type.addTypesContainingConvs(set: &set) || hasConv
+      }
+      if hasConv {
+        set.insert(self)
+      }
+      return hasConv
+    default: return false
+    }
+  }
 }
 
 

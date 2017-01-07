@@ -4,10 +4,10 @@ main = {
   p2 = (0 p)
 
   a:(i: Int j:Int) = p
-  #b:(Int (i:Int j:Int)) = p2
+  b:(Int (i:Int j:Int)) = p2
   #c:(Int k:(i:Int j:Int)) = p2
 
   assert_eq(0 j@a "a")
-  #assert_eq(0 j@1@b "b")
+  assert_eq(0 j@1@b "b")
   #assert_eq(0 j@k@c "c")
 }

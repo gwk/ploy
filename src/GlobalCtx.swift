@@ -12,7 +12,8 @@ class GlobalCtx {
   }
 
   func addConversion(_ type: Type) {
-    conversions.formUnion(type.convs)
+    let hasConv = type.addTypesContainingConvs(set: &conversions)
+    assert(hasConv)
   }
 
   func emitConversions() {
@@ -48,9 +49,9 @@ class GlobalCtx {
       let name = field.hostName(index: i)
       if field.type.hasConv {
         assert(conversions.contains(field.type))
-        em.str(2, "\(name): \(field.type.hostConvName)($.\(name))")
+        em.str(2, "\(name): \(field.type.hostConvName)($.\(name)),")
       } else {
-        em.str(2, "\(name): $.\(name)")
+        em.str(2, "\(name): $.\(name),")
       }
     }
   }
