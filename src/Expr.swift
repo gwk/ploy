@@ -116,6 +116,6 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     default: return nil
     }
   }
-}
 
-func ==(l: Expr, r: Expr) -> Bool { return l.form === r.form }
+  static func ==(l: Expr, r: Expr) -> Bool { return l.form === r.form }
+}
