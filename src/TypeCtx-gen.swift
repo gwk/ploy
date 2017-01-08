@@ -32,7 +32,7 @@ extension TypeCtx {
     case .call(let call):
       let calleeType = genConstraints(scope, expr: call.callee)
       let argType = genConstraints(scope, expr: call.arg)
-      let domType = addFreeType() // TODO: this should be unnecessary.
+      let domType = addFreeType() // necessary to get the act/exp direction right.
       let retType = addFreeType()
       let sigType = Type.Sig(dom: domType, ret: retType)
       constrain(call.callee, actType: calleeType, expType: sigType, "callee")

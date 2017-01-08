@@ -19,14 +19,12 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case all(members: Set<Type>)
     case any(members: Set<Type>)
     case cmpd(fields: [TypeField])
-    case conv(orig: Type, cast: Type)
     case free(index: Int)
     case host
     case poly(members: Set<Type>)
     case prim
     case prop(accessor: PropAccessor, type: Type)
     case sig(dom: Type, ret: Type)
-    case sub(orig: Type, cast: Type)
     case var_(name: String)
   }
 
@@ -36,46 +34,40 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   let globalIndex: Int
   let description: String
   let kind: Kind
-  let childConvs: Set<Type>
   let childFrees: Set<Type>
   let childVars: Set<Type>
 
-  private init(_ description: String, kind: Kind, convs: Set<Type> = [], frees: Set<Type> = [], vars: Set<Type> = []) {
+  private init(_ description: String, kind: Kind, frees: Set<Type> = [], vars: Set<Type> = []) {
     self.globalIndex = Type.allTypes.count
     self.description = description
     self.kind = kind
-    self.childConvs = convs
     self.childFrees = frees
     self.childVars = vars
     Type.allTypes.insertNew(description, value: self)
   }
 
-  class func memoize(_ description: String, _ parts: @autoclosure ()->(kind: Kind, convs: Set<Type>, frees: Set<Type>, vars: Set<Type>)) -> Type {
+  class func memoize(_ description: String, _ parts: @autoclosure ()->(kind: Kind, frees: Set<Type>, vars: Set<Type>)) -> Type {
     if let memo = allTypes[description] {
       return memo
     }
-    let (kind, convs, frees, vars) = parts()
-    let type = Type(description, kind: kind, convs: convs, frees: frees, vars: vars)
+    let (kind, frees, vars) = parts()
+    let type = Type(description, kind: kind, frees: frees, vars: vars)
     allTypes[description] = type
     return type
   }
 
   class func All(_ members: Set<Type>) -> Type {
     let desc = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    members.forEach { assert(!$0.hasConv, "Type.all cannot contain convs: \(desc)") }
     return memoize(desc, (
       kind: .all(members: members),
-      convs: [],
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
 
   class func Any_(_ members: Set<Type>) -> Type {
     let desc = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    members.forEach { assert(!$0.hasConv, "Type.any cannot contain convs: \(desc)") }
     return memoize(desc, (
       kind: .any(members: members),
-      convs: [],
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -85,20 +77,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     let desc = "(\(descs))"
     return memoize(desc, (
       kind: .cmpd(fields: fields),
-      convs: Set(fields.flatMap { $0.type.convs }),
       frees: Set(fields.flatMap { $0.type.frees }),
       vars: Set(fields.flatMap { $0.type.vars })))
-  }
-
-  class func Conv(orig: Type, cast: Type) -> Type {
-    let desc = "\(orig.description)~>\(cast.description)"
-    assert(!orig.hasConv, "Type.conv orig cannot contain convs: \(desc)")
-    assert(!cast.hasConv, "Type.conv cast cannot contain convs: \(desc)")
-    return memoize(desc, (
-      kind: .conv(orig: orig, cast: cast),
-      convs: [],
-      frees: orig.frees.union(cast.frees),
-      vars: orig.vars.union(cast.vars)))
   }
 
   class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
@@ -119,10 +99,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   class func Poly(_ members: Set<Type>) -> Type {
     let desc = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
-    members.forEach { assert(!$0.hasConv, "Type.poly cannot contain convs: \(desc)") }
     return memoize(desc, (
       kind: .poly(members: members),
-      convs: [],
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -133,34 +111,18 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
     let desc = ("\(accessor.accessorString)@\(type)")
-    assert(!type.hasConv, "Type.prop type cannot contain convs: \(desc)")
     return memoize(desc, (
       kind: .prop(accessor: accessor, type: type),
-      convs: [],
       frees: type.frees,
       vars: type.vars))
   }
 
   class func Sig(dom: Type, ret: Type) -> Type {
     let desc = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
-    assert(!dom.hasConv, "Type.sig dom cannot contain convs: \(desc)")
-    assert(!ret.hasConv, "Type.sig ret cannot contain convs: \(desc)")
     return memoize(desc, (
       kind: .sig(dom: dom, ret: ret),
-      convs: [],
       frees: dom.frees.union(ret.frees),
       vars: dom.vars.union(ret.vars)))
-  }
-
-  class func Sub(orig: Type, cast: Type) -> Type {
-    let desc = "\(orig.description)->\(cast.description)"
-    assert(!orig.hasConv, "Type.sub orig cannot contain convs: \(desc)")
-    assert(!cast.hasConv, "Type.sub cast cannot contain convs: \(desc)")
-    return memoize(desc, (
-      kind: .sub(orig: orig, cast: cast),
-      convs: [],
-      frees: orig.frees.union(cast.frees),
-      vars: orig.vars.union(cast.vars)))
   }
 
   class func Var(_ name: String) -> Type {
@@ -182,12 +144,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     fatalError()
   }
 
-  var convs: Set<Type> {
-    var s = childConvs
-    if case .conv = self.kind { s.insert(self) }
-    return s
-  }
-
   var frees: Set<Type> {
     var s = childFrees
     if case .free = self.kind { s.insert(self) }
@@ -200,37 +156,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return s
   }
 
-  var hasConv: Bool {
-    if case .conv = self.kind { return true }
-    return !childConvs.isEmpty
-  }
+  static func ==(l: Type, r: Type) -> Bool { return l === r }
 
-  var hostConvName: String { return "$c\(globalIndex)" }
-
-  func addTypesContainingConvs(set: inout Set<Type>) -> Bool {
-    switch self.kind {
-    case .conv:
-      set.insert(self)
-      assert(self.childConvs.isEmpty)
-      return true
-    case .cmpd(let fields):
-      var hasConv = false
-      for field in fields {
-        hasConv = field.type.addTypesContainingConvs(set: &set) || hasConv
-      }
-      if hasConv {
-        set.insert(self)
-      }
-      return hasConv
-    default: return false
-    }
-  }
+  static func <(l: Type, r: Type) -> Bool { return l.description < r.description }
 }
 
-
-func ==(l: Type, r: Type) -> Bool { return l === r }
-
-func <(l: Type, r: Type) -> Bool { return l.description < r.description }
 
 
 let typeEmpty = Type.Any_([]) // aka "Bottom type"; the set of all objects.

@@ -1,13 +1,39 @@
 
 main = {
+  zz:(Int Int) = (0 1)
+  assert_eq(0 0@zz "zz")
+  assert_eq(1 1@zz "zz")
+
+  iz:(i:Int Int)    = (0 1)
+  assert_eq(0 i@iz "iz")
+  assert_eq(1 1@iz "iz")
+
+  zj:(Int j:Int)    = (0 1)
+  assert_eq(0 0@zj "zj")
+  assert_eq(1 j@zj "zj")
+
+  ij:(i:Int j:Int)  = (0 1)
+  assert_eq(0 i@ij "ij")
+  assert_eq(1 j@ij "ij")
+
+  zz_zz:(Int (Int Int)) = (0 (1 2))
+  assert_eq(0   0@zz_zz "zz_zz")
+  assert_eq(1 0@1@zz_zz "zz_zz")
+  assert_eq(2 1@1@zz_zz "zz_zz")
+
+  ij_zz:(i:Int j:(Int Int)) = (0 (1 2))
+  assert_eq(0   i@ij_zz "ij_zz")
+  assert_eq(1 0@j@ij_zz "ij_zz")
+  assert_eq(2 1@j@ij_zz "ij_zz")
+
+  zz_kl:(Int (k:Int l:Int)) = (0 (1 2))
+  assert_eq(0   0@zz_kl "zz_kl 0")
+  assert_eq(1 k@1@zz_kl "zz_kl 1")
+  assert_eq(2 l@1@zz_kl "zz_kl 2")
+
+  ij_kl:(i:Int j:(k:Int l:Int)) = (0 (1 2))
+
   p = (0 0)
-  p2 = (0 p)
-
   a:(i: Int j:Int) = p
-  b:(Int (i:Int j:Int)) = p2
-  #c:(Int k:(i:Int j:Int)) = p2
-
   assert_eq(0 j@a "a")
-  assert_eq(0 j@1@b "b")
-  #assert_eq(0 j@k@c "c")
 }

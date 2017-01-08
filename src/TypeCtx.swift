@@ -20,7 +20,8 @@ struct TypeCtx {
   private var freeTypeCount = 0
   private var freeUnifications: [Int:Type] = [:]
   private var exprTypes = [Expr:Type]() // maps expressions to their latest types.
-
+  private var exprCasts = [Expr:Type]() // maps expressions to conversion types.
+  private var exprSubs = [Expr:Type]() // maps expressions to subtypes.
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
 
@@ -32,6 +33,22 @@ struct TypeCtx {
 
   func typeFor(expr: Expr) -> Type {
     return resolved(type: exprTypes[expr]!)
+  }
+
+
+  func castFor(expr: Expr) -> Type? {
+    if let cast = exprCasts[expr] {
+      return resolved(type: cast)
+    }
+    return nil
+  }
+
+
+  func subFor(expr: Expr) -> Type? {
+    if let sub = exprSubs[expr] {
+      return resolved(type: sub)
+    }
+    return nil
   }
 
 
@@ -64,8 +81,6 @@ struct TypeCtx {
       return Type.Any_(Set(members.map { self.resolved(type: $0) }))
     case .cmpd(let fields):
       return Type.Cmpd(fields.map() { self.resolved(par: $0) })
-    case .conv(let orig, let cast):
-      return Type.Conv(orig: resolved(type: orig), cast: resolved(type: cast))
     case .free(let freeIndex):
       return freeUnifications[freeIndex].or(type)
     case .host:
@@ -88,8 +103,6 @@ struct TypeCtx {
       }
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
-    case .sub(let orig, let cast):
-      return Type.Sub(orig: resolved(type: orig), cast: resolved(type: cast))
     case .var_: return type
     }
   }
@@ -98,14 +111,6 @@ struct TypeCtx {
   private func resolved(par: TypeField) -> TypeField {
     let type = resolved(type: par.type)
     return (type == par.type) ? par : TypeField(label: par.label, type: type)
-  }
-
-
-  private func resolved(actType: Type) -> Type {
-    switch actType.kind {
-    case .conv(_, let cast), .sub(_, let cast): return resolved(actType: cast)
-    default: return resolved(type: actType)
-    }
   }
 
 
@@ -126,7 +131,7 @@ struct TypeCtx {
 
 
   mutating func resolveDisp(constraint: Constraint) throws -> Type {
-    let act = resolved(actType: constraint.act.type)
+    let act = resolved(type: constraint.act.type)
     let exp = resolved(type: constraint.exp.type)
     if (act == exp) {
       return act
@@ -143,21 +148,26 @@ struct TypeCtx {
     case (_, .free(let ie)): return unify(freeIndex: ie, to: act)
 
     case (.poly(let morphs), _):
-      var match: Type? = nil
+      var match: (TypeCtx, Type)? = nil
       for morph in morphs {
+        var ctx = self // copy ctx.
+        let res: Type
         do {
-          let morph = try resolveSub(constraint, actType: morph, actDesc: "morph")
-          if let prev = match { throw Err(constraint, "multiple morphs match expected: \(prev); \(morph)") }
-          match = morph
+          res = try ctx.resolveSub(constraint, actType: morph, actDesc: "morph")
         } catch {
-          continue // TODO: this is broken because we should be unwinding any resolved types.
+          continue
         }
+        if let (_, prev) = match { throw Err(constraint, "multiple morphs match expected: \(prev); \(res)") }
+        match = (ctx, res)
       }
-      guard let morph = match else { throw Err(constraint, "no morphs match expected") }
-      let sub = Type.Sub(orig: act, cast: morph)
-      assert(constraint.act.chain == .end, "polymorph subconstraint cannot write expr type.")
-      exprTypes[constraint.act.expr] = sub
-      return sub
+      guard let (ctx, morph) = match else { throw Err(constraint, "no morphs match expected") }
+      self = ctx
+      if let expr = constraint.act.litExpr {
+        exprSubs[expr] = morph
+      } else {
+        throw Err(constraint, "polytype cannot select morph without a literal expression")
+      }
+      return morph // TODO: this seems weird, but is currently necessary.
 
     case (.prop(let accessor, let accesseeType), _):
       let accType = resolved(type: accesseeType)
@@ -193,11 +203,12 @@ struct TypeCtx {
       let nFields = pluralize(actFields.count, "field")
       throw Err(constraint, "actual struct has \(nFields); expected \(expFields.count)")
     }
-    var isConv = false
     let litActFields = constraint.act.litExpr?.cmpdFields
     let litExpFields = constraint.exp.litExpr?.cmpdFields
-    let fields = try enumZip(actFields, expFields).map {
-      (index, actField, expField) -> TypeField in
+    var typeFields: [TypeField] = []
+    var castFields: [TypeField] = []
+    var isConv = false
+    for (index, (actField, expField)) in zip(actFields, expFields).enumerated() {
       if actField.label != nil {
         if actField.label != expField.label {
           throw Err(constraint, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
@@ -208,13 +219,17 @@ struct TypeCtx {
       let fieldType = try resolveSub(constraint,
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
         expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
-      return TypeField(label: expField.label, type: fieldType)
+      typeFields.append(TypeField(label: actField.label, type: fieldType))
+      castFields.append(TypeField(label: expField.label, type: fieldType))
     }
-    var type = Type.Cmpd(fields)
     if isConv {
-      type = Type.Conv(orig: act, cast: type)
+      if let expr = constraint.act.litExpr {
+        exprCasts[expr] = Type.Cmpd(castFields)
+      } else {
+        throw Err(constraint, "struct type cannot be converted without a literal expression")
+      }
     }
-    return type
+    return Type.Cmpd(typeFields)
   }
 
 

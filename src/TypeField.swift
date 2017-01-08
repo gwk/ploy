@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-struct TypeField: CustomStringConvertible {
+struct TypeField: Equatable, CustomStringConvertible {
 
   let label: String?
   let type: Type
@@ -30,4 +30,6 @@ struct TypeField: CustomStringConvertible {
   func accessorString(index: Int) -> String { return label.or(String(index)) }
 
   func hostName(index: Int) -> String { return label.or("_\(index)") }
+
+  static func ==(l: TypeField, r: TypeField) -> Bool { return l.label == r.label && l.type == r.type }
 }

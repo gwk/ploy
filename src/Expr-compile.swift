@@ -4,13 +4,22 @@
 extension Expr {
 
   func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, isTail: Bool) {
-    var type = ctx.typeFor(expr: self)
-    let hasConv = type.hasConv
-    if hasConv {
-      ctx.globalCtx.addConversion(type)
-      em.str(indent, "(\(type.hostConvName)(")
+    let type = ctx.typeFor(expr: self)
+    let cast = ctx.castFor(expr: self)
+    let sub = ctx.subFor(expr: self)
+    var hasConv = false
+    if let cast = cast {
+      hasConv = true
+      let conv = Conversion(orig: type, cast: cast)
+      ctx.globalCtx.addConversion(conv)
+      em.str(indent, "(\(conv.hostName)(")
     }
-    if case .conv(let orig, _) = type.kind { type = orig }
+    if let sub = sub {
+      switch self {
+      case .path, .sym: break
+      default: form.fatal("non-identifier expression has type: \(type)\n  subtype: \(sub)")
+      }
+    }
 
     switch self {
 
@@ -108,7 +117,7 @@ extension Expr {
       }
 
     case .path(let path):
-      compileSym(&ctx, em, indent, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!)
+      compileSym(&ctx, em, indent, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!, sub: sub)
 
     case .reify:
       fatalError()
@@ -117,7 +126,7 @@ extension Expr {
       fatalError()
 
     case .sym(let sym):
-      compileSym(&ctx, em, indent, sym: sym, scopeRecord: ctx.symRecords[sym]!)
+      compileSym(&ctx, em, indent, sym: sym, scopeRecord: ctx.symRecords[sym]!, sub: sub)
 
     case .void:
       em.str(indent, "undefined")
@@ -128,7 +137,7 @@ extension Expr {
     }
   }
 
-  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, scopeRecord: ScopeRecord) {
+  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, scopeRecord: ScopeRecord, sub: Type?) {
     switch scopeRecord.kind {
     case .val:
       em.str(indent, scopeRecord.hostName)
@@ -138,17 +147,10 @@ extension Expr {
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
     case .poly(let polyType, let morphsToNeedsLazy):
-      let type = ctx.typeFor(expr: self)
-      switch type.kind {
-      case .sub(let origType, let morphType):
-        assert(origType == polyType)
-        let needsLazy = morphsToNeedsLazy[morphType]!
-        let lazySuffix = (needsLazy ? "__acc()" : "")
-        em.str(indent, "\(scopeRecord.hostName)__\(morphType.globalIndex)\(lazySuffix)")
-      default:
-        let msg = (type == polyType) ? "did not resolve" : "usage resolved to non-subtype: \(type)"
-        sym.fatal("`\(sym.name)` refers to a polytype: \(polyType); \(msg).")
-      }
+      guard let morph = sub else { sym.fatal("`\(sym.name)` refers to a polytype: \(polyType); no morph selected.") }
+      let needsLazy = morphsToNeedsLazy[morph]!
+      let lazySuffix = (needsLazy ? "__acc()" : "")
+      em.str(indent, "\(scopeRecord.hostName)__\(morph.globalIndex)\(lazySuffix)")
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:

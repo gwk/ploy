@@ -154,7 +154,6 @@ func needsLazyDef(val: Expr, type: Type) -> Bool {
   case .sym:
     switch type.kind {
     case .sig: return false
-    case .sub(_, let cast): return needsLazyDef(val: val, type: cast) // TODO: should conv, sub have been previously eliminated from type cases?
     default: return true
     }
   default: return true
