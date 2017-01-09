@@ -131,7 +131,14 @@ struct TypeCtx {
 
 
   mutating func resolveDisp(constraint: Constraint) throws -> Type {
-    let act = resolved(type: constraint.act.type)
+    let act: Type
+    if let lit = constraint.act.litExpr {
+      // if the expression has an associated type then use that, because it may have been refined.
+      // however, the litExpr might refer to a type expression, in which case it will not have an associated type.
+      act = resolved(type: exprTypes[lit].or(constraint.act.type))
+    } else {
+      act = resolved(type: constraint.act.type)
+    }
     let exp = resolved(type: constraint.exp.type)
     if (act == exp) {
       return act
@@ -162,7 +169,7 @@ struct TypeCtx {
       }
       guard let (ctx, morph) = match else { throw Err(constraint, "no morphs match expected") }
       self = ctx
-      if let expr = constraint.act.litExpr {
+      if let expr = constraint.act.litExpr, exprTypes.contains(key: expr) {
         exprSubs[expr] = morph
       } else {
         throw Err(constraint, "polytype cannot select morph without a literal expression")
@@ -223,7 +230,7 @@ struct TypeCtx {
       castFields.append(TypeField(label: expField.label, type: fieldType))
     }
     if isConv {
-      if let expr = constraint.act.litExpr {
+      if let expr = constraint.act.litExpr, exprTypes.contains(key: expr) {
         exprCasts[expr] = Type.Cmpd(castFields)
       } else {
         throw Err(constraint, "struct type cannot be converted without a literal expression")
