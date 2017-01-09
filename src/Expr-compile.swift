@@ -5,19 +5,18 @@ extension Expr {
 
   func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, isTail: Bool) {
     let type = ctx.typeFor(expr: self)
-    let cast = ctx.castFor(expr: self)
-    let sub = ctx.subFor(expr: self)
+    let orig = ctx.origFor(expr: self)
     var hasConv = false
-    if let cast = cast {
+    if let orig = orig {
       hasConv = true
-      let conv = Conversion(orig: type, cast: cast)
+      let conv = Conversion(orig: orig, cast: type)
       ctx.globalCtx.addConversion(conv)
       em.str(indent, "(\(conv.hostName)(")
     }
-    if let sub = sub {
+    if let poly = ctx.polyFor(expr: self) {
       switch self {
       case .path, .sym: break
-      default: form.fatal("non-identifier expression has type: \(type)\n  subtype: \(sub)")
+      default: form.fatal("non-identifier expression has type: \(poly)\n  subtype: \(type)")
       }
     }
 
@@ -96,28 +95,20 @@ extension Expr {
       em.str(indent, s)
 
     case .paren(let paren):
-      switch type.kind {
-
-      case .cmpd(let fields):
+      if paren.isScalarValue {
+        paren.els[0].compile(&ctx, em, indent, isTail: isTail)
+      } else {
+        guard case .cmpd(let fields) = orig.or(type).kind else { paren.fatal("expected struct type") }
         em.str(indent, "{")
         var argIndex = 0
         for (i, field) in fields.enumerated() {
           compileCmpdField(&ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
         }
-        if argIndex != fields.count {
-          paren.fatal("expected \(fields.count) arguments; received \(argIndex)")
-        }
         em.append("}")
-
-      default:
-        if !paren.isScalarType {
-          paren.failType("expected type: \(type); received a struct value.")
-        }
-        paren.els[0].compile(&ctx, em, indent, isTail: isTail)
       }
 
     case .path(let path):
-      compileSym(&ctx, em, indent, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!, sub: sub)
+      compileSym(&ctx, em, indent, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!, type: type)
 
     case .reify:
       fatalError()
@@ -126,7 +117,7 @@ extension Expr {
       fatalError()
 
     case .sym(let sym):
-      compileSym(&ctx, em, indent, sym: sym, scopeRecord: ctx.symRecords[sym]!, sub: sub)
+      compileSym(&ctx, em, indent, sym: sym, scopeRecord: ctx.symRecords[sym]!, type: type)
 
     case .void:
       em.str(indent, "undefined")
@@ -137,7 +128,7 @@ extension Expr {
     }
   }
 
-  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, scopeRecord: ScopeRecord, sub: Type?) {
+  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, scopeRecord: ScopeRecord, type: Type) {
     switch scopeRecord.kind {
     case .val:
       em.str(indent, scopeRecord.hostName)
@@ -146,11 +137,10 @@ extension Expr {
       em.str(indent, "\(s)")
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
-    case .poly(let polyType, let morphsToNeedsLazy):
-      guard let morph = sub else { sym.fatal("`\(sym.name)` refers to a polytype: \(polyType); no morph selected.") }
-      let needsLazy = morphsToNeedsLazy[morph]!
+    case .poly(_, let morphsToNeedsLazy):
+      let needsLazy = morphsToNeedsLazy[type]!
       let lazySuffix = (needsLazy ? "__acc()" : "")
-      em.str(indent, "\(scopeRecord.hostName)__\(morph.globalIndex)\(lazySuffix)")
+      em.str(indent, "\(scopeRecord.hostName)__\(type.globalIndex)\(lazySuffix)")
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:
