@@ -17,22 +17,6 @@ class Sym: Form { // symbol: `name`.
 
   var hostName: String { return name }
 
-  func typeForAccess(ctx: inout TypeCtx, accesseeType: Type) -> Type { // TODO: move to Prop type refinement.
-    switch accesseeType.kind {
-    case .cmpd(let fields):
-      for field in fields {
-        if let label = field.label {
-          if name == label {
-            return field.type
-          }
-        }
-      }
-      failType("symbol accessor does not match any field label of compound type: \(accesseeType)")
-    default:
-      failType("symbol cannot access into value of type: \(accesseeType)")
-    }
-  }
-
   func typeForExprRecord(_ scopeRecord: ScopeRecord) -> Type {
     switch scopeRecord.kind {
     case .lazy(let type): return type
