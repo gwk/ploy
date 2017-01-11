@@ -6,11 +6,11 @@ struct TypeCtx {
   typealias MsgThunk = ()->String
 
   struct Err: Error {
-    let constraint: Constraint
+    let rel: Rel
     let msgThunk: MsgThunk
 
-    init(_ constraint: Constraint, _ msgThunk: @escaping @autoclosure ()->String) {
-      self.constraint = constraint
+    init(_ rel: Rel, _ msgThunk: @escaping @autoclosure ()->String) {
+      self.rel = rel
       self.msgThunk = msgThunk
     }
   }
@@ -65,10 +65,10 @@ struct TypeCtx {
 
 
   mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
-    constraints.append(Constraint(
-      act: Constraint.Side(expr: actExpr, type: actType),
-      exp: Constraint.Side(expr: expExpr.or(actExpr), type: expType),
-      desc: desc))
+    constraints.append(.rel(Rel(
+      act: Side(expr: actExpr, type: actType),
+      exp: Side(expr: expExpr.or(actExpr), type: expType),
+      desc: desc)))
   }
 
 
@@ -122,24 +122,27 @@ struct TypeCtx {
 
 
   mutating func resolve(_ constraint: Constraint) throws -> Type {
-    let type = try resolveDisp(constraint: constraint)
-    if let expr = constraint.act.litExpr {
-      exprTypes[expr] = type
+    switch constraint {
+    case .rel(let rel):
+      let type = try resolveRel(rel: rel)
+      if let expr = rel.act.litExpr {
+        exprTypes[expr] = type
+      }
+      return type
     }
-    return type
   }
 
 
-  mutating func resolveDisp(constraint: Constraint) throws -> Type {
+  mutating func resolveRel(rel: Rel) throws -> Type {
     let act: Type
-    if let lit = constraint.act.litExpr {
+    if let lit = rel.act.litExpr {
       // if the expression has an associated type then use that, because it may have been refined.
       // however, the litExpr might refer to a type expression, in which case it will not have an associated type.
-      act = resolved(type: exprTypes[lit].or(constraint.act.type))
+      act = resolved(type: exprTypes[lit].or(rel.act.type))
     } else {
-      act = resolved(type: constraint.act.type)
+      act = resolved(type: rel.act.type)
     }
-    let exp = resolved(type: constraint.exp.type)
+    let exp = resolved(type: rel.exp.type)
     if (act == exp) {
       return act
     }
@@ -160,19 +163,19 @@ struct TypeCtx {
         var ctx = self // copy ctx.
         let res: Type
         do {
-          res = try ctx.resolveSub(constraint, actType: morph, actDesc: "morph")
+          res = try ctx.resolveSub(rel, actType: morph, actDesc: "morph")
         } catch {
           continue
         }
-        if let (_, prev) = match { throw Err(constraint, "multiple morphs match expected: \(prev); \(res)") }
+        if let (_, prev) = match { throw Err(rel, "multiple morphs match expected: \(prev); \(res)") }
         match = (ctx, res)
       }
-      guard let (ctx, morph) = match else { throw Err(constraint, "no morphs match expected") }
+      guard let (ctx, morph) = match else { throw Err(rel, "no morphs match expected") }
       self = ctx
-      if let expr = constraint.act.litExpr, exprTypes.contains(key: expr) {
+      if let expr = rel.act.litExpr, exprTypes.contains(key: expr) {
         exprPolys[expr] = act
       } else {
-        throw Err(constraint, "polytype cannot select morph without a literal expression")
+        throw Err(rel, "polytype cannot select morph without a literal expression")
       }
       return morph
 
@@ -182,58 +185,58 @@ struct TypeCtx {
       case .cmpd(let fields):
         for (i, field) in fields.enumerated() {
           if field.accessorString(index: i) != accessor.accessorString { continue }
-          return try resolveSub(constraint, actType: field.type, actDesc: "`\(field.accessorString(index: i))` property")
+          return try resolveSub(rel, actType: field.type, actDesc: "`\(field.accessorString(index: i))` property")
         }
-        throw Err(constraint, "actual type has no field matching accessor")
-      default: throw Err(constraint, "actual type is not an accessible type")
+        throw Err(rel, "actual type has no field matching accessor")
+      default: throw Err(rel, "actual type is not an accessible type")
       }
 
     case (_, .any(let members)):
       if !members.contains(act) {
-        throw Err(constraint, "actual type is not a member of `Any` expected type")
+        throw Err(rel, "actual type is not a member of `Any` expected type")
       }
       return act
 
     case (.cmpd(let actFields), .cmpd(let expFields)):
-      return try resolveCmpdToCmpd(constraint, act: act, actFields: actFields, expFields: expFields)
+      return try resolveCmpdToCmpd(rel, act: act, actFields: actFields, expFields: expFields)
 
     case (.sig(let actDom, let actRet), .sig(let expDom, let expRet)):
-      return try resolveSigToSig(constraint, actDom: actDom, actRet: actRet, expDom: expDom, expRet: expRet)
+      return try resolveSigToSig(rel, actDom: actDom, actRet: actRet, expDom: expDom, expRet: expRet)
 
-    default: throw Err(constraint, "actual type is not expected type")
+    default: throw Err(rel, "actual type is not expected type")
     }
   }
 
 
-  mutating func resolveCmpdToCmpd(_ constraint: Constraint, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Type {
+  mutating func resolveCmpdToCmpd(_ rel: Rel, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Type {
     if expFields.count != actFields.count {
       let nFields = pluralize(actFields.count, "field")
-      throw Err(constraint, "actual struct has \(nFields); expected \(expFields.count)")
+      throw Err(rel, "actual struct has \(nFields); expected \(expFields.count)")
     }
-    let litActFields = constraint.act.litExpr?.cmpdFields
-    let litExpFields = constraint.exp.litExpr?.cmpdFields
+    let litActFields = rel.act.litExpr?.cmpdFields
+    let litExpFields = rel.exp.litExpr?.cmpdFields
     var origFields: [TypeField] = []
     var castFields: [TypeField] = []
     var isConv = false
     for (index, (actField, expField)) in zip(actFields, expFields).enumerated() {
       if actField.label != nil {
         if actField.label != expField.label {
-          throw Err(constraint, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
+          throw Err(rel, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
         }
       } else if expField.label != nil { // convert unlabeled to labeled.
         isConv = true
       }
-      let fieldType = try resolveSub(constraint,
+      let fieldType = try resolveSub(rel,
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
         expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
       origFields.append(TypeField(label: actField.label, type: fieldType))
       castFields.append(TypeField(label: expField.label, type: fieldType))
     }
     if isConv {
-      if let expr = constraint.act.litExpr, exprTypes.contains(key: expr) {
+      if let expr = rel.act.litExpr, exprTypes.contains(key: expr) {
         exprOrigs[expr] = Type.Cmpd(origFields)
       } else {
-        throw Err(constraint, "struct type cannot be converted without a literal expression")
+        throw Err(rel, "struct type cannot be converted without a literal expression")
       }
     } else {
       assert(origFields == castFields)
@@ -242,51 +245,51 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveSigToSig(_ constraint: Constraint, actDom: Type, actRet: Type, expDom: Type, expRet: Type) throws -> Type {
-    let domType = try resolveSub(constraint,
-      actExpr: constraint.act.litExpr?.sigDom, actType: actDom, actDesc: "signature domain",
-      expExpr: constraint.exp.litExpr?.sigDom, expType: expDom, expDesc: "signature domain")
-    let retType = try resolveSub(constraint,
-      actExpr: constraint.act.litExpr?.sigRet, actType: actRet, actDesc: "signature return",
-      expExpr: constraint.exp.litExpr?.sigRet, expType: expRet, expDesc: "signature return")
+  mutating func resolveSigToSig(_ rel: Rel, actDom: Type, actRet: Type, expDom: Type, expRet: Type) throws -> Type {
+    let domType = try resolveSub(rel,
+      actExpr: rel.act.litExpr?.sigDom, actType: actDom, actDesc: "signature domain",
+      expExpr: rel.exp.litExpr?.sigDom, expType: expDom, expDesc: "signature domain")
+    let retType = try resolveSub(rel,
+      actExpr: rel.act.litExpr?.sigRet, actType: actRet, actDesc: "signature return",
+      expExpr: rel.exp.litExpr?.sigRet, expType: expRet, expDesc: "signature return")
     return Type.Sig(dom: domType, ret: retType)
   }
 
 
-  mutating func resolveSub(_ constraint: Constraint,
+  mutating func resolveSub(_ rel: Rel,
    actExpr: Expr?, actType: Type, actDesc: String,
    expExpr: Expr?, expType: Type, expDesc: String) throws -> Type {
-    let sub = Constraint(
-      act: constraint.act.sub(expr: actExpr, type: actType, desc: actDesc),
-      exp: constraint.exp.sub(expr: expExpr, type: expType, desc: expDesc),
-      desc: constraint.desc)
+    let sub = Constraint.rel(Rel(
+      act: rel.act.sub(expr: actExpr, type: actType, desc: actDesc),
+      exp: rel.exp.sub(expr: expExpr, type: expType, desc: expDesc),
+      desc: rel.desc))
     return try resolve(sub)
   }
 
 
-  mutating func resolveSub(_ constraint: Constraint, actType: Type, actDesc: String) throws -> Type {
-    let a = constraint.act
-    let sub = Constraint(
-      act: Constraint.Side(expr: a.expr, type: actType, chain: .link(actDesc, a.chain)),
-      exp: constraint.exp,
-      desc: constraint.desc)
+  mutating func resolveSub(_ rel: Rel, actType: Type, actDesc: String) throws -> Type {
+    let a = rel.act
+    let sub = Constraint.rel(Rel(
+      act: Side(expr: a.expr, type: actType, chain: .link(actDesc, a.chain)),
+      exp: rel.exp,
+      desc: rel.desc))
     return try resolve(sub)
   }
 
 
   func error(err: Err) -> Never {
-    let c = err.constraint
+    let r = err.rel
     let msg = err.msgThunk()
-    let act = resolved(type: c.act.type)
-    let exp = resolved(type: c.exp.type)
-    let actDesc = c.act.chain.map({"\($0) -> "}).join()
-    let expDesc = c.exp.chain.map({"\($0) -> "}).join()
+    let act = resolved(type: r.act.type)
+    let exp = resolved(type: r.exp.type)
+    let actDesc = r.act.chain.map({"\($0) -> "}).join()
+    let expDesc = r.exp.chain.map({"\($0) -> "}).join()
 
-    if c.act.expr != c.exp.expr {
-      c.act.expr.form.failType("\(c.desc) \(msg). \(actDesc)actual type: \(act)",
-        notes: (c.exp.expr.form, "\(expDesc)expected type: \(exp)"))
+    if r.act.expr != r.exp.expr {
+      r.act.expr.form.failType("\(r.desc) \(msg). \(actDesc)actual type: \(act)",
+        notes: (r.exp.expr.form, "\(expDesc)expected type: \(exp)"))
     } else {
-      c.act.expr.form.failType("\(c.desc) \(msg).\n  \(actDesc)actual type:   \(act);\n  \(expDesc)expected type: \(exp).")
+      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(actDesc)actual type:   \(act);\n  \(expDesc)expected type: \(exp).")
     }
   }
 
