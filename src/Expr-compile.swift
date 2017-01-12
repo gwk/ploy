@@ -3,13 +3,11 @@
 
 extension Expr {
 
-  func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, isTail: Bool) {
+  func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, exp: Type, isTail: Bool) {
     let type = ctx.typeFor(expr: self)
-    let orig = ctx.origFor(expr: self)
-    var hasConv = false
-    if let orig = orig {
-      hasConv = true
-      let conv = Conversion(orig: orig, cast: type)
+    let hasConv = (type != exp)
+    if hasConv {
+      let conv = Conversion(orig: type, cast: exp)
       ctx.globalCtx.addConversion(conv)
       em.str(indent, "(\(conv.hostName)(")
     }
@@ -18,31 +16,37 @@ extension Expr {
 
     case .acc(let acc):
       em.str(indent, "(")
-      acc.accessee.compile(&ctx, em, indent + 2, isTail: false)
+      acc.accessee.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: acc.accessee), isTail: false)
       em.str(indent + 2, acc.accessor.hostAccessor)
       em.append(")")
 
     case .ann(let ann):
-      ann.expr.compile(&ctx, em, indent, isTail: isTail)
+      ann.expr.compile(&ctx, em, indent, exp: type, isTail: isTail)
 
     case .bind(let bind):
       em.str(indent, "let \(bind.place.sym.hostName) =")
-      bind.val.compile(&ctx, em, indent + 2, isTail: false)
+      let valTypeExpr = (bind.place.ann?.typeExpr).or(bind.val)
+      bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: valTypeExpr), isTail: false)
 
     case .call(let call):
-      call.callee.compile(&ctx, em, indent, isTail: false)
+      let calleeType = ctx.typeFor(expr: call.callee)
+      // note: we rely on the actual callee type being identical to the expected callee type.
+      // this works because functions are currently never convertible,
+      // implying that polymorph selection should not in the future be made to rely on this mechanism.
+      // from the callee we can extract the expected arg type.
+      call.callee.compile(&ctx, em, indent, exp: calleeType, isTail: false) // exp is ok for now because sigs are not convertible.
       em.append("(")
-      call.arg.compile(&ctx, em, indent + 2, isTail: false)
+      call.arg.compile(&ctx, em, indent + 2, exp: calleeType.sigDom, isTail: false)
       em.append(")")
 
     case .do_(let do_):
       em.str(indent, "(()=>{")
-      compileBody(&ctx, em, indent + 2, body: do_.body, isTail: isTail)
+      compileBody(&ctx, em, indent + 2, body: do_.body, type: type, isTail: isTail)
       em.append("})()")
 
     case .fn(let fn):
       em.str(indent,  "(function self($){")
-      compileBody(&ctx, em, indent + 2, body: fn.body, isTail: isTail)
+      compileBody(&ctx, em, indent + 2, body: fn.body, type: ctx.typeFor(expr: .sig(fn.sig)).sigRet, isTail: isTail)
       em.append("})")
 
     case .hostVal(let hostVal):
@@ -51,13 +55,13 @@ extension Expr {
     case .if_(let if_):
       em.str(indent, "(")
       for c in if_.cases {
-        c.condition.compile(&ctx, em, indent + 2, isTail: false)
+        c.condition.compile(&ctx, em, indent + 2, exp: typeBool, isTail: false)
         em.append(" ?")
-        c.consequence.compile(&ctx, em, indent + 2, isTail: isTail)
+        c.consequence.compile(&ctx, em, indent + 2, exp: type, isTail: isTail)
         em.append(" :")
       }
       if let dflt = if_.dflt {
-        dflt.expr.compile(&ctx, em, indent + 2, isTail: isTail)
+        dflt.expr.compile(&ctx, em, indent + 2, exp: type, isTail: isTail)
       } else {
         em.str(indent + 2, "undefined")
       }
@@ -90,9 +94,9 @@ extension Expr {
 
     case .paren(let paren):
       if paren.isScalarValue {
-        paren.els[0].compile(&ctx, em, indent, isTail: isTail)
+        paren.els[0].compile(&ctx, em, indent, exp: type, isTail: isTail)
       } else {
-        guard case .cmpd(let fields) = orig.or(type).kind else { paren.fatal("expected struct type") }
+        guard case .cmpd(let fields) = type.kind else { paren.fatal("expected struct type") }
         em.str(indent, "{")
         var argIndex = 0
         for (i, field) in fields.enumerated() {
@@ -144,17 +148,16 @@ extension Expr {
 }
 
 
-func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, body: Body, isTail: Bool) {
+func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, body: Body, type: Type, isTail: Bool) {
   for stmt in body.stmts {
-    stmt.compile(&ctx, em, indent, isTail: false)
+    stmt.compile(&ctx, em, indent, exp: typeVoid, isTail: false)
     em.append(";")
   }
-  let type = ctx.typeFor(expr: body.expr)
   let hasRet = (type != typeVoid)
   if hasRet {
     em.str(indent, "return (")
   }
-  body.expr.compile(&ctx, em, indent, isTail: isTail)
+  body.expr.compile(&ctx, em, indent, exp: type, isTail: isTail)
   if hasRet {
     em.append(")")
   }
@@ -181,7 +184,7 @@ func compileCmpdField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, paren:
     default: val = arg
     }
     em.str(indent + 1, "\(field.hostName(index: parIndex)):")
-    val.compile(&ctx, em, indent + 2, isTail: false)
+    val.compile(&ctx, em, indent + 2, exp: field.type, isTail: false)
     em.append(",")
     argIndex += 1
   } else { // TODO: support default arguments.

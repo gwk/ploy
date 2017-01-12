@@ -1,6 +1,0 @@
-type error: test/2/type/conv-nonliteral.ploy:3:27-27: type annotation struct type cannot be converted without a literal expression. field 1 -> actual type: (Int Int)
-    b:(Int (i:Int j:Int)) = p
-                            ~
-note: test/2/type/conv-nonliteral.ploy:3:10-22: expected type: (i:Int j:Int)
-    b:(Int (i:Int j:Int)) = p
-           ~~~~~~~~~~~~~

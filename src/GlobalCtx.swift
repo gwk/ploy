@@ -16,25 +16,38 @@ class GlobalCtx {
   }
 
   func emitConversions() {
-    for conv in conversions.sorted() {
+    var convs = conversions.sorted()
+    var i = 0
+    while i < convs.count {
+      let conv = convs[i]
+      i += 1
       let orig = conv.orig
       let cast = conv.cast
       let em = Emitter(file: file)
       switch (orig.kind, cast.kind) {
       case (.cmpd(let origFields), .cmpd(let castFields)):
-        emitCmpdCmpd(em, conv: conv, origFields: origFields, castFields: castFields)
+        emitCmpdCmpd(em, convs: &convs, conv: conv, origFields: origFields, castFields: castFields)
       default: fatalError("impossible conversion: \(conv)")
       }
       em.flush()
     }
   }
 
-  func emitCmpdCmpd(_ em: Emitter, conv: Conversion, origFields: [TypeField], castFields: [TypeField]) {
+  func emitCmpdCmpd(_ em: Emitter, convs: inout [Conversion], conv: Conversion, origFields: [TypeField], castFields: [TypeField]) {
     em.str(0, "let \(conv.hostName) = $=>({ // \(conv)")
     for (i, (o, c)) in zip(origFields, castFields).enumerated() {
-      let cName = c.hostName(index: i)
       let oName = o.hostName(index: i)
-      em.str(2, "\(cName): $.\(oName),")
+      let cName = c.hostName(index: i)
+      if o.type != c.type {
+        let fieldConv = Conversion(orig: o.type, cast: c.type)
+        if !conversions.contains(fieldConv) {
+          conversions.insert(fieldConv)
+          convs.append(fieldConv)
+        }
+        em.str(2, "\(cName): \(fieldConv.hostName)($.\(oName)),")
+      } else {
+        em.str(2, "\(cName): $.\(oName),")
+      }
     }
     em.append("})")
   }

@@ -27,7 +27,6 @@ struct TypeCtx {
   private var freeTypeCount = 0
   private var freeUnifications: [Int:Type] = [:]
   private var exprTypes = [Expr:Type]() // maps expressions to their latest types.
-  private var exprOrigs = [Expr:Type]() // maps expressions to pre-conversion types.
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
 
@@ -39,14 +38,6 @@ struct TypeCtx {
 
   func typeFor(expr: Expr) -> Type {
     return resolved(type: exprTypes[expr]!)
-  }
-
-
-  func origFor(expr: Expr) -> Type? {
-    if let orig = exprOrigs[expr] {
-      return resolved(type: orig)
-    }
-    return nil
   }
 
 
@@ -199,33 +190,17 @@ struct TypeCtx {
     }
     let litActFields = rel.act.litExpr?.cmpdFields
     let litExpFields = rel.exp.litExpr?.cmpdFields
-    var origFields: [TypeField] = []
-    var castFields: [TypeField] = []
-    var isConv = false
+    var fields = [TypeField]()
     for (index, (actField, expField)) in zip(actFields, expFields).enumerated() {
-      if actField.label != nil {
-        if actField.label != expField.label {
-          throw Err(rel, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
-        }
-      } else if expField.label != nil { // convert unlabeled to labeled.
-        isConv = true
+      if actField.label != nil && actField.label != expField.label {
+        throw Err(rel, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
       }
       let fieldType = try resolveSub(rel,
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
         expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
-      origFields.append(TypeField(label: actField.label, type: fieldType))
-      castFields.append(TypeField(label: expField.label, type: fieldType))
+      fields.append(TypeField(label: actField.label, type: fieldType))
     }
-    if isConv {
-      if let expr = rel.act.litExpr, exprTypes.contains(key: expr) {
-        exprOrigs[expr] = Type.Cmpd(origFields)
-      } else {
-        throw Err(rel, "struct type cannot be converted without a literal expression")
-      }
-    } else {
-      assert(origFields == castFields)
-    }
-    return Type.Cmpd(castFields)
+    return Type.Cmpd(fields)
   }
 
 

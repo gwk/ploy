@@ -138,6 +138,20 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   static func ==(l: Type, r: Type) -> Bool { return l === r }
 
   static func <(l: Type, r: Type) -> Bool { return l.description < r.description }
+
+  var sigDom: Type {
+    switch self.kind {
+    case .sig(let dom, _): return dom
+    default: fatalError()
+    }
+  }
+
+  var sigRet: Type {
+    switch self.kind {
+    case .sig(_, let ret): return ret
+    default: fatalError()
+    }
+  }
 }
 
 

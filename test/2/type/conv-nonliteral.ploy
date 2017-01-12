@@ -1,4 +1,0 @@
-main = {
-  p = (0 (0 0))
-  b:(Int (i:Int j:Int)) = p
-}
