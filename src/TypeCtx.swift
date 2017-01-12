@@ -3,25 +3,6 @@
 
 struct TypeCtx {
 
-  typealias MsgThunk = ()->String
-
-  struct Err: Error {
-    let rel: Rel
-    let msgThunk: MsgThunk
-
-    init(_ rel: Rel, _ msgThunk: @escaping @autoclosure ()->String) {
-      self.rel = rel
-      self.msgThunk = msgThunk
-    }
-  }
-
-
-  struct PropErr: Error {
-    let prop: Prop
-    let msg: String
-  }
-
-
   let globalCtx: GlobalCtx
 
   var exprTypes = [Expr:Type]() // maps expressions to their latest types.
@@ -135,16 +116,16 @@ struct TypeCtx {
         } catch {
           continue
         }
-        if let (_, prev) = match { throw Err(rel, "multiple morphs match expected: \(prev); \(res)") }
+        if let (_, prev) = match { throw rel.error("multiple morphs match expected: \(prev); \(res)") }
         match = (ctx, res)
       }
-      guard let (ctx, morph) = match else { throw Err(rel, "no morphs match expected") }
+      guard let (ctx, morph) = match else { throw rel.error("no morphs match expected") }
       self = ctx
       return morph
 
     case (_, .any(let members)):
       if !members.contains(act) {
-        throw Err(rel, "actual type is not a member of `Any` expected type")
+        throw rel.error("actual type is not a member of `Any` expected type")
       }
       return act
 
@@ -154,7 +135,7 @@ struct TypeCtx {
     case (.sig(let actDom, let actRet), .sig(let expDom, let expRet)):
       return try resolveSigToSig(rel, actDom: actDom, actRet: actRet, expDom: expDom, expRet: expRet)
 
-    default: throw Err(rel, "actual type is not expected type")
+    default: throw rel.error("actual type is not expected type")
     }
   }
 
@@ -162,14 +143,14 @@ struct TypeCtx {
   mutating func resolveCmpdToCmpd(_ rel: Rel, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Type {
     if expFields.count != actFields.count {
       let nFields = pluralize(actFields.count, "field")
-      throw Err(rel, "actual struct has \(nFields); expected \(expFields.count)")
+      throw rel.error("actual struct has \(nFields); expected \(expFields.count)")
     }
     let litActFields = rel.act.litExpr?.cmpdFields
     let litExpFields = rel.exp.litExpr?.cmpdFields
     var fields = [TypeField]()
     for (index, (actField, expField)) in zip(actFields, expFields).enumerated() {
       if actField.label != nil && actField.label != expField.label {
-        throw Err(rel, "field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
+        throw rel.error("field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
       }
       let fieldType = try resolveSub(rel,
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
@@ -205,8 +186,8 @@ struct TypeCtx {
             desc: "access")))
         }
       }
-      throw PropErr(prop: prop, msg: "accessee has no field matching accessor")
-    default: throw PropErr(prop: prop, msg: "accessee is not a struct")
+      throw prop.error("accessee has no field matching accessor")
+    default: throw prop.error("accessee is not a struct")
     }
   }
 
@@ -232,7 +213,7 @@ struct TypeCtx {
   }
 
 
-  func error(err: Err) -> Never {
+  func error(_ err: Rel.Err) -> Never {
     let r = err.rel
     let msg = err.msgThunk()
     let act = resolved(type: r.act.type)
@@ -249,10 +230,10 @@ struct TypeCtx {
   }
 
 
-  func error(prop: Prop, msg: String) -> Never {
-    let accesseeType = resolved(type: prop.accesseeType)
-    prop.acc.accessee.form.failType("\(msg). accessee type: \(accesseeType)",
-      notes: (prop.acc.accessor.form, "accessor is here."))
+  func error(_ err: Prop.Err) -> Never {
+    let accesseeType = resolved(type: err.prop.accesseeType)
+    err.prop.acc.accessee.form.failType("\(err.msg). accessee type: \(accesseeType)",
+      notes: (err.prop.acc.accessor.form, "accessor is here."))
   }
 
 
@@ -261,10 +242,10 @@ struct TypeCtx {
     for constraint in constraints {
       do {
         _ = try resolve(constraint)
-      } catch let err as Err {
-        error(err: err)
-      } catch let err as PropErr {
-        error(prop: err.prop, msg: err.msg)
+      } catch let err as Rel.Err {
+        error(err)
+      } catch let err as Prop.Err {
+        error(err)
       } catch { fatalError() }
     }
 

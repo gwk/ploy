@@ -15,16 +15,36 @@ enum Constraint: CustomStringConvertible {
 
 
 struct Rel {
+
+  struct Err: Error {
+    let rel: Rel
+    let msgThunk: ()->String
+  }
+
   let act: Side
   let exp: Side
   let desc: String
+
+  func error(_ msgThunk: @escaping @autoclosure ()->String) -> Err {
+    return Err(rel: self, msgThunk: msgThunk)
+  }
 }
 
 
-struct Prop: Error { // doubles as its own error type.
+struct Prop {
+
+  struct Err: Error {
+    let prop: Prop
+    let msg: String
+  }
+
   let acc: Acc
   let accesseeType: Type
   let accType: Type
+
+  func error(_ msg: String) -> Err {
+    return Err(prop: self, msg: msg)
+  }
 }
 
 
