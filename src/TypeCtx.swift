@@ -15,6 +15,13 @@ struct TypeCtx {
     }
   }
 
+
+  struct PropErr: Error {
+    let prop: Prop
+    let msg: String
+  }
+
+
   let globalCtx: GlobalCtx
   private var constraints: [Constraint] = []
   private var freeTypeCount = 0
@@ -72,6 +79,11 @@ struct TypeCtx {
   }
 
 
+  mutating func constrain(prop: Prop) {
+    constraints.append(.prop(prop))
+  }
+
+
   private func resolved(type: Type) -> Type {
     // TODO: need to track types to prevent/handle recursion.
     switch type.kind {
@@ -89,18 +101,6 @@ struct TypeCtx {
       return Type.Poly(Set(members.map { self.resolved(type: $0) }))
     case .prim:
       return type
-    case .prop(let accessor, let accesseeType):
-      let accType = resolved(type: accesseeType)
-      switch accType.kind {
-      case .cmpd(let fields):
-        for (i, field) in fields.enumerated() {
-          if field.accessorString(index: i) == accessor.accessorString {
-            return field.type
-          }
-        }
-        fatalError("impossible prop type (TODO): \(type)")
-      default: return Type.Prop(accessor, type: accType)
-      }
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
     case .var_: return type
@@ -122,18 +122,24 @@ struct TypeCtx {
 
 
   mutating func resolve(_ constraint: Constraint) throws -> Type {
+    let type: Type
+    let litExpr: Expr?
     switch constraint {
     case .rel(let rel):
-      let type = try resolveRel(rel: rel)
-      if let expr = rel.act.litExpr {
-        exprTypes[expr] = type
-      }
-      return type
+      type = try resolve(rel: rel)
+      litExpr = rel.act.litExpr
+    case .prop(let prop):
+      type = try resolve(prop: prop)
+      litExpr = .acc(prop.acc)
     }
+    if let litExpr = litExpr {
+      exprTypes[litExpr] = type
+    }
+    return type
   }
 
 
-  mutating func resolveRel(rel: Rel) throws -> Type {
+  mutating func resolve(rel: Rel) throws -> Type {
     let act: Type
     if let lit = rel.act.litExpr {
       // if the expression has an associated type then use that, because it may have been refined.
@@ -151,8 +157,8 @@ struct TypeCtx {
 
     case (.free(let ia), .free(let ie)):
       // TODO: determine whether always resolving to lower index is necessary.
-      if ia > ie { return unify(freeIndex: ie, to: act) }
-      else {       return unify(freeIndex: ia, to: exp) }
+      if ia > ie { return unify(freeIndex: ia, to: exp) }
+      else {       return unify(freeIndex: ie, to: act) }
 
     case (.free(let ia), _): return unify(freeIndex: ia, to: exp)
     case (_, .free(let ie)): return unify(freeIndex: ie, to: act)
@@ -178,18 +184,6 @@ struct TypeCtx {
         throw Err(rel, "polytype cannot select morph without a literal expression")
       }
       return morph
-
-    case (.prop(let accessor, let accesseeType), _):
-      let accType = resolved(type: accesseeType)
-      switch accType.kind {
-      case .cmpd(let fields):
-        for (i, field) in fields.enumerated() {
-          if field.accessorString(index: i) != accessor.accessorString { continue }
-          return try resolveSub(rel, actType: field.type, actDesc: "`\(field.accessorString(index: i))` property")
-        }
-        throw Err(rel, "actual type has no field matching accessor")
-      default: throw Err(rel, "actual type is not an accessible type")
-      }
 
     case (_, .any(let members)):
       if !members.contains(act) {
@@ -256,6 +250,26 @@ struct TypeCtx {
   }
 
 
+  mutating func resolve(prop: Prop) throws -> Type {
+    let accesseeType = resolved(type: prop.accesseeType)
+    let accType = resolved(type: prop.accType)
+    switch accesseeType.kind {
+    case .cmpd(let fields):
+      for (i, field) in fields.enumerated() {
+        if field.accessorString(index: i) == prop.acc.accessor.propAccessor.accessorString {
+          exprTypes[.acc(prop.acc)] = field.type // TOTAL HACK.
+          return try resolve(.rel(Rel(
+            act: Side(expr: .acc(prop.acc), type: field.type),
+            exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
+            desc: "access")))
+        }
+      }
+      throw PropErr(prop: prop, msg: "accessee has no field matching accessor")
+    default: throw PropErr(prop: prop, msg: "accessee is not a struct")
+    }
+  }
+
+
   mutating func resolveSub(_ rel: Rel,
    actExpr: Expr?, actType: Type, actDesc: String,
    expExpr: Expr?, expType: Type, expDesc: String) throws -> Type {
@@ -294,6 +308,13 @@ struct TypeCtx {
   }
 
 
+  func error(prop: Prop, msg: String) -> Never {
+    let accesseeType = resolved(type: prop.accesseeType)
+    prop.acc.accessee.form.failType("\(msg). accessee type: \(accesseeType)",
+      notes: (prop.acc.accessor.form, "accessor is here."))
+  }
+
+
   mutating func resolveAll() {
 
     for constraint in constraints {
@@ -301,6 +322,8 @@ struct TypeCtx {
         _ = try resolve(constraint)
       } catch let err as Err {
         error(err: err)
+      } catch let err as PropErr {
+        error(prop: err.prop, msg: err.msg)
       } catch { fatalError() }
     }
 

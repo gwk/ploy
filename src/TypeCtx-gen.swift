@@ -14,7 +14,9 @@ extension TypeCtx {
 
     case .acc(let acc):
       let accesseeType = genConstraints(scope, expr: acc.accessee)
-      return Type.Prop(acc.accessor.propAccessor, type: accesseeType)
+      let accType = addFreeType()
+      constrain(prop: Prop(acc: acc, accesseeType: accesseeType, accType: accType))
+      return accType
 
     case .ann(let ann):
       let type = genConstraints(scope, expr: ann.expr)

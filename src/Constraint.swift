@@ -1,8 +1,16 @@
 // © 2016 George King. Permission to use this file is granted in license.txt.
 
 
-enum Constraint {
+enum Constraint: CustomStringConvertible {
   case rel(Rel)
+  case prop(Prop)
+
+  var description: String {
+    switch self {
+    case .rel(let rel): return String(describing: rel)
+    case .prop(let prop): return String(describing: prop)
+    }
+  }
 }
 
 
@@ -10,6 +18,13 @@ struct Rel {
   let act: Side
   let exp: Side
   let desc: String
+}
+
+
+struct Prop: Error { // doubles as its own error type.
+  let acc: Acc
+  let accesseeType: Type
+  let accType: Type
 }
 
 

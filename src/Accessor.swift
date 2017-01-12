@@ -29,7 +29,7 @@ enum Accessor: SubForm {
     }
   }
 
-  var propAccessor: Type.PropAccessor {
+  var propAccessor: PropAccessor {
     switch self {
       case .litNum(let litNum): return .index(litNum.val)
       case .sym(let sym): return .name(sym.name)

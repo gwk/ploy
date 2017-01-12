@@ -3,18 +3,6 @@
 
 class Type: CustomStringConvertible, Hashable, Comparable {
 
-  enum PropAccessor {
-    case index(Int)
-    case name(String)
-
-    var accessorString: String {
-      switch self {
-      case .index(let index): return String(index)
-      case .name(let string): return string
-      }
-    }
-  }
-
   enum Kind {
     case all(members: Set<Type>)
     case any(members: Set<Type>)
@@ -23,7 +11,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case host
     case poly(members: Set<Type>)
     case prim
-    case prop(accessor: PropAccessor, type: Type)
     case sig(dom: Type, ret: Type)
     case var_(name: String)
   }
@@ -107,14 +94,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   class func Prim(_ name: String) -> Type {
     return Type(name, kind: .prim)
-  }
-
-  class func Prop(_ accessor: PropAccessor, type: Type) -> Type {
-    let desc = ("\(accessor.accessorString)@\(type)")
-    return memoize(desc, (
-      kind: .prop(accessor: accessor, type: type),
-      frees: type.frees,
-      vars: type.vars))
   }
 
   class func Sig(dom: Type, ret: Type) -> Type {
