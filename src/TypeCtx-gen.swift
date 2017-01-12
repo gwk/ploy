@@ -3,11 +3,42 @@
 
 extension TypeCtx {
 
+  mutating func track(expr: Expr, type: Type) {
+    exprTypes.insertNew(expr, value: type)
+  }
+
+
+  mutating func track(typeExpr: Expr, type: Type) {
+    exprTypes.insertNew(typeExpr, value: type)
+  }
+
+
+  mutating func addFreeType() -> Type {
+    let t = Type.Free(freeTypeCount)
+    freeTypeCount += 1
+    return t
+  }
+
+
+  mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
+    constraints.append(.rel(Rel(
+      act: Side(expr: actExpr, type: actType),
+      exp: Side(expr: expExpr.or(actExpr), type: expType),
+      desc: desc)))
+  }
+
+
+  mutating func constrain(prop: Prop) {
+    constraints.append(.prop(prop))
+  }
+
+
   mutating func genConstraints(_ scope: LocalScope, expr: Expr) -> Type {
     let type = genConstraintsDisp(scope, expr: expr)
     track(expr: expr, type: type)
     return type
   }
+
 
   mutating func genConstraintsDisp(_ scope: LocalScope, expr: Expr) -> Type {
     switch expr {

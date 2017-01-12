@@ -23,12 +23,17 @@ struct TypeCtx {
 
 
   let globalCtx: GlobalCtx
-  private var constraints: [Constraint] = []
-  private var freeTypeCount = 0
-  private var freeUnifications: [Int:Type] = [:]
-  private var exprTypes = [Expr:Type]() // maps expressions to their latest types.
+
+  var exprTypes = [Expr:Type]() // maps expressions to their latest types.
+
+  // only mutated during generation phase.
+  var constraints: [Constraint] = []
+  var freeTypeCount = 0
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
+
+  // mutated during resolution phase.
+  var freeUnifications: [Int:Type] = [:]
 
 
   init(globalCtx: GlobalCtx) {
@@ -38,35 +43,6 @@ struct TypeCtx {
 
   func typeFor(expr: Expr) -> Type {
     return resolved(type: exprTypes[expr]!)
-  }
-
-
-  mutating func addFreeType() -> Type {
-    let t = Type.Free(freeTypeCount)
-    freeTypeCount += 1
-    return t
-  }
-
-
-  mutating func track(expr: Expr, type: Type) {
-    exprTypes.insertNew(expr, value: type)
-  }
-
-
-  mutating func track(typeExpr: Expr, type: Type) {
-    exprTypes.insertNew(typeExpr, value: type)
-  }
-
-  mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
-    constraints.append(.rel(Rel(
-      act: Side(expr: actExpr, type: actType),
-      exp: Side(expr: expExpr.or(actExpr), type: expType),
-      desc: desc)))
-  }
-
-
-  mutating func constrain(prop: Prop) {
-    constraints.append(.prop(prop))
   }
 
 
