@@ -5,7 +5,7 @@ extension TypeCtx {
 
   mutating func genConstraints(_ scope: LocalScope, expr: Expr) -> Type {
     let type = genConstraintsDisp(scope, expr: expr)
-    trackExpr(expr, type: type)
+    track(expr: expr, type: type)
     return type
   }
 
@@ -46,6 +46,7 @@ extension TypeCtx {
 
     case .fn(let fn):
       let type = Expr.sig(fn.sig).type(scope, "signature")
+      track(typeExpr: .sig(fn.sig), type: type)
       guard case .sig(let dom, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
@@ -76,7 +77,9 @@ extension TypeCtx {
       for dep in hostVal.deps {
         _ = scope.getRecord(identifier: dep)
       }
-      return hostVal.typeExpr.type(scope, "host value declaration")
+      let type = hostVal.typeExpr.type(scope, "host value declaration")
+      track(typeExpr: hostVal.typeExpr, type: type)
+      return type
 
     case .litNum:
       return typeInt
@@ -115,6 +118,7 @@ extension TypeCtx {
 
   mutating func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
     let annType = ann.typeExpr.type(scope, "type annotation")
+    track(typeExpr: ann.typeExpr, type: annType)
     constrain(expr, actType: type, expExpr: ann.typeExpr, expType: annType, "type annotation")
     return annType
   }

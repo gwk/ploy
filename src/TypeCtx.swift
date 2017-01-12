@@ -57,10 +57,14 @@ struct TypeCtx {
   }
 
 
-  mutating func trackExpr(_ expr: Expr, type: Type) {
+  mutating func track(expr: Expr, type: Type) {
     exprTypes.insertNew(expr, value: type)
   }
 
+
+  mutating func track(typeExpr: Expr, type: Type) {
+    exprTypes.insertNew(typeExpr, value: type)
+  }
 
   mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
     constraints.append(.rel(Rel(
