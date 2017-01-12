@@ -171,7 +171,7 @@ func compileCmpdField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, paren:
       let argLabel = bind.place.sym.name
       if let label = field.label {
         if argLabel != label {
-          bind.place.sym.failType("argument label does not match type field label `(label)`")
+          bind.place.sym.failType("argument label does not match type field label `\(label)`")
         }
       } else {
         bind.place.sym.failType("argument label does not match unlabeled type field")
