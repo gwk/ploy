@@ -28,7 +28,6 @@ struct TypeCtx {
   private var freeUnifications: [Int:Type] = [:]
   private var exprTypes = [Expr:Type]() // maps expressions to their latest types.
   private var exprOrigs = [Expr:Type]() // maps expressions to pre-conversion types.
-  private var exprPolys = [Expr:Type]() // maps expressions to pre-narrowing types.
   var symRecords = [Sym:ScopeRecord]()
   var pathRecords = [Path:ScopeRecord]()
 
@@ -46,14 +45,6 @@ struct TypeCtx {
   func origFor(expr: Expr) -> Type? {
     if let orig = exprOrigs[expr] {
       return resolved(type: orig)
-    }
-    return nil
-  }
-
-
-  func polyFor(expr: Expr) -> Type? {
-    if let poly = exprPolys[expr] {
-      return resolved(type: poly)
     }
     return nil
   }
@@ -178,11 +169,6 @@ struct TypeCtx {
       }
       guard let (ctx, morph) = match else { throw Err(rel, "no morphs match expected") }
       self = ctx
-      if let expr = rel.act.litExpr, exprTypes.contains(key: expr) {
-        exprPolys[expr] = act
-      } else {
-        throw Err(rel, "polytype cannot select morph without a literal expression")
-      }
       return morph
 
     case (_, .any(let members)):

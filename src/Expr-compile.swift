@@ -13,12 +13,6 @@ extension Expr {
       ctx.globalCtx.addConversion(conv)
       em.str(indent, "(\(conv.hostName)(")
     }
-    if let poly = ctx.polyFor(expr: self) {
-      switch self {
-      case .path, .sym: break
-      default: form.fatal("non-identifier expression has type: \(poly)\n  subtype: \(type)")
-      }
-    }
 
     switch self {
 
