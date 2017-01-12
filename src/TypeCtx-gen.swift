@@ -56,7 +56,9 @@ extension TypeCtx {
       return type
 
     case .if_(let if_):
-      let type = (if_.dflt == nil) ? typeVoid: addFreeType() // all cases must return same type. // TODO: always free?
+      let type = (if_.dflt == nil) ? typeVoid: addFreeType() // all cases must return same type.
+      // note: we could do without the freee type by generating constraints for dflt first,
+      // but we prefer to generate constraints in lexical order for all cases.
       // TODO: much more to do here when default is missing;
       // e.g. inferring complete case coverage without default, typeHalt support, etc.
       for case_ in if_.cases {
