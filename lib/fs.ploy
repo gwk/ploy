@@ -12,7 +12,4 @@ write += host_val (File Bool)%() "function($) { FS___writeSync($._0, $._1) }" _w
 write += host_val (File Int)%()  "function($) { FS___writeSync($._0, $._1) }" _writeSync;
 write += host_val (File Str)%()  "function($) { FS___writeSync($._0, $._1) }" _writeSync;
 
-write_Bool: (File Bool)%()  = write # TEMP.
-write_Int:  (File Int)%()   = write # TEMP.
-write_Str:  (File Str)%()   = write # TEMP.
 ;

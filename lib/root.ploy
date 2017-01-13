@@ -57,58 +57,53 @@ std_err = host_val FS/File "$g.process.stderr.fd";
 
 
 extensible err; # TODO: make generic.
-err += fn Str%() FS/write_Str(std_err $);
-err += fn Int%() FS/write_Int(std_err $);
-
-err_Int: Int%() = err # TEMP.
-err_Str: Str%() = err # TEMP.
+err += fn Str%() FS/write(std_err $);
+err += fn Int%() FS/write(std_err $);
 
 extensible out; # TODO: make generic.
-out += fn Str%() FS/write_Str(std_out $);
-out += fn Int%() FS/write_Int(std_out $);
+out += fn Str%() FS/write(std_out $);
+out += fn Int%() FS/write(std_out $);
 
-out_Int: Int%() = out # TEMP.
-out_Str: Str%() = out # TEMP.
 
 extensible errL; # TODO: make generic.
 
 errL += fn Int%()
-  err_Int.$
-  err_Str.'\n';
+  err.$
+  err.'\n';
 
 errL += fn Str%()
-  err_Str.$
-  err_Str.'\n';
+  err.$
+  err.'\n';
 
 
 extensible outL; # TODO: make generic.
 
 outL += fn Int%()
-  out_Int.$
-  out_Str.'\n';
+  out.$
+  out.'\n';
 
 outL += fn Str%()
-  out_Str.$
-  out_Str.'\n';
-
-outL_Int: Int%() = outL # TEMP.
+  out.$
+  out.'\n';
 
 
 assert = fn (Bool Str)%()
+  # TODO: source location reporting using macros?
   if not.0@$ ? {
     err.'assert failed: '
-    errL(1@$)
+    errL.1@$
     exit.1 };;
 
 assert_eq = fn (Int Int Str)%()
+  # TODO: make generic.
   if ne(0@$ 1@$) ? {
-    err_Str.'assert_eq failed: '
-    err_Int.0@$
-    err_Str.' != '
-    err_Int.1@$
-    err_Str.'; '
-    err_Str.2@$
-    err_Str('\n')
+    err.'assert_eq failed: '
+    err.0@$
+    err.' != '
+    err.1@$
+    err.'; '
+    err.2@$
+    err.'\n'
     exit.1 };;
 
 ;

@@ -1,1 +1,1 @@
-main = FS/write_Str(std_out 'this is std_out.\n')
+main = outL.'this is std_out.'

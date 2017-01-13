@@ -1,6 +1,6 @@
 main = {
-  FS/write_Bool(std_out true)
-  FS/write_Str(std_out ' ')
-  FS/write_Int(std_out 0)
-  FS/write_Str(std_out '\n')
+  FS/write(std_out true)
+  FS/write(std_out ' ')
+  FS/write(std_out 0)
+  FS/write(std_out '\n')
 }
