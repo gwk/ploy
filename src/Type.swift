@@ -135,6 +135,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return s
   }
 
+  var isResolved: Bool {
+    switch self.kind {
+    case .free: return false
+    default: return childFrees.isEmpty
+    }
+  }
+
   static func ==(l: Type, r: Type) -> Bool { return l === r }
 
   static func <(l: Type, r: Type) -> Bool { return l.description < r.description }

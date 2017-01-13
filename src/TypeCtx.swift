@@ -28,7 +28,8 @@ struct TypeCtx {
 
 
   func resolved(type: Type) -> Type {
-    // TODO: need to track types to prevent/handle recursion.
+    // TODO: need to track types to prevent/handle recursion?
+    if type.isResolved { return type }
     switch type.kind {
     case .all(let members):
       return Type.All(Set(members.map { self.resolved(type: $0) }))
@@ -40,15 +41,9 @@ struct TypeCtx {
       if let substitution = freeUnifications[freeIndex] {
         return resolved(type: substitution)
       } else { return type }
-    case .host:
-      return type
-    case .poly(let members):
-      return Type.Poly(Set(members.map { self.resolved(type: $0) }))
-    case .prim:
-      return type
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
-    case .var_: return type
+    default: fatalError("type kind cannot contain frees: \(type)")
     }
   }
 
