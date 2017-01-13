@@ -68,10 +68,10 @@ struct Side {
     }
   }
 
-  var isSub: Bool {
+  var isLit: Bool {
     switch chain {
-    case .link: return true
-    case .end: return false
+    case .link: return false
+    case .end: return true
     }
   }
 
