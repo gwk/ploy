@@ -110,7 +110,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     type = ctx.constrainAnn(space, expr: val, type: type, ann: ann)
   }
   ctx.resolveAll()
-  type = ctx.typeFor(expr: val)
+  type = ctx.resolved(type: type)
   let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
   let em = Emitter(file: space.ctx.file)
   //let fullName = "\(space.name)/\(place.sym.name)"

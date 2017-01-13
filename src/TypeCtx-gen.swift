@@ -20,8 +20,14 @@ extension TypeCtx {
   }
 
 
+  mutating func addConstraint(_ constraint: Constraint) {
+    constraints.append(constraint)
+    constraintsResolved.append(false)
+  }
+
+
   mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
-    constraints.append(.rel(Rel(
+    addConstraint(.rel(Rel(
       act: Side(expr: actExpr, type: actType),
       exp: Side(expr: expExpr.or(actExpr), type: expType),
       desc: desc)))
@@ -29,7 +35,7 @@ extension TypeCtx {
 
 
   mutating func constrain(prop: Prop) {
-    constraints.append(.prop(prop))
+    addConstraint(.prop(prop))
   }
 
 
@@ -166,7 +172,7 @@ extension TypeCtx {
   mutating func genConstraintsBody(_ scope: LocalScope, body: Body) -> Type {
     for stmt in body.stmts {
       let type = genConstraints(scope, expr: stmt)
-      self.constrain(stmt, actType: type, expType: typeVoid, "statement")
+      constrain(stmt, actType: type, expType: typeVoid, "statement")
     }
     return genConstraints(LocalScope(parent: scope), expr: body.expr)
   }
@@ -176,7 +182,10 @@ extension TypeCtx {
     symRecords[sym] = record
     switch record.kind {
     case .lazy(let type): return type
-    case .poly(let type, _): return type
+    case .poly(let polytype, _):
+      let morphType = addFreeType()
+      constrain(.sym(sym), actType: polytype, expType: morphType, "polymorph alias")
+      return morphType
     case .val(let type): return type
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }
