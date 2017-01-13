@@ -7,26 +7,9 @@ enum Constraint: CustomStringConvertible {
 
   var description: String {
     switch self {
-    case .rel(let rel): return String(describing: rel)
     case .prop(let prop): return String(describing: prop)
+    case .rel(let rel): return String(describing: rel)
     }
-  }
-}
-
-
-struct RelCon {
-
-  struct Err: Error {
-    let rel: RelCon
-    let msgThunk: ()->String
-  }
-
-  let act: Side
-  let exp: Side
-  let desc: String
-
-  func error(_ msgThunk: @escaping @autoclosure ()->String) -> Err {
-    return Err(rel: self, msgThunk: msgThunk)
   }
 }
 
@@ -44,6 +27,23 @@ struct PropCon {
 
   func error(_ msg: String) -> Err {
     return Err(prop: self, msg: msg)
+  }
+}
+
+
+struct RelCon {
+
+  struct Err: Error {
+    let rel: RelCon
+    let msgThunk: ()->String
+  }
+
+  let act: Side
+  let exp: Side
+  let desc: String
+
+  func error(_ msgThunk: @escaping @autoclosure ()->String) -> Err {
+    return Err(rel: self, msgThunk: msgThunk)
   }
 }
 

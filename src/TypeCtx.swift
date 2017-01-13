@@ -67,8 +67,28 @@ struct TypeCtx {
 
   mutating func resolve(_ constraint: Constraint) throws -> Bool {
     switch constraint {
-    case .rel(let rel): return try resolve(rel: rel)
     case .prop(let prop): return try resolve(prop: prop)
+    case .rel(let rel): return try resolve(rel: rel)
+    }
+  }
+
+
+  mutating func resolve(prop: PropCon) throws -> Bool {
+    let accesseeType = resolved(type: prop.accesseeType)
+    let accType = resolved(type: prop.accType)
+    switch accesseeType.kind {
+    case .cmpd(let fields):
+      for (i, field) in fields.enumerated() {
+        if field.accessorString(index: i) == prop.acc.accessor.propAccessor.accessorString {
+          try resolveSub(constraint: .rel(RelCon(
+            act: Side(expr: .acc(prop.acc), type: field.type),
+            exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
+            desc: "access")))
+          return true
+        }
+      }
+      throw prop.error("accessee has no field matching accessor")
+    default: throw prop.error("accessee is not a struct")
     }
   }
 
@@ -157,26 +177,6 @@ struct TypeCtx {
   }
 
 
-  mutating func resolve(prop: PropCon) throws -> Bool {
-    let accesseeType = resolved(type: prop.accesseeType)
-    let accType = resolved(type: prop.accType)
-    switch accesseeType.kind {
-    case .cmpd(let fields):
-      for (i, field) in fields.enumerated() {
-        if field.accessorString(index: i) == prop.acc.accessor.propAccessor.accessorString {
-          try resolveSub(constraint: .rel(RelCon(
-            act: Side(expr: .acc(prop.acc), type: field.type),
-            exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
-            desc: "access")))
-          return true
-        }
-      }
-      throw prop.error("accessee has no field matching accessor")
-    default: throw prop.error("accessee is not a struct")
-    }
-  }
-
-
   mutating func resolveSub(constraint: Constraint) throws {
     let done = try resolve(constraint)
     if !done {
@@ -200,30 +200,6 @@ struct TypeCtx {
       act: Side(expr: rel.act.expr, type: actType, chain: .link(actDesc, rel.act.chain)),
       exp: rel.exp,
       desc: rel.desc)))
-  }
-
-
-  func error(_ err: RelCon.Err) -> Never {
-    let r = err.rel
-    let msg = err.msgThunk()
-    let act = resolved(type: r.act.type)
-    let exp = resolved(type: r.exp.type)
-    let actDesc = r.act.chain.map({"\($0) -> "}).join()
-    let expDesc = r.exp.chain.map({"\($0) -> "}).join()
-
-    if r.act.expr != r.exp.expr {
-      r.act.expr.form.failType("\(r.desc) \(msg). \(actDesc)actual type: \(act)",
-        notes: (r.exp.expr.form, "\(expDesc)expected type: \(exp)"))
-    } else {
-      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(actDesc)actual type:   \(act);\n  \(expDesc)expected type: \(exp).")
-    }
-  }
-
-
-  func error(_ err: PropCon.Err) -> Never {
-    let accesseeType = resolved(type: err.prop.accesseeType)
-    err.prop.acc.accessee.form.failType("\(err.msg). accessee type: \(accesseeType)",
-      notes: (err.prop.acc.accessor.form, "accessor is here."))
   }
 
 
@@ -265,6 +241,30 @@ struct TypeCtx {
       if type.frees.count > 0 {
         fatalError("unresolved frees in type: \(type)")
       }
+    }
+  }
+
+
+  func error(_ err: PropCon.Err) -> Never {
+    let accesseeType = resolved(type: err.prop.accesseeType)
+    err.prop.acc.accessee.form.failType("\(err.msg). accessee type: \(accesseeType)",
+      notes: (err.prop.acc.accessor.form, "accessor is here."))
+  }
+
+
+  func error(_ err: RelCon.Err) -> Never {
+    let r = err.rel
+    let msg = err.msgThunk()
+    let act = resolved(type: r.act.type)
+    let exp = resolved(type: r.exp.type)
+    let actDesc = r.act.chain.map({"\($0) -> "}).join()
+    let expDesc = r.exp.chain.map({"\($0) -> "}).join()
+
+    if r.act.expr != r.exp.expr {
+      r.act.expr.form.failType("\(r.desc) \(msg). \(actDesc)actual type: \(act)",
+        notes: (r.exp.expr.form, "\(expDesc)expected type: \(exp)"))
+    } else {
+      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(actDesc)actual type:   \(act);\n  \(expDesc)expected type: \(exp).")
     }
   }
 }
