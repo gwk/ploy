@@ -106,7 +106,7 @@ extension Expr {
       }
 
     case .path(let path):
-      compileSym(&ctx, em, indent, sym: path.syms.last!, scopeRecord: ctx.pathRecords[path]!, type: type)
+      compileSym(&ctx, em, indent, sym: path.syms.last!, type: type)
 
     case .reify:
       fatalError()
@@ -115,7 +115,7 @@ extension Expr {
       fatalError()
 
     case .sym(let sym):
-      compileSym(&ctx, em, indent, sym: sym, scopeRecord: ctx.symRecords[sym]!, type: type)
+      compileSym(&ctx, em, indent, sym: sym, type: type)
 
     case .void:
       em.str(indent, "undefined")
@@ -126,7 +126,8 @@ extension Expr {
     }
   }
 
-  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, scopeRecord: ScopeRecord, type: Type) {
+  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, type: Type) {
+    let scopeRecord = ctx.symRecords[sym]!
     switch scopeRecord.kind {
     case .val:
       em.str(indent, scopeRecord.hostName)

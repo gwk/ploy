@@ -11,7 +11,6 @@ struct TypeCtx {
   var constraints: [Constraint] = []
   var freeTypeCount = 0
   var symRecords = [Sym:ScopeRecord]()
-  var pathRecords = [Path:ScopeRecord]()
 
   // mutated during resolution phase.
   var freeUnifications: [Int:Type] = [:]

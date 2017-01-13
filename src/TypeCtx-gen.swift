@@ -128,9 +128,7 @@ extension TypeCtx {
       return Type.Cmpd(fields)
 
     case .path(let path):
-      let record = scope.getRecord(path: path)
-      pathRecords[path] = record
-      return path.syms.last!.typeForExprRecord(scope.getRecord(path: path))
+      return constrainSym(sym: path.syms.last!, record: scope.getRecord(path: path))
 
     case .reify(let reify):
       reify.failType("type reification cannot be used as a value expression (temporary)")
@@ -139,9 +137,7 @@ extension TypeCtx {
       sig.failType("type signature cannot be used as a value expression (temporary)")
 
     case .sym(let sym):
-      let record = scope.getRecord(sym: sym)
-      symRecords[sym] = record
-      return sym.typeForExprRecord(record)
+      return constrainSym(sym: sym, record: scope.getRecord(sym: sym))
 
     case .void:
       return typeVoid
@@ -173,5 +169,10 @@ extension TypeCtx {
       self.constrain(stmt, actType: type, expType: typeVoid, "statement")
     }
     return genConstraints(LocalScope(parent: scope), expr: body.expr)
+  }
+
+  mutating func constrainSym(sym: Sym, record: ScopeRecord) -> Type {
+    symRecords[sym] = record
+    return sym.typeForExprRecord(record)
   }
 }
