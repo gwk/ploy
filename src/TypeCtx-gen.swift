@@ -171,8 +171,14 @@ extension TypeCtx {
     return genConstraints(LocalScope(parent: scope), expr: body.expr)
   }
 
+
   mutating func constrainSym(sym: Sym, record: ScopeRecord) -> Type {
     symRecords[sym] = record
-    return sym.typeForExprRecord(record)
+    switch record.kind {
+    case .lazy(let type): return type
+    case .poly(let type, _): return type
+    case .val(let type): return type
+    default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
+    }
   }
 }

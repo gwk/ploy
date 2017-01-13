@@ -17,15 +17,6 @@ class Sym: Form { // symbol: `name`.
 
   var hostName: String { return name }
 
-  func typeForExprRecord(_ scopeRecord: ScopeRecord) -> Type {
-    switch scopeRecord.kind {
-    case .lazy(let type): return type
-    case .poly(let type, _): return type
-    case .val(let type): return type
-    default: failScope("expected a value; `\(name)` refers to a \(scopeRecord.kindDesc).")
-    }
-  }
-
   func failUndef() -> Never {
     failScope("`\(name)` is not defined in this scope.")
   }
