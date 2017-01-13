@@ -73,7 +73,7 @@ struct TypeCtx {
   }
 
 
-  mutating func resolve(rel: Rel) throws -> Bool {
+  mutating func resolve(rel: RelCon) throws -> Bool {
     let act = resolved(type: rel.act.type)
     let exp = resolved(type: rel.exp.type)
 
@@ -127,7 +127,7 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveCmpdToCmpd(_ rel: Rel, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
+  mutating func resolveCmpdToCmpd(_ rel: RelCon, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
     if expFields.count != actFields.count {
       let nFields = pluralize(actFields.count, "field")
       throw rel.error("actual struct has \(nFields); expected \(expFields.count)")
@@ -146,7 +146,7 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveSigToSig(_ rel: Rel, actDom: Type, actRet: Type, expDom: Type, expRet: Type) throws -> Bool {
+  mutating func resolveSigToSig(_ rel: RelCon, actDom: Type, actRet: Type, expDom: Type, expRet: Type) throws -> Bool {
     try resolveSub(rel,
       actExpr: rel.act.litExpr?.sigDom, actType: actDom, actDesc: "signature domain",
       expExpr: rel.exp.litExpr?.sigDom, expType: expDom, expDesc: "signature domain")
@@ -157,14 +157,14 @@ struct TypeCtx {
   }
 
 
-  mutating func resolve(prop: Prop) throws -> Bool {
+  mutating func resolve(prop: PropCon) throws -> Bool {
     let accesseeType = resolved(type: prop.accesseeType)
     let accType = resolved(type: prop.accType)
     switch accesseeType.kind {
     case .cmpd(let fields):
       for (i, field) in fields.enumerated() {
         if field.accessorString(index: i) == prop.acc.accessor.propAccessor.accessorString {
-          try resolveSub(constraint: .rel(Rel(
+          try resolveSub(constraint: .rel(RelCon(
             act: Side(expr: .acc(prop.acc), type: field.type),
             exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
             desc: "access")))
@@ -185,25 +185,25 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveSub(_ rel: Rel,
+  mutating func resolveSub(_ rel: RelCon,
    actExpr: Expr?, actType: Type, actDesc: String,
    expExpr: Expr?, expType: Type, expDesc: String) throws {
-    try resolveSub(constraint: Constraint.rel(Rel(
+    try resolveSub(constraint: Constraint.rel(RelCon(
       act: rel.act.sub(expr: actExpr, type: actType, desc: actDesc),
       exp: rel.exp.sub(expr: expExpr, type: expType, desc: expDesc),
       desc: rel.desc)))
   }
 
 
-  mutating func resolveSub(_ rel: Rel, actType: Type, actDesc: String) throws {
-    try resolveSub(constraint: Constraint.rel(Rel(
+  mutating func resolveSub(_ rel: RelCon, actType: Type, actDesc: String) throws {
+    try resolveSub(constraint: Constraint.rel(RelCon(
       act: Side(expr: rel.act.expr, type: actType, chain: .link(actDesc, rel.act.chain)),
       exp: rel.exp,
       desc: rel.desc)))
   }
 
 
-  func error(_ err: Rel.Err) -> Never {
+  func error(_ err: RelCon.Err) -> Never {
     let r = err.rel
     let msg = err.msgThunk()
     let act = resolved(type: r.act.type)
@@ -220,7 +220,7 @@ struct TypeCtx {
   }
 
 
-  func error(_ err: Prop.Err) -> Never {
+  func error(_ err: PropCon.Err) -> Never {
     let accesseeType = resolved(type: err.prop.accesseeType)
     err.prop.acc.accessee.form.failType("\(err.msg). accessee type: \(accesseeType)",
       notes: (err.prop.acc.accessor.form, "accessor is here."))
@@ -246,9 +246,9 @@ struct TypeCtx {
             constraintsResolved[index] = true
             doneThisRound += 1
           }
-        } catch let err as Rel.Err {
+        } catch let err as RelCon.Err {
           error(err)
-        } catch let err as Prop.Err {
+        } catch let err as PropCon.Err {
           error(err)
         } catch { fatalError() }
       }

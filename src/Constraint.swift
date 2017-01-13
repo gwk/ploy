@@ -2,8 +2,8 @@
 
 
 enum Constraint: CustomStringConvertible {
-  case rel(Rel)
-  case prop(Prop)
+  case prop(PropCon)
+  case rel(RelCon)
 
   var description: String {
     switch self {
@@ -14,10 +14,10 @@ enum Constraint: CustomStringConvertible {
 }
 
 
-struct Rel {
+struct RelCon {
 
   struct Err: Error {
-    let rel: Rel
+    let rel: RelCon
     let msgThunk: ()->String
   }
 
@@ -31,10 +31,10 @@ struct Rel {
 }
 
 
-struct Prop {
+struct PropCon {
 
   struct Err: Error {
-    let prop: Prop
+    let prop: PropCon
     let msg: String
   }
 

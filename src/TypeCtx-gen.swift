@@ -27,15 +27,17 @@ extension TypeCtx {
 
 
   mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
-    addConstraint(.rel(Rel(
+    addConstraint(.rel(RelCon(
       act: Side(expr: actExpr, type: actType),
       exp: Side(expr: expExpr.or(actExpr), type: expType),
       desc: desc)))
   }
 
 
-  mutating func constrain(prop: Prop) {
-    addConstraint(.prop(prop))
+  mutating func constrain(acc: Acc, accesseeType: Type) -> Type {
+    let accType = addFreeType()
+    addConstraint(.prop(PropCon(acc: acc, accesseeType: accesseeType, accType: accType)))
+    return accType
   }
 
 
@@ -51,9 +53,7 @@ extension TypeCtx {
 
     case .acc(let acc):
       let accesseeType = genConstraints(scope, expr: acc.accessee)
-      let accType = addFreeType()
-      constrain(prop: Prop(acc: acc, accesseeType: accesseeType, accType: accType))
-      return accType
+      return constrain(acc: acc, accesseeType: accesseeType)
 
     case .ann(let ann):
       let type = genConstraints(scope, expr: ann.expr)
