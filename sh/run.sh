@@ -6,7 +6,7 @@ cd $(dirname $0)/..
 
 make build
 
-mainPath="$1"; shift
+mainPath="$1"; shift || mainPath="_repro.ploy"
 stem=${mainPath%.ploy}
 outPath="_build/$stem.js"
 outDir=$(dirname "$outPath")
