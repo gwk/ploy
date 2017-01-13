@@ -1,7 +1,9 @@
 {
   "search.exclude": {
+    "**/_misc": true,
     "_build": true,
     "_build/_repro.js": false,
-    "**/_misc": true
+    "ploy.xcodeproj": true,
+    "quilt": true
   }
 }
