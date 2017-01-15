@@ -225,7 +225,14 @@ struct TypeCtx {
       }
       assert(doneThisRound >= doneCount)
       if doneThisRound == doneCount {
-        fatalError("resolve loop did not progress.") // TODO: error reporting.
+        for (c, isResolved) in zip(constraints, constraintsResolved) {
+          if isResolved { continue }
+          switch c {
+          case .prop(let prop): error(prop.error("cannot resolve constraint"))
+          case .rel(let rel): error(rel.error("cannot resolve constraint"))
+          }
+        }
+        fatalError("resolve loop did not progress") // should be unreachable.
       }
       doneCount = doneThisRound
     }

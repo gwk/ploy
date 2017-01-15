@@ -1,0 +1,7 @@
+extensible x;
+x += 0
+x += ''
+
+main = {
+  y = x
+}
