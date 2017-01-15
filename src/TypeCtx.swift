@@ -74,7 +74,7 @@ struct TypeCtx {
     switch accesseeType.kind {
     case .cmpd(let fields):
       for (i, field) in fields.enumerated() {
-        if field.accessorString(index: i) == prop.acc.accessor.propAccessor.accessorString {
+        if field.accessorString(index: i) == prop.acc.accessor.accessorString {
           try resolveSub(constraint: .rel(RelCon(
             act: Side(expr: .acc(prop.acc), type: field.type),
             exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.

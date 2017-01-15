@@ -29,10 +29,10 @@ enum Accessor: SubForm {
     }
   }
 
-  var propAccessor: PropAccessor {
+  var accessorString: String {
     switch self {
-      case .litNum(let litNum): return .index(litNum.val)
-      case .sym(let sym): return .name(sym.name)
+    case .litNum(let litNum): return String(litNum.val)
+    case .sym(let sym): return sym.name
     }
   }
 }
