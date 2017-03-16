@@ -4,7 +4,7 @@
 # $<: The name of the first prerequisite.
 # $^: The names of all the prerequisites, with spaces between them.
 
-.PHONY: _default all build clean cov gen test
+.PHONY: _default all build clean cov gen test xcode
 
 _default: test
 
