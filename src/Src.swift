@@ -189,7 +189,7 @@ class Src: CustomStringConvertible {
       failParse(pos, p, "floating point literals are not yet supported.")
     }
     guard let val = Int(string, radix: 10) else {
-      failParse(pos, p, "invalid number literal (INTERNAL ERROR).")
+      failParse(pos, p, "invalid number literal (PLOY COMPILER ERROR).")
     }
     return LitNum(Syn(src: self, pos: pos, visEnd: p, end: parseSpace(p)), val: val)
   }

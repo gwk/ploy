@@ -60,7 +60,7 @@ class Form: Hashable, CustomStringConvertible {
   }
 
   func fatal(_ msg: String, notes: (Form?, String)...) -> Never {
-    failForm(prefix: "INTERNAL ERROR", msg: msg, notes: notes)
+    failForm(prefix: "PLOY COMPILER ERROR", msg: msg, notes: notes)
   }
 
   static func ==(l: Form, r: Form) -> Bool { return l === r }
