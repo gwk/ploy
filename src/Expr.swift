@@ -26,7 +26,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let form as Ann:     self = .ann(form)
     case let form as Bind:    self = .bind(form)
     case let form as Call:    self = .call(form)
-    //case let form asCmpdType: self = .cmpdType(form)
+    //case let form as CmpdType: self = .cmpdType(form)
     case let form as Do:      self = .do_(form)
     case let form as Fn:      self = .fn(form)
     case let form as HostVal: self = .hostVal(form)
