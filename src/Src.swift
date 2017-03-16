@@ -446,6 +446,7 @@ class Src: CustomStringConvertible {
     [ ("=", Bind.mk),
       ("+=", Extension.mk),
       ("?", Case.mk)],
+    [ ("|", Union.mk)],
     [ (":", Ann.mk)],
     [ ("@", Acc.mk),
       (".", Call.mk),
