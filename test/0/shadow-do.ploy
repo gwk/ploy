@@ -1,0 +1,7 @@
+
+main = {
+  x = 1
+  { x = 2
+    assert_eq(x 2 'inner') }
+  assert_eq(x 1 'outer')
+}

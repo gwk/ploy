@@ -79,7 +79,7 @@ extension TypeCtx {
       return retType
 
     case .do_(let do_):
-      return genConstraintsBody(scope, body: do_.body)
+      return genConstraintsBody(LocalScope(parent: scope), body: do_.body)
 
     case .fn(let fn):
       let type = Expr.sig(fn.sig).type(scope, "signature")
@@ -174,7 +174,7 @@ extension TypeCtx {
       let type = genConstraints(scope, expr: stmt)
       constrain(stmt, actType: type, expType: typeVoid, "statement")
     }
-    return genConstraints(LocalScope(parent: scope), expr: body.expr)
+    return genConstraints(scope, expr: body.expr)
   }
 
 

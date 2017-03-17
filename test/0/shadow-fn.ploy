@@ -1,0 +1,9 @@
+
+main = {
+  x = 1
+  f = fn ()%()
+    x = 2
+    assert_eq(x 2 'inner');
+  f()
+  assert_eq(x 1 'outer')
+}
