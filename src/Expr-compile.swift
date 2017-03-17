@@ -92,6 +92,9 @@ extension Expr {
       s.append(Character("\""))
       em.str(indent, s)
 
+    case .match:
+      ctx.getSynth(src: self).compile(&ctx, em, indent, exp: type, isTail: isTail)
+
     case .paren(let paren):
       if paren.isScalarValue {
         paren.els[0].compile(&ctx, em, indent, exp: type, isTail: isTail)

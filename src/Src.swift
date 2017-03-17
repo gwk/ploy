@@ -377,6 +377,26 @@ class Src: CustomStringConvertible {
     return In(synForSemicolon(sym, end, "`in` form"), identifier: identifier, defs: defs)
   }
 
+  func parseMatch(_ sym: Sym) -> Form {
+    let expr: Expr = parseSubForm(sym.syn.end, subj: "`match` form")
+    var clauses: [Clause] = []
+    let end = parseSubForms(&clauses, expr.syn.end, subj: "`match` form")
+    var cases: [Case] = []
+    var dflt: Default? = nil
+    for (i, clause) in clauses.enumerated() {
+      switch clause {
+      case .case_(let case_): cases.append(case_)
+      case .default_(let default_):
+        if i == clauses.lastIndex {
+          dflt = default_
+        } else {
+          default_.failSyntax("`match` form requires `?` case clauses in all but final position; received `/` default clause.")
+        }
+      }
+    }
+    return Match(synForSemicolon(sym, end, "`match` form"), expr: expr, cases: cases, dflt: dflt)
+  }
+
   func parsePub(_ sym: Sym) -> Form {
     let def: Def = parseSubForm(sym.syn.end, subj: "`pub` form")
     return Pub(Syn(sym.syn, def.syn), def: def)
@@ -389,6 +409,7 @@ class Src: CustomStringConvertible {
     "host_val"    : parseHostVal,
     "if"          : parseIf,
     "in"          : parseIn,
+    "match"       : parseMatch,
     "pub"         : parsePub,
   ]
 

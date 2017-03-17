@@ -126,6 +126,27 @@ extension TypeCtx {
     case .litStr:
       return typeStr
 
+    case .match(let match):
+      let valSym = genSym(parent: match.expr)
+      let exprBind = Expr.bind(Bind(match.expr.syn, place: .sym(valSym), val: match.expr))
+      let if_ = If(match.syn,
+        cases: match.cases.map {
+          (case_) in
+          let patt = case_.condition
+          return Case(case_.syn,
+            condition: .call(Call(patt.syn,
+              callee: .sym(Sym(patt.syn, name: "eq")),
+              arg: .paren(Paren(patt.syn, els: [.sym(Sym(patt.syn, name: valSym.name)), patt])))),
+            consequence: case_.consequence)
+        },
+        dflt: match.dflt.or(Default(match.syn, expr: .call(Call(match.syn,
+          callee: .sym(Sym(match.syn, name: "fail")),
+          arg: .litStr(LitStr(match.syn, val: "match failed: \(match.syn).")))))))
+
+      let do_ = putSynth(src: expr, expr: .do_(Do(match.syn, stmts: [exprBind], expr: .if_(if_))))
+      let type = genConstraints(scope, expr: do_)
+      return type
+
     case .paren(let paren):
       if paren.isScalarValue {
         return genConstraints(scope, expr: paren.els[0])
@@ -189,5 +210,24 @@ extension TypeCtx {
     case .val(let type): return type
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }
+  }
+
+  mutating func putSynth(src: Expr, expr: Expr) -> Expr {
+    synths.insertNew(src, value: expr)
+    return expr
+  }
+
+  mutating func getSynth(src: Expr) -> Expr {
+    return synths[src]!
+  }
+
+  mutating func synthSym(src: Expr, name: String) -> Expr {
+    return putSynth(src: src, expr: .sym(Sym(src.syn, name: name)))
+  }
+
+  mutating func genSym(parent: Expr) -> Sym {
+    let sym = Sym(parent.syn, name: "$g\(genSyms.count)")
+    genSyms.append(sym)
+    return sym
   }
 }

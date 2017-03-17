@@ -5,15 +5,23 @@ class Body: Form { // body of statements and final expression.
   let stmts: [Expr]
   let expr: Expr
 
-  init(_ syn: Syn, exprs: [Expr]) {
-    if let expr = exprs.last {
-      self.stmts = Array(exprs[0..<exprs.lastIndex!])
-      self.expr = expr
-    } else {
-      self.stmts = []
-      self.expr = .void(ImplicitVoid(syn))
-    }
+  init(_ syn: Syn, stmts: [Expr], expr: Expr) {
+    self.stmts = stmts
+    self.expr = expr
     super.init(syn)
+  }
+
+  convenience init(_ syn: Syn, exprs: [Expr]) {
+    let _stmts: [Expr]
+    let _expr: Expr
+    if let expr = exprs.last {
+      _stmts = Array(exprs[0..<exprs.lastIndex!])
+      _expr = expr
+    } else {
+      _stmts = exprs
+      _expr = Expr.void(ImplicitVoid(syn))
+    }
+    self.init(syn, stmts: _stmts, expr: _expr)
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {

@@ -11,6 +11,8 @@ struct TypeCtx {
   // only mutated during generation phase.
   var exprTypes = [Expr:Type]() // maps expressions to their types.
   var symRecords = [Sym:ScopeRecord]()
+  var synths = [Expr:Expr]()
+  var genSyms = [Sym]()
   var freeTypeCount = 0
 
   // mutated during resolution phase.

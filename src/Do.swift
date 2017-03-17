@@ -9,6 +9,10 @@ class Do: Form { // do block: `{…}`.
     super.init(syn)
   }
 
+  convenience init(_ syn: Syn, stmts: [Expr], expr: Expr) {
+    self.init(syn, body: Body(syn, stmts: stmts, expr: expr))
+  }
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth)
     body.write(to: &stream, depth + 1)

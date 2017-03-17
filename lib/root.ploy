@@ -87,6 +87,11 @@ outL += fn Str%()
   out.'\n';
 
 
+fail = fn Str%()
+  errL.$
+  exit.1;
+
+
 assert = fn (Bool Str)%()
   # TODO: source location reporting using macros?
   if not.0@$ ? {
