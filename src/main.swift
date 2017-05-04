@@ -31,7 +31,7 @@ func main() {
   }
   _ = ployPath
 
-  check(opt == nil, "dangling option flag: '\(opt)'")
+  check(opt == nil, "dangling option flag: '\(opt!)'")
 
   guard let mainPath = opts["-main"] else { fail("`-main main-src-path` argument is required.") }
   guard let outPath = opts["-o"] else { fail("`-o out-path` argument is required.") }
