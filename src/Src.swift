@@ -310,11 +310,11 @@ class Src: CustomStringConvertible {
     return Paren(synForTerminator(pos, end, ")", "parenthesized expression"), els: els)
   }
 
-  func parseCmpdType(_ pos: Pos) -> Form {
+  func parseTypeConstraint(_ pos: Pos) -> Form {
     let p = parseSpace(adv(pos))
     var pars: [Expr] = []
-    let end = parseSubForms(&pars, p, subj: "compound type")
-    return CmpdType(synForTerminator(pos, end, ">", "compound type"), pars: pars)
+    let end = parseSubForms(&pars, p, subj: "type constraint")
+    return TypeConstraint(synForTerminator(pos, end, ">", "type constraint"), pars: pars)
   }
 
   func parseDo(_ pos: Pos) -> Form {
@@ -457,7 +457,7 @@ class Src: CustomStringConvertible {
     case "-": return parseDash(pos)
     case "/": return parseSlash(pos)
     case "(": return parseParen(pos)
-    case "<": return parseCmpdType(pos)
+    case "<": return parseTypeConstraint(pos)
     case "{": return parseDo(pos)
     default: failParse(pos, nil, "unexpected character: '\(c)'.")
     }
@@ -490,7 +490,6 @@ class Src: CustomStringConvertible {
 
   let adjacencyOperators: [(Character, (Form, Form)->Form)] = [
     ("(", CallAdj.mk),
-    ("<", ReifyAdj.mk)
   ]
 
   func parsePhrase(_ pos: Pos, precedence: Int = 0) -> Form {

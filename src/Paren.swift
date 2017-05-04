@@ -1,7 +1,10 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Paren: Form { // parenthesized expression: `(a b)`.
+class Paren: Form {
+  // parenthesized expression: `(a)` or `(a b)`.
+  // A single parenthesized expression is a purely syntactic form, with "scalar" type.
+  // Multiple expressions within parentheses create a compound (either struct or enum).
   let els: [Expr]
 
   init(_ syn: Syn, els: [Expr]) {
@@ -16,7 +19,7 @@ class Paren: Form { // parenthesized expression: `(a b)`.
     }
   }
 
-  // MARK: Cmpd
+  // MARK: Syntactic Compound
 
   var isScalarValue: Bool {
     return els.count == 1 && els[0].argLabel == nil

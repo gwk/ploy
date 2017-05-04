@@ -152,7 +152,7 @@ extension TypeCtx {
         return genConstraints(scope, expr: paren.els[0])
       }
       let fields = paren.els.enumerated().map { self.typeFieldForArg(scope, arg: $1, index: $0) }
-      return Type.Cmpd(fields)
+      return Type.Struct(fields)
 
     case .path(let path):
       return constrainSym(sym: path.syms.last!, record: scope.getRecord(path: path))

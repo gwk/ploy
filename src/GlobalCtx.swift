@@ -25,15 +25,15 @@ class GlobalCtx {
       let cast = conv.cast
       let em = Emitter(file: file)
       switch (orig.kind, cast.kind) {
-      case (.cmpd(let origFields), .cmpd(let castFields)):
-        emitCmpdCmpd(em, convs: &convs, conv: conv, origFields: origFields, castFields: castFields)
+      case (.struct_(let origFields), .struct_(let castFields)):
+        emitStructToStruct(em, convs: &convs, conv: conv, origFields: origFields, castFields: castFields)
       default: fatalError("impossible conversion: \(conv)")
       }
       em.flush()
     }
   }
 
-  func emitCmpdCmpd(_ em: Emitter, convs: inout [Conversion], conv: Conversion, origFields: [TypeField], castFields: [TypeField]) {
+  func emitStructToStruct(_ em: Emitter, convs: inout [Conversion], conv: Conversion, origFields: [TypeField], castFields: [TypeField]) {
     em.str(0, "let \(conv.hostName) = $=>({ // \(conv)")
     for (i, (o, c)) in zip(origFields, castFields).enumerated() {
       let oName = o.hostName(index: i)

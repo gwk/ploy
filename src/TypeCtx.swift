@@ -37,8 +37,8 @@ struct TypeCtx {
       return Type.All(Set(members.map { self.resolved(type: $0) }))
     case .any(let members):
       return Type.Any_(Set(members.map { self.resolved(type: $0) }))
-    case .cmpd(let fields):
-      return Type.Cmpd(fields.map() { self.resolved(par: $0) })
+    case .struct_(let fields):
+      return Type.Struct(fields.map() { self.resolved(par: $0) })
     case .free(let freeIndex):
       if let substitution = freeUnifications[freeIndex] {
         return resolved(type: substitution)
@@ -74,7 +74,7 @@ struct TypeCtx {
     let accesseeType = resolved(type: prop.accesseeType)
     let accType = resolved(type: prop.accType)
     switch accesseeType.kind {
-    case .cmpd(let fields):
+    case .struct_(let fields):
       for (i, field) in fields.enumerated() {
         if field.accessorString(index: i) == prop.acc.accessor.accessorString {
           try resolveSub(constraint: .rel(RelCon(
@@ -133,8 +133,8 @@ struct TypeCtx {
       }
       return true
 
-    case (.cmpd(let actFields), .cmpd(let expFields)):
-      return try resolveCmpdToCmpd(rel, act: act, actFields: actFields, expFields: expFields)
+    case (.struct_(let actFields), .struct_(let expFields)):
+      return try resolveStructToStruct(rel, act: act, actFields: actFields, expFields: expFields)
 
     case (.sig(let actDom, let actRet), .sig(let expDom, let expRet)):
       return try resolveSigToSig(rel, actDom: actDom, actRet: actRet, expDom: expDom, expRet: expRet)
@@ -144,13 +144,13 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveCmpdToCmpd(_ rel: RelCon, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
+  mutating func resolveStructToStruct(_ rel: RelCon, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
     if expFields.count != actFields.count {
       let nFields = pluralize(actFields.count, "field")
       throw rel.error("actual struct has \(nFields); expected \(expFields.count)")
     }
-    let litActFields = rel.act.litExpr?.cmpdFields
-    let litExpFields = rel.exp.litExpr?.cmpdFields
+    let litActFields = rel.act.litExpr?.structFields
+    let litExpFields = rel.exp.litExpr?.structFields
     for (index, (actField, expField)) in zip(actFields, expFields).enumerated() {
       if actField.label != nil && actField.label != expField.label {
         throw rel.error("field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")

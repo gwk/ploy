@@ -25,5 +25,5 @@ class Call: Form {
 }
 
 
-// function call implied by adjacency to Cmpd: `f(a b)`.
+// function call implied by adjacency to parenthesized: `f(a b)`.
 class CallAdj: Call {}

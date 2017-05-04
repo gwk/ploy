@@ -11,7 +11,7 @@ extension Expr {
       if paren.isScalarType {
         return paren.els[0].type(scope, subj)
       }
-      return Type.Cmpd(paren.els.map { $0.typeField(scope) })
+      return Type.Struct(paren.els.map { $0.typeField(scope) })
 
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
@@ -67,7 +67,7 @@ extension Expr {
 
 func zipFields(paren: Paren, type: Type) -> Zip2Sequence<[Expr], [TypeField]> {
   switch type.kind {
-  case .cmpd(let fields):
+  case .struct_(let fields):
     assert(paren.els.count == fields.count)
     return zip(paren.els, fields)
   default: fatalError()

@@ -23,7 +23,3 @@ class Reify: Form { // type reification:  `T^A`.
     arg.write(to: &stream, depth + 1)
   }
 }
-
-
-/// type reification implied by adjacency to CmpdType: `T<A B>`.
-class ReifyAdj: Reify {}

@@ -99,11 +99,11 @@ extension Expr {
       if paren.isScalarValue {
         paren.els[0].compile(&ctx, em, indent, exp: type, isTail: isTail)
       } else {
-        guard case .cmpd(let fields) = type.kind else { paren.fatal("expected struct type") }
+        guard case .struct_(let fields) = type.kind else { paren.fatal("expected struct type") }
         em.str(indent, "{")
         var argIndex = 0
         for (i, field) in fields.enumerated() {
-          compileCmpdField(&ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
+          compileStructField(&ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
         }
         em.append("}")
       }
@@ -168,7 +168,7 @@ func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, body: Body,
 }
 
 
-func compileCmpdField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, paren: Paren, field: TypeField, parIndex: Int, argIndex: inout Int) {
+func compileStructField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, paren: Paren, field: TypeField, parIndex: Int, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr

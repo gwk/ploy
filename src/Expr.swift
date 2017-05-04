@@ -6,7 +6,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case ann(Ann)
   case bind(Bind)
   case call(Call)
-  //case cmpdType(CmpdType)
+  //case typeConsraint(TypeConstraint)
   case do_(Do)
   case fn(Fn)
   case hostVal(HostVal)
@@ -27,7 +27,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let form as Ann:     self = .ann(form)
     case let form as Bind:    self = .bind(form)
     case let form as Call:    self = .call(form)
-    //case let form as CmpdType: self = .cmpdType(form)
+    //case let form as TypeConstraint: self = .typeConstraint(form)
     case let form as Do:      self = .do_(form)
     case let form as Fn:      self = .fn(form)
     case let form as HostVal: self = .hostVal(form)
@@ -56,7 +56,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .ann(let ann): return ann
     case .bind(let bind): return bind
     case .call(let call): return call
-    //case .cmpdType(let cmpdType): return cmpdType
+    //case .typeConsraint(let typeConsraint): return typeConsraint
     case .do_(let do_): return do_
     case .fn(let fn): return fn
     case .hostVal(let hostVal): return hostVal
@@ -93,7 +93,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     }
   }
 
-  var cmpdFields: [Expr]? {
+  var structFields: [Expr]? {
     switch self {
     case .paren(let paren): return paren.els
     default: return nil

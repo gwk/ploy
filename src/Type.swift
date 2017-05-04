@@ -6,7 +6,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   enum Kind {
     case all(members: Set<Type>)
     case any(members: Set<Type>)
-    case cmpd(fields: [TypeField])
+    case struct_(fields: [TypeField])
     case free(index: Int)
     case host
     case poly(members: Set<Type>)
@@ -59,11 +59,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: Set(members.flatMap { $0.vars })))
   }
 
-  class func Cmpd(_ fields: [TypeField]) -> Type {
+  class func Struct(_ fields: [TypeField]) -> Type {
     let descs = fields.map({$0.description}).joined(separator: " ")
     let desc = "(\(descs))"
     return memoize(desc, (
-      kind: .cmpd(fields: fields),
+      kind: .struct_(fields: fields),
       frees: Set(fields.flatMap { $0.type.frees }),
       vars: Set(fields.flatMap { $0.type.vars })))
   }
@@ -165,7 +165,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 let typeEmpty = Type.Any_([]) // aka "Bottom type"; the set of all objects.
 let typeEvery = Type.All([]) // aka "Top type"; the empty set.
-let typeVoid = Type.Cmpd([])
+let typeVoid = Type.Struct([])
 
 let typeBool      = Type.Prim("Bool")
 let typeInt       = Type.Prim("Int")
