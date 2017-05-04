@@ -27,9 +27,9 @@ struct TypeField: Equatable, CustomStringConvertible {
     }
   }
 
-  func accessorString(index: Int) -> String { return label.or(String(index)) }
+  func accessorString(index: Int) -> String { return label ?? String(index) }
 
-  func hostName(index: Int) -> String { return label.or("_\(index)") }
+  func hostName(index: Int) -> String { return label ?? "_\(index)" }
 
   static func ==(l: TypeField, r: TypeField) -> Bool { return l.label == r.label && l.type == r.type }
 }

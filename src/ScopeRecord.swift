@@ -19,7 +19,7 @@ struct ScopeRecord {
 
   init(name: String, hostName: String? = nil, sym: Sym?, kind: Kind) {
     self.name = name
-    self.hostName = hostName.or(name)
+    self.hostName = hostName ?? name
     self.sym = sym
     self.kind = kind
   }

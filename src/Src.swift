@@ -560,7 +560,7 @@ class Src: CustomStringConvertible {
   func parseBody(_ pos: Pos, subj: String) -> Body {
     var exprs: [Expr] = []
     let end = parseSubForms(&exprs, pos, subj: "body")
-    return Body(Syn(src: self, pos: pos, visEnd: (exprs.last?.syn.visEnd).or(pos), end: end), exprs: exprs)
+    return Body(Syn(src: self, pos: pos, visEnd: exprs.last?.syn.visEnd ?? pos, end: end), exprs: exprs)
   }
 
   func parse(verbose: Bool = false) -> [Def] {

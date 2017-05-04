@@ -29,7 +29,7 @@ extension TypeCtx {
   mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
     addConstraint(.rel(RelCon(
       act: Side(expr: actExpr, type: actType),
-      exp: Side(expr: expExpr.or(actExpr), type: expType),
+      exp: Side(expr: expExpr ?? actExpr, type: expType),
       desc: desc)))
   }
 
@@ -139,9 +139,9 @@ extension TypeCtx {
               arg: .paren(Paren(patt.syn, els: [.sym(Sym(patt.syn, name: valSym.name)), patt])))),
             consequence: case_.consequence)
         },
-        dflt: match.dflt.or(Default(match.syn, expr: .call(Call(match.syn,
+        dflt: match.dflt ?? Default(match.syn, expr: .call(Call(match.syn,
           callee: .sym(Sym(match.syn, name: "fail")),
-          arg: .litStr(LitStr(match.syn, val: "match failed: \(match.syn).")))))))
+          arg: .litStr(LitStr(match.syn, val: "match failed: \(match.syn)."))))))
 
       let do_ = putSynth(src: expr, expr: .do_(Do(match.syn, stmts: [exprBind], expr: .if_(if_))))
       let type = genConstraints(scope, expr: do_)
