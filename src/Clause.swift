@@ -1,7 +1,7 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-enum Clause: SubForm {
+enum Clause: SubForm { // either a `?` case or `/` default.
 
   case case_(Case)
   case default_(Default)
