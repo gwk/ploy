@@ -11,10 +11,7 @@ extension Expr {
       if paren.isScalarType {
         return paren.els[0].type(scope, subj)
       }
-      return Type.Cmpd(paren.els.enumerated().map {
-        (index, par) in
-        return par.typeField(scope, index: index)
-      })
+      return Type.Cmpd(paren.els.map { $0.typeField(scope) })
 
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
@@ -34,7 +31,7 @@ extension Expr {
   }
 
 
-  func typeField(_ scope: Scope, index: Int) -> TypeField {
+  func typeField(_ scope: Scope) -> TypeField {
     var label: String? = nil
     var type: Type
 
