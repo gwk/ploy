@@ -120,6 +120,9 @@ extension Expr {
     case .sym(let sym):
       compileSym(&ctx, em, indent, sym: sym, type: type)
 
+    case .typeAlias:
+      em.str(indent, "undefined")
+
     case .void:
       em.str(indent, "undefined")
     }

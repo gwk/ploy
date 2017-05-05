@@ -19,6 +19,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case reify(Reify)
   case sig(Sig)
   case sym(Sym)
+  case typeAlias(TypeAlias)
   case void(ImplicitVoid)
 
   init(form: Form, subj: String, exp: String) {
@@ -40,7 +41,8 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let form as Reify:   self = .reify(form)
     case let form as Sig:     self = .sig(form)
     case let form as Sym:     self = .sym(form)
-    case let form as ImplicitVoid: self = .void(form)
+    case let form as TypeAlias:     self = .typeAlias(form)
+    case let form as ImplicitVoid:  self = .void(form)
     default:
       form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
     }
@@ -69,6 +71,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .reify(let reify): return reify
     case .sig(let sig): return sig
     case .sym(let sym): return sym
+    case .typeAlias(let typeAlias): return typeAlias
     case .void(let void): return void
     }
   }

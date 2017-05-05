@@ -9,6 +9,7 @@ enum Def: SubForm {
   case hostType(HostType)
   case in_(In)
   case pub(Pub)
+  case typeAlias(TypeAlias)
 
   init(form: Form, subj: String) {
     switch form {
@@ -18,6 +19,7 @@ enum Def: SubForm {
     case let form as HostType:    self = .hostType(form)
     case let form as In:          self = .in_(form)
     case let form as Pub:         self = .pub(form)
+    case let form as TypeAlias:   self = .typeAlias(form)
     default:
       form.failSyntax("\(subj) expects definition but received \(form.syntaxName).")
     }
@@ -31,6 +33,7 @@ enum Def: SubForm {
     case .hostType(let hostType): return hostType
     case .in_(let in_): return in_
     case .pub(let pub): return pub
+    case .typeAlias(let typeAlias): return typeAlias
     }
   }
 
@@ -42,6 +45,7 @@ enum Def: SubForm {
     case .hostType(let hostType): return hostType.sym
     case .in_(let in_): form.fatal("`in` is not an individual definition; sym should never be called: \(in_).")
     case .pub(let pub): return pub.def.sym
+    case .typeAlias(let typeAlias): return typeAlias.sym
     }
   }
 
@@ -98,6 +102,9 @@ enum Def: SubForm {
 
     case .pub:
       fatalError()
+
+    case .typeAlias(let typeAlias):
+      return .type(typeAlias.expr.type(space, "type alias"))
     }
   }
 }

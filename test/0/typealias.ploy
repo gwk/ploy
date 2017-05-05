@@ -1,0 +1,5 @@
+Int1 =: Int
+
+main = {
+  Int2 =: Int
+  exit.add(0:Int1 0:Int2) }

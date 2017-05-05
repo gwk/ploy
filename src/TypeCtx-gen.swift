@@ -166,6 +166,12 @@ extension TypeCtx {
     case .sym(let sym):
       return constrainSym(sym: sym, record: scope.getRecord(sym: sym))
 
+    case .typeAlias(let typeAlias):
+      _ = scope.addRecord(sym: typeAlias.sym, kind: .fwd)
+      let type = typeAlias.expr.type(scope, "type alias")
+      _ = scope.addRecord(sym: typeAlias.sym, kind: .type(type))
+      return typeVoid
+
     case .void:
       return typeVoid
     }
