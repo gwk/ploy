@@ -57,8 +57,7 @@ extension Expr {
       }
 
     default:
-      let typeExpr = Expr(form: form, subj: "parameter type")
-      type = typeExpr.type(scope, "parameter type")
+      type = self.type(scope, "parameter type")
     }
     return TypeField(label: label, type: type)
   }
