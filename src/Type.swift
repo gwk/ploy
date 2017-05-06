@@ -92,7 +92,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: Set(members.flatMap { $0.vars })))
   }
 
-  class func Prim(_ name: String) -> Type {
+  fileprivate class func Prim(_ name: String) -> Type {
     return Type(name, kind: .prim)
   }
 
