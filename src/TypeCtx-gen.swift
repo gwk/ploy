@@ -151,7 +151,7 @@ extension TypeCtx {
       if paren.isScalarValue {
         return genConstraints(scope, expr: paren.els[0])
       }
-      let fields = paren.els.enumerated().map { self.typeFieldForArg(scope, arg: $1, index: $0) }
+      let fields = paren.els.map { self.typeFieldForArg(scope, arg: $0) }
       return Type.Struct(fields)
 
     case .path(let path):
@@ -186,7 +186,7 @@ extension TypeCtx {
   }
 
 
-  mutating func typeFieldForArg(_ scope: LocalScope, arg: Expr, index: Int) -> TypeField {
+  mutating func typeFieldForArg(_ scope: LocalScope, arg: Expr) -> TypeField {
     let val: Expr
     switch arg {
       case .bind(let bind): val = bind.val
