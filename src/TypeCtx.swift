@@ -134,7 +134,7 @@ struct TypeCtx {
       return true
 
     case (.struct_(let actFields), .struct_(let expFields)):
-      return try resolveStructToStruct(rel, act: act, actFields: actFields, expFields: expFields)
+      return try resolveStructToStruct(rel, actFields: actFields, expFields: expFields)
 
     case (.sig(let actDom, let actRet), .sig(let expDom, let expRet)):
       return try resolveSigToSig(rel, actDom: actDom, actRet: actRet, expDom: expDom, expRet: expRet)
@@ -144,7 +144,7 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveStructToStruct(_ rel: RelCon, act: Type, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
+  mutating func resolveStructToStruct(_ rel: RelCon, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
     if expFields.count != actFields.count {
       let nFields = pluralize(actFields.count, "field")
       throw rel.error("actual struct has \(nFields); expected \(expFields.count)")
