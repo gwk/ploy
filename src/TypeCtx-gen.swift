@@ -181,7 +181,7 @@ extension TypeCtx {
   mutating func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
     let annType = ann.typeExpr.type(scope, "type annotation")
     track(typeExpr: ann.typeExpr, type: annType)
-    constrain(expr, actType: type, expExpr: ann.typeExpr, expType: annType, "type annotation")
+    constrain(expr, actType: type, expExpr: ann.typeExpr, expType: annType, "annotated:")
     return annType
   }
 
