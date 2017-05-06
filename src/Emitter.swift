@@ -58,7 +58,7 @@ func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace)
 
   file.writeL("\"use strict\";\n")
   file.writeL("(()=>{ // ploy scope.\n")
-  file.writeL("let $g = global;")
+  file.writeL("let $g = global;") // bling: $g.
   file.writeL("let $require = require;")
   file.writeL("function $lazy_sentinal() { throw 'PLOY RUNTIME ERROR: lazy value init recursed.' };")
   file.writeL("function $assert(cond) { if (!cond) { throw 'PLOY RUNTIME ERROR: assertion failed.' }; };")

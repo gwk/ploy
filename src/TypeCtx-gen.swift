@@ -232,7 +232,7 @@ extension TypeCtx {
   }
 
   mutating func genSym(parent: Expr) -> Sym {
-    let sym = Sym(parent.syn, name: "$g\(genSyms.count)")
+    let sym = Sym(parent.syn, name: "$g\(genSyms.count)") // bling: $g<i>: gensym.
     genSyms.append(sym)
     return sym
   }
