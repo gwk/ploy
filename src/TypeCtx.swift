@@ -133,16 +133,26 @@ struct TypeCtx {
       }
       return true
 
+    case (.sig(let actDR), .sig(let expDR)):
+      return try resolveSigToSig(rel, act: actDR, exp: expDR)
+
     case (.struct_(let actFields), .struct_(let expFields)):
       return try resolveStructToStruct(rel, actFields: actFields, expFields: expFields)
-
-    case (.sig(let actDom, let actRet), .sig(let expDom, let expRet)):
-      return try resolveSigToSig(rel, actDom: actDom, actRet: actRet, expDom: expDom, expRet: expRet)
 
     default: throw rel.error("actual type is not expected type")
     }
   }
 
+
+  mutating func resolveSigToSig(_ rel: RelCon, act: (dom: Type, ret: Type), exp: (dom: Type, ret: Type)) throws -> Bool {
+    try resolveSub(rel,
+      actExpr: rel.act.litExpr?.sigDom, actType: act.dom, actDesc: "signature domain",
+      expExpr: rel.exp.litExpr?.sigDom, expType: exp.dom, expDesc: "signature domain")
+    try resolveSub(rel,
+      actExpr: rel.act.litExpr?.sigRet, actType: act.ret, actDesc: "signature return",
+      expExpr: rel.exp.litExpr?.sigRet, expType: exp.ret, expDesc: "signature return")
+    return true
+  }
 
   mutating func resolveStructToStruct(_ rel: RelCon, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
     if expFields.count != actFields.count {
@@ -159,17 +169,6 @@ struct TypeCtx {
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
         expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
     }
-    return true
-  }
-
-
-  mutating func resolveSigToSig(_ rel: RelCon, actDom: Type, actRet: Type, expDom: Type, expRet: Type) throws -> Bool {
-    try resolveSub(rel,
-      actExpr: rel.act.litExpr?.sigDom, actType: actDom, actDesc: "signature domain",
-      expExpr: rel.exp.litExpr?.sigDom, expType: expDom, expDesc: "signature domain")
-    try resolveSub(rel,
-      actExpr: rel.act.litExpr?.sigRet, actType: actRet, actDesc: "signature return",
-      expExpr: rel.exp.litExpr?.sigRet, expType: expRet, expDesc: "signature return")
     return true
   }
 
