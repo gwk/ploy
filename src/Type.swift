@@ -163,8 +163,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 
 
-let typeEmpty = Type.Any_([]) // aka "Bottom type"; the set of all objects.
-let typeEvery = Type.All([]) // aka "Top type"; the empty set.
+let typeEmpty = Type.Any_([]) // aka "Bottom type"; the empty set.
+let typeEvery = Type.All([]) // aka "Top type"; the set of all objects.
 let typeVoid = Type.Struct([])
 
 let typeBool      = Type.Prim("Bool")
