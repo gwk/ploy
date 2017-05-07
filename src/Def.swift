@@ -151,12 +151,7 @@ func needsLazyDef(val: Expr, type: Type) -> Bool {
     if paren.isScalarValue {
       return needsLazyDef(val: paren.els[0], type: type)
     } else {
-      for (fieldVal, typeField) in zipFields(paren: paren, type: type) {
-        if needsLazyDef(val: fieldVal, type: typeField.type) {
-          return true
-        }
-      }
-      return false
+      return hasLazyMember(paren: paren, type: type)
     }
   case .sym:
     switch type.kind {
@@ -164,5 +159,23 @@ func needsLazyDef(val: Expr, type: Type) -> Bool {
     default: return true
     }
   default: return true
+  }
+}
+
+
+func hasLazyMember(paren: Paren, type: Type) -> Bool {
+  guard case .struct_(let fields, let variants) = type.kind else { fatalError() }
+  var i = 0
+  for typeField in fields {
+    if needsLazyDef(val: paren.els[i], type: typeField.type) { return true }
+    i += 1
+  }
+  if variants.isEmpty {
+    assert(i == paren.els.count)
+    return false
+  } else {
+    assert(variants.count == 1)
+    assert(i == paren.els.lastIndex)
+    return needsLazyDef(val: paren.els[i], type: variants[0].type)
   }
 }

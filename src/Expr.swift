@@ -19,6 +19,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case reify(Reify)
   case sig(Sig)
   case sym(Sym)
+  case tag(Tag)
   case typeAlias(TypeAlias)
   case void(ImplicitVoid)
 
@@ -41,6 +42,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let form as Reify:   self = .reify(form)
     case let form as Sig:     self = .sig(form)
     case let form as Sym:     self = .sym(form)
+    case let form as Tag:     self = .tag(form)
     case let form as TypeAlias:     self = .typeAlias(form)
     case let form as ImplicitVoid:  self = .void(form)
     default:
@@ -71,6 +73,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .reify(let reify): return reify
     case .sig(let sig): return sig
     case .sym(let sym): return sym
+    case .tag(let tag): return tag
     case .typeAlias(let typeAlias): return typeAlias
     case .void(let void): return void
     }

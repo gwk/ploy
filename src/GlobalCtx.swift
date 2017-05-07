@@ -25,17 +25,21 @@ class GlobalCtx {
       let cast = conv.cast
       let em = Emitter(file: file)
       switch (orig.kind, cast.kind) {
-      case (.struct_(let origFields), .struct_(let castFields)):
-        emitStructToStruct(em, convs: &convs, conv: conv, origFields: origFields, castFields: castFields)
+      case (.struct_(let orig), .struct_(let cast)):
+        emitStructToStruct(em, convs: &convs, conv: conv, orig: orig, cast: cast)
       default: fatalError("impossible conversion: \(conv)")
       }
       em.flush()
     }
   }
 
-  func emitStructToStruct(_ em: Emitter, convs: inout [Conversion], conv: Conversion, origFields: [TypeField], castFields: [TypeField]) {
+  func emitStructToStruct(_ em: Emitter, convs: inout [Conversion], conv: Conversion,
+   orig: (fields: [TypeField], variants: [TypeField]),
+   cast: (fields: [TypeField], variants: [TypeField])) {
     em.str(0, "let \(conv.hostName) = $=>({ // \(conv)")
-    for (i, (o, c)) in zip(origFields, castFields).enumerated() {
+    assert(cast.fields.count + cast.variants.count > 0) // conversion to nil is explictly disallowed.
+    assert(orig.fields.count == cast.fields.count)
+    for (i, (o, c)) in zip(orig.fields, cast.fields).enumerated() {
       let oName = o.hostName(index: i)
       let cName = c.hostName(index: i)
       if o.type != c.type {
@@ -48,6 +52,11 @@ class GlobalCtx {
       } else {
         em.str(2, "\(cName): $.\(oName),")
       }
+    }
+    if !cast.variants.isEmpty {
+      assert(!orig.variants.isEmpty)
+      em.str(2, "$t: $.$t,") // bling: $t: morph tag.
+      em.str(2, "$m: $.$m,") // bling: $m: morph value.
     }
     em.append("})")
   }

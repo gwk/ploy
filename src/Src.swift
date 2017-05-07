@@ -288,6 +288,9 @@ class Src: CustomStringConvertible {
     let nextChar = char(nextPos)
     if ployNumHeadChars.contains(nextChar) {
       return parseLitNum(pos)
+    } else if ploySymHeadChars.contains(nextChar) {
+      let sym = parseSym(nextPos)
+      return Tag(Syn(pos: pos, bodySyn: sym.syn), sym: sym)
     }
     failParse(pos, nil, "unexpected dash.")
   }

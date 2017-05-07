@@ -11,7 +11,24 @@ extension Expr {
       if paren.isScalarType {
         return paren.els[0].type(scope, subj)
       }
-      return Type.Struct(paren.els.map { $0.typeField(scope) })
+      var fields = [TypeField]()
+      var variants = [TypeField]()
+      var firstVariantForm: Form? = nil
+      for par in paren.els {
+        let typeField = par.getTypeField(scope)
+        if typeField.isVariant {
+          variants.append(typeField)
+          if firstVariantForm == nil {
+            firstVariantForm = par.form
+          }
+        } else if let first = firstVariantForm {
+            par.form.failSyntax("compound field cannot follow a variant",
+              notes: (first, "first variant is here"))
+        } else {
+          fields.append(typeField)
+        }
+      }
+      return Type.Struct(fields: fields, variants: variants)
 
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
@@ -31,17 +48,25 @@ extension Expr {
   }
 
 
-  func typeField(_ scope: Scope) -> TypeField {
+  func getTypeField(_ scope: Scope) -> TypeField {
+    var isVariant = false
     var label: String? = nil
     var type: Type
 
     switch self {
+
     case .ann(let ann):
-      guard case .sym(let sym) = ann.expr else {
+      switch ann.expr {
+      case .sym(let sym):
+        label = sym.name
+        type = ann.typeExpr.type(scope, "parameter annotated type")
+      case .tag(let tag):
+        isVariant = true
+        label = tag.sym.name
+        type = ann.typeExpr.type(scope, "tag annotated type")
+      default:
         ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
       }
-      label = sym.name
-      type = ann.typeExpr.type(scope, "parameter annotated type")
 
     case .bind(let bind):
       switch bind.place {
@@ -54,21 +79,13 @@ extension Expr {
       case .sym(let sym):
         // TODO: for now assume the sym refers to a type. This is going to change.
         type = scope.typeBinding(sym: sym, subj: "default parameter type")
+      case .tag:
+        bind.failSyntax("tag parameter cannot have a default value.")
       }
 
     default:
       type = self.type(scope, "parameter type")
     }
-    return TypeField(label: label, type: type)
-  }
-}
-
-
-func zipFields(paren: Paren, type: Type) -> Zip2Sequence<[Expr], [TypeField]> {
-  switch type.kind {
-  case .struct_(let fields):
-    assert(paren.els.count == fields.count)
-    return zip(paren.els, fields)
-  default: fatalError()
+    return TypeField(isVariant: isVariant, label: label, type: type)
   }
 }

@@ -5,6 +5,7 @@ enum Place: SubForm { // left side of a binding.
 
   case ann(Ann)
   case sym(Sym)
+  case tag(Tag)
 
   init(form: Form, subj: String) {
     switch form {
@@ -15,6 +16,7 @@ enum Place: SubForm { // left side of a binding.
       }
       self = .ann(form)
     case let form as Sym: self = .sym(form)
+    case let form as Tag: self = .tag(form)
     default:
       form.failSyntax("\(subj) expects symbol or annotated symbol but received \(form.syntaxName).")
     }
@@ -22,24 +24,27 @@ enum Place: SubForm { // left side of a binding.
 
   var form: Form {
     switch self {
-      case .sym(let sym): return sym
       case .ann(let ann): return ann
+      case .sym(let sym): return sym
+      case .tag(let tag): return tag
     }
   }
 
   var sym: Sym {
     switch self {
-      case .sym(let sym): return sym
       case .ann(let ann):
         guard case .sym(let sym) = ann.expr else { fatalError() }
         return sym
+      case .sym(let sym): return sym
+      case .tag(let tag): return tag.sym
     }
   }
 
   var ann: Ann? {
     switch self {
-      case .sym: return nil
       case .ann(let ann): return ann
+      case .sym: return nil
+      case .tag: return nil
     }
   }
 }

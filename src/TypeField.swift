@@ -3,6 +3,7 @@
 
 struct TypeField: Equatable, CustomStringConvertible {
 
+  let isVariant: Bool
   let label: String?
   let type: Type
 
@@ -14,17 +15,15 @@ struct TypeField: Equatable, CustomStringConvertible {
      }
   }
 
-  init(label: String?, type: Type) {
+  init(isVariant: Bool, label: String?, type: Type) {
+    self.isVariant = isVariant
     self.label = label
     self.type = type
   }
 
   var description: String {
-    if let label = label {
-      return "\(label):\(type)"
-    } else {
-      return type.description
-    }
+    let l = label.and({$0 + ":"}) ?? ""
+    return "\(isVariant ? "-" : "")\(l)\(type)"
   }
 
   func accessorString(index: Int) -> String { return label ?? String(index) }

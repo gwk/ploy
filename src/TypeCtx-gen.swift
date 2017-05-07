@@ -60,13 +60,19 @@ extension TypeCtx {
       return constrainAnn(scope, expr: ann.expr, type: type, ann: ann)
 
     case .bind(let bind):
-      _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
-      var exprType = genConstraints(scope, expr: bind.val)
-      if let ann = bind.place.ann {
-        exprType = constrainAnn(scope, expr: bind.val, type: exprType, ann: ann)
+      if case .tag(let tag) = bind.place { // variant constructor.
+        let fieldType = genConstraints(scope, expr: bind.val)
+        let t = Type.Variant(label: tag.sym.name, type: fieldType)
+        return t
+      } else {
+        _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
+        var exprType = genConstraints(scope, expr: bind.val)
+        if let ann = bind.place.ann {
+          exprType = constrainAnn(scope, expr: bind.val, type: exprType, ann: ann)
+        }
+        _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
+        return typeVoid
       }
-      _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
-      return typeVoid
 
     case .call(let call):
       let calleeType = genConstraints(scope, expr: call.callee)
@@ -151,8 +157,23 @@ extension TypeCtx {
       if paren.isScalarValue {
         return genConstraints(scope, expr: paren.els[0])
       }
-      let fields = paren.els.map { self.typeFieldForArg(scope, arg: $0) }
-      return Type.Struct(fields)
+      var fields = [TypeField]()
+      var variants = [TypeField]()
+      for el in paren.els {
+        let member = self.typeFieldForArg(scope, arg: el)
+        if member.isVariant {
+          if !variants.isEmpty {
+            el.form.failSyntax("struct literal cannot contain multiple tagged elements")
+          }
+          variants.append(member)
+        } else {
+          if !variants.isEmpty {
+            el.form.failSyntax("struct literal field cannot follow a variant")
+          }
+          fields.append(member)
+        }
+      }
+      return Type.Struct(fields: fields, variants: variants)
 
     case .path(let path):
       return constrainSym(sym: path.syms.last!, record: scope.getRecord(path: path))
@@ -165,6 +186,9 @@ extension TypeCtx {
 
     case .sym(let sym):
       return constrainSym(sym: sym, record: scope.getRecord(sym: sym))
+
+    case .tag(let tag):
+      tag.failType("tag cannot be used in a value expression")
 
     case .typeAlias(let typeAlias):
       _ = scope.addRecord(sym: typeAlias.sym, kind: .fwd)
@@ -187,12 +211,17 @@ extension TypeCtx {
 
 
   mutating func typeFieldForArg(_ scope: LocalScope, arg: Expr) -> TypeField {
+    var isVariant = false
     let val: Expr
     switch arg {
-      case .bind(let bind): val = bind.val
+      case .bind(let bind):
+        if case .tag = bind.place {
+          isVariant = true
+        }
+        val = bind.val
       default: val = arg
     }
-    return TypeField(label: arg.argLabel, type: genConstraints(scope, expr: val))
+    return TypeField(isVariant: isVariant, label: arg.argLabel, type: genConstraints(scope, expr: val))
   }
 
 

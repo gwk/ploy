@@ -37,8 +37,10 @@ struct TypeCtx {
       return Type.All(Set(members.map { self.resolved(type: $0) }))
     case .any(let members):
       return Type.Any_(Set(members.map { self.resolved(type: $0) }))
-    case .struct_(let fields):
-      return Type.Struct(fields.map() { self.resolved(par: $0) })
+    case .struct_(let fields, let variants):
+      return Type.Struct(
+        fields: fields.map() { self.resolved(par: $0) },
+        variants: variants.map() { self.resolved(par: $0) })
     case .free(let freeIndex):
       if let substitution = freeUnifications[freeIndex] {
         return resolved(type: substitution)
@@ -52,7 +54,7 @@ struct TypeCtx {
 
   private func resolved(par: TypeField) -> TypeField {
     let type = resolved(type: par.type)
-    return (type == par.type) ? par : TypeField(label: par.label, type: type)
+    return TypeField(isVariant: par.isVariant, label: par.label, type: type)
   }
 
 
@@ -73,8 +75,9 @@ struct TypeCtx {
   mutating func resolve(prop: PropCon) throws -> Bool {
     let accesseeType = resolved(type: prop.accesseeType)
     let accType = resolved(type: prop.accType)
+
     switch accesseeType.kind {
-    case .struct_(let fields):
+    case .struct_(let fields, _):
       for (i, field) in fields.enumerated() {
         if field.accessorString(index: i) == prop.acc.accessor.accessorString {
           try resolveSub(constraint: .rel(RelCon(
@@ -84,6 +87,7 @@ struct TypeCtx {
           return true
         }
       }
+      // TODO: variant access? would return Opt.
       throw prop.error("accessee has no field matching accessor")
     default: throw prop.error("accessee is not a struct")
     }
@@ -136,8 +140,11 @@ struct TypeCtx {
     case (.sig(let actDR), .sig(let expDR)):
       return try resolveSigToSig(rel, act: actDR, exp: expDR)
 
-    case (.struct_(let actFields), .struct_(let expFields)):
-      return try resolveStructToStruct(rel, actFields: actFields, expFields: expFields)
+    case (.struct_(let actFV), .struct_(let expFV)):
+      if exp == typeVoid {
+        throw rel.error("implicit struct conversion to Void is disallowed")
+      }
+      return try resolveStructToStruct(rel, act: actFV, exp: expFV)
 
     default: throw rel.error("actual type is not expected type")
     }
@@ -154,20 +161,28 @@ struct TypeCtx {
     return true
   }
 
-  mutating func resolveStructToStruct(_ rel: RelCon, actFields: [TypeField], expFields: [TypeField]) throws -> Bool {
-    if expFields.count != actFields.count {
-      let nFields = pluralize(actFields.count, "field")
-      throw rel.error("actual struct has \(nFields); expected \(expFields.count)")
+
+  mutating func resolveStructToStruct(_ rel: RelCon,
+   act: (fields: [TypeField], variants: [TypeField]),
+   exp: (fields: [TypeField], variants: [TypeField])) throws -> Bool {
+    if exp.fields.count != act.fields.count {
+      let nFields = pluralize(act.fields.count, "field")
+      throw rel.error("actual struct has \(nFields); expected \(exp.fields.count)")
     }
     let litActFields = rel.act.litExpr?.structFields
     let litExpFields = rel.exp.litExpr?.structFields
-    for (index, (actField, expField)) in zip(actFields, expFields).enumerated() {
+    for (index, (actField, expField)) in zip(act.fields, exp.fields).enumerated() {
       if actField.label != nil && actField.label != expField.label {
         throw rel.error("field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
       }
       try resolveSub(rel,
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
         expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
+    }
+    for variant in act.variants {
+      if !exp.variants.contains(variant) {
+        throw rel.error("actual struct contains variant not found in expected struct: `-\(variant.label!)`")
+      }
     }
     return true
   }

@@ -6,12 +6,12 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   enum Kind {
     case all(members: Set<Type>)
     case any(members: Set<Type>)
-    case struct_(fields: [TypeField])
     case free(index: Int)
     case host
     case poly(members: Set<Type>)
     case prim
     case sig(dom: Type, ret: Type)
+    case struct_(fields: [TypeField], variants: [TypeField])
     case var_(name: String)
   }
 
@@ -58,16 +58,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
-
-  class func Struct(_ fields: [TypeField]) -> Type {
-    let descs = fields.map({$0.description}).joined(separator: " ")
-    let desc = "(\(descs))"
-    return memoize(desc, (
-      kind: .struct_(fields: fields),
-      frees: Set(fields.flatMap { $0.type.frees }),
-      vars: Set(fields.flatMap { $0.type.vars })))
-  }
-
   class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
     if index < allFreeTypes.count {
       return allFreeTypes[index]
@@ -104,10 +94,25 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: dom.vars.union(ret.vars)))
   }
 
+  class func Struct(fields: [TypeField], variants: [TypeField]) -> Type {
+    let members = fields + variants
+    let descs = members.map({$0.description}).joined(separator: " ")
+    let desc = "(\(descs))"
+    return memoize(desc, (
+      kind: .struct_(fields: fields, variants: variants),
+      frees: Set(members.flatMap { $0.type.frees }),
+      vars:  Set(members.flatMap { $0.type.vars })))
+  }
+
   class func Var(_ name: String) -> Type {
     let desc = "*" + name
     return Type(desc, kind: .var_(name: name))
   }
+
+  class func Variant(label: String, type: Type) -> Type {
+    return Struct(fields: [], variants: [TypeField(isVariant: true, label: label, type: type)])
+  }
+
 
   var nestedSigDescription: String {
     switch kind {
@@ -165,7 +170,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 let typeEmpty = Type.Any_([]) // aka "Bottom type"; the empty set.
 let typeEvery = Type.All([]) // aka "Top type"; the set of all objects.
-let typeVoid = Type.Struct([])
+let typeVoid = Type.Struct(fields: [], variants: [])
 
 let typeBool      = Type.Prim("Bool")
 let typeInt       = Type.Prim("Int")

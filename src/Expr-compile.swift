@@ -24,9 +24,15 @@ extension Expr {
       ann.expr.compile(&ctx, em, indent, exp: type, isTail: isTail)
 
     case .bind(let bind):
-      em.str(indent, "let \(bind.place.sym.hostName) =")
-      let valTypeExpr = bind.place.ann?.typeExpr ?? bind.val
-      bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: valTypeExpr), isTail: false)
+      if case .tag(let tag) = bind.place { // variant constructor.
+        em.str(indent, "{$t:\"\(tag.sym.name)\", $m:") // bling: $t, $m: morph tag/value.
+        bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: bind.val), isTail: false)
+        em.append("}")
+      } else {
+        em.str(indent, "let \(bind.place.sym.hostName) =")
+        let valTypeExpr = bind.place.ann?.typeExpr ?? bind.val
+        bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: valTypeExpr), isTail: false)
+      }
 
     case .call(let call):
       let calleeType = ctx.typeFor(expr: call.callee)
@@ -99,11 +105,16 @@ extension Expr {
       if paren.isScalarValue {
         paren.els[0].compile(&ctx, em, indent, exp: type, isTail: isTail)
       } else {
-        guard case .struct_(let fields) = type.kind else { paren.fatal("expected struct type") }
+        guard case .struct_(let fields, let variants) = type.kind else { paren.fatal("expected struct type") }
         em.str(indent, "{")
         var argIndex = 0
         for (i, field) in fields.enumerated() {
           compileStructField(&ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
+        }
+        if !variants.isEmpty {
+          assert(variants.count == 1)
+          assert(argIndex == paren.els.lastIndex!)
+          compileStructVariant(&ctx, em, indent, expr: paren.els.last!, variant: variants[0])
         }
         em.append("}")
       }
@@ -119,6 +130,9 @@ extension Expr {
 
     case .sym(let sym):
       compileSym(&ctx, em, indent, sym: sym, type: type)
+
+    case .tag:
+      fatalError()
 
     case .typeAlias:
       em.str(indent, "undefined")
@@ -197,4 +211,17 @@ func compileStructField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, pare
   } else { // TODO: support default arguments.
     paren.fatal("missing argument for parameter")
   }
+}
+
+
+func compileStructVariant(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, expr: Expr, variant: TypeField) {
+  guard case .bind(let bind) = expr else { fatalError() }
+  guard case .tag(let tag) = bind.place else { fatalError() }
+  guard let label = variant.label else { fatalError() }
+  if tag.sym.name != label {
+    bind.place.sym.fatal("argument label does not match type's variant label `\(label)`")
+  }
+  em.str(indent + 1, "{$t:\"\(tag.sym.name)\", $m:") // bling: $t, $m: morph tag/value.
+  bind.val.compile(&ctx, em, indent + 2, exp: variant.type, isTail: false)
+  em.append(",")
 }
