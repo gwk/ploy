@@ -2,8 +2,8 @@
 
 
 enum Constraint: CustomStringConvertible {
-  case prop(PropCon)
-  case rel(RelCon)
+  case prop(PropCon) // property constraint between an accessee type and an accessed type via an accessor.
+  case rel(RelCon) // relation constraint between actual and expected types.
 
   var description: String {
     switch self {
