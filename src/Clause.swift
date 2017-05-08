@@ -8,8 +8,8 @@ enum Clause: SubForm { // either a `?` case or `/` default.
 
   init(form: Form, subj: String) {
     switch form {
-    case let form as Case:    self = .case_(form)
-    case let form as Default: self = .default_(form)
+    case let f as Case:     self = .case_(f)
+    case let f as Default:  self = .default_(f)
     default:
       form.failSyntax("\(subj) expects case (`cond ? expr`) or default (`/ expr`) but received \(form.syntaxName).")
     }

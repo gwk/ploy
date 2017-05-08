@@ -8,8 +8,8 @@ enum Accessor: SubForm {
 
   init(form: Form, subj: String) {
     switch form {
-    case let form as LitNum:  self = .litNum(form)
-    case let form as Sym:     self = .sym(form)
+    case let f as LitNum: self = .litNum(f)
+    case let f as Sym:    self = .sym(f)
     default:
       form.failSyntax("\(subj) expects accessor symbol or number literal but received \(form.syntaxName).")
     }

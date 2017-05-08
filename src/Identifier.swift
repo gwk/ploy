@@ -7,8 +7,8 @@ enum Identifier: SubForm {
 
   init(form: Form, subj: String) {
     switch form {
-    case let form as Path:  self = .path(form)
-    case let form as Sym:   self = .sym(form)
+    case let f as Path: self = .path(f)
+    case let f as Sym:  self = .sym(f)
     default:
       form.failSyntax("\(subj) expects identifier symbol or path but received \(form.syntaxName).")
     }

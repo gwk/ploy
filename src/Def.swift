@@ -13,13 +13,13 @@ enum Def: SubForm {
 
   init(form: Form, subj: String) {
     switch form {
-    case let form as Bind:        self = .bind(form)
-    case let form as Extension:   self = .ext(form)
-    case let form as Extensible:  self = .extensible(form)
-    case let form as HostType:    self = .hostType(form)
-    case let form as In:          self = .in_(form)
-    case let form as Pub:         self = .pub(form)
-    case let form as TypeAlias:   self = .typeAlias(form)
+    case let f as Bind:       self = .bind(f)
+    case let f as Extension:  self = .ext(f)
+    case let f as Extensible: self = .extensible(f)
+    case let f as HostType:   self = .hostType(f)
+    case let f as In:         self = .in_(f)
+    case let f as Pub:        self = .pub(f)
+    case let f as TypeAlias:  self = .typeAlias(f)
     default:
       form.failSyntax("\(subj) expects definition but received \(form.syntaxName).")
     }
@@ -40,10 +40,10 @@ enum Def: SubForm {
   var sym: Sym {
     switch self {
     case .bind(let bind): return bind.place.sym
-    case .ext(let ext): form.fatal("Extensions are not yet referenceable; sym should never be called: \(ext).")
+    case .ext(let ext): ext.fatal("Extensions are not yet referenceable; sym should never be called: \(ext).")
     case .extensible(let extensible): return extensible.sym
     case .hostType(let hostType): return hostType.sym
-    case .in_(let in_): form.fatal("`in` is not an individual definition; sym should never be called: \(in_).")
+    case .in_(let in_): in_.fatal("`in` is not an individual definition; sym should never be called: \(in_).")
     case .pub(let pub): return pub.def.sym
     case .typeAlias(let typeAlias): return typeAlias.sym
     }
@@ -62,7 +62,7 @@ enum Def: SubForm {
       }
 
     case .ext(let ext):
-      form.fatal("Extension is not an independent definition; compileDef should never be called: \(ext).")
+      ext.fatal("Extension is not an independent definition; compileDef should never be called: \(ext).")
 
     case .extensible(let extensible):
       let exts = space.exts.getDefault(sym.name, dflt: Ref<[Extension]>()).val
@@ -98,7 +98,7 @@ enum Def: SubForm {
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
     case .in_(let in_):
-      form.fatal("`in` is not an independent definition; compileDef should never be called: \(in_).")
+      in_.fatal("`in` is not an independent definition; compileDef should never be called: \(in_).")
 
     case .pub:
       fatalError()
