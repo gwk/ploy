@@ -1,0 +1,6 @@
+type error: test/2/type/cast-struct-to-nil.ploy:2:10-14: annotated: implicit struct conversion to Void is disallowed. actual type: (Int Int)
+    x:() = (0 0)
+           ~~~~~
+note: test/2/type/cast-struct-to-nil.ploy:2:5-6: expected type: ()
+    x:() = (0 0)
+      ~~
