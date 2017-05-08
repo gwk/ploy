@@ -1,0 +1,4 @@
+main = {
+  x:(Int) = 0 # type is scalar Int, not illegal struct with single unlabeled element.
+  x1:Int = x
+}

@@ -121,7 +121,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
       default: return nil
       }
     case .bind(let bind): return bind.place.sym.name
-    case .sym(let sym): return sym.name
+    case .sym: return nil // the symbol specifies the type, not the label.
     default: return nil
     }
   }
