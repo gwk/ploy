@@ -466,7 +466,7 @@ class Src: CustomStringConvertible {
     }
   }
 
-  static let operatorGroups: [[(String, (Form, Form)->Form)]] = [
+  static let opGroups: [[(String, (Form, Form)->Form)]] = [
     [ ("=:", TypeAlias.mk),
       ("=", Bind.mk),
       ("+=", Extension.mk),
@@ -479,10 +479,14 @@ class Src: CustomStringConvertible {
       ("%", Sig.mk)]
     ]
 
+  // precedence is repeated for spaced and unspaced operators.
+  static let opPrecedenceGroups = opGroups + opGroups
+  static let unspacedPrecedence = opGroups.count
+
   // note: currently unused.
   static let operatorCharacters = { () -> Set<Character> in
     var s = Set<Character>()
-    for g in operatorGroups {
+    for g in opGroups {
       for (string, _) in g {
         for c in string.characters {
           s.insert(c)
@@ -500,13 +504,19 @@ class Src: CustomStringConvertible {
     var left = parsePoly(pos)
     var p = left.syn.end
     outer: while hasSome(p) {
-      for i in precedence..<Src.operatorGroups.count {
-        let group = Src.operatorGroups[i]
+      let leftSpace = left.syn.hasEndSpace
+      for i in precedence..<Src.opPrecedenceGroups.count {
+        let group = Src.opPrecedenceGroups[i]
         for (string, handler) in group {
-          if match(pos: p, string: string) {
-            p = adv(p, count: string.characters.count)
-            p = parseSpace(p)
-            let right = parsePhrase(p, precedence: i)
+          let expSpace = (i < Src.unspacedPrecedence)
+          if (leftSpace == expSpace) && match(pos: p, string: string) {
+            let opVisEnd = adv(p, count: string.characters.count)
+            let rightPos = parseSpace(opVisEnd)
+            let rightSpace = (opVisEnd.idx < rightPos.idx)
+            if leftSpace != rightSpace {
+              failParse(left.syn.visEnd, rightPos, "mismatched space around operator")
+            }
+            let right = parsePhrase(rightPos, precedence: i)
             left = handler(left, right)
             p = left.syn.end
             continue outer
@@ -514,10 +524,10 @@ class Src: CustomStringConvertible {
         }
       }
       // adjacency operators have highest precedence.
-      if !left.syn.hasEndSpace {
+      if !leftSpace {
         for (c, handler) in adjacencyOperators {
           if char(p) == c {
-            let right = parsePhrase(p, precedence: Src.operatorGroups.count) // TODO: decide if this should call parsePoly instead.
+            let right = parsePhrase(p, precedence: Src.opPrecedenceGroups.count) // TODO: decide if this should call parsePoly instead.
             left = handler(left, right)
             p = left.syn.end
             continue outer
@@ -538,8 +548,8 @@ class Src: CustomStringConvertible {
     }
   }
 
-  func parseSubForm<T: SubForm>(_ pos: Pos, subj: String) -> T {
-    return T(form: parsePhrase(pos), subj: subj)
+  func parseSubForm<T: SubForm>(_ pos: Pos, subj: String, allowSpaces: Bool = true) -> T {
+    return T(form: parsePhrase(pos, precedence: (allowSpaces ? 0 : Src.unspacedPrecedence)), subj: subj)
   }
 
   func parseSubForms<T: SubForm>(_ subForms: inout [T], _ pos: Pos, subj: String) -> Pos {

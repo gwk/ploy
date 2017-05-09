@@ -1,4 +1,4 @@
 main = {
-  x: Str = 0
+  x:Str = 0
   outL.x
 }
