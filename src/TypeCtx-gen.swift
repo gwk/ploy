@@ -214,12 +214,12 @@ extension TypeCtx {
     var isVariant = false
     let val: Expr
     switch arg {
-      case .bind(let bind):
-        if case .tag = bind.place {
-          isVariant = true
-        }
-        val = bind.val
-      default: val = arg
+    case .bind(let bind):
+      if case .tag = bind.place {
+        isVariant = true
+      }
+      val = bind.val
+    default: val = arg
     }
     return TypeField(isVariant: isVariant, label: arg.argLabel, type: genConstraints(scope, expr: val))
   }

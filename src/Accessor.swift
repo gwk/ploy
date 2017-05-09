@@ -17,15 +17,15 @@ enum Accessor: SubForm {
 
   var form: Form {
     switch self {
-      case .litNum(let litNum): return litNum
-      case .sym(let sym): return sym
+    case .litNum(let litNum): return litNum
+    case .sym(let sym): return sym
     }
   }
 
   var hostAccessor: String {
     switch self {
-      case .litNum(let litNum): return "._\(litNum.val)"
-      case .sym(let sym): return ".\(sym.hostName)"
+    case .litNum(let litNum): return "._\(litNum.val)"
+    case .sym(let sym): return ".\(sym.hostName)"
     }
   }
 

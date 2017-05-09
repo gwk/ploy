@@ -27,8 +27,8 @@ enum Identifier: SubForm {
 
   var syms: [Sym] {
     switch self {
-      case .path(let path): return path.syms
-      case .sym(let sym): return [sym]
+    case .path(let path): return path.syms
+    case .sym(let sym): return [sym]
     }
   }
 }

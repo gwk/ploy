@@ -23,27 +23,27 @@ enum Place: SubForm { // left side of a binding.
 
   var form: Form {
     switch self {
-      case .ann(let ann): return ann
-      case .sym(let sym): return sym
-      case .tag(let tag): return tag
+    case .ann(let ann): return ann
+    case .sym(let sym): return sym
+    case .tag(let tag): return tag
     }
   }
 
   var sym: Sym {
     switch self {
-      case .ann(let ann):
-        guard case .sym(let sym) = ann.expr else { fatalError() }
-        return sym
-      case .sym(let sym): return sym
-      case .tag(let tag): return tag.sym
+    case .ann(let ann):
+      guard case .sym(let sym) = ann.expr else { fatalError() }
+      return sym
+    case .sym(let sym): return sym
+    case .tag(let tag): return tag.sym
     }
   }
 
   var ann: Ann? {
     switch self {
-      case .ann(let ann): return ann
-      case .sym: return nil
-      case .tag: return nil
+    case .ann(let ann): return ann
+    case .sym: return nil
+    case .tag: return nil
     }
   }
 }

@@ -17,8 +17,8 @@ enum Clause: SubForm { // either a `?` case or `/` default.
 
   var form: Form {
     switch self {
-      case .case_(let case_): return case_
-      case .default_(let default_): return default_
+    case .case_(let case_): return case_
+    case .default_(let default_): return default_
     }
   }
 }
