@@ -19,7 +19,7 @@ class Body: Form { // body of statements and final expression.
       _expr = expr
     } else {
       _stmts = exprs
-      _expr = Expr.void(ImplicitVoid(syn))
+      _expr = .void(ImplicitVoid(syn))
     }
     self.init(syn, stmts: _stmts, expr: _expr)
   }
