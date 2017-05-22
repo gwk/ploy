@@ -42,7 +42,6 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as Sym:          self = .sym(f)
     case let f as Tag:          self = .tag(f)
     case let f as TypeAlias:    self = .typeAlias(f)
-    case let f as ImplicitVoid: self = .void(f)
     default:
       form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
     }
