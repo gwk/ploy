@@ -58,8 +58,8 @@ func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace)
 
   file.writeL("\"use strict\";\n")
   file.writeL("(()=>{ // ploy scope.\n")
-  file.writeL("let $g = global;") // bling: $g.
-  file.writeL("let $require = require;")
+  file.writeL("let $g = global;") // bling: $g: alias that cannot be shadowed.
+  file.writeL("let $require = require;") // bling: $require: alias that cannot be shadowed.
   file.writeL("function $lazy_sentinal() { throw 'PLOY RUNTIME ERROR: lazy value init recursed.' };")
   file.writeL("function $assert(cond) { if (!cond) { throw 'PLOY RUNTIME ERROR: assertion failed.' }; };")
 

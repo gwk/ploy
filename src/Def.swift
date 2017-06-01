@@ -126,7 +126,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     let acc = "\(hostName)__acc"
     em.str(0, "var \(acc) = function() {")
     em.str(0, " \(acc) = $lazy_sentinal;")
-    em.str(0, " let $v = // \(type)")
+    em.str(0, " let $v = // \(type)") // bling: $v: lazy value.
     val.compile(&ctx, em, 0, exp: type, isTail: false)
     em.append(";")
     em.str(0, " \(acc) = function() { return $v };")
