@@ -4,6 +4,7 @@
 enum Accessor: SubForm {
 
   case litNum(LitNum)
+  case morph(variant: Sym)
   case sym(Sym)
 
   init(form: Form, subj: String) {
@@ -18,6 +19,7 @@ enum Accessor: SubForm {
   var form: Form {
     switch self {
     case .litNum(let litNum): return litNum
+    case .morph(let variant): return variant
     case .sym(let sym): return sym
     }
   }
@@ -25,6 +27,7 @@ enum Accessor: SubForm {
   var hostAccessor: String {
     switch self {
     case .litNum(let litNum): return "._\(litNum.val)"
+    case .morph: return  ".$m"
     case .sym(let sym): return ".\(sym.hostName)"
     }
   }
@@ -32,6 +35,8 @@ enum Accessor: SubForm {
   var accessorString: String {
     switch self {
     case .litNum(let litNum): return String(litNum.val)
+    case .morph(let variant):
+      fatalError("accessorString should never be called on morph accessor; variant: \(variant)")
     case .sym(let sym): return sym.name
     }
   }

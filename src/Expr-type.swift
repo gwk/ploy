@@ -56,17 +56,11 @@ extension Expr {
     switch self {
 
     case .ann(let ann):
-      switch ann.expr {
-      case .sym(let sym):
-        label = sym.name
-        type = ann.typeExpr.type(scope, "parameter annotated type")
-      case .tag(let tag):
-        isVariant = true
-        label = tag.sym.name
-        type = ann.typeExpr.type(scope, "tag annotated type")
-      default:
+      guard case .sym(let sym) = ann.expr  else {
         ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
       }
+      label = sym.name
+      type = ann.typeExpr.type(scope, "parameter annotated type")
 
     case .bind(let bind):
       switch bind.place {
@@ -79,9 +73,16 @@ extension Expr {
       case .sym(let sym):
         // TODO: for now assume the sym refers to a type. This is going to change.
         type = scope.typeBinding(sym: sym, subj: "default parameter type")
-      case .tag:
-        bind.failSyntax("tag parameter cannot have a default value.")
       }
+
+    case .tag(let tag):
+      isVariant = true
+      guard case .ann(let ann) = tag.tagged else {
+        let tagged = tag.tagged.form
+        tagged.failSyntax("variant parameter (tag within a type expression) requires an annotation; received \(tagged)")
+      }
+      label = tag.tagged.sym.name
+      type = ann.typeExpr.type(scope, "variant type")
 
     default:
       type = self.type(scope, "parameter type")

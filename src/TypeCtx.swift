@@ -75,20 +75,35 @@ struct TypeCtx {
   mutating func resolve(prop: PropCon) throws -> Bool {
     let accesseeType = resolved(type: prop.accesseeType)
     let accType = resolved(type: prop.accType)
+    let accessor = prop.acc.accessor
 
     switch accesseeType.kind {
-    case .struct_(let fields, _):
-      for (i, field) in fields.enumerated() {
-        if field.accessorString(index: i) == prop.acc.accessor.accessorString {
-          try resolveSub(constraint: .rel(RelCon(
-            act: Side(expr: .acc(prop.acc), type: field.type),
-            exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
-            desc: "access")))
-          return true
+    case .struct_(let fields, let variants):
+      if case .morph(let variantSym) = accessor {
+        let name = variantSym.name
+        for variant in variants {
+          if variant.label! == name {
+            try resolveSub(constraint: .rel(RelCon(
+              act: Side(expr: .acc(prop.acc), type: variant.type),
+              exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
+              desc: "variant")))
+            return true
+          }
         }
+        throw prop.error("accessee has no variant named `\(name)`")
+      } else {
+        for (i, field) in fields.enumerated() {
+          if field.accessorString(index: i) == accessor.accessorString {
+            try resolveSub(constraint: .rel(RelCon(
+              act: Side(expr: .acc(prop.acc), type: field.type),
+              exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
+              desc: "access")))
+            return true
+          }
+        }
+        // TODO: variant access? would return Opt.
+        throw prop.error("accessee has no field matching accessor `\(accessor.accessorString)`")
       }
-      // TODO: variant access? would return Opt.
-      throw prop.error("accessee has no field matching accessor")
     default: throw prop.error("accessee is not a struct")
     }
   }

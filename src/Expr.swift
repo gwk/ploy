@@ -12,6 +12,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case if_(If)
   case litNum(LitNum)
   case litStr(LitStr)
+  case magic(Magic)
   case match(Match)
   case paren(Paren)
   case path(Path)
@@ -64,6 +65,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .if_(let if_): return if_
     case .litNum(let litNum): return litNum
     case .litStr(let litStr): return litStr
+    case .magic(let magic): return magic
     case .match(let match): return match
     case .paren(let paren): return paren
     case .path(let path): return path

@@ -60,19 +60,13 @@ extension TypeCtx {
       return constrainAnn(scope, expr: ann.expr, type: type, ann: ann)
 
     case .bind(let bind):
-      if case .tag(let tag) = bind.place { // variant constructor.
-        let fieldType = genConstraints(scope, expr: bind.val)
-        let t = Type.Variant(label: tag.sym.name, type: fieldType)
-        return t
-      } else {
-        _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
-        var exprType = genConstraints(scope, expr: bind.val)
-        if let ann = bind.place.ann {
-          exprType = constrainAnn(scope, expr: bind.val, type: exprType, ann: ann)
-        }
-        _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
-        return typeVoid
+      _ = scope.addRecord(sym: bind.place.sym, kind: .fwd)
+      var exprType = genConstraints(scope, expr: bind.val)
+      if let ann = bind.place.ann {
+        exprType = constrainAnn(scope, expr: bind.val, type: exprType, ann: ann)
       }
+      _ = scope.addRecord(sym: bind.place.sym, kind: .val(exprType))
+      return typeVoid
 
     case .call(let call):
       let calleeType = genConstraints(scope, expr: call.callee)
@@ -132,18 +126,16 @@ extension TypeCtx {
     case .litStr:
       return typeStr
 
+    case .magic(let magic):
+      return magic.type
+
     case .match(let match):
+      let valSyn = match.expr.syn
       let valSym = genSym(parent: match.expr)
-      let exprBind = Expr.bind(Bind(match.expr.syn, place: .sym(valSym), val: match.expr))
+      let exprBind = Expr.bind(Bind(valSyn, place: .sym(valSym), val: match.expr))
       let if_ = If(match.syn,
         cases: match.cases.map {
-          (case_) in
-          let patt = case_.condition
-          return Case(case_.syn,
-            condition: .call(Call(patt.syn,
-              callee: .sym(Sym(patt.syn, name: "eq")),
-              arg: .paren(Paren(patt.syn, els: [.sym(Sym(patt.syn, name: valSym.name)), patt])))),
-            consequence: case_.consequence)
+          genMatchCase(valSyn: valSyn, valName: valSym.name, syn: $0.syn, condition: $0.condition, consequence: $0.consequence)
         },
         dflt: match.dflt ?? Default(match.syn, expr: .call(Call(match.syn,
           callee: .sym(Sym(match.syn, name: "fail")),
@@ -187,8 +179,12 @@ extension TypeCtx {
     case .sym(let sym):
       return constrainSym(sym: sym, record: scope.getRecord(sym: sym))
 
-    case .tag(let tag):
-      tag.failType("tag cannot be used in a value expression")
+    case .tag(let tag): // morph constructor.
+      guard case .bind(let bind) = tag.tagged else {
+        tag.tagged.form.failSyntax("tag expects morph constructor (`=` phrase) in an expression context; received \(tag.tagged.form.syntaxName).")
+      }
+      let fieldType = genConstraints(scope, expr: bind.val)
+      return Type.Variant(label: tag.tagged.sym.name, type: fieldType)
 
     case .typeAlias(let typeAlias):
       _ = scope.addRecord(sym: typeAlias.sym, kind: .fwd)
@@ -215,9 +211,10 @@ extension TypeCtx {
     let val: Expr
     switch arg {
     case .bind(let bind):
-      if case .tag = bind.place {
-        isVariant = true
-      }
+      val = bind.val
+    case .tag(let tag):
+      isVariant = true
+      guard case .bind(let bind) = tag.tagged else { fatalError() }
       val = bind.val
     default: val = arg
     }
@@ -247,22 +244,67 @@ extension TypeCtx {
     }
   }
 
+
   mutating func putSynth(src: Expr, expr: Expr) -> Expr {
     synths.insertNew(src, value: expr)
     return expr
   }
 
+
   mutating func getSynth(src: Expr) -> Expr {
     return synths[src]!
   }
 
+
   mutating func synthSym(src: Expr, name: String) -> Expr {
     return putSynth(src: src, expr: .sym(Sym(src.syn, name: name)))
   }
+
 
   mutating func genSym(parent: Expr) -> Sym {
     let sym = Sym(parent.syn, name: "$g\(genSyms.count)") // bling: $g<i>: gensym.
     genSyms.append(sym)
     return sym
   }
+}
+
+
+func genMatchCase(valSyn: Syn, valName: String, syn: Syn, condition: Expr, consequence: Expr) -> Case {
+  // Synthesize an `if` case from a `match` case.
+  // This is a purely syntactic process; the result is type checked.
+  var tests = [String]()
+  var binds = [Bind]()
+
+  switch condition {
+
+  case .tag(let tag):
+    switch tag.tagged {
+
+    case .bind(let bind):
+      switch bind.place {
+      case .ann(let ann): ann.failSyntax("destructuring bind symbol cannot be annotated")
+      case .sym(let sym): tests.append("(\(valName).$t == '\(sym.name)')")
+      }
+
+      switch bind.val {
+      case .sym(let sym):
+        // ok to use sym as is instead of genSym on the left side, because this is the sole use.
+        let accessor = Accessor.morph(variant: sym)
+        let accessee = Expr.sym(Sym(valSyn, name: valName))
+        binds.append(Bind(sym.syn, place: .sym(sym), val: .acc(Acc(bind.syn, accessor: accessor, accessee: accessee))))
+      default: bind.val.form.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
+      }
+
+    case .sym(let sym): tests.append("(\(valName).$t == '\(sym.name)')")
+
+    default: tag.tagged.form.failSyntax("variant match case expects sym or destructuring bind; received \(tag.tagged.form.syntaxName)")
+    }
+
+  default: condition.form.failSyntax("match case expects variant tag (INCOMPLETE); received \(condition.form.syntaxName)")
+  }
+  let genCond = Expr.magic(Magic(condition.syn, type: typeBool, code: tests.joined(separator: "&&")))
+  let genCons = binds.isEmpty
+  ? consequence
+  : .do_(Do(consequence.syn, body: Body(consequence.syn, stmts: binds.map {.bind($0)}, expr: consequence)))
+  return Case(syn, condition: genCond, consequence: genCons)
 }

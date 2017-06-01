@@ -288,11 +288,10 @@ class Src: CustomStringConvertible {
     let nextChar = char(nextPos)
     if ployNumHeadChars.contains(nextChar) {
       return parseLitNum(pos)
-    } else if ploySymHeadChars.contains(nextChar) {
-      let sym = parseSym(nextPos)
-      return Tag(Syn(pos: pos, bodySyn: sym.syn), sym: sym)
+    } else {
+      let tagged: Tagged = parseSubForm(nextPos, subj: "`-` form", allowSpaces: false)
+      return Tag(Syn(pos: pos, bodySyn: tagged.syn), tagged: tagged)
     }
-    failParse(pos, nil, "unexpected dash.")
   }
 
   func parseSlash(_ pos: Pos) -> Form {
