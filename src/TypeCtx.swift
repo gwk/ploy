@@ -275,8 +275,8 @@ struct TypeCtx {
     let msg = err.msgThunk()
     let act = resolved(type: r.act.type)
     let exp = resolved(type: r.exp.type)
-    let actDesc = r.act.chain.map({"\($0) -> "}).join()
-    let expDesc = r.exp.chain.map({"\($0) -> "}).join()
+    let actDesc = r.act.chain.map({"\($0) -> "}).joined()
+    let expDesc = r.exp.chain.map({"\($0) -> "}).joined()
 
     if r.act.expr != r.exp.expr {
       r.act.expr.form.failType("\(r.desc) \(msg). \(actDesc)actual type: \(act)",
