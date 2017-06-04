@@ -4,12 +4,9 @@
 extension TypeCtx {
 
   mutating func track(expr: Expr, type: Type) {
+    // Note: this functionality requires that a given piece Expr only be tracked once.
+    // Therefore synthesized expressions cannot reuse input exprs multiple times.
     exprTypes.insertNew(expr, value: type)
-  }
-
-
-  mutating func track(typeExpr: Expr, type: Type) {
-    exprTypes.insertNew(typeExpr, value: type)
   }
 
 
@@ -83,7 +80,7 @@ extension TypeCtx {
 
     case .fn(let fn):
       let type = Expr.sig(fn.sig).type(scope, "signature")
-      track(typeExpr: .sig(fn.sig), type: type)
+      track(expr: .sig(fn.sig), type: type)
       guard case .sig(let dom, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
@@ -117,7 +114,7 @@ extension TypeCtx {
         _ = scope.getRecord(identifier: dep)
       }
       let type = hostVal.typeExpr.type(scope, "host value declaration")
-      track(typeExpr: hostVal.typeExpr, type: type)
+      track(expr: hostVal.typeExpr, type: type)
       return type
 
     case .litNum:
@@ -200,7 +197,7 @@ extension TypeCtx {
 
   mutating func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
     let annType = ann.typeExpr.type(scope, "type annotation")
-    track(typeExpr: ann.typeExpr, type: annType)
+    track(expr: ann.typeExpr, type: annType)
     constrain(expr, actType: type, expExpr: ann.typeExpr, expType: annType, "annotated:")
     return annType
   }
@@ -288,7 +285,7 @@ func genMatchCase(valSyn: Syn, valName: String, syn: Syn, condition: Expr, conse
 
       switch bind.val {
       case .sym(let sym):
-        // ok to use sym as is instead of genSym on the left side, because this is the sole use.
+        // ok to use sym as is instead of genSym on the left side, because this is the sole use (see track()).
         let accessor = Accessor.morph(variant: sym)
         let accessee = Expr.sym(Sym(valSyn, name: valName))
         binds.append(Bind(sym.syn, place: .sym(sym), val: .acc(Acc(bind.syn, accessor: accessor, accessee: accessee))))
