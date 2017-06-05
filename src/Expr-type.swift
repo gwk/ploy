@@ -22,7 +22,7 @@ extension Expr {
             firstVariantForm = par.form
           }
         } else if let first = firstVariantForm {
-            par.form.failSyntax("compound field cannot follow a variant",
+            par.form.failSyntax("struct field cannot follow a variant",
               notes: (first, "first variant is here"))
         } else {
           fields.append(typeField)
