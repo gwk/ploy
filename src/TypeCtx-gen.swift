@@ -255,7 +255,7 @@ extension TypeCtx {
     case .lazy(let type): return type
     case .poly(let polytype, _):
       let morphType = addFreeType()
-      constrain(.sym(sym), actType: polytype, expType: morphType, "polymorph alias")
+      constrain(.sym(sym), actType: polytype, expType: morphType, "polymorph alias '\(sym.name)':")
       return morphType
     case .val(let type): return type
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
@@ -305,6 +305,8 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
   // This is a purely syntactic process; the result is type checked.
   // valSyn/valName belong to the synthesized symbol bound to the match argument value.
   // The actual symbol is not passed here because it must not be incorporated into synthesized cases; see track().
+  // Note: the synthesized calls to ROOT/eq result in somewhat cryptic type errors regarding type signature of 'eq'.
+  // Not sure how that should be addressed; seems like the constraint should be given the function name wherever it is known.
   var tests = [Expr]()
   var binds = [Bind]()
 
@@ -314,7 +316,13 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
     let syn = litNum.syn
     tests.append(synthCall(syn,
       callee: synthPath(syn, "ROOT", "eq"),
-      args: synthSym(syn, valName), .litNum(litNum))) // ok to use original litNum; sole use.
+      args: synthSym(syn, valName), .litNum(litNum))) // ok to use original form; sole use.
+
+  case .litStr(let litStr):
+    let syn = litStr.syn
+    tests.append(synthCall(syn,
+      callee: synthPath(syn, "ROOT", "eq"),
+      args: synthSym(syn, valName), .litStr(litStr))) // ok to use original form; sole use.
 
   case .tag(let tag):
     switch tag.tagged {
@@ -322,7 +330,7 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
     case .bind(let bind):
       switch bind.place {
       case .ann(let ann): ann.failSyntax("destructuring bind symbol cannot be annotated")
-      case .sym(let sym): tests.append(.magic(Magic(bind.place.syn, type: typeBool, code: "(\(valName).$t == '\(sym.name)')"))) // TODO: type constraint that this is variant exists in argument type.
+      case .sym: tests.append(.tagTest(TagTest(tag.syn, tag: tag, expr: synthSym(valSyn, valName))))
       }
 
       switch bind.val {
@@ -334,12 +342,12 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
       default: bind.val.form.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
       }
 
-    case .sym(let sym): tests.append(.magic(Magic(sym.syn, type: typeBool, code: "(\(valName).$t == '\(sym.name)')"))) // TODO: type constraint that this variant exists in argument type.
+    case .sym: tests.append(.tagTest(TagTest(tag.syn, tag: tag, expr: synthSym(valSyn, valName))))
 
     default: tag.tagged.form.failSyntax("variant match case expects sym or destructuring bind; received \(tag.tagged.form.syntaxName)")
     }
 
-  default: condition.form.failSyntax("match case expects variant tag (INCOMPLETE); received \(condition.form.syntaxName)")
+  default: condition.form.failSyntax("match case expects pattern; received \(condition.form.syntaxName)")
   }
   let genCond = Expr.and(And(condition.syn, terms: tests))
   let genCons = binds.isEmpty

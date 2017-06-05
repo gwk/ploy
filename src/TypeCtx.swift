@@ -184,8 +184,8 @@ struct TypeCtx {
       let nFields = pluralize(act.fields.count, "field")
       throw rel.error("actual struct has \(nFields); expected \(exp.fields.count)")
     }
-    let litActFields = rel.act.litExpr?.structFields
-    let litExpFields = rel.exp.litExpr?.structFields
+    let litActFields = rel.act.litExpr?.structLitFields
+    let litExpFields = rel.exp.litExpr?.structLitFields
     for (index, (actField, expField)) in zip(act.fields, exp.fields).enumerated() {
       if actField.label != nil && actField.label != expField.label {
         throw rel.error("field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
@@ -194,10 +194,18 @@ struct TypeCtx {
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
         expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
     }
-    for variant in act.variants {
-      if !exp.variants.contains(variant) {
-        throw rel.error("actual struct contains variant not found in expected struct: `-\(variant.label!)`")
+    actual: for (actIdx, actVariant) in act.variants.enumerated() {
+      let litActVariants = rel.act.litExpr?.structLitVariants
+      for (expIdx, expVariant) in exp.variants.enumerated() { // TODO: fix quadratic behavior.
+        if expVariant.label == actVariant.label {
+          let litExpVariants = rel.exp.litExpr?.structLitVariants
+          try resolveSub(rel,
+            actExpr: litActVariants?[actIdx], actType: actVariant.type, actDesc: "variant \(actIdx)",
+            expExpr: litExpVariants?[expIdx], expType: expVariant.type, expDesc: "variant \(expIdx)")
+            continue actual
+        }
       }
+      throw rel.error("actual variant tag not found in expected variants: `-\(actVariant.label!)`")
     }
     return true
   }
