@@ -312,52 +312,56 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
     return .tagTest(TagTest(tag.syn, tag: tag, expr: valSym())) // assumes sole use of tag.
   }
 
-  switch condition {
+  func dispatch(expr: Expr) {
+    switch expr {
 
-  case .litNum(let litNum):
-    let syn = litNum.syn
-    tests.append(synthCall(syn,
-      callee: synthPath(syn, "ROOT", "eq"),
-      args: valSym(), .litNum(litNum))) // sole use of litNum.
+    case .litNum(let litNum):
+      let syn = litNum.syn
+      tests.append(synthCall(syn,
+        callee: synthPath(syn, "ROOT", "eq"),
+        args: valSym(), .litNum(litNum))) // sole use of litNum.
 
-  case .litStr(let litStr):
-    let syn = litStr.syn
-    tests.append(synthCall(syn,
-      callee: synthPath(syn, "ROOT", "eq"),
-      args: valSym(), .litStr(litStr))) // sole use of litStr.
+    case .litStr(let litStr):
+      let syn = litStr.syn
+      tests.append(synthCall(syn,
+        callee: synthPath(syn, "ROOT", "eq"),
+        args: valSym(), .litStr(litStr))) // sole use of litStr.
 
-  case .tag(let tag):
-    tests.append(synthTagTest(tag: tag)) // sole use of tag.
+    case .tag(let tag):
+      tests.append(synthTagTest(tag: tag)) // sole use of tag.
 
-  case .paren(let paren):
-    if paren.els.count != 1 { paren.failSyntax("TODO: destructuring structs not yet supported") }
-    switch paren.els[0] {
+    case .paren(let paren):
+      if paren.els.count != 1 { paren.failSyntax("TODO: destructuring structs not yet supported") }
+      switch paren.els[0] {
 
-    case .bind(let bind):
-      var unwrapped: Expr! = nil
-      switch bind.place {
-      case .ann(let ann): ann.failSyntax("destructuring bind symbol cannot be annotated")
-      case .sym(let sym): sym.failSyntax("destructuring bind: TODO: struct fields")
-      case .tag(let tag):
-        tests.append(synthTagTest(tag: tag))
-        unwrapped = .acc(Acc(tag.syn, accessor: .untag(tag.sym), accessee: valSym())) // sole use of tag.sym.
+      case .bind(let bind):
+        var unwrapped: Expr! = nil
+        switch bind.place {
+        case .ann(let ann): ann.failSyntax("destructuring bind symbol cannot be annotated")
+        case .sym(let sym): sym.failSyntax("destructuring bind: TODO: struct fields")
+        case .tag(let tag):
+          tests.append(synthTagTest(tag: tag))
+          unwrapped = .acc(Acc(tag.syn, accessor: .untag(tag.sym), accessee: valSym())) // sole use of tag.sym.
+        }
+        switch bind.val {
+        case .sym(let sym):
+          binds.append(Bind(sym.syn, place: .sym(sym), val: unwrapped)) // sole use of sym.
+        default: bind.val.form.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
+        }
+
+      default: paren.failSyntax("destructuring paren: TODO: incomplete")
       }
-      switch bind.val {
-      case .sym(let sym):
-        binds.append(Bind(sym.syn, place: .sym(sym), val: unwrapped)) // sole use of sym.
-      default: bind.val.form.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
-      }
 
-    default: paren.failSyntax("destructuring paren: TODO: incomplete")
+    case .sym(let sym):
+      binds.append(Bind(sym.syn, place: .sym(sym), val: valSym())) // sole use of sym.
+
+    case .where_(let where_): fatalError("TODO: \(where_)")
+
+    default: expr.form.failSyntax("match case expects pattern; received \(condition.form.syntaxName)")
     }
-
-  case .sym(let sym):
-    binds.append(Bind(sym.syn, place: .sym(sym), val: valSym())) // sole use of sym.
-
-  case .where_(let where_): fatalError("TODO: \(where_)")
-
-  default: condition.form.failSyntax("match case expects pattern; received \(condition.form.syntaxName)")
   }
+
+  dispatch(expr: condition)
   let genCond = Expr.and(And(condition.syn, terms: tests))
   let genCons = binds.isEmpty
   ? consequence
