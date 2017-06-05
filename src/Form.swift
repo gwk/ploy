@@ -7,6 +7,8 @@ class Form: Hashable, CustomStringConvertible {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
 
+  static func ==(l: Form, r: Form) -> Bool { return l === r }
+
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
   var description: String {
@@ -62,6 +64,4 @@ class Form: Hashable, CustomStringConvertible {
   func fatal(_ msg: String, notes: (Form?, String)...) -> Never {
     failForm(prefix: "PLOY COMPILER ERROR", msg: msg, notes: notes)
   }
-
-  static func ==(l: Form, r: Form) -> Bool { return l === r }
 }
