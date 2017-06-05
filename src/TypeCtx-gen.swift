@@ -141,13 +141,10 @@ extension TypeCtx {
       return magic.type
 
     case .match(let match):
-      let valSyn = match.expr.syn
       let valSym = genSym(parent: match.expr)
-      let exprBind = Expr.bind(Bind(valSyn, place: .sym(valSym), val: match.expr))
+      let exprBind = Expr.bind(Bind(match.expr.syn, place: .sym(valSym), val: match.expr))
       let if_ = If(match.syn,
-        cases: match.cases.map {
-          genMatchCase(valSyn: valSyn, valName: valSym.name, caseSyn: $0.syn, condition: $0.condition, consequence: $0.consequence)
-        },
+        cases: match.cases.map { genMatchCase(matchValSym: valSym, case_: $0) },
         dflt: match.dflt ?? Default(match.syn, expr: .call(Call(match.syn,
           callee: .sym(Sym(match.syn, name: "fail")),
           arg: .litStr(LitStr(match.syn, val: "match failed: \(match.syn)."))))))
@@ -282,10 +279,6 @@ extension TypeCtx {
 }
 
 
-func synthSym(_ syn: Syn, _ name: String) -> Expr {
-  return .sym(Sym(syn, name: name))
-}
-
 func synthPath(_ syn: Syn, _ names: String...) -> Expr {
   return .path(Path(syn, syms: names.map { Sym(syn, name: $0) }))
 }
@@ -294,26 +287,30 @@ func synthCall(_ syn: Syn, callee: Expr, args: Expr...) -> Expr {
   return .call(Call(syn, callee: callee, arg: .paren(Paren(syn, els: args))))
 }
 
-func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, consequence: Expr) -> Case {
+
+func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
   // Synthesize an `if` case from a `match` case.
   // This is a purely syntactic process; the result is type checked.
-  // valSyn/valName belong to the synthesized symbol bound to the match argument value.
-  // The actual symbol is not passed here because it must not be incorporated into synthesized cases; see track().
-  // Instead use valSym() to synthesize a new reference.
+  // valSym is the generated sym bound to the match value expression.
+  // It must not be incorporated into synthesized cases; see track().
+  // Instead use synth(sym: valSym) to clone the symbol.
   // We can reuse original bits of syntax from the condition, but only if they only appear once in the output.
   // Note: the synthesized calls to ROOT/eq result in somewhat cryptic type errors regarding type signature of 'eq'.
   // Not sure how that should be addressed; seems like the constraint should be given the function name wherever it is known.
+  let cond = case_.condition
+  let cons = case_.consequence
   var tests = [Expr]()
   var binds = [Bind]()
 
-  func valSym() -> Expr { return synthSym(valSyn, valName) }
+  func destructure(val valSymOrig: Sym, pattern: Expr) {
 
-  func synthTagTest(tag: Tag) -> Expr {
-    return .tagTest(TagTest(tag.syn, tag: tag, expr: valSym())) // assumes sole use of tag.
-  }
+    func valSym() -> Expr { return .sym(valSymOrig.cloned) }
 
-  func dispatch(expr: Expr) {
-    switch expr {
+    func synthTagTest(tag: Tag) -> Expr {
+      return .tagTest(TagTest(tag.syn, tag: tag.cloned, expr: valSym()))
+    }
+
+    switch pattern {
 
     case .litNum(let litNum):
       let syn = litNum.syn
@@ -327,13 +324,22 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
         callee: synthPath(syn, "ROOT", "eq"),
         args: valSym(), .litStr(litStr))) // sole use of litStr.
 
-    case .tag(let tag):
-      tests.append(synthTagTest(tag: tag)) // sole use of tag.
-
     case .paren(let paren):
-      if paren.els.count != 1 { paren.failSyntax("TODO: destructuring structs not yet supported") }
-      switch paren.els[0] {
-
+      if paren.isScalarValue { // match syntax follows that of value constructors, as opposed to type declarations.
+        destructure(val: valSymOrig, pattern: paren.els[0])
+        return
+      }
+      for el in paren.fieldEls {
+        el.form.failSyntax("destructuring does not yet support fields")
+      }
+      let variantEls = paren.variantEls
+      if variantEls.isEmpty { return }
+      let variant = variantEls[0]
+      if variantEls.count > 1 {
+        variantEls[1].form.failSyntax("destructuring does not support more than one variant",
+          notes: (variant.form, "first variant is here"))
+      }
+      switch variant {
       case .bind(let bind):
         var unwrapped: Expr! = nil
         switch bind.place {
@@ -355,16 +361,19 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
     case .sym(let sym):
       binds.append(Bind(sym.syn, place: .sym(sym), val: valSym())) // sole use of sym.
 
+    case .tag(let tag):
+      tests.append(synthTagTest(tag: tag)) // sole use of tag.
+
     case .where_(let where_): fatalError("TODO: \(where_)")
 
-    default: expr.form.failSyntax("match case expects pattern; received \(condition.form.syntaxName)")
+    default: pattern.form.failSyntax("match case expects pattern; received \(cond.form.syntaxName)")
     }
   }
 
-  dispatch(expr: condition)
-  let genCond = Expr.and(And(condition.syn, terms: tests))
+  destructure(val: matchValSym, pattern: cond)
+  let genCond = Expr.and(And(cond.syn, terms: tests))
   let genCons = binds.isEmpty
-  ? consequence
-  : .do_(Do(consequence.syn, body: Body(consequence.syn, stmts: binds.map {.bind($0)}, expr: consequence)))
-  return Case(caseSyn, condition: genCond, consequence: genCons)
+  ? cons
+  : .do_(Do(cons.syn, body: Body(cons.syn, stmts: binds.map {.bind($0)}, expr: cons)))
+  return Case(case_.syn, condition: genCond, consequence: genCons)
 }

@@ -28,4 +28,12 @@ class Paren: Form {
   var isScalarType: Bool {
     return els.count == 1 && els[0].parLabel == nil
   }
+
+  var fieldEls: [Expr] {
+    return els.filter { !$0.isTagged }
+  }
+
+  var variantEls: [Expr] {
+    return els.filter { $0.isTagged }
+  }
 }

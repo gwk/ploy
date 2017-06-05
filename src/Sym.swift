@@ -17,6 +17,8 @@ class Sym: Form { // symbol: `name`.
 
   var hostName: String { return name }
 
+  var cloned: Sym { return Sym(syn, name: name) }
+
   func failUndef() -> Never {
     failScope("`\(name)` is not defined in this scope.")
   }

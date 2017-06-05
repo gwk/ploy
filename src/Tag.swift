@@ -13,5 +13,9 @@ class Tag: Form { // tag: `-X`.
     writeHead(to: &stream, depth)
     sym.write(to: &stream, depth + 1)
   }
+
+  // Tag.
+
+  var cloned: Tag { return Tag(syn, sym: sym.cloned) }
 }
 

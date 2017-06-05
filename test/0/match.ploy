@@ -1,0 +1,10 @@
+main = {
+
+  t0 = fn Int%Int
+    match $
+      0 ? 0
+      / -1;;
+
+  assert_eq(0 t0.0 "0")
+  assert_eq(-1 t0.-1 "-1")
+}

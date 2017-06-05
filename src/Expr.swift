@@ -112,23 +112,27 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     }
   }
 
-  var isLitVariant: Bool {
+  var isTagged: Bool {
     switch self {
+      case .ann(let ann):
+        if case .tag = ann.expr { return true }
+        return false
+      case .bind(let bind): return bind.place.isTag
       case .tag: return true
       default: return false
     }
   }
 
-  var structLitFields: [Expr]? {
+  var parenFieldEls: [Expr]? {
     switch self {
-    case .paren(let paren): return paren.els.filter { !$0.isLitVariant }
+    case .paren(let paren): return paren.fieldEls
     default: return nil
     }
   }
 
-  var structLitVariants: [Expr]? {
+  var parenVariantEls: [Expr]? {
     switch self {
-    case .paren(let paren): return paren.els.filter { $0.isLitVariant }
+    case .paren(let paren): return paren.variantEls
     default: return nil
     }
   }
