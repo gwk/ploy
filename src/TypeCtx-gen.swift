@@ -146,7 +146,7 @@ extension TypeCtx {
       let exprBind = Expr.bind(Bind(valSyn, place: .sym(valSym), val: match.expr))
       let if_ = If(match.syn,
         cases: match.cases.map {
-          genMatchCase(valSyn: valSyn, valName: valSym.name, syn: $0.syn, condition: $0.condition, consequence: $0.consequence)
+          genMatchCase(valSyn: valSyn, valName: valSym.name, caseSyn: $0.syn, condition: $0.condition, consequence: $0.consequence)
         },
         dflt: match.dflt ?? Default(match.syn, expr: .call(Call(match.syn,
           callee: .sym(Sym(match.syn, name: "fail")),
@@ -280,13 +280,34 @@ extension TypeCtx {
 }
 
 
-func genMatchCase(valSyn: Syn, valName: String, syn: Syn, condition: Expr, consequence: Expr) -> Case {
+func synthSym(_ syn: Syn, _ name: String) -> Expr {
+  return .sym(Sym(syn, name: name))
+}
+
+func synthPath(_ syn: Syn, _ names: String...) -> Expr {
+  return .path(Path(syn, syms: names.map { Sym(syn, name: $0) }))
+}
+
+func synthCall(_ syn: Syn, callee: Expr, args: Expr...) -> Expr {
+  return .call(Call(syn, callee: callee, arg: .paren(Paren(syn, els: args))))
+}
+
+
+func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, consequence: Expr) -> Case {
   // Synthesize an `if` case from a `match` case.
   // This is a purely syntactic process; the result is type checked.
-  var tests = [String]()
+  // valSyn/valName belong to the synthesized symbol bound to the match argument value.
+  // The actual symbol is not passed here because it must not be incorporated into synthesized cases; see track().
+  var tests = [Expr]()
   var binds = [Bind]()
 
   switch condition {
+
+  case .litNum(let litNum):
+    let syn = litNum.syn
+    tests.append(synthCall(syn,
+      callee: synthPath(syn, "ROOT", "eq"),
+      args: synthSym(syn, valName), .litNum(litNum))) // ok to use original litNum; sole use.
 
   case .tag(let tag):
     switch tag.tagged {
@@ -294,7 +315,7 @@ func genMatchCase(valSyn: Syn, valName: String, syn: Syn, condition: Expr, conse
     case .bind(let bind):
       switch bind.place {
       case .ann(let ann): ann.failSyntax("destructuring bind symbol cannot be annotated")
-      case .sym(let sym): tests.append("(\(valName).$t == '\(sym.name)')")
+      case .sym(let sym): tests.append(.magic(Magic(bind.place.syn, type: typeBool, code: "(\(valName).$t == '\(sym.name)')"))) // TODO: type constraint that this is variant exists in argument type.
       }
 
       switch bind.val {
@@ -306,16 +327,16 @@ func genMatchCase(valSyn: Syn, valName: String, syn: Syn, condition: Expr, conse
       default: bind.val.form.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
       }
 
-    case .sym(let sym): tests.append("(\(valName).$t == '\(sym.name)')")
+    case .sym(let sym): tests.append(.magic(Magic(sym.syn, type: typeBool, code: "(\(valName).$t == '\(sym.name)')"))) // TODO: type constraint that this variant exists in argument type.
 
     default: tag.tagged.form.failSyntax("variant match case expects sym or destructuring bind; received \(tag.tagged.form.syntaxName)")
     }
 
   default: condition.form.failSyntax("match case expects variant tag (INCOMPLETE); received \(condition.form.syntaxName)")
   }
-  let genCond = Expr.magic(Magic(condition.syn, type: typeBool, code: tests.joined(separator: "&&")))
+  let genCond = Expr.and(And(condition.syn, terms: tests))
   let genCons = binds.isEmpty
   ? consequence
   : .do_(Do(consequence.syn, body: Body(consequence.syn, stmts: binds.map {.bind($0)}, expr: consequence)))
-  return Case(syn, condition: genCond, consequence: genCons)
+  return Case(caseSyn, condition: genCond, consequence: genCons)
 }

@@ -3,7 +3,7 @@ f = fn Int%Int
   one = 1
   match $
     0 ? 0
-    one ? 1
+    #x::eq(x one) ? 1
     / $;;
 
 
