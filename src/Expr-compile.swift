@@ -158,7 +158,7 @@ extension Expr {
 
     case .tag(let tag): // variant constructor.
       guard case .bind(let bind) = tag.tagged else { fatalError() }
-      em.str(indent, "{$t:\"\(tag.tagged.sym.name)\", $m:") // bling: $t, $m: morph tag/value.
+      em.str(indent, "{$t:'\(tag.tagged.sym.name)', $m:") // bling: $t, $m: morph tag/value.
       bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: bind.val), isTail: false)
       em.append("}")
 
