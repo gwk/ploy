@@ -327,6 +327,18 @@ class Src: CustomStringConvertible {
 
   // MARK: keyword sentences.
 
+  func parseAnd(_ sym: Sym) -> Form {
+    var terms: [Expr] = []
+    let end = parseSubForms(&terms, sym.syn.end, subj: "`and` form")
+    return And(synForSemicolon(sym, end, "and"), terms: terms)
+  }
+
+  func parseOr(_ sym: Sym) -> Form {
+    var terms: [Expr] = []
+    let end = parseSubForms(&terms, sym.syn.end, subj: "`or` form")
+    return Or(synForSemicolon(sym, end, "or"), terms: terms)
+  }
+
   func parseExtensible(_ sym: Sym) -> Form {
     var constraints: [Expr] = []
     let nameSym: Sym = parseForm(sym.syn.end, subj: "`extensible` form", exp: "name symbol")
@@ -405,6 +417,7 @@ class Src: CustomStringConvertible {
   }
 
   static let keywordSentenceHandlers: [String: (Src) -> (Sym) -> Form] = [
+    "and"         : parseAnd,
     "extensible"  : parseExtensible,
     "fn"          : parseFn,
     "host_type"   : parseHostType,
@@ -412,6 +425,7 @@ class Src: CustomStringConvertible {
     "if"          : parseIf,
     "in"          : parseIn,
     "match"       : parseMatch,
+    "or"          : parseOr,
     "pub"         : parsePub,
   ]
 

@@ -20,6 +20,34 @@ extension Expr {
       em.str(indent + 2, acc.accessor.hostAccessor)
       em.append(")")
 
+    case .and(let and):
+      if and.terms.isEmpty {
+        em.str(indent, "true")
+      } else {
+        em.str(indent, "(")
+        var isRight = false
+        for term in and.terms {
+          if isRight { em.append(" &&") }
+          term.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: term), isTail: false)
+          isRight = true
+        }
+        em.append(")")
+      }
+
+    case .or(let or):
+      if or.terms.isEmpty {
+        em.str(indent, "false")
+      } else {
+        em.str(indent, "(")
+        var isRight = false
+        for term in or.terms {
+          if isRight { em.append(" ||") }
+          term.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: term), isTail: false)
+          isRight = true
+        }
+        em.append(")")
+      }
+
     case .ann(let ann):
       ann.expr.compile(&ctx, em, indent, exp: type, isTail: isTail)
 

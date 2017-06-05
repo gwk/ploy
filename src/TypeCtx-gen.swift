@@ -52,6 +52,20 @@ extension TypeCtx {
       let accesseeType = genConstraints(scope, expr: acc.accessee)
       return constrain(acc: acc, accesseeType: accesseeType)
 
+    case .and(let and):
+      for term in and.terms {
+        let termType = genConstraints(scope, expr: term)
+        constrain(term, actType: termType, expType: typeBool, "`and` term")
+      }
+      return typeBool
+
+    case .or(let or):
+      for term in or.terms {
+        let termType = genConstraints(scope, expr: term)
+        constrain(term, actType: termType, expType: typeBool, "`or` term")
+      }
+      return typeBool
+
     case .ann(let ann):
       let type = genConstraints(scope, expr: ann.expr)
       return constrainAnn(scope, expr: ann.expr, type: type, ann: ann)

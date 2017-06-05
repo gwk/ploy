@@ -3,6 +3,7 @@
 enum Expr: SubForm, Hashable, CustomStringConvertible {
 
   case acc(Acc)
+  case and(And)
   case ann(Ann)
   case bind(Bind)
   case call(Call)
@@ -14,6 +15,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case litStr(LitStr)
   case magic(Magic)
   case match(Match)
+  case or(Or)
   case paren(Paren)
   case path(Path)
   case reify(Reify)
@@ -26,6 +28,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   init(form: Form, subj: String, exp: String) {
     switch form {
     case let f as Acc:        self = .acc(f)
+    case let f as And:        self = .and(f)
     case let f as Ann:        self = .ann(f)
     case let f as Bind:       self = .bind(f)
     case let f as Call:       self = .call(f)
@@ -36,6 +39,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as LitNum:     self = .litNum(f)
     case let f as LitStr:     self = .litStr(f)
     case let f as Match:      self = .match(f)
+    case let f as Or:         self = .or(f)
     case let f as Paren:      self = .paren(f)
     case let f as Path:       self = .path(f)
     case let f as Reify:      self = .reify(f)
@@ -56,6 +60,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     switch self {
     case .acc(let acc): return acc
     case .ann(let ann): return ann
+    case .and(let and): return and
     case .bind(let bind): return bind
     case .call(let call): return call
     //case .typeConsraint(let typeConsraint): return typeConsraint
@@ -67,6 +72,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .litStr(let litStr): return litStr
     case .magic(let magic): return magic
     case .match(let match): return match
+    case .or(let or): return or
     case .paren(let paren): return paren
     case .path(let path): return path
     case .reify(let reify): return reify
