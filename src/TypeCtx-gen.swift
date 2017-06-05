@@ -274,11 +274,6 @@ extension TypeCtx {
   }
 
 
-  mutating func synthSym(src: Expr, name: String) -> Expr {
-    return putSynth(src: src, expr: .sym(Sym(src.syn, name: name)))
-  }
-
-
   mutating func genSym(parent: Expr) -> Sym {
     let sym = Sym(parent.syn, name: "$g\(genSyms.count)") // bling: $g<i>: gensym.
     genSyms.append(sym)
