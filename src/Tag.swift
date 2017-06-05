@@ -2,16 +2,16 @@
 
 
 class Tag: Form { // tag: `-X`.
-  let tagged: Tagged
+  let sym: Sym
 
-  init(_ syn: Syn, tagged: Tagged) {
-    self.tagged = tagged
+  init(_ syn: Syn, sym: Sym) {
+    self.sym = sym
     super.init(syn)
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
     writeHead(to: &stream, depth)
-    tagged.write(to: &stream, depth + 1)
+    sym.write(to: &stream, depth + 1)
   }
 }
 

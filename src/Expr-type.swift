@@ -51,38 +51,44 @@ extension Expr {
   func getTypeField(_ scope: Scope) -> TypeField {
     var isVariant = false
     var label: String? = nil
-    var type: Type
+    var type = typeVoid
+
+    func handle(ann: Ann) {
+      switch ann.expr {
+      case .sym(let sym):
+        label = sym.name
+        type = ann.typeExpr.type(scope, "parameter type")
+      case .tag(let tag):
+        isVariant = true
+        label = tag.sym.name
+        type = ann.typeExpr.type(scope, "variant type")
+      default: ann.expr.form.failSyntax("annotated parameter requires a symbol or tag label.")
+      }
+    }
 
     switch self {
 
-    case .ann(let ann):
-      guard case .sym(let sym) = ann.expr  else {
-        ann.expr.form.failSyntax("annotated parameter requires a label symbol.")
-      }
-      label = sym.name
-      type = ann.typeExpr.type(scope, "parameter annotated type")
+    case .ann(let ann): handle(ann: ann)
 
     case .bind(let bind):
       switch bind.place {
       case .ann(let ann):
-        guard case .sym(let sym) = ann.expr else {
-          ann.expr.form.failSyntax("annotated default parameter requires a label symbol.")
-        }
+        handle(ann: ann)
+        fatalError("TODO: handle default value.")
+      case .sym(let sym): // infer type from default expression.
         label = sym.name
-        type = ann.typeExpr.type(scope, "default parameter annotated type")
-      case .sym(let sym):
-        // TODO: for now assume the sym refers to a type. This is going to change.
-        type = scope.typeBinding(sym: sym, subj: "default parameter type")
+        type = typeVoid // TODO
+        fatalError("TODO: handle default value.")
+      case .tag(let tag): // infer type from default expression.
+        label = tag.sym.name
+        type = typeVoid // TODO
+        fatalError("TODO: handle default value.")
       }
 
-    case .tag(let tag):
+    case .tag(let tag): // bare tag; no payload.
       isVariant = true
-      guard case .ann(let ann) = tag.tagged else {
-        let tagged = tag.tagged.form
-        tagged.failSyntax("variant parameter (tag within a type expression) requires an annotation; received \(tagged)")
-      }
-      label = tag.tagged.sym.name
-      type = ann.typeExpr.type(scope, "variant type")
+      label = tag.sym.name
+      type = typeVoid
 
     default:
       type = self.type(scope, "parameter type")

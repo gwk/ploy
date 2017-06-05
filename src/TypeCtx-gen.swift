@@ -190,17 +190,13 @@ extension TypeCtx {
     case .sym(let sym):
       return constrainSym(sym: sym, record: scope.getRecord(sym: sym))
 
-    case .tag(let tag): // morph constructor.
-      guard case .bind(let bind) = tag.tagged else {
-        tag.tagged.form.failSyntax("tag expects morph constructor (`=` phrase) in an expression context; received \(tag.tagged.form.syntaxName).")
-      }
-      let fieldType = genConstraints(scope, expr: bind.val)
-      return Type.Variant(label: tag.tagged.sym.name, type: fieldType)
+    case .tag(let tag): // bare morph constructor.
+      return Type.Variant(label: tag.sym.name, type: typeVoid)
 
     case .tagTest(let tagTest):
       let expr = tagTest.expr
       let actType = genConstraints(scope, expr: expr)
-      let expType = Type.Variant(label: tagTest.tag.tagged.sym.name, type: addFreeType())
+      let expType = Type.VariantMember(variant: TypeField(isVariant: true, label: tagTest.tag.sym.name, type: addFreeType()))
       constrain(expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
       return typeBool
 
@@ -229,17 +225,18 @@ extension TypeCtx {
 
   mutating func typeFieldForArg(_ scope: LocalScope, arg: Expr) -> TypeField {
     var isVariant = false
-    let val: Expr
+    let type: Type
     switch arg {
     case .bind(let bind):
-      val = bind.val
-    case .tag(let tag):
+      isVariant = bind.place.isTag
+      type = genConstraints(scope, expr: bind.val)
+    case .tag:
       isVariant = true
-      guard case .bind(let bind) = tag.tagged else { fatalError() }
-      val = bind.val
-    default: val = arg
+      type = typeVoid
+    default:
+      type = genConstraints(scope, expr: arg)
     }
-    return TypeField(isVariant: isVariant, label: arg.argLabel, type: genConstraints(scope, expr: val))
+    return TypeField(isVariant: isVariant, label: arg.argLabel, type: type)
   }
 
 
@@ -302,16 +299,23 @@ func synthCall(_ syn: Syn, callee: Expr, args: Expr...) -> Expr {
   return .call(Call(syn, callee: callee, arg: .paren(Paren(syn, els: args))))
 }
 
-
 func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, consequence: Expr) -> Case {
   // Synthesize an `if` case from a `match` case.
   // This is a purely syntactic process; the result is type checked.
   // valSyn/valName belong to the synthesized symbol bound to the match argument value.
   // The actual symbol is not passed here because it must not be incorporated into synthesized cases; see track().
+  // Instead use valSym() to synthesize a new reference.
+  // We can reuse original bits of syntax from the condition, but only if they only appear once in the output.
   // Note: the synthesized calls to ROOT/eq result in somewhat cryptic type errors regarding type signature of 'eq'.
   // Not sure how that should be addressed; seems like the constraint should be given the function name wherever it is known.
   var tests = [Expr]()
   var binds = [Bind]()
+
+  func valSym() -> Expr { return synthSym(valSyn, valName) }
+
+  func synthTagTest(tag: Tag) -> Expr {
+    return .tagTest(TagTest(tag.syn, tag: tag, expr: valSym())) // assumes sole use of tag.
+  }
 
   switch condition {
 
@@ -319,36 +323,41 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
     let syn = litNum.syn
     tests.append(synthCall(syn,
       callee: synthPath(syn, "ROOT", "eq"),
-      args: synthSym(syn, valName), .litNum(litNum))) // ok to use original form; sole use.
+      args: valSym(), .litNum(litNum))) // sole use of litNum.
 
   case .litStr(let litStr):
     let syn = litStr.syn
     tests.append(synthCall(syn,
       callee: synthPath(syn, "ROOT", "eq"),
-      args: synthSym(syn, valName), .litStr(litStr))) // ok to use original form; sole use.
+      args: valSym(), .litStr(litStr))) // sole use of litStr.
 
   case .tag(let tag):
-    switch tag.tagged {
+    tests.append(synthTagTest(tag: tag)) // sole use of tag.
+
+  case .paren(let paren):
+    if paren.els.count != 1 { paren.failSyntax("TODO: destructuring structs not yet supported") }
+    switch paren.els[0] {
 
     case .bind(let bind):
+      var unwrapped: Expr! = nil
       switch bind.place {
       case .ann(let ann): ann.failSyntax("destructuring bind symbol cannot be annotated")
-      case .sym: tests.append(.tagTest(TagTest(tag.syn, tag: tag, expr: synthSym(valSyn, valName))))
+      case .sym(let sym): sym.failSyntax("destructuring bind: TODO: struct fields")
+      case .tag(let tag):
+        tests.append(synthTagTest(tag: tag))
+        unwrapped = .acc(Acc(tag.syn, accessor: .untag(tag.sym), accessee: valSym())) // sole use of tag.sym.
       }
-
       switch bind.val {
       case .sym(let sym):
-        // ok to use sym as is instead of genSym on the left side, because this is the sole use (see track()).
-        let accessor = Accessor.morph(variant: sym)
-        let accessee = Expr.sym(Sym(valSyn, name: valName))
-        binds.append(Bind(sym.syn, place: .sym(sym), val: .acc(Acc(bind.syn, accessor: accessor, accessee: accessee))))
+        binds.append(Bind(sym.syn, place: .sym(sym), val: unwrapped)) // sole use of sym.
       default: bind.val.form.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
       }
 
-    case .sym: tests.append(.tagTest(TagTest(tag.syn, tag: tag, expr: synthSym(valSyn, valName))))
-
-    default: tag.tagged.form.failSyntax("variant match case expects sym or destructuring bind; received \(tag.tagged.form.syntaxName)")
+    default: paren.failSyntax("destructuring paren: TODO: incomplete")
     }
+
+  case .sym(let sym):
+    binds.append(Bind(sym.syn, place: .sym(sym), val: valSym())) // sole use of sym.
 
   case .where_(let where_): fatalError("TODO: \(where_)")
 

@@ -47,6 +47,8 @@ struct TypeCtx {
       } else { return type }
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
+    case .variantMember(let variant):
+      return Type.VariantMember(variant: resolved(par: variant))
     default: fatalError("type kind cannot contain frees: \(type)")
     }
   }
@@ -79,7 +81,7 @@ struct TypeCtx {
 
     switch accesseeType.kind {
     case .struct_(let fields, let variants):
-      if case .morph(let variantSym) = accessor {
+      if case .untag(let variantSym) = accessor {
         let name = variantSym.name
         for variant in variants {
           if variant.label! == name {
@@ -161,6 +163,9 @@ struct TypeCtx {
       }
       return try resolveStructToStruct(rel, act: actFV, exp: expFV)
 
+    case (.struct_(_, let actVariants), .variantMember(let expVariant)):
+      return try resolveStructToVariantMember(rel, actVariants: actVariants, expVariant: expVariant)
+
     default: throw rel.error("actual type is not expected type")
     }
   }
@@ -210,6 +215,18 @@ struct TypeCtx {
     return true
   }
 
+
+  mutating func resolveStructToVariantMember(_ rel: RelCon, actVariants: [TypeField], expVariant: TypeField) throws -> Bool {
+    for actVariant in actVariants {
+      if actVariant.label == expVariant.label {
+        try resolveSub(rel,
+          actExpr: nil, actType: actVariant.type, actDesc: "variant",
+          expExpr: nil, expType: expVariant.type, expDesc: "variant")
+      return true
+      }
+    }
+    throw rel.error("actual variants do not contain expected variant label: `-\(expVariant.label!)`")
+  }
 
   mutating func resolveSub(constraint: Constraint) throws {
     let done = try resolve(constraint)

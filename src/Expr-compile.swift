@@ -156,14 +156,11 @@ extension Expr {
     case .sym(let sym):
       compileSym(&ctx, em, indent, sym: sym, type: type)
 
-    case .tag(let tag): // variant constructor.
-      guard case .bind(let bind) = tag.tagged else { fatalError() }
-      em.str(indent, "{$t:'\(tag.tagged.sym.name)', $m:") // bling: $t, $m: morph tag/value.
-      bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: bind.val), isTail: false)
-      em.append("}")
+    case .tag(let tag): // simple morph constructor; no payload.
+      em.str(indent, "{$t:'\(tag.sym.name)', $m:{}}") // bling: $t, $m: morph tag/value. TODO: should be special case without $m.
 
     case .tagTest(let tagTest):
-      em.str(indent, "( '\(tagTest.tag.tagged.sym.name)' ==")
+      em.str(indent, "( '\(tagTest.tag.sym.name)' ==")
       tagTest.expr.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: tagTest.expr), isTail: false)
       em.append(".$t)") // bling: $t: morph tag.
 
@@ -251,13 +248,13 @@ func compileStructField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, pare
 
 
 func compileStructVariant(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, expr: Expr, variant: TypeField) {
-  guard case .tag(let tag) = expr else { fatalError() }
-  guard case .bind(let bind) = tag.tagged else { fatalError() }
+  guard case .bind(let bind) = expr else { fatalError() }
+  guard case .tag(let tag) = bind.place else { fatalError() }
   guard let label = variant.label else { fatalError() }
-  if bind.place.sym.name != label {
-    bind.place.sym.fatal("morph constructor label does not match type's variant label `\(label)`")
+  if tag.sym.name != label {
+    tag.sym.fatal("morph constructor label does not match type's variant label `\(label)`")
   }
-  em.str(indent + 1, "{$t:\"\(tag.tagged.sym.name)\", $m:") // bling: $t, $m: morph tag/value.
+  em.str(indent + 1, "$t:\"\(tag.sym.name)\", $m:") // bling: $t, $m: morph tag/value.
   bind.val.compile(&ctx, em, indent + 2, exp: variant.type, isTail: false)
   em.append(",")
 }

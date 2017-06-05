@@ -13,6 +13,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case sig(dom: Type, ret: Type)
     case struct_(fields: [TypeField], variants: [TypeField])
     case var_(name: String)
+    case variantMember(variant: TypeField)
   }
 
   static var allTypes: [String: Type] = [:]
@@ -113,6 +114,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return Struct(fields: [], variants: [TypeField(isVariant: true, label: label, type: type)])
   }
 
+  class func VariantMember(variant: TypeField) -> Type {
+    let desc = "(\(variant)...)"
+    return memoize(desc, (
+      kind: .variantMember(variant: variant),
+      frees: variant.type.frees,
+      vars: variant.type.vars))
+  }
 
   var nestedSigDescription: String {
     switch kind {

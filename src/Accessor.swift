@@ -4,13 +4,15 @@
 enum Accessor: SubForm {
 
   case litNum(LitNum)
-  case morph(variant: Sym)
   case sym(Sym)
+  case tag(Tag)
+  case untag(Sym)
 
   init(form: Form, subj: String) {
     switch form {
     case let f as LitNum: self = .litNum(f)
     case let f as Sym:    self = .sym(f)
+    case let f as Tag:    self = .tag(f)
     default:
       form.failSyntax("\(subj) expects accessor symbol or number literal but received \(form.syntaxName).")
     }
@@ -19,25 +21,27 @@ enum Accessor: SubForm {
   var form: Form {
     switch self {
     case .litNum(let litNum): return litNum
-    case .morph(let variant): return variant
     case .sym(let sym): return sym
+    case .tag(let tag): return tag
+    case .untag(let sym): return sym
     }
   }
 
   var hostAccessor: String {
     switch self {
     case .litNum(let litNum): return "._\(litNum.val)"
-    case .morph: return  ".$m"
     case .sym(let sym): return ".\(sym.hostName)"
+    case .tag: fatalError("tag accessors not yet implemented")
+    case .untag: return  ".$m"
     }
   }
 
   var accessorString: String {
     switch self {
     case .litNum(let litNum): return String(litNum.val)
-    case .morph(let variant):
-      fatalError("accessorString should never be called on morph accessor; variant: \(variant)")
     case .sym(let sym): return sym.name
+    case .tag(let tag): return "-\(tag.sym.name)"
+    case .untag(let sym): fatalError("accessorString should never be called on untag: \(sym)")
     }
   }
 }
