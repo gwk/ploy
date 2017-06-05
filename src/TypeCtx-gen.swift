@@ -197,6 +197,13 @@ extension TypeCtx {
       let fieldType = genConstraints(scope, expr: bind.val)
       return Type.Variant(label: tag.tagged.sym.name, type: fieldType)
 
+    case .tagTest(let tagTest):
+      let expr = tagTest.expr
+      let actType = genConstraints(scope, expr: expr)
+      let expType = Type.Variant(label: tagTest.tag.tagged.sym.name, type: addFreeType())
+      constrain(expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
+      return typeBool
+
     case .typeAlias(let typeAlias):
       _ = scope.addRecord(sym: typeAlias.sym, kind: .fwd)
       let type = typeAlias.expr.type(scope, "type alias")

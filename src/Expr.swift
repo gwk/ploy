@@ -22,6 +22,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case sig(Sig)
   case sym(Sym)
   case tag(Tag)
+  case tagTest(TagTest)
   case typeAlias(TypeAlias)
   case void(ImplicitVoid)
 
@@ -46,6 +47,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as Sig:        self = .sig(f)
     case let f as Sym:        self = .sym(f)
     case let f as Tag:        self = .tag(f)
+    case let f as TagTest:    self = .tagTest(f)
     case let f as TypeAlias:  self = .typeAlias(f)
     default:
       form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
@@ -79,6 +81,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .sig(let sig): return sig
     case .sym(let sym): return sym
     case .tag(let tag): return tag
+    case .tagTest(let tagTest): return tagTest
     case .typeAlias(let typeAlias): return typeAlias
     case .void(let void): return void
     }

@@ -162,6 +162,11 @@ extension Expr {
       bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: bind.val), isTail: false)
       em.append("}")
 
+    case .tagTest(let tagTest):
+      em.str(indent, "( '\(tagTest.tag.tagged.sym.name)' ==")
+      tagTest.expr.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: tagTest.expr), isTail: false)
+      em.append(".$t)") // bling: $t: morph tag.
+
     case .typeAlias:
       em.str(indent, "undefined")
 
