@@ -212,6 +212,9 @@ extension TypeCtx {
 
     case .void:
       return typeVoid
+
+    case .where_(let where_):
+      where_.failSyntax("where phrase cannot be used as a value expression (temporary)")
     }
   }
 
@@ -346,6 +349,8 @@ func genMatchCase(valSyn: Syn, valName: String, caseSyn: Syn, condition: Expr, c
 
     default: tag.tagged.form.failSyntax("variant match case expects sym or destructuring bind; received \(tag.tagged.form.syntaxName)")
     }
+
+  case .where_(let where_): fatalError("TODO: \(where_)")
 
   default: condition.form.failSyntax("match case expects pattern; received \(condition.form.syntaxName)")
   }

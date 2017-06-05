@@ -170,6 +170,9 @@ extension Expr {
     case .typeAlias:
       em.str(indent, "undefined")
 
+    case .where_:
+      fatalError()
+
     case .void:
       em.str(indent, "undefined")
     }
