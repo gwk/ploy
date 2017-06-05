@@ -10,12 +10,11 @@ _default: test
 
 all: clean gen build test
 
-swift_build = swift build --build-path _build
+swift_build = swift build --color=always --build-path=_build
 
 # src/Lex.swift
 build:
 	$(swift_build)
-	@echo done.
 
 clean:
 	rm -rf _build/*
@@ -29,10 +28,7 @@ cov:
 gen: src/Lex.swift
 
 src/Lex.swift: ploy.legs
-	legs \
-	-license 'Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.' \
-	-output $@ \
-	$^
+	legs $^ -output $@
 
 test: build
 	iotest -fail-fast

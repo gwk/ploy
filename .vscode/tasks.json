@@ -1,7 +1,26 @@
 {
-  "version": "0.1.0",
-  "command": "make",
-  "isShellCommand": true,
-  "args": [],
-  "showOutput": "always"
+  "version": "2.0.0",
+  "command": ".vscode/run-args.sh",
+  "echoCommand": false,
+  "isShellCommand": false,
+  "showOutput": "always",
+  "suppressTaskName": true,
+  "tasks": [
+    { "taskName": "_default",
+      "args": ["make"],
+      "isBuildCommand": true
+    },
+    { "taskName": "build",
+      "args": ["make", "build"],
+      "isBuildCommand": false
+    },
+    { "taskName": "test-current",
+      "args": ["sh/test.sh", "${relativeFile}"],
+      "isTestCommand": true
+    },
+    { "taskName": "test",
+      "args": ["make", "test"],
+      "isTestCommand": false
+    },
+  ]
 }
