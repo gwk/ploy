@@ -1,0 +1,73 @@
+#!/usr/local/bin/node
+// Dedicated to the public domain under CC0: https://creativecommons.org/publicdomain/zero/1.0/.
+
+// Stream source mappings from stdin and output a js source map.
+// Each mapping is of form: "srcPath srcName srcLine srcCol genLine genCol";
+// srcName may be the empty string.
+
+'use strict';
+
+let fs = require('fs');
+let readline = require('readline');
+let sourceMap = require('source-map');
+let stdin = process.stdin;
+let stdout = process.stdout;
+let errL = console.error;
+let exit = process.exit;
+let repr = JSON.stringify;
+
+
+function main() {
+  function checkArg(cond) {
+    if (!cond) {
+      errL(`argument error; usage: gen-source-map [genPath] [outPath] < [mappings]`)
+      exit(1)
+    }
+  }
+  let args =  process.argv; // first two arguments are 'node' and the script path.
+  checkArg(args.length == 2 + 2)
+  let genPath = args[2]; checkArg(genPath);
+  let outPath = args[3]; checkArg(outPath);
+
+  let srcPaths = new Set();
+  let generator = new sourceMap.SourceMapGenerator({file: genPath});
+  let reader = readline.createInterface({input: stdin, output: stdout});  // note: also supports sourceRooot parameter.
+
+  reader.on('line', (line) => {
+    let els = line.split(' ');
+    function check(cond, msg) {
+      if (!cond) {
+        errL(`gen-source-map error: ${msg}; received:\n${line}\n${repr(els)}`);
+        exit(1);
+      }
+    }
+    check(els.length == 6, 'input line must contain 6 space-separated elements');
+
+    let srcPath =  els[0];
+    var srcName =  els[1];
+    let srcLine = +els[2]; check(!isNaN(srcLine), 'bad srcLine');
+    let srcCol  = +els[3]; check(!isNaN(srcCol),  'bad srcCol');
+    let genLine = +els[4]; check(!isNaN(genLine), 'bad genLine');
+    let genCol  = +els[5]; check(!isNaN(genCol),  'bad genCol');
+
+    srcPaths.add(srcPath);
+    generator.addMapping({
+      source: srcPath,
+      original: { line: srcLine, column: srcCol },
+      generated: { line: genLine, column: genCol },
+      name: srcName,
+    });
+  });
+
+  reader.on('close', ()=>{
+    let embedSrc = false; // writing the source contents results in larger map file; for future distribution mode.
+    if (embedSrc) {
+      for (path of srcPaths) {
+        generator.setSourceContent(path, fs.readFileSync(path));
+      }
+    }
+    fs.writeFileSync(outPath, generator.toString() + '\n');
+  });
+}
+
+main();
