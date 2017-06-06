@@ -34,6 +34,7 @@ rem += host_val (Int Int)%Int "function($) { return $._0 % $._1; }";
 
 extensible eq; # TODO: constraints.
 eq += host_val (Int Int)%Bool "function($) { return $._0 == $._1; }";
+eq += host_val (Str Str)%Bool "function($) { return $._0 == $._1; }";
 
 extensible ne; # TODO: constraints.
 ne += host_val (Int Int)%Bool "function($) { return $._0 != $._1; }";
