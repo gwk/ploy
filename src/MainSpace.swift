@@ -1,5 +1,7 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
+import Foundation
+
 
 class MainSpace: Space {
 
@@ -10,16 +12,16 @@ class MainSpace: Space {
     return def
   }
 
-  func compileMain() {
+  func compileMain() -> Syn {
     let def = getMainDef()
     _ = getRecordInFrame(sym: def.sym)!
-    ctx.emitConversions()
+    return def.sym.syn
   }
 }
 
 
-func setupRootAndMain(mainPath: String, outFile: OutFile) -> (root: Space, main: MainSpace) {
-  let ctx = GlobalCtx(mainPath: mainPath, file: outFile)
+func setupRootAndMain(mainPath: String, outFile: OutFile, mapSend: FileHandle) -> (root: Space, main: MainSpace) {
+  let ctx = GlobalCtx(mainPath: mainPath, file: outFile, mapSend: mapSend)
   let root = Space(ctx, pathNames: ["ROOT"], parent: nil)
   root.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, kind: .space(root)) // NOTE: reference cycle.
   // TODO: could fix the reference cycle by making a special case for "ROOT" just before lookup failure.

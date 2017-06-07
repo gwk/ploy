@@ -181,23 +181,24 @@ extension Expr {
 
   func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, type: Type) {
     let scopeRecord = ctx.symRecords[sym]!
+    let code: String
     switch scopeRecord.kind {
     case .val:
-      em.str(indent, scopeRecord.hostName)
+      code = scopeRecord.hostName
     case .lazy:
-      let s = "\(scopeRecord.hostName)__acc()"
-      em.str(indent, "\(s)")
+      code = "\(scopeRecord.hostName)__acc()"
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
     case .poly(_, let morphsToNeedsLazy):
       let needsLazy = morphsToNeedsLazy[type]!
       let lazySuffix = (needsLazy ? "__acc()" : "")
-      em.str(indent, "\(scopeRecord.hostName)__\(type.globalIndex)\(lazySuffix)")
+      code = "\(scopeRecord.hostName)__\(type.globalIndex)\(lazySuffix)"
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:
       sym.fatal("`\(sym.name)` refers to a type.") // TODO: eventually this will return a runtime type.
     }
+    em.str(indent, code, syn: sym.syn, frameName: "")
   }
 }
 

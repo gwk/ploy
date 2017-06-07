@@ -1,79 +1,84 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
+import Foundation
+
 
 class Emitter {
-  let file: OutFile
-  var lines: [String] = []
+  let ctx: GlobalCtx
+  var lines: [Line] = []
 
   deinit {
     assert(lines.isEmpty, "Emitter was not flushed.")
   }
 
-  init(file: OutFile) {
-    self.file = file
+  init(ctx: GlobalCtx) {
+    self.ctx = ctx
   }
 
   func flush() {
-    if !lines.isEmpty {
-      file.write("\n")
-      for line in lines {
-        file.write(line)
-        file.write("\n")
-      }
-      lines.removeAll()
+    if lines.isEmpty { return }
+    ctx.writeL()
+    for line in lines {
+      ctx.write(line: line)
     }
+    lines.removeAll()
+    ctx.writeL()
   }
 
-  func str(_ indent: Int, _ string: String) {
-    if let i = lines.lastIndex {
-      let last = lines[i]
-      let diff = indent - last.characters.count
-      if diff >= 0 { // inline.
-        lines[i] = last + String(char: " ", count: diff) + string
-        return
-      }
-    }
-    lines.append(String(char: " ", count: indent) + string)
+  func str(_ indent: Int, _ text: String, syn: Syn? = nil, off: Int = 0, frameName: String = "") {
+    let mapping: SrcMapping? = syn.and({
+      (path: $0.src.path, line: $0.pos.line, col: $0.pos.col, off: off, frameName: frameName)
+    })
+    lines.append((indent: indent, text: text, mapping: mapping))
   }
 
-  func append(_ string: String) {
-    lines[lines.lastIndex!] = lines.last! + string
+  func append(_ suffix: String) {
+    var line = lines.last!
+    line.text += suffix
+    lines[lines.lastIndex!] = line
   }
 }
 
 
-func compileProgram(file: OutFile, includePaths: [String], mainSpace: MainSpace) {
+func compileProgram(file: OutFile, mainPath: String, includePaths: [String], mainSpace: MainSpace, mapName: String) {
   // normal shebang line cannot pass necessary flags to node,
   // because shebang only respects one argument.
+  let ctx = mainSpace.ctx
   #if true // simple thing to do is just use the standard node install path.
-  file.writeL("#!/usr/local/bin/node --harmony-tailcalls")
+  ctx.writeL("#!/usr/local/bin/node --harmony-tailcalls")
   #else
   // alternative trick: launch as shell script, then immediately exec env with all arguments.
   // the hack relies on sh and node both interpreting the line;
   // node sees a string followed by a comment;
   // sh sees the no-op ':' command followed by the exec command.
-  file.writeL("#!/bin/sh")
-  file.writeL("':' //; exec /usr/bin/env node --harmony-tailcalls \"$0\" \"$@\"\n")
+  ctx.writeL("#!/bin/sh")
+  ctx.writeL("':' //; exec /usr/bin/env node --harmony-tailcalls \"$0\" \"$@\"")
   #endif
 
-  file.writeL("\"use strict\";\n")
-  file.writeL("(()=>{ // ploy scope.\n")
-  file.writeL("let $g = global;") // bling: $g: alias that cannot be shadowed.
-  file.writeL("let $require = require;") // bling: $require: alias that cannot be shadowed.
-  file.writeL("function $lazy_sentinal() { throw 'PLOY RUNTIME ERROR: lazy value init recursed.' };")
-  file.writeL("function $assert(cond) { if (!cond) { throw 'PLOY RUNTIME ERROR: assertion failed.' }; };")
+  ctx.writeL("'use strict';")
+  ctx.writeL("require('ploy-source-map').install();")
+  ctx.writeL("(()=>{ // ploy root scope.")
+  ctx.writeL("let $g = global;") // bling: $g: alias that cannot be shadowed.
+  ctx.writeL("let $require = require;") // bling: $require: alias that cannot be shadowed.
+  ctx.writeL("function $lazy_sentinal() { throw new Error('PLOY RUNTIME ERROR: lazy value init recursed.') };")
 
   for path in includePaths {
     let name = path.withoutPathDir
-    file.writeL("// included: \(name).")
+    ctx.writeL("// included: \(name).")
     let src = guarded { try String(contentsOfFile: path) }
-    file.writeL(src)
-    file.writeL("// end: \(name).\n")
+    ctx.writeL(src)
+    ctx.writeL("// end: \(name).")
+    ctx.writeL()
   }
 
-  mainSpace.compileMain()
-  file.writeL("")
-  file.writeL("let $m = MAIN__main__acc();")
-  file.writeL("$assert($m === undefined);")
-  file.writeL("})();")
+  let mainSyn = mainSpace.compileMain()
+  ctx.emitConversions()
+
+  ctx.writeL()
+  let mainPos = mainSyn.pos
+  let mainMapping = (path: mainSyn.src.path, line: mainPos.line, col: mainPos.col, off: 0, frameName: "<ploy>")
+  ctx.writeL("MAIN__main__acc();", mainMapping)
+  ctx.writeL("})(); // ploy root scope.")
+
+  ctx.writeL("//# sourceMappingURL=\(mapName)")
 }

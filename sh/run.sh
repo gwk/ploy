@@ -12,7 +12,7 @@ outPath="_build/$stem.js"
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
-_build/debug/ploy lib -main "$mainPath" -o "$outPath"
+_build/debug/ploy lib -mapper ./gen-source-map -main "$mainPath" -o "$outPath"
 "$outPath" "$@"
 
 # TODO: move the profile dump.

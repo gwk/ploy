@@ -82,7 +82,7 @@ enum Def: SubForm {
       }
       let type = Type.Poly(Set(typesToNeedsLazy.keys))
       #if false
-      let em = Emitter(file: space.ctx.file)
+      let em = Emitter(ctx: space.ctx)
       let hostName = "\(space.hostPrefix)\(sym.hostName)"
       em.str(0, "let \(hostName)__$table = {")
       // TODO: emit table contents.
@@ -119,7 +119,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
   ctx.resolveAll()
   type = ctx.resolved(type: type)
   let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
-  let em = Emitter(file: space.ctx.file)
+  let em = Emitter(ctx: space.ctx)
   //let fullName = "\(space.name)/\(place.sym.name)"
   let hostName = "\(space.hostPrefix)\(place.sym.hostName)\(suffix)"
   if needsLazyDef(val: val, type: type) {
