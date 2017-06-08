@@ -1,10 +1,10 @@
 main = {
-  assert_eq(0 0@(0 1) "#1")
-  assert_eq(0 0@0@((0 1) 2) "#2")
+  assert.eq(0 0@(0 1))
+  assert.eq(0 0@0@((0 1) 2))
 
-  assert(-a@?-a "-a")
+  assert.-a@?-a
 
   AB =: (-a -b)
   b:AB = -b
-  assert(not.-a@?b "-b")
+  assert.not.-a@?b
 }

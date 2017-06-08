@@ -7,9 +7,9 @@ main = {
       x ? -1
       / -2;;
 
-  assert_eq(0 tI.0 "0")
-  assert_eq(1 tI.1 "1")
-  assert_eq(-1 tI.-1 "-1")
+  assert.eq(0 tI.0)
+  assert.eq(1 tI.1)
+  assert.eq(-1 tI.-1)
 
   tS = fn Str%Str
     match $
@@ -18,7 +18,7 @@ main = {
       x ? "x"
       / "z";;
 
-  assert(eq("a" tS."a") "a")
-  assert(eq("b" tS."b") "b")
-  assert(eq("x" tS."c") "c")
+  assert(eq("a" tS."a"))
+  assert(eq("b" tS."b"))
+  assert(eq("x" tS."c"))
 }

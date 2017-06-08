@@ -3,7 +3,7 @@ main = {
   x = 1
   f = fn ()%()
     x = 2
-    assert_eq(x 2 'inner');
+    assert.eq(x 2);
   f()
-  assert_eq(x 1 'outer')
+  assert.eq(x 1)
 }

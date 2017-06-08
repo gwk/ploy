@@ -6,6 +6,6 @@ main = {
   match (-a=0) -a ? ();
   match (-b=1) -b ? ();
 
-  match (-a=0) (-a=x) ? assert_eq(x 0 "a");
+  match (-a=0) (-a=x) ? assert.eq(x 0);
 
 }

@@ -95,23 +95,7 @@ fail = fn Str%()
 abort = host_val Str%() "function($) { throw new Error($); }";
 
 
-assert = fn (Bool Str)%()
-  # TODO: source location reporting using macros?
-  if not.0@$ ? {
-    err.'assert failed: '
-    errL.1@$
-    abort.'assert failed.' };;
-
-assert_eq = fn (Int Int Str)%()
-  # TODO: make generic.
-  if ne(0@$ 1@$) ? {
-    err.'assert_eq failed: '
-    err.0@$
-    err.' != '
-    err.1@$
-    err.'; '
-    err.2@$
-    err.'\n'
-    exit.1 };;
+assert = fn Bool%()
+  if not.$ ? abort.'assert failed.';;
 
 ;

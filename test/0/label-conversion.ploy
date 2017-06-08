@@ -4,40 +4,40 @@ main = {
   # literal conversions.
 
   zz:(Int Int) = (0 1)
-  assert_eq(0 0@zz "zz")
-  assert_eq(1 1@zz "zz")
+  assert.eq(0 0@zz)
+  assert.eq(1 1@zz)
 
   iz:(i:Int Int) = (0 1)
-  assert_eq(0 i@iz "iz")
-  assert_eq(1 1@iz "iz")
+  assert.eq(0 i@iz)
+  assert.eq(1 1@iz)
 
   zj:(Int j:Int) = (0 1)
-  assert_eq(0 0@zj "zj")
-  assert_eq(1 j@zj "zj")
+  assert.eq(0 0@zj)
+  assert.eq(1 j@zj)
 
   ij:(i:Int j:Int) = (0 1)
-  assert_eq(0 i@ij "ij")
-  assert_eq(1 j@ij "ij")
+  assert.eq(0 i@ij)
+  assert.eq(1 j@ij)
 
   zz_zz:(Int (Int Int)) = (0 (1 2))
-  assert_eq(0   0@zz_zz "zz_zz")
-  assert_eq(1 0@1@zz_zz "zz_zz")
-  assert_eq(2 1@1@zz_zz "zz_zz")
+  assert.eq(0   0@zz_zz)
+  assert.eq(1 0@1@zz_zz)
+  assert.eq(2 1@1@zz_zz)
 
   ij_zz:(i:Int j:(Int Int)) = (0 (1 2))
-  assert_eq(0   i@ij_zz "ij_zz")
-  assert_eq(1 0@j@ij_zz "ij_zz")
-  assert_eq(2 1@j@ij_zz "ij_zz")
+  assert.eq(0   i@ij_zz)
+  assert.eq(1 0@j@ij_zz)
+  assert.eq(2 1@j@ij_zz)
 
   zz_kl:(Int (k:Int l:Int)) = (0 (1 2))
-  assert_eq(0   0@zz_kl "zz_kl 0")
-  assert_eq(1 k@1@zz_kl "zz_kl 1")
-  assert_eq(2 l@1@zz_kl "zz_kl 2")
+  assert.eq(0   0@zz_kl)
+  assert.eq(1 k@1@zz_kl)
+  assert.eq(2 l@1@zz_kl)
 
   ij_kl:(i:Int j:(k:Int l:Int)) = (0 (1 2))
-  assert_eq(0   i@ij_kl "ij_kl 0")
-  assert_eq(1 k@j@ij_kl "ij_kl 1")
-  assert_eq(2 l@j@ij_kl "ij_kl 2")
+  assert.eq(0   i@ij_kl)
+  assert.eq(1 k@j@ij_kl)
+  assert.eq(2 l@j@ij_kl)
 
   # nonliteral shallow conversions.
 
@@ -45,28 +45,28 @@ main = {
   p2 = (0 (1 2))
 
   s_zz:(Int Int) = p1
-  assert_eq(0 0@s_zz "s_zz")
-  assert_eq(1 1@s_zz "s_zz")
+  assert.eq(0 0@s_zz)
+  assert.eq(1 1@s_zz)
 
   s_ij:(i:Int j:Int) = p1
-  assert_eq(0 i@s_ij "s_ij")
-  assert_eq(1 j@s_ij "s_ij")
+  assert.eq(0 i@s_ij)
+  assert.eq(1 j@s_ij)
 
   s_ij_zz:(i:Int j:(Int Int)) = p2
-  assert_eq(0   i@s_ij_zz "s_ij_zz")
-  assert_eq(1 0@j@s_ij_zz "s_ij_zz")
-  assert_eq(2 1@j@s_ij_zz "s_ij_zz")
+  assert.eq(0   i@s_ij_zz)
+  assert.eq(1 0@j@s_ij_zz)
+  assert.eq(2 1@j@s_ij_zz)
 
   # nonliteral deep conversions.
 
   d_zz_kl:(Int (k:Int l:Int)) = p2
-  assert_eq(0   0@d_zz_kl "d_zz_kl 0")
-  assert_eq(1 k@1@d_zz_kl "d_zz_kl 1")
-  assert_eq(2 l@1@d_zz_kl "d_zz_kl 2")
+  assert.eq(0   0@d_zz_kl)
+  assert.eq(1 k@1@d_zz_kl)
+  assert.eq(2 l@1@d_zz_kl)
 
   d_ij_kl:(i:Int j:(k:Int l:Int)) = p2
-  assert_eq(0   i@d_ij_kl "d_ij_kl 0")
-  assert_eq(1 k@j@d_ij_kl "d_ij_kl 1")
-  assert_eq(2 l@j@d_ij_kl "d_ij_kl 2")
+  assert.eq(0   i@d_ij_kl)
+  assert.eq(1 k@j@d_ij_kl)
+  assert.eq(2 l@j@d_ij_kl)
 
 }
