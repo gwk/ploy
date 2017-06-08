@@ -88,7 +88,7 @@ enum Def: SubForm {
       // TODO: emit table contents.
       em.append("}")
       em.str(0, "function \(hostName)($){")
-      em.str(0, "  throw \"PLOY RUNTIME ERROR: extensible dispatch not implemented\"") // TODO: dispatch.
+      em.str(0, "  throw new Error('PLOY RUNTIME ERROR: extensible dispatch not implemented')") // TODO: dispatch.
       em.append("}")
       em.flush()
       #endif
