@@ -91,7 +91,7 @@ extension Expr {
       if let dflt = if_.dflt {
         dflt.expr.compile(&ctx, em, indent + 2, exp: type, isTail: isTail)
       } else {
-        em.str(indent + 2, "undefined")
+        em.str(indent + 2, "null")
       }
       em.append(")")
 
@@ -129,6 +129,8 @@ extension Expr {
     case .paren(let paren):
       if paren.isScalarValue {
         paren.els[0].compile(&ctx, em, indent, exp: type, isTail: isTail)
+      } else if type == typeVoid {
+        em.str(indent, "null")
       } else {
         guard case .struct_(let fields, let variants) = type.kind else { paren.fatal("expected struct type") }
         em.str(indent, "{")
@@ -165,13 +167,13 @@ extension Expr {
       em.append(".$t)") // bling: $t: morph tag.
 
     case .typeAlias:
-      em.str(indent, "undefined")
+      em.str(indent, "null")
 
     case .where_:
       fatalError()
 
     case .void:
-      em.str(indent, "undefined")
+      em.str(indent, "null")
     }
 
     if hasConv {
