@@ -22,7 +22,7 @@ extension Expr {
             firstVariantForm = par.form
           }
         } else if let first = firstVariantForm {
-            par.form.failSyntax("struct field cannot follow a variant",
+            par.failSyntax("struct field cannot follow a variant",
               notes: (first, "first variant is here"))
         } else {
           fields.append(typeField)
@@ -62,7 +62,7 @@ extension Expr {
         isVariant = true
         label = tag.sym.name
         type = ann.typeExpr.type(scope, "variant type")
-      default: ann.expr.form.failSyntax("annotated parameter requires a symbol or tag label.")
+      default: ann.expr.failSyntax("annotated parameter requires a symbol or tag label.")
       }
     }
 

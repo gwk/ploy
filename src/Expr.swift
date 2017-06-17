@@ -156,4 +156,9 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     default: return nil
     }
   }
+
+  func failSyntax(_ msg: String, notes: (Form?, String)...) -> Never {
+    // redundant with form.failSyntax, but convenient so we do not have to type .form everywhere.
+    form.failForm(prefix: "syntax error", msg: msg, notes: notes)
+  }
 }

@@ -11,7 +11,7 @@ enum Place: SubForm { // left side of a binding.
     switch form {
     case let ann as Ann:
       guard case .sym = ann.expr else {
-        ann.expr.form.failSyntax("\(subj) annnoted place expects symbol but received \(ann.expr.form.syntaxName).")
+        ann.expr.failSyntax("\(subj) annnoted place expects symbol but received \(ann.expr.form.syntaxName).")
       }
       self = .ann(ann)
     case let sym as Sym: self = .sym(sym)

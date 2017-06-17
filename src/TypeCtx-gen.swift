@@ -156,12 +156,12 @@ extension TypeCtx {
         let member = self.typeFieldForArg(scope, arg: el)
         if member.isVariant {
           if !variants.isEmpty {
-            el.form.failSyntax("struct literal cannot contain multiple tagged elements")
+            el.failSyntax("struct literal cannot contain multiple tagged elements")
           }
           variants.append(member)
         } else {
           if !variants.isEmpty {
-            el.form.failSyntax("struct literal field cannot follow a variant")
+            el.failSyntax("struct literal field cannot follow a variant")
           }
           fields.append(member)
         }

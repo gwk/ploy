@@ -55,13 +55,13 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
         return
       }
       for el in paren.fieldEls {
-        el.form.failSyntax("destructuring does not yet support fields")
+        el.failSyntax("destructuring does not yet support fields")
       }
       let variantEls = paren.variantEls
       if variantEls.isEmpty { return }
       let variant = variantEls[0]
       if variantEls.count > 1 {
-        variantEls[1].form.failSyntax("destructuring does not support more than one variant",
+        variantEls[1].failSyntax("destructuring does not support more than one variant",
           notes: (variant.form, "first variant is here"))
       }
       switch variant {
@@ -77,7 +77,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
         switch bind.val {
         case .sym(let sym):
           binds.append(Bind(sym.syn, place: .sym(sym), val: unwrapped)) // sole use of sym.
-        default: bind.val.form.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
+        default: bind.val.failSyntax("destructuring bind right side must be a destructuring (sym or struct)")
         }
 
       default: paren.failSyntax("destructuring paren: TODO: incomplete")
@@ -91,7 +91,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
 
     case .where_(let where_): fatalError("TODO: \(where_)")
 
-    default: pattern.form.failSyntax("match case expects pattern; received \(cond.form.syntaxName)")
+    default: pattern.failSyntax("match case expects pattern; received \(cond.form.syntaxName)")
     }
   }
 
