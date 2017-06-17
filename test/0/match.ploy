@@ -1,24 +1,26 @@
 main = {
 
-  tI = fn Int%Int
+  tInt = fn Int%Int
     match $
       0 ? 0
       (1) ? 1
       x ? -1
       / -2;;
 
-  assert.eq(0 tI.0)
-  assert.eq(1 tI.1)
-  assert.eq(-1 tI.-1)
+  assert.eq(0 tInt.0)
+  assert.eq(1 tInt.1)
+  assert.eq(-1 tInt.-1)
 
-  tS = fn Str%Str
+  tStr = fn Str%Str
     match $
       "a" ? "a"
       ("b") ? "b"
       x ? "x"
       / "z";;
 
-  assert.eq("a" tS."a")
-  assert.eq("b" tS."b")
-  assert.eq("x" tS."c")
+  assert.eq("a" tStr."a")
+  assert.eq("b" tStr."b")
+  assert.eq("x" tStr."c")
+
+
 }
