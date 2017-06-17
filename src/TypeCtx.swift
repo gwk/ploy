@@ -81,8 +81,8 @@ struct TypeCtx {
 
     switch accesseeType.kind {
     case .struct_(let fields, let variants):
-      if case .untag(let variantSym) = accessor {
-        let name = variantSym.name
+      if case .untag(let tag) = accessor {
+        let name = tag.sym.name
         for variant in variants {
           if variant.label! == name {
             try resolveSub(constraint: .rel(RelCon(

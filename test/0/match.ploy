@@ -11,6 +11,7 @@ main = {
   assert.eq(1 tInt.1)
   assert.eq(-1 tInt.-1)
 
+
   tStr = fn Str%Str
     match $
       "a" ? "a"
@@ -21,6 +22,35 @@ main = {
   assert.eq("a" tStr."a")
   assert.eq("b" tStr."b")
   assert.eq("x" tStr."c")
+
+
+  tPair = fn (Int Int)%Int
+    match $
+      (0 0) ? 0
+      (0 x) ? x
+      (x y) ? mul(x y)
+      / -1;;
+
+  assert.eq(0 tPair(0 0))
+  assert.eq(1 tPair(0 1))
+  assert.eq(6 tPair(2 3))
+
+
+  tXY = fn (x:Int y:Int)%Int
+    match $
+      (x=0 y=0) ? 0
+      (x=0 y=z) ? z
+      (x=x y=y) ? mul(x y)
+      / -1;;
+
+  assert.eq(0 tXY(x=0 y=0))
+  assert.eq(1 tXY(x=0 y=1))
+  assert.eq(6 tXY(x=2 y=3))
+
+
+  assert.match ((0 0) (0 0))
+    ((0 0) (0 0)) ? true / false;
+
 
 
 }

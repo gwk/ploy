@@ -90,6 +90,16 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     }
   }
 
+  var cloned: Expr {
+    switch self {
+    case .acc(let acc): return .acc(acc.cloned)
+    case .litNum(let litNum): return .litNum(litNum.cloned)
+    case .sym(let sym): return .sym(sym.cloned)
+    case .tag(let tag): return .tag(tag.cloned)
+    default: self.form.fatal("cannot clone expr: \(self)")
+    }
+  }
+
   static func ==(l: Expr, r: Expr) -> Bool { return l.form === r.form }
 
   var hashValue: Int { return form.hashValue }

@@ -22,4 +22,8 @@ class Acc: Form { // accessor: `field@val`.
     accessor.write(to: &stream, depth + 1)
     accessee.write(to: &stream, depth + 1)
   }
+
+  var cloned: Acc {
+    return Acc(syn, accessor: accessor.cloned, accessee: accessee.cloned)
+  }
 }

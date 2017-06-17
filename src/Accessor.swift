@@ -6,7 +6,7 @@ enum Accessor: SubForm {
   case litNum(LitNum)
   case sym(Sym)
   case tag(Tag)
-  case untag(Sym)
+  case untag(Tag)
 
   init(form: Form, subj: String) {
     switch form {
@@ -14,7 +14,7 @@ enum Accessor: SubForm {
     case let f as Sym:    self = .sym(f)
     case let f as Tag:    self = .tag(f)
     default:
-      form.failSyntax("\(subj) expects accessor symbol or number literal but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expects accessor index, symbol, or tag; received \(form.syntaxName).")
     }
   }
 
@@ -23,7 +23,16 @@ enum Accessor: SubForm {
     case .litNum(let litNum): return litNum
     case .sym(let sym): return sym
     case .tag(let tag): return tag
-    case .untag(let sym): return sym
+    case .untag(let tag): return tag
+    }
+  }
+
+  var cloned: Accessor {
+    switch self {
+    case .litNum(let litNum): return .litNum(litNum.cloned)
+    case .sym(let sym): return .sym(sym.cloned)
+    case .tag(let tag): return .tag(tag.cloned)
+    case .untag(let tag): return .untag(tag.cloned)
     }
   }
 
@@ -41,7 +50,7 @@ enum Accessor: SubForm {
     case .litNum(let litNum): return String(litNum.val)
     case .sym(let sym): return sym.name
     case .tag(let tag): return "-\(tag.sym.name)"
-    case .untag(let sym): fatalError("accessorString should never be called on untag: \(sym)")
+    case .untag(let tag): fatalError("accessorString should never be called on untag: \(tag)")
     }
   }
 }
