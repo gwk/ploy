@@ -18,7 +18,7 @@ main = {
       x ? "x"
       / "z";;
 
-  assert(eq("a" tS."a"))
-  assert(eq("b" tS."b"))
-  assert(eq("x" tS."c"))
+  assert.eq("a" tS."a")
+  assert.eq("b" tS."b")
+  assert.eq("x" tS."c")
 }
