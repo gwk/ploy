@@ -106,6 +106,6 @@ class GlobalCtx {
       em.str(2, "$t: $.$t,") // bling: $t: morph tag.
       em.str(2, "$m: $.$m,") // bling: $m: morph value.
     }
-    em.append("})")
+    em.append("});")
   }
 }
