@@ -183,6 +183,7 @@ let typeVoid = Type.Struct(fields: [], variants: [])
 let typeBool      = Type.Prim("Bool")
 let typeInt       = Type.Prim("Int")
 let typeNamespace = Type.Prim("Namespace")
+let typeNever     = Type.Prim("Never")
 let typeStr       = Type.Prim("Str")
 let typeType      = Type.Prim("Type")
 
@@ -192,6 +193,7 @@ let intrinsicTypes = [
   typeEvery,
   typeInt,
   typeNamespace,
+  typeNever,
   typeStr,
   typeType,
 ]

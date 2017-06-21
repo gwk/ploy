@@ -1,0 +1,10 @@
+
+main = {
+
+  x:Int = match 0
+    1 ? fail.'Never value preceding other clauses should have no effect.'
+    0 ? 0
+    / fail.'Never value following other clauses should have no effect.';
+
+  y:Int = match 0 / exit.0; # Never value as only clause should resolve.
+}

@@ -154,6 +154,9 @@ struct TypeCtx {
       }
       return true
 
+    case (.prim, _) where act == typeNever:
+      return true
+
     case (.sig(let actDR), .sig(let expDR)):
       return try resolveSigToSig(rel, act: actDR, exp: expDR)
 

@@ -52,7 +52,7 @@ extensible lt; # TODO: constraints.
 lt += host_val (Int Int)%Bool "function($) { return $._0 <  $._1; }";
 
 
-exit = host_val Int%() "function($) { HOST___process.exit($); }" HOST/_process;
+exit = host_val Int%Never "function($) { HOST___process.exit($); }" HOST/_process;
 std_out = host_val FS/File "$g.process.stdout.fd";
 std_err = host_val FS/File "$g.process.stderr.fd";
 
@@ -88,11 +88,11 @@ outL += fn Str%()
   out.'\n';
 
 
-fail = fn Str%()
+fail = fn Str%Never
   errL.$
   exit.1;
 
-abort = host_val Str%() "function($) { throw new Error($); }";
+abort = host_val Str%Never "function($) { throw new Error($); }";
 
 
 assert = fn Bool%()

@@ -73,8 +73,13 @@ class GlobalCtx {
       let cast = conv.cast
       let em = Emitter(ctx: self)
       switch (orig.kind, cast.kind) {
+
+      case (.prim, _) where orig == typeNever:
+        em.str(0, "let \(conv.hostName) = $=>{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); };")
+
       case (.struct_(let orig), .struct_(let cast)):
         emitStructToStruct(em, convs: &convs, conv: conv, orig: orig, cast: cast)
+
       default: fatalError("impossible conversion: \(conv)")
       }
       em.flush()
