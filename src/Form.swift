@@ -3,7 +3,7 @@
 import Darwin
 
 
-class Form: Hashable, CustomStringConvertible {
+class Form: Hashable, CustomStringConvertible, TextOutputStreamable {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
 

@@ -93,24 +93,24 @@ class Src: CustomStringConvertible {
   func errPos(_ pos: Pos, end: Pos?, prefix: String, msg: String) {
     let msgSpace = msg.hasPrefix("\n") ? "" : " "
     let posLine = line(pos)
-    err("\(prefix): \(path):\(pos.line + 1):")
+    errZ("\(prefix): \(path):\(pos.line + 1):")
     if let end = end {
       if pos.line == end.line { // single line.
         if pos.col < end.col { // multiple columns.
-          err("\(pos.col + 1)-\(end.col):\(msgSpace)\(msg)\n  \(posLine)\n  \(underline(pos, end))\n")
+          errZ("\(pos.col + 1)-\(end.col):\(msgSpace)\(msg)\n  \(posLine)\n  \(underline(pos, end))\n")
           return
         }
       } else { // multiline.
         let endLine = line(end)
         let (underlinePos, underlineEnd) = underlines(pos, end, lineLen: posLine.characters.count)
-        err("\(pos.col + 1)--\(end.line + 1):\(end.col):\(msgSpace)\(msg)\n")
-        err("  \(posLine)\n  \(underlinePos)…\n")
-        err("  \(endLine)\n …\(underlineEnd)\n")
+        errZ("\(pos.col + 1)--\(end.line + 1):\(end.col):\(msgSpace)\(msg)\n")
+        errZ("  \(posLine)\n  \(underlinePos)…\n")
+        errZ("  \(endLine)\n …\(underlineEnd)\n")
         return
       }
     }
     // single line, single column.
-    err("\(pos.col + 1):\(msgSpace)\(msg)\n  \(posLine)\n  \(underline(pos))\n")
+    errZ("\(pos.col + 1):\(msgSpace)\(msg)\n  \(posLine)\n  \(underline(pos))\n")
   }
 
   func fail(_ pos: Pos, _ end: Pos?, _ prefix: String, _ msg: String) -> Never {
@@ -600,7 +600,7 @@ class Src: CustomStringConvertible {
     }
     if verbose {
       for def in defs {
-        def.write(to: &std_err)
+        def.write(to: &stdErr)
       }
     }
     return defs

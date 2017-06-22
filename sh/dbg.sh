@@ -6,10 +6,10 @@ cd $(dirname $0)/..
 
 make build
 
-mainPath="$1"; shift
+mainPath="$1"; shift || mainPath="_repro.ploy"
 stem=${mainPath%.ploy}
-outPath="_build/_sh/$stem.js"
+outPath="_build/$stem.js"
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
-lldb --file _build/debug/ploy -- lib/*.ploy -main "$mainPath" -o "$outPath"
+lldb --file _build/debug/ploy -- lib -mapper ./gen-source-map -main "$mainPath" -o "$outPath"
