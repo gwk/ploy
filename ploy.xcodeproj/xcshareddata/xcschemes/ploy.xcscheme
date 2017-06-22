@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "OBJ_92"
+               BlueprintIdentifier = "ploy::ploy"
                BuildableName = "ploy"
                BlueprintName = "ploy"
                ReferencedContainer = "container:ploy.xcodeproj">
@@ -47,13 +47,21 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "OBJ_92"
+            BlueprintIdentifier = "ploy::ploy"
             BuildableName = "ploy"
             BlueprintName = "ploy"
             ReferencedContainer = "container:ploy.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-mapper"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "$(PROJECT_DIR)/gen-source-map"
+            isEnabled = "YES">
+         </CommandLineArgument>
          <CommandLineArgument
             argument = "$(PROJECT_DIR)/lib"
             isEnabled = "YES">
@@ -75,6 +83,13 @@
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "NODE_PATH"
+            value = "/usr/local/lib/node_modules"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
