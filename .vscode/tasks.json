@@ -21,6 +21,6 @@
     { "taskName": "test",
       "args": ["make", "test"],
       "isTestCommand": false
-    },
+    }
   ]
 }
