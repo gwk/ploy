@@ -54,10 +54,10 @@ class Src: CustomStringConvertible {
 
   func char(_ pos: Pos) -> Character { return text[pos.idx] }
 
-  func slice(_ pos: Pos, _ end: Pos) -> String { return text[pos.idx..<end.idx] }
+  func slice(_ pos: Pos, _ end: Pos) -> String { return String(text[pos.idx..<end.idx]) }
 
   /// returns the line of source text containing pos; always excludes newline for consistency.
-  func line(_ pos: Pos) -> String {
+  func line(_ pos: Pos) -> Substring {
     var s = pos.idx
     while s > text.startIndex {
       let i = text.index(before: s)
