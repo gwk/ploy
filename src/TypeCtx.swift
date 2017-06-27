@@ -17,6 +17,7 @@ struct TypeCtx {
 
   // mutated during resolution phase.
   var freeUnifications = [Int:Type]()
+  var nevers = Set<Int>() // Never types are a special case, omitted from unification.
 
 
   init(globalCtx: GlobalCtx) {
@@ -145,8 +146,20 @@ struct TypeCtx {
       if ia > ie { unify(freeIndex: ia, to: exp); return true }
       else {       unify(freeIndex: ie, to: act); return true }
 
-    case (.free(let ia), _): unify(freeIndex: ia, to: exp); return true
-    case (_, .free(let ie)): unify(freeIndex: ie, to: act); return true
+    case (.free(let ia), _):
+      // note: if expected is Never, unify; the caller expects to never return.
+      unify(freeIndex: ia, to: exp);
+      return true
+
+    case (_, .free(let ie)):
+      if act == typeNever {
+        // if actual is Never, do not unify; another code paths may return, and we want that type to bind to the free exp.
+        // however this might be the only branch, so we need to remember this and fall back if exp remains free.
+        nevers.insert(ie)
+      } else {
+        unify(freeIndex: ie, to: act)
+      }
+      return true
 
     case (_, .any(let members)):
       if !members.contains(act) {
@@ -154,7 +167,7 @@ struct TypeCtx {
       }
       return true
 
-    case (.prim, _) where act == typeNever:
+    case (.prim, _) where act == typeNever: // never is compatible with any expected type.
       return true
 
     case (.sig(let actDR), .sig(let expDR)):
@@ -294,6 +307,13 @@ struct TypeCtx {
         fatalError("resolve loop did not progress") // should be unreachable.
       }
       doneCount = doneThisRound
+    }
+
+    // fill in frees that were only bound to Never.
+    for idx in nevers {
+      if !freeUnifications.contains(key: idx) {
+        freeUnifications[idx] = typeNever
+      }
     }
 
     // check that resolution is complete.
