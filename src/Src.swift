@@ -30,6 +30,103 @@ class Src: CustomStringConvertible {
 
   var startPos: Pos { return Pos(idx: text.startIndex, line: 0, col: 0) }
 
+
+  func parse(verbose: Bool = false) -> [Def] {
+    var defs: [Def] = []
+    let end = parseSubForms(&defs, startPos, subj: "top level")
+    if hasSome(end) {
+      failParse(end, nil, "unexpected terminator character: '\(char(end))'")
+    }
+    if verbose {
+      for def in defs {
+        def.write(to: &stdErr)
+      }
+    }
+    return defs
+  }
+
+
+  func parseForm<T: Form>(_ pos: Pos, subj: String, exp: String) -> T {
+    let form = parsePhrase(pos)
+    if let form = form as? T {
+      return form
+    } else {
+      form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
+    }
+  }
+
+
+  func parseSubForm<T: SubForm>(_ pos: Pos, subj: String, allowSpaces: Bool = true) -> T {
+    return T(form: parsePhrase(pos, precedence: (allowSpaces ? 0 : Src.unspacedPrecedence)), subj: subj)
+  }
+
+
+  func parseSubForms<T: SubForm>(_ subForms: inout [T], _ pos: Pos, subj: String) -> Pos {
+    var p = parseSpace(pos)
+    var prevSpace = true
+    while hasSome(p) {
+      if ployTerminatorChars.contains(char(p)) {
+        break
+      }
+      if !prevSpace {
+        failParse(p, nil, "adjacent forms require a separating space.")
+      }
+      let form: T = parseSubForm(p, subj: subj)
+      p = form.syn.end
+      prevSpace = form.syn.hasEndSpace
+      subForms.append(form)
+    }
+    return p
+  }
+
+
+  func parseBody(_ pos: Pos, subj: String) -> Body {
+    var exprs: [Expr] = []
+    let end = parseSubForms(&exprs, pos, subj: "body")
+    return Body(Syn(src: self, pos: pos, visEnd: exprs.last?.syn.visEnd ?? pos, end: end), exprs: exprs)
+  }
+
+
+  func parsePhrase(_ pos: Pos, precedence: Int = 0) -> Form {
+    var left = parsePoly(pos)
+    var p = left.syn.end
+    outer: while hasSome(p) {
+      let leftSpace = left.syn.hasEndSpace
+      for i in precedence..<Src.opPrecedenceGroups.count {
+        let group = Src.opPrecedenceGroups[i]
+        for (string, handler) in group {
+          let expSpace = (i < Src.unspacedPrecedence)
+          if (leftSpace == expSpace) && match(pos: p, string: string) {
+            let opVisEnd = adv(p, count: string.characters.count)
+            let rightPos = parseSpace(opVisEnd)
+            let rightSpace = (opVisEnd.idx < rightPos.idx)
+            if leftSpace != rightSpace {
+              failParse(left.syn.visEnd, rightPos, "mismatched space around operator")
+            }
+            let right = parsePhrase(rightPos, precedence: i)
+            left = handler(left, right)
+            p = left.syn.end
+            continue outer
+          }
+        }
+      }
+      // adjacency operators have highest precedence.
+      if !leftSpace {
+        for (c, handler) in adjacencyOperators {
+          if char(p) == c {
+            let right = parsePhrase(p, precedence: Src.opPrecedenceGroups.count) // TODO: decide if this should call parsePoly instead.
+            left = handler(left, right)
+            p = left.syn.end
+            continue outer
+          }
+        }
+      }
+      break
+    }
+    return left
+  }
+
+
   func adv(_ pos: Pos, count: Int = 1) -> Pos {
     var idx = pos.idx
     var c = count
@@ -515,94 +612,4 @@ class Src: CustomStringConvertible {
   let adjacencyOperators: [(Character, (Form, Form)->Form)] = [
     ("(", CallAdj.mk),
   ]
-
-  func parsePhrase(_ pos: Pos, precedence: Int = 0) -> Form {
-    var left = parsePoly(pos)
-    var p = left.syn.end
-    outer: while hasSome(p) {
-      let leftSpace = left.syn.hasEndSpace
-      for i in precedence..<Src.opPrecedenceGroups.count {
-        let group = Src.opPrecedenceGroups[i]
-        for (string, handler) in group {
-          let expSpace = (i < Src.unspacedPrecedence)
-          if (leftSpace == expSpace) && match(pos: p, string: string) {
-            let opVisEnd = adv(p, count: string.characters.count)
-            let rightPos = parseSpace(opVisEnd)
-            let rightSpace = (opVisEnd.idx < rightPos.idx)
-            if leftSpace != rightSpace {
-              failParse(left.syn.visEnd, rightPos, "mismatched space around operator")
-            }
-            let right = parsePhrase(rightPos, precedence: i)
-            left = handler(left, right)
-            p = left.syn.end
-            continue outer
-          }
-        }
-      }
-      // adjacency operators have highest precedence.
-      if !leftSpace {
-        for (c, handler) in adjacencyOperators {
-          if char(p) == c {
-            let right = parsePhrase(p, precedence: Src.opPrecedenceGroups.count) // TODO: decide if this should call parsePoly instead.
-            left = handler(left, right)
-            p = left.syn.end
-            continue outer
-          }
-        }
-      }
-      break
-    }
-    return left
-  }
-
-  func parseForm<T: Form>(_ pos: Pos, subj: String, exp: String) -> T {
-    let form = parsePhrase(pos)
-    if let form = form as? T {
-      return form
-    } else {
-      form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
-    }
-  }
-
-  func parseSubForm<T: SubForm>(_ pos: Pos, subj: String, allowSpaces: Bool = true) -> T {
-    return T(form: parsePhrase(pos, precedence: (allowSpaces ? 0 : Src.unspacedPrecedence)), subj: subj)
-  }
-
-  func parseSubForms<T: SubForm>(_ subForms: inout [T], _ pos: Pos, subj: String) -> Pos {
-    var p = parseSpace(pos)
-    var prevSpace = true
-    while hasSome(p) {
-      if ployTerminatorChars.contains(char(p)) {
-        break
-      }
-      if !prevSpace {
-        failParse(p, nil, "adjacent forms require a separating space.")
-      }
-      let form: T = parseSubForm(p, subj: subj)
-      p = form.syn.end
-      prevSpace = form.syn.hasEndSpace
-      subForms.append(form)
-    }
-    return p
-  }
-
-  func parseBody(_ pos: Pos, subj: String) -> Body {
-    var exprs: [Expr] = []
-    let end = parseSubForms(&exprs, pos, subj: "body")
-    return Body(Syn(src: self, pos: pos, visEnd: exprs.last?.syn.visEnd ?? pos, end: end), exprs: exprs)
-  }
-
-  func parse(verbose: Bool = false) -> [Def] {
-    var defs: [Def] = []
-    let end = parseSubForms(&defs, startPos, subj: "top level")
-    if hasSome(end) {
-      failParse(end, nil, "unexpected terminator character: '\(char(end))'")
-    }
-    if verbose {
-      for def in defs {
-        def.write(to: &stdErr)
-      }
-    }
-    return defs
-  }
 }
