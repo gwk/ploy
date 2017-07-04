@@ -9,14 +9,9 @@ class Syn: CustomStringConvertible {
   let end: Pos // position past the last member character, including whitespace.
 
   var hasEndSpace: Bool { return visEnd.idx < end.idx }
-  var hasEndLine: Bool { return src.text[visEnd.idx..<end.idx].contains("\n") }
-  var visRange: Range<String.CharacterView.Index> { return pos.idx..<visEnd.idx }
-  var range: Range<String.CharacterView.Index> { return pos.idx..<end.idx }
-
-  var visString: String { return String(src.text[visRange]) }
-  var string: String { return String(src.text[range]) }
-
-  var visStringInline: String { return visString.replace("\n", with: " ") }
+  var hasEndLine: Bool { return src.text[visEnd.idx..<end.idx].contains(ucb("\n")) }
+  var visRange: Range<Int> { return pos.idx..<visEnd.idx }
+  var range: Range<Int> { return pos.idx..<end.idx }
 
   init(src: Src, pos: Pos, visEnd: Pos, end: Pos) {
     self.src = src

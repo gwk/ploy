@@ -14,16 +14,11 @@ let ployTerminatorChars = Set(")>]};".characters)
 
 class Src: CustomStringConvertible {
   let path: String
-  let text: String
+  let text: [U8]
 
   init(path: String) {
     self.path = path
-    self.text = guarded { try String(contentsOfFile: path) }
-  }
-
-  init(name: String) {
-    self.path = name
-    self.text = ""
+    self.text = guarded { try readBytes(path: path) }
   }
 
   var description: String { return "Src(\(path))" }
@@ -146,27 +141,30 @@ class Src: CustomStringConvertible {
   func hasSome(_ pos: Pos) -> Bool { return pos.idx < text.endIndex }
 
   func match(pos: Pos, string: String) -> Bool {
-    return text.contains(string: string, atIndex: pos.idx)
+    for (idx, byte) in string.utf8.enumerated() {
+      if text[idx + pos.idx] != byte { return false }
+    }
+    return true
   }
 
-  func char(_ pos: Pos) -> Character { return text[pos.idx] }
+  func char(_ pos: Pos) -> Character { return Character(UnicodeScalar(text[pos.idx])) }
 
-  func slice(_ pos: Pos, _ end: Pos) -> String { return String(text[pos.idx..<end.idx]) }
+  func slice(_ pos: Pos, _ end: Pos) -> String { return String(bytes: text[pos.idx..<end.idx])! }
 
   /// returns the line of source text containing pos; always excludes newline for consistency.
-  func line(_ pos: Pos) -> Substring {
+  func line(_ pos: Pos) -> String {
     var s = pos.idx
     while s > text.startIndex {
       let i = text.index(before: s)
-      if text[i] == "\n" { break }
+      if text[i] == ucb("\n") { break }
       s = i
     }
     var e = pos.idx
     while e < text.endIndex {
-      if text[e] == "\n" { break }
+      if text[e] == ucb("\n") { break }
       e = text.index(after: e)
     }
-    return text[s..<e]
+    return String(bytes: text[s..<e])!
   }
 
   func underline(_ pos: Pos, _ end: Pos? = nil) -> String {
@@ -613,3 +611,10 @@ class Src: CustomStringConvertible {
     ("(", CallAdj.mk),
   ]
 }
+
+
+@inline(__always)
+func ucv(_ s: UnicodeScalar) -> UInt32 { return s.value }
+
+@inline(__always)
+func ucb(_ s: UnicodeScalar) -> UInt8 { return UInt8(s.value) }

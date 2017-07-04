@@ -2,7 +2,7 @@
 
 
 struct Pos: CustomStringConvertible {
-  let idx: String.CharacterView.Index
+  let idx: Int
   let line: Int
   let col: Int
 
