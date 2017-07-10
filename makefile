@@ -10,7 +10,7 @@ _default: test
 
 all: clean gen build test
 
-swift_build = swift build --build-path=_build
+swift_build = sh/build.sh
 
 # src/Lex.swift
 build:
