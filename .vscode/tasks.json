@@ -8,7 +8,10 @@
   "tasks": [
     { "taskName": "_default",
       "args": ["make"],
-      "group": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "problemMatcher": []
     },
     { "taskName": "build",
