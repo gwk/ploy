@@ -12,12 +12,12 @@ all: clean gen build test
 
 swift_build = sh/build.sh
 
-# src/Lex.swift
-build:
+build: src/lex.swift
 	$(swift_build)
 
 clean:
 	rm -rf _build/*
+	rm src/lex.swift
 
 clean-ploy:
 	rm -rf _build/debug/ploy*
@@ -27,7 +27,7 @@ cov:
 
 gen: src/Lex.swift
 
-src/Lex.swift: ploy.legs
+src/lex.swift: ploy.legs
 	legs $^ -output $@
 
 test: build

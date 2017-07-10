@@ -3,7 +3,9 @@
 import Foundation
 
 
-typealias SrcMapping = (path: String, line: Int, col: Int, off: Int, frameName: String)
+typealias SrcMapping = (path: String, lineIdx: Int, colIdx: Int, off: Int, frameName: String)
+// note: `off` is the relative offset into the generated output string being written,
+// e.g. if we are mapping  a parenthesized symbol "(a)" then off=1.
 
 typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
@@ -13,8 +15,8 @@ class GlobalCtx {
   let mainPath: String
   let file: OutFile
   let mapSend: FileHandle
-  var line = 0
-  var col = 0
+  var outLineIdx = 0
+  var outColIdx = 0
   var conversions: Set<Conversion> = []
 
   init(mainPath: String, file: OutFile, mapSend: FileHandle) {
@@ -25,29 +27,29 @@ class GlobalCtx {
 
   func writeMap(_ m: SrcMapping) {
     assert(!m.path.isEmpty)
-    mapSend.write("\(m.path) \(m.frameName) \(m.line) \(m.col) \(line) \(col + m.off)\n")
+    mapSend.write("\(m.path) \(m.frameName) \(m.lineIdx) \(m.colIdx) \(outLineIdx) \(outColIdx + m.off)\n")
   }
 
   func write(line l: Line) {
     assert(!l.text.utf16.contains(utf16Newline)) // assuming utf16 is the underlying storage, this should be quick.
-    let diff = l.indent - col
+    let diff = l.indent - outColIdx
     if diff >= 0 { // inline.
-      col += diff
+      outColIdx += diff
       file.write(String(char: " ", count: diff) + l.text)
     } else { // new line.
-      line += 1
-      col = l.indent
+      outLineIdx += 1
+      outColIdx = l.indent
       file.write("\n" + String(char: " ", count: l.indent) + l.text)
     }
     if let mapping = l.mapping {
       writeMap(mapping)
     }
-    col += l.text.characters.count
+    outColIdx += l.text.characters.count
   }
 
   func writeL(_ string: String, _ mapping: SrcMapping? = nil) {
     assert(!string.utf16.contains(utf16Newline)) // assuming utf16 is the underlying storage, this should be quick.
-    assert(col == 0)
+    assert(outColIdx == 0)
     if let mapping = mapping { writeMap(mapping) }
     file.write(string)
     writeL()
@@ -55,8 +57,8 @@ class GlobalCtx {
 
   func writeL() {
     file.write("\n")
-    line += 1
-    col = 0
+    outLineIdx += 1
+    outColIdx = 0
   }
 
   func addConversion(_ conv: Conversion) {

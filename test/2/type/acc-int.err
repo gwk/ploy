@@ -1,6 +1,6 @@
-type error: test/2/type/acc-int.ploy:2:9-9: accessee is not a struct. accessee type: Int
+type error: test/2/type/acc-int.ploy:2:9-10: accessee is not a struct. accessee type: Int
     x = 0@1
           ~
-note: test/2/type/acc-int.ploy:2:7-7: accessor is here.
+note: test/2/type/acc-int.ploy:2:7-8: accessor is here.
     x = 0@1
         ~

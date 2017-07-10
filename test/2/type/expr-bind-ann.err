@@ -1,6 +1,6 @@
-type error: test/2/type/expr-bind-ann.ploy:2:11-11: annotated: actual type is not expected type. actual type: Int
+type error: test/2/type/expr-bind-ann.ploy:2:11-12: annotated: actual type is not expected type. actual type: Int
     x:Str = 0
             ~
-note: test/2/type/expr-bind-ann.ploy:2:5-7: expected type: Str
+note: test/2/type/expr-bind-ann.ploy:2:5-8: expected type: Str
     x:Str = 0
       ~~~

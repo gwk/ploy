@@ -27,7 +27,7 @@ class Emitter {
 
   func str(_ indent: Int, _ text: String, syn: Syn? = nil, off: Int = 0, frameName: String = "") {
     let mapping: SrcMapping? = syn.and({
-      (path: $0.src.path, line: $0.pos.line, col: $0.pos.col, off: off, frameName: frameName)
+      (path: $0.source.name, line: $0.lineIdx, col: $0.colIdx, off: off, frameName: frameName)
     })
     lines.append((indent: indent, text: text, mapping: mapping))
   }
@@ -75,8 +75,7 @@ func compileProgram(file: OutFile, mainPath: String, includePaths: [String], mai
   ctx.emitConversions()
 
   ctx.writeL()
-  let mainPos = mainSyn.pos
-  let mainMapping = (path: mainSyn.src.path, line: mainPos.line, col: mainPos.col, off: 0, frameName: "<ploy>")
+  let mainMapping = (path: mainSyn.source.name, lineIdx: mainSyn.lineIdx, colIdx: mainSyn.colIdx, off: 0, frameName: "<ploy>")
   ctx.writeL("MAIN__main__acc();", mainMapping)
   ctx.writeL("})(); // ploy root scope.")
 

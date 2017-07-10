@@ -60,8 +60,8 @@ func main() {
     }
   }
 
-  let mainDefs = Src(path: mainPath).parse(verbose: false)
-  let libDefs = libPaths.flatMap { Src(path: $0).parse(verbose: false) }
+  let mainDefs = parsePloy(path: mainPath)
+  let libDefs = libPaths.flatMap { parsePloy(path: $0) }
 
   let tmpPath = outPath + ".tmp"
   let mapPath = outPath + ".map"

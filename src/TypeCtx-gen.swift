@@ -142,7 +142,7 @@ extension TypeCtx {
 
     case .match(let match):
       let valSym = genSym(parent: match.expr)
-      let do_ = putSynth(src: expr, expr: genMatch(match: match, valSym: valSym))
+      let do_ = putSynth(source: expr, expr: genMatch(match: match, valSym: valSym))
       let type = genConstraints(scope, expr: do_)
       return type
 
@@ -253,14 +253,14 @@ extension TypeCtx {
   }
 
 
-  mutating func putSynth(src: Expr, expr: Expr) -> Expr {
-    synths.insertNew(src, value: expr)
+  mutating func putSynth(source: Expr, expr: Expr) -> Expr {
+    synths.insertNew(source, value: expr)
     return expr
   }
 
 
-  mutating func getSynth(src: Expr) -> Expr {
-    return synths[src]!
+  mutating func getSynth(source: Expr) -> Expr {
+    return synths[source]!
   }
 
 

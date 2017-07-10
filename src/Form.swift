@@ -29,7 +29,9 @@ class Form: Hashable, CustomStringConvertible, TextOutputStreamable {
     write(to: &stream, 0)
   }
 
-  func write<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int) { fatalError("Form.write not implemented for type: \(type(of: self))") }
+  func write<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int) {
+    fatalError("Form.write not implemented for type: \(type(of: self))")
+  }
 
   func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String = "\n") {
     stream.write(String(indent: depth))
@@ -40,10 +42,10 @@ class Form: Hashable, CustomStringConvertible, TextOutputStreamable {
   }
 
   func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) -> Never {
-    syn.src.errPos(syn.pos, end: syn.visEnd, prefix: prefix, msg: msg)
+    syn.errDiagnostic(prefix: prefix, msg: msg)
     for (form, msg) in notes {
       if let form = form {
-        form.syn.src.errPos(form.syn.pos, end: form.syn.visEnd, prefix: "note", msg: msg)
+        form.syn.errDiagnostic(prefix: "note", msg: msg)
       }
     }
     exit(1)

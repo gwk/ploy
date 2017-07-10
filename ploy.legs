@@ -1,32 +1,44 @@
+# © 2017 George King. Permission to use this file is granted in license-quilt.txt.
+
+
 newline: \n
 spaces: \s+
 tabs: \t+
-comment: \# [$Ascii_Readable - \n]*
+comment: \# [$Readable - \n]*
 
-int: $Dec+
-| 0d  $Dec+
-| 0b  $Bin+
-| 0q  [0123]+
-| 0x  $Hex+
+int:      -?    $Dec+   (_ $Dec+)*
+intDec:   -? 0d $Dec+   (_ $Dec+)*
+intBin:   -? 0b $Bin+   (_ $Bin+)*
+intQuat:  -? 0q $Quat+  (_ $Quat+)*
+intOct:   -? 0o $Oct+   (_ $Oct+)*
+intHex:   -? 0x $Hex+   (_ $Hex+)*
 
-sym: $Ascii_Letter [$Ascii_Letter $Ascii_Number _]*
+flt: -? $Dec+ . $Dec*
+
+sym: [$Ascii_Letter _] [$Ascii_Letter $Ascii_Number _]*
+# TODO: more accurate, but then makes error reporting weird:
+#sym: ($Ascii_Letter | _ [$Ascii_Letter $Ascii_Number]) (_? [$Ascii_Letter $Ascii_Number])*
 
 stringDQ: " ( [ $Ascii_Readable - \\ " ] | \\ $Ascii_Readable )* "
 stringSQ: ' ( [ $Ascii_Readable - \\ ' ] | \\ $Ascii_Readable )* '
 
-at: @
-bling: \$
-caret: ^
-colon: :
-dot: .
-equal: =
-minus: -
-percent: %
-question: \?
-slash: /
+acc: @
+ann: :
+bind: =
+call: .
+case: \?
+extension: \+=
+reify: ^
+sig: %
+tagTest: @\?
+typeAlias: =:
+union: \|
+where: ::
 
-arrowThin: ->
-arrowFat: =>
+slash: /
+bling: \$
+dash: -
+semicolon: ;
 
 parenO: \(
 parenC: \)
@@ -37,13 +49,13 @@ braceC: }
 angleO: <
 angleC: >
 
-enum
+and
+extensible
 fn
-hostType
-hostVal
+host_type
+host_val
 if
 in
-method
-polyFn
+match
+or
 pub
-struct

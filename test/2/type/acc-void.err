@@ -1,6 +1,6 @@
-type error: test/2/type/acc-void.ploy:2:9-10: accessee has no field matching accessor `0`. accessee type: ()
+type error: test/2/type/acc-void.ploy:2:9-11: accessee has no field matching accessor `0`. accessee type: ()
     x = 0@()
           ~~
-note: test/2/type/acc-void.ploy:2:7-7: accessor is here.
+note: test/2/type/acc-void.ploy:2:7-8: accessor is here.
     x = 0@()
         ~
