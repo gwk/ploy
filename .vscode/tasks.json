@@ -1,28 +1,22 @@
 {
   "version": "2.0.0",
-  "command": ".vscode/run-args.sh",
-  "echoCommand": false,
   "type": "process",
-  "presentation": {},
   "suppressTaskName": true,
   "tasks": [
-    { "taskName": "_default",
-      "args": ["make"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    },
     { "taskName": "build",
-      "args": ["make", "build"]
+      "command": "make",
+      "args": ["build"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$plumage-swift"
     },
     { "taskName": "test-current",
+      "command": "make",
       "args": ["sh/test.sh", "${relativeFile}"],
-      "group": "test"
+      "group": { "kind": "test", "isDefault": true }
     },
     { "taskName": "test",
-      "args": ["make", "test"]
+      "command": "make",
+      "args": ["test"]
     }
   ]
 }
