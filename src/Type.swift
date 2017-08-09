@@ -64,7 +64,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       return allFreeTypes[index]
     }
     assert(index == allFreeTypes.count)
-    let desc = "*\(index)"
+    let desc = "^\(index)"
     let t = Type(desc, kind: .free(index: index))
     allFreeTypes.append(t)
     return t
@@ -106,7 +106,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Var(_ name: String) -> Type {
-    let desc = "*" + name
+    let desc = "^" + name
     return Type(desc, kind: .var_(name: name))
   }
 
