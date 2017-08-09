@@ -293,10 +293,11 @@ class Parser {
 
   func synForTerminator(head: Token, terminator: TokenKind, _ formName: String) -> Syn {
     if atEnd {
-      failParse(token: tokens.last!, "`\(formName)` form expects '\(terminator)' terminator; reached end of source text.") // TODO: report correct position.
+      failParse(token: head, "`\(formName)` form expects \(terminator) terminator; reached end of source text.")
+      // TODO: report correct position.
     }
     if current.kind != terminator {
-      failParse("`\(formName)` form expects '\(terminator)' terminator; received '\(current.kind)'.")
+      failParse("`\(formName)` form expects \(terminator) terminator; received '\(current.kind)'.")
     }
     let visEnd = current.end
     advance()
@@ -320,11 +321,10 @@ class Parser {
 
   func parseDash() -> Form {
     let head = getCurrentAndAdvance()
-    if atEnd {
-      failParse(token: tokens.last!, "dangling dash at end of file.")
-    }
+    if atEnd { failParse(token: head, "dangling dash at end of file.") }
     if current.kind != .sym {
       failParse("dash must be followed by numeric literal or symbol.")
+      // note: the numeric case is lexed as a number, and not handled here.
     }
     let sym = parseSym()
     return Tag(Syn(head, sym.syn), sym: sym)
@@ -333,9 +333,7 @@ class Parser {
 
   func parseSlash() -> Form {
     let head = getCurrentAndAdvance(requireSpace: false)
-    if atEnd {
-      failParse(token: tokens.last!, "dangling slash at end of file.")
-    }
+    if atEnd { failParse(token: head, "dangling slash at end of file.") }
     let expr: Expr = parseSubForm(subj: "`/` form")
     return Default(Syn(head, expr.syn), expr: expr)
   }
