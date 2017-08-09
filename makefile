@@ -33,6 +33,9 @@ src/lex.swift: ploy.legs
 test: build
 	iotest -fail-fast
 
+test/%: build
+	iotest -fail-fast $@
+
 xcode:
 	swift package generate-xcodeproj
 
