@@ -9,7 +9,6 @@ typealias SrcMapping = (path: String, lineIdx: Int, colIdx: Int, off: Int, frame
 
 typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
-let utf16Newline = "\n".utf16[String.UTF16View.Index(0)]
 
 class GlobalCtx {
   let mainPath: String
@@ -31,7 +30,7 @@ class GlobalCtx {
   }
 
   func write(line l: Line) {
-    assert(!l.text.utf16.contains(utf16Newline)) // assuming utf16 is the underlying storage, this should be quick.
+    assert(!l.text.containsNewline)
     let diff = l.indent - outColIdx
     if diff >= 0 { // inline.
       outColIdx += diff
@@ -48,7 +47,7 @@ class GlobalCtx {
   }
 
   func writeL(_ string: String, _ mapping: SrcMapping? = nil) {
-    assert(!string.utf16.contains(utf16Newline)) // assuming utf16 is the underlying storage, this should be quick.
+    assert(!string.containsNewline)
     assert(outColIdx == 0)
     if let mapping = mapping { writeMap(mapping) }
     file.write(string)
