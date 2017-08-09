@@ -132,7 +132,6 @@ class Parser {
     [ (.tagTest, TagTest.mk),
       (.acc, Acc.mk),
       (.call, Call.mk),
-      (.reify, Reify.mk),
       (.sig, Sig.mk)]
     ]
 
@@ -142,6 +141,7 @@ class Parser {
 
   static let adjacencyOperators: [(TokenKind, (Form, Form)->Form)] = [
     (.parenO, CallAdj.mk),
+    (.angleO, Reify.mk),
   ]
 
 
@@ -161,10 +161,11 @@ class Parser {
     case .int, .intDec, .intBin, .intQuat, .intOct, .intHex: return parseLitNum()
     case .stringDQ, .stringSQ: return parseLitStr()
     case .bling: return parseBling()
+    case .caret: return parseCaret()
     case .dash: return parseDash()
     case .slash: return parseSlash()
     case .parenO: return parseParen()
-    case .angleO: return parseTypeConstraint()
+    case .angleO: return parseTypeArgs()
     case .braceO: return parseDo()
     default: failParse("unexpected token: \(current.kind).")
     }
@@ -317,6 +318,17 @@ class Parser {
   }
 
 
+  func parseCaret() -> Form {
+    let head = getCurrentAndAdvance()
+    if atEnd { failParse(token: head, "dangling caret at end of file.") }
+    if current.kind != .sym {
+      failParse("caret must be followed by a symbol.")
+    }
+    let sym = parseSym()
+    return TypeVar(Syn(head, sym.syn), sym: sym)
+  }
+
+
   func parseDash() -> Form {
     let head = getCurrentAndAdvance()
     if atEnd { failParse(token: head, "dangling dash at end of file.") }
@@ -347,10 +359,10 @@ class Parser {
   }
 
 
-  func parseTypeConstraint() -> Form {
+  func parseTypeArgs() -> Form {
     let head = getCurrentAndAdvance(requireSpace: false)
-    let pars: [Expr] = parseSubForms(subj: "type constraint")
-    return TypeConstraint(synForTerminator(head: head, terminator: .angleC, "type constraint"), pars: pars)
+    let exprs: [Expr] = parseSubForms(subj: "type constraint")
+    return TypeArgs(synForTerminator(head: head, terminator: .angleC, "type constraint"), exprs: exprs)
   }
 
 

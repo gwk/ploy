@@ -27,8 +27,8 @@ ann: :
 bind: =
 call: .
 case: \?
+caret: \^
 extension: \+=
-reify: ^
 sig: %
 tagTest: @\?
 typeAlias: =:

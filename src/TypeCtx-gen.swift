@@ -196,6 +196,12 @@ extension TypeCtx {
       _ = scope.addRecord(sym: typeAlias.sym, kind: .type(type))
       return typeVoid
 
+    case .typeArgs(let typeArgs):
+      typeArgs.failType("type constraint declaration not implemented.")
+
+    case .typeVar(let typeVar):
+      typeVar.failType("type variable declaration not implemented.")
+
     case .void:
       return typeVoid
 

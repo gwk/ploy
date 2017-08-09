@@ -167,6 +167,10 @@ extension Expr {
     case .typeAlias:
       em.str(indent, "null")
 
+    case .typeArgs: fatalError()
+
+    case .typeVar: fatalError()
+
     case .where_: fatalError()
 
     case .void:

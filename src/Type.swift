@@ -108,7 +108,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   class func Var(_ name: String) -> Type {
     let desc = "^" + name
-    return Type(desc, kind: .var_(name: name))
+    return memoize(desc, (kind: .var_(name: name), frees: [], vars: []))
   }
 
   class func Variant(label: String, type: Type) -> Type {
