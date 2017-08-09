@@ -59,6 +59,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
+
   class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
     if index < allFreeTypes.count {
       return allFreeTypes[index]

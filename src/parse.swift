@@ -32,9 +32,7 @@ class Parser {
   func parse() -> [Def] {
     if tokens.isEmpty { return [] }
     let defs: [Def] = parseSubForms(subj: "top level")
-    if !atEnd {
-      failParse("unexpected terminator token: \(current.kind)")
-    }
+    if !atEnd { failParse("unexpected terminator token: \(current.kind)") }
     return defs
   }
 

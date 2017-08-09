@@ -149,11 +149,9 @@ extension Expr {
     case .path(let path):
       compileSym(&ctx, em, indent, sym: path.syms.last!, type: type)
 
-    case .reify:
-      fatalError()
+    case .reify: fatalError()
 
-    case .sig:
-      fatalError()
+    case .sig: fatalError()
 
     case .sym(let sym):
       compileSym(&ctx, em, indent, sym: sym, type: type)
@@ -169,8 +167,7 @@ extension Expr {
     case .typeAlias:
       em.str(indent, "null")
 
-    case .where_:
-      fatalError()
+    case .where_: fatalError()
 
     case .void:
       em.str(indent, "null")
