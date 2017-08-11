@@ -54,7 +54,7 @@ class Space: Scope {
         space.add(defs: in_.defs, root: root)
 
       case .ext(let ext):
-        let extsRef = exts.getDefault(ext.place.sym.name, dflt: Ref<[Extension]>())
+        let extsRef = exts.getOrInsert(ext.place.sym.name, dflt: Ref<[Extension]>())
         extsRef.val.append(ext)
 
       default:
