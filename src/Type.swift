@@ -138,15 +138,19 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   var frees: Set<Type> {
-    var s = childFrees
-    if case .free = self.kind { s.insert(self) }
-    return s
+    if case .free = self.kind {
+      assert(childFrees.isEmpty)
+      return [self]
+    }
+    return childFrees
   }
 
   var vars: Set<Type> {
-    var s = childVars
-    if case .var_ = self.kind { s.insert(self) }
-    return s
+    if case .var_ = self.kind {
+      assert(childVars.isEmpty)
+      return [self]
+    }
+    return childVars
   }
 
   var isResolved: Bool {
