@@ -172,7 +172,21 @@ extension TypeCtx {
       return constrainSym(sym: path.syms.last!, record: scope.getRecord(path: path))
 
     case .reify(let reify):
-      reify.failType("type reification cannot be used as a value expression (temporary)")
+      let abstractType = reify.abstract.type(scope, "reification abstract type")
+      track(expr: reify.abstract, type: abstractType)
+      var typeArgFields: [TypeField] = []
+      var labels: Set<String> = []
+      for expr in reify.args.exprs {
+        let typeField = typeFieldForTypeArg(scope, arg: expr)
+        if let label = typeField.label {
+          if labels.containsOrInsert(label) {
+            expr.form.failType("type argument has duplicate label: `\(label)`")
+          }
+        }
+        typeArgFields.append(typeField)
+      }
+      let type = abstractType.reify(typeArgFields)
+      return type
 
     case .sig(let sig):
       sig.failType("type signature cannot be used as a value expression.")
@@ -236,6 +250,20 @@ extension TypeCtx {
   }
 
 
+  mutating func typeFieldForTypeArg(_ scope: LocalScope, arg: Expr) -> TypeField {
+    let type: Type
+    switch arg {
+    case .bind(let bind):
+      type = bind.val.type(scope, "type argument")
+      track(expr: bind.val, type: type)
+    default:
+      type = arg.type(scope, "type argument")
+      track(expr: arg, type: type)
+    }
+    return TypeField(isVariant: false, label: arg.argLabel, type: type)
+  }
+
+
   mutating func genConstraintsBody(_ scope: LocalScope, body: Body) -> Type {
     for stmt in body.stmts {
       let type = genConstraints(scope, expr: stmt)
@@ -247,15 +275,40 @@ extension TypeCtx {
 
   mutating func constrainSym(sym: Sym, record: ScopeRecord) -> Type {
     symRecords[sym] = record
+    let type: Type
     switch record.kind {
-    case .lazy(let type): return type
+    case .lazy(let t): type = t
     case .poly(let polytype, _):
-      let morphType = addFreeType()
-      constrain(.sym(sym), actType: polytype, expType: morphType, "polymorph alias '\(sym.name)':")
-      return morphType
-    case .val(let type): return type
+      type = addFreeType() // morph type.
+      constrain(.sym(sym), actType: polytype, expType: type, "polymorph alias '\(sym.name)':")
+    case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }
+    return instantiate(type)
+  }
+
+
+  mutating func instantiate(_ type: Type) -> Type {
+    var varsToFrees: [String:Type] = [:]
+    switch type.kind {
+    case .free, .host, .prim: return type
+    case .all(let members): return .All(Set(members.map { self.instantiate($0) }))
+    case .any(let members): return .Any_(Set(members.map { self.instantiate($0) }))
+    case .poly(let members): return .Poly(Set(members.map { self.instantiate($0) }))
+    case .sig(let dom, let ret):
+      return .Sig(dom: instantiate(dom), ret: instantiate(ret))
+    case .struct_(let fields, let variants):
+      return .Struct(fields: instantiateFields(fields), variants: instantiateFields(variants))
+    case .var_(let name):
+      return varsToFrees.getOrInsert(name, dflt: { () in self.addFreeType() })
+    case .variantMember(let variant):
+      return .VariantMember(variant: variant.substitute(type: instantiate(variant.type)))
+    }
+  }
+
+
+  mutating func instantiateFields(_ fields: [TypeField]) -> [TypeField] {
+    return fields.map { $0.substitute(type: self.instantiate($0.type)) }
   }
 
 

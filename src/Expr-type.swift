@@ -42,6 +42,12 @@ extension Expr {
     case .sym(let sym):
       return scope.typeBinding(sym: sym, subj: subj)
 
+    case .typeVar(let typeVar):
+      let sym = typeVar.sym
+      let type = Type.Var(sym.name)
+      _ = scope.addRecord(sym: sym, kind: .type(type))
+      return Type.Var(sym.name)
+
     default:
       form.failType("\(subj) expects a type; received \(form.syntaxName).")
     }

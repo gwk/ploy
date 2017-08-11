@@ -30,5 +30,9 @@ struct TypeField: Equatable, CustomStringConvertible {
 
   func hostName(index: Int) -> String { return label ?? "_\(index)" }
 
+  func substitute(type: Type) -> TypeField {
+    return TypeField(isVariant: isVariant, label: label, type: type)
+  }
+
   static func ==(l: TypeField, r: TypeField) -> Bool { return l.label == r.label && l.type == r.type }
 }
