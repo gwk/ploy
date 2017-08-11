@@ -4,7 +4,7 @@
 extension TypeCtx {
 
   mutating func track(expr: Expr, type: Type) {
-    // Note: this functionality requires that a given piece Expr only be tracked once.
+    // Note: this functionality requires that a given Expr only be tracked once.
     // Therefore synthesized expressions cannot reuse input exprs multiple times.
     exprTypes.insertNew(expr, value: type)
   }
@@ -175,7 +175,7 @@ extension TypeCtx {
       reify.failType("type reification cannot be used as a value expression (temporary)")
 
     case .sig(let sig):
-      sig.failType("type signature cannot be used as a value expression (temporary)")
+      sig.failType("type signature cannot be used as a value expression.")
 
     case .sym(let sym):
       return constrainSym(sym: sym, record: scope.getRecord(sym: sym))
@@ -196,17 +196,17 @@ extension TypeCtx {
       _ = scope.addRecord(sym: typeAlias.sym, kind: .type(type))
       return typeVoid
 
-    case .typeArgs(let typeArgs):
-      typeArgs.failType("type constraint declaration not implemented.")
+    case .typeArgs(let typeArgs): // TODO: impossible? fatalError?
+      typeArgs.failType("type args cannot be used as a value expression.")
 
     case .typeVar(let typeVar):
-      typeVar.failType("type variable declaration not implemented.")
+      typeVar.failType("type variable declaration cannot be used as a value expression.")
 
     case .void:
       return typeVoid
 
     case .where_(let where_):
-      where_.failSyntax("where phrase cannot be used as a value expression (temporary)")
+      where_.failSyntax("where phrase cannot be used as a value expression.")
     }
   }
 
