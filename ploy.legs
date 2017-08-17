@@ -1,4 +1,4 @@
-# © 2017 George King. Permission to use this file is granted in license-quilt.txt.
+// © 2017 George King. Permission to use this file is granted in license-quilt.txt.
 
 
 newline: \n
@@ -16,8 +16,8 @@ intHex:   -? 0x $Hex+   (_ $Hex+)*
 flt: -? $Dec+ . $Dec*
 
 sym: [$Ascii_Letter _] [$Ascii_Letter $Ascii_Number _]*
-# TODO: more accurate, but then makes error reporting weird:
-#sym: ($Ascii_Letter | _ [$Ascii_Letter $Ascii_Number]) (_? [$Ascii_Letter $Ascii_Number])*
+// TODO: more accurate, but then makes error reporting weird:
+//sym: ($Ascii_Letter | _ [$Ascii_Letter $Ascii_Number]) (_? [$Ascii_Letter $Ascii_Number])*
 
 stringDQ: " ( [ $Ascii_Readable - \\ " ] | \\ $Ascii_Readable )* "
 stringSQ: ' ( [ $Ascii_Readable - \\ ' ] | \\ $Ascii_Readable )* '
