@@ -8,16 +8,16 @@ struct TypeCtx {
   var constraints = [Constraint]()
   var constraintsResolved = [Bool]()
 
-  // only mutated during generation phase.
+  // Mutated by constraint generation.
   var exprTypes = [Expr:Type]() // maps expressions to their types.
   var symRecords = [Sym:ScopeRecord]()
   var synths = [Expr:Expr]()
   var genSyms = [Sym]()
   var freeTypeCount = 0
 
-  // mutated during resolution phase.
+  // Mutated by constraint resolution.
   var freeUnifications = [Int:Type]()
-  var nevers = Set<Int>() // Never types are a special case, omitted from unification.
+  var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
 
 
   init(globalCtx: GlobalCtx) {
@@ -161,7 +161,7 @@ struct TypeCtx {
       if act == typeNever {
         // if actual is Never, do not unify; another code paths may return, and we want that type to bind to the free exp.
         // however this might be the only branch, so we need to remember this and fall back if exp remains free.
-        nevers.insert(ie)
+        freeNevers.insert(ie)
       } else {
         unify(freeIndex: ie, to: act)
       }
@@ -316,7 +316,7 @@ struct TypeCtx {
     }
 
     // fill in frees that were only bound to Never.
-    for idx in nevers {
+    for idx in freeNevers {
       if !freeUnifications.contains(key: idx) {
         freeUnifications[idx] = typeNever
       }
