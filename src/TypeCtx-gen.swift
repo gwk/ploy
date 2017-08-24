@@ -17,12 +17,6 @@ extension TypeCtx {
   }
 
 
-  mutating func addConstraint(_ constraint: Constraint) {
-    constraints.append(constraint)
-    constraintsResolved.append(false)
-  }
-
-
   mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
     addConstraint(.rel(RelCon(
       act: Side(expr: actExpr, type: actType),

@@ -25,6 +25,12 @@ struct TypeCtx {
   }
 
 
+  mutating func addConstraint(_ constraint: Constraint) {
+    constraints.append(constraint)
+    constraintsResolved.append(false)
+  }
+
+
   func typeFor(expr: Expr) -> Type {
     return resolved(type: exprTypes[expr]!)
   }
