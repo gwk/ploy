@@ -2,6 +2,10 @@
 
 
 enum Constraint: CustomStringConvertible {
+
+  // A type constraint to be resolved during type checking.
+  // Constraints contain types and the expressions from which they were generated for error reporting.
+
   case prop(PropCon) // property constraint between an accessee type and an accessed type via an accessor.
   case rel(RelCon) // relation constraint between actual and expected types.
 
@@ -26,6 +30,14 @@ struct PropCon {
   let acc: Acc
   let accesseeType: Type
   let accType: Type
+
+  init(acc: Acc, accesseeType: Type, accType: Type) {
+    assert(accesseeType.isConstraintEligible)
+    assert(accType.isConstraintEligible)
+    self.acc = acc
+    self.accesseeType = accesseeType
+    self.accType = accType
+  }
 
   func error(_ msg: String) -> Err {
     return Err(prop: self, msg: msg)
@@ -58,6 +70,7 @@ struct Side {
   let chain: Chain<String> // describes the path into the parent literal expression.
 
   init(expr: Expr, type: Type, chain: Chain<String> = .end) {
+    assert(type.isConstraintEligible)
     self.expr = expr
     self.type = type
     self.chain = chain

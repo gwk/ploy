@@ -160,6 +160,16 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
+  var isConstraintEligible: Bool {
+    // For a type to appear in a constraint, it must either be completely reified already,
+    // or else be a free type that points into the mutable types array of the TypeCtx.
+    switch self.kind {
+    case .free: return true
+    default: return childFrees.isEmpty
+    }
+  }
+
+
   static func ==(l: Type, r: Type) -> Bool { return l === r }
 
   static func <(l: Type, r: Type) -> Bool { return l.globalIndex < r.globalIndex }

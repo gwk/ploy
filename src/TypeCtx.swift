@@ -8,19 +8,31 @@ struct TypeCtx {
   var constraints = [Constraint]()
   var constraintsResolved = [Bool]()
   var freeUnifications = [Type?]()
+  var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
 
-  // Mutated by constraint generation.
   var exprTypes = [Expr:Type]() // maps expressions to their types.
   var symRecords = [Sym:ScopeRecord]()
   var synths = [Expr:Expr]()
   var genSyms = [Sym]()
 
-  // Mutated by constraint resolution.
-  var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
-
 
   init(globalCtx: GlobalCtx) {
     self.globalCtx = globalCtx
+  }
+
+
+  mutating func addType(_ type: Type) -> Type {
+    if type.isConstraintEligible { return type }
+    let idx = freeUnifications.count
+    freeUnifications.append(type)
+    return Type.Free(idx)
+  }
+
+
+  mutating func addFreeType() -> Type {
+    let idx = freeUnifications.count
+    freeUnifications.append(nil)
+    return Type.Free(idx)
   }
 
 
@@ -67,6 +79,7 @@ struct TypeCtx {
 
 
   mutating func unify(freeIndex: Int, to type: Type) {
+    assert(type.isConstraintEligible)
     freeUnifications[freeIndex] = type
   }
 
@@ -151,8 +164,8 @@ struct TypeCtx {
       else {       unify(freeIndex: ie, to: act); return true }
 
     case (.free(let ia), _):
-      // note: if expected is Never, unify; the caller expects to never return.
-      unify(freeIndex: ia, to: exp);
+      // note: if expected is Never we do unify; the caller expects to never return.
+      unify(freeIndex: ia, to: addType(exp));
       return true
 
     case (_, .free(let ie)):
@@ -161,7 +174,7 @@ struct TypeCtx {
         // however this might be the only branch, so we need to remember this and fall back if exp remains free.
         freeNevers.insert(ie)
       } else {
-        unify(freeIndex: ie, to: act)
+        unify(freeIndex: ie, to: addType(act))
       }
       return true
 
@@ -193,11 +206,11 @@ struct TypeCtx {
 
   mutating func resolveSigToSig(_ rel: RelCon, act: (dom: Type, ret: Type), exp: (dom: Type, ret: Type)) throws -> Bool {
     try resolveSub(rel,
-      actExpr: rel.act.litExpr?.sigDom, actType: act.dom, actDesc: "signature domain",
-      expExpr: rel.exp.litExpr?.sigDom, expType: exp.dom, expDesc: "signature domain")
+      actExpr: rel.act.litExpr?.sigDom, actType: addType(act.dom), actDesc: "signature domain",
+      expExpr: rel.exp.litExpr?.sigDom, expType: addType(exp.dom), expDesc: "signature domain")
     try resolveSub(rel,
-      actExpr: rel.act.litExpr?.sigRet, actType: act.ret, actDesc: "signature return",
-      expExpr: rel.exp.litExpr?.sigRet, expType: exp.ret, expDesc: "signature return")
+      actExpr: rel.act.litExpr?.sigRet, actType: addType(act.ret), actDesc: "signature return",
+      expExpr: rel.exp.litExpr?.sigRet, expType: addType(exp.ret), expDesc: "signature return")
     return true
   }
 

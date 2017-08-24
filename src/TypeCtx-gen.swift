@@ -7,15 +7,8 @@ extension TypeCtx {
   mutating func track(expr: Expr, type: Type) {
     // Note: this functionality requires that a given Expr only be tracked once.
     // Therefore synthesized expressions cannot reuse input exprs multiple times.
+    assert(type.isConstraintEligible)
     exprTypes.insertNew(expr, value: type)
-  }
-
-
-  mutating func addFreeType() -> Type {
-    let idx = freeUnifications.count
-    let t = Type.Free(idx)
-    freeUnifications.append(nil)
-    return t
   }
 
 
@@ -36,6 +29,7 @@ extension TypeCtx {
 
   mutating func genConstraints(_ scope: LocalScope, expr: Expr) -> Type {
     let type = genConstraintsDisp(scope, expr: expr)
+    assert(type.isConstraintEligible)
     track(expr: expr, type: type)
     return type
   }
@@ -80,7 +74,7 @@ extension TypeCtx {
       let argType = genConstraints(scope, expr: call.arg)
       let domType = addFreeType() // necessary to get the act/exp direction right.
       let retType = addFreeType()
-      let sigType = Type.Sig(dom: domType, ret: retType)
+      let sigType = addType(Type.Sig(dom: domType, ret: retType))
       constrain(call.callee, actType: calleeType, expType: sigType, "callee")
       constrain(call.arg, actType: argType, expType: domType, "argument")
       return retType
@@ -89,7 +83,7 @@ extension TypeCtx {
       return genConstraintsBody(LocalScope(parent: scope), body: do_.body)
 
     case .fn(let fn):
-      let type = Expr.sig(fn.sig).type(scope, "signature")
+      let type = addType(Expr.sig(fn.sig).type(scope, "signature"))
       track(expr: .sig(fn.sig), type: type)
       guard case .sig(let dom, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
@@ -101,10 +95,10 @@ extension TypeCtx {
 
     case .if_(let if_):
       let type = (if_.dflt == nil) ? typeVoid: addFreeType() // all cases must return same type.
-      // note: we could do without the freee type by generating constraints for dflt first,
+      // note: we could do without the free type by generating constraints for dflt first,
       // but we prefer to generate constraints in lexical order for all cases.
       // TODO: much more to do here when default is missing;
-      // e.g. inferring complete case coverage without default, typeHalt support, etc.
+      // e.g. inferring complete case coverage without default, Never support, etc.
       for case_ in if_.cases {
         let cond = case_.condition
         let cons = case_.consequence
@@ -123,7 +117,7 @@ extension TypeCtx {
       for dep in hostVal.deps {
         _ = scope.getRecord(identifier: dep)
       }
-      let type = hostVal.typeExpr.type(scope, "host value declaration")
+      let type = addType(hostVal.typeExpr.type(scope, "host value declaration"))
       track(expr: hostVal.typeExpr, type: type)
       return type
 
@@ -162,7 +156,7 @@ extension TypeCtx {
           fields.append(member)
         }
       }
-      return Type.Struct(fields: fields, variants: variants)
+      return addType(Type.Struct(fields: fields, variants: variants))
 
     case .path(let path):
       return constrainSym(sym: path.syms.last!, record: scope.getRecord(path: path))
@@ -182,7 +176,7 @@ extension TypeCtx {
         typeArgFields.append(typeField)
       }
       let type = abstractType.reify(typeArgFields)
-      return type
+      return addType(type)
 
     case .sig(let sig):
       sig.failType("type signature cannot be used as a value expression.")
@@ -196,7 +190,7 @@ extension TypeCtx {
     case .tagTest(let tagTest):
       let expr = tagTest.expr
       let actType = genConstraints(scope, expr: expr)
-      let expType = Type.VariantMember(variant: TypeField(isVariant: true, label: tagTest.tag.sym.name, type: addFreeType()))
+      let expType = addType(Type.VariantMember(variant: TypeField(isVariant: true, label: tagTest.tag.sym.name, type: addFreeType())))
       constrain(expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
       return typeBool
 
@@ -280,7 +274,7 @@ extension TypeCtx {
     case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }
-    return instantiate(type)
+    return addType(instantiate(type))
   }
 
 
