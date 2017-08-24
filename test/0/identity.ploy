@@ -1,0 +1,25 @@
+
+ident = fn ^T%T $;
+
+#idI = ident<Int>
+#idS = ident<Str>
+
+extensible identE;
+identE += fn Int%Int $;
+identE += fn Str%Str $;
+
+main = {
+  assert.eq(1 ident.1)
+  assert.eq("hi" ident."hi")
+
+  one:Int = ident.1
+  assert.eq(1 one)
+
+  #assert.eq(ident.1 ident.1)
+  #assert.eq(identE.1 identE.1)
+
+  #outL.ident."hi"
+  #outL.idI.2
+  #outL.idS."bye"
+}
+
