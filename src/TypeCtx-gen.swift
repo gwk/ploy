@@ -3,6 +3,7 @@
 
 extension TypeCtx {
 
+
   mutating func track(expr: Expr, type: Type) {
     // Note: this functionality requires that a given Expr only be tracked once.
     // Therefore synthesized expressions cannot reuse input exprs multiple times.
