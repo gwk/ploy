@@ -15,6 +15,8 @@ enum Constraint: CustomStringConvertible {
 
 
 struct PropCon {
+  // A property access constraint.
+  // This specialization is required to represent the expectation that the property named by the acessor exists in the accessee.
 
   struct Err: Error {
     let prop: PropCon
@@ -32,6 +34,7 @@ struct PropCon {
 
 
 struct RelCon {
+  // A generic binary relation constraint, consisting of 'actual' and 'expected' sides.
 
   struct Err: Error {
     let rel: RelCon

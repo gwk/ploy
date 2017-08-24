@@ -275,7 +275,7 @@ struct TypeCtx {
     while doneCount < constraints.count {
       var i = 0
       var doneThisRound = 0
-      while i < constraints.count {
+      while i < constraints.count { // use while loop because constraints array may grow during iteration.
         let index = i
         i += 1
         if constraintsResolved[index] {
@@ -288,7 +288,7 @@ struct TypeCtx {
           if done {
             constraintsResolved[index] = true
             doneThisRound += 1
-          }
+          } // else deferred to next round.
         } catch let err as RelCon.Err {
           error(err)
         } catch let err as PropCon.Err {
