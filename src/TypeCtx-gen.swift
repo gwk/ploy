@@ -11,8 +11,9 @@ extension TypeCtx {
 
 
   mutating func addFreeType() -> Type {
-    let t = Type.Free(freeTypeCount)
-    freeTypeCount += 1
+    let idx = freeUnifications.count
+    let t = Type.Free(idx)
+    freeUnifications.append(nil)
     return t
   }
 

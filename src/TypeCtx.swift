@@ -7,16 +7,15 @@ struct TypeCtx {
 
   var constraints = [Constraint]()
   var constraintsResolved = [Bool]()
+  var freeUnifications = [Type?]()
 
   // Mutated by constraint generation.
   var exprTypes = [Expr:Type]() // maps expressions to their types.
   var symRecords = [Sym:ScopeRecord]()
   var synths = [Expr:Expr]()
   var genSyms = [Sym]()
-  var freeTypeCount = 0
 
   // Mutated by constraint resolution.
-  var freeUnifications = [Int:Type]()
   var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
 
 
@@ -68,7 +67,6 @@ struct TypeCtx {
 
 
   mutating func unify(freeIndex: Int, to type: Type) {
-    assert(!freeUnifications.contains(key: freeIndex))
     freeUnifications[freeIndex] = type
   }
 
@@ -317,7 +315,7 @@ struct TypeCtx {
 
     // fill in frees that were only bound to Never.
     for idx in freeNevers {
-      if !freeUnifications.contains(key: idx) {
+      if freeUnifications[idx] == nil {
         freeUnifications[idx] = typeNever
       }
     }
