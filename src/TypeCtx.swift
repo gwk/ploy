@@ -140,11 +140,10 @@ struct TypeCtx {
     case (.poly, .free):
       return false
 
-    // TODO: handle cases where sig or compound contains frees and must be deferred.
-
     case (.poly(let morphs), _):
       var match: (TypeCtx, Type)? = nil
       for morph in morphs {
+        assert(morph.isResolved)
         var ctx = self // copy ctx.
         do {
           try ctx.resolveSub(rel, actType: morph, actDesc: "morph")
@@ -357,12 +356,35 @@ struct TypeCtx {
     let exp = resolved(type: r.exp.type)
     let actDesc = r.act.chain.map({"\($0) -> "}).joined()
     let expDesc = r.exp.chain.map({"\($0) -> "}).joined()
-
     if r.act.expr != r.exp.expr {
       r.act.expr.form.failType("\(r.desc) \(msg). \(actDesc)actual type: \(act)",
         notes: (r.exp.expr.form, "\(expDesc)expected type: \(exp)"))
     } else {
       r.act.expr.form.failType("\(r.desc) \(msg).\n  \(actDesc)actual type:   \(act);\n  \(expDesc)expected type: \(exp).")
     }
+  }
+
+  func describeState(_ label: String = "", showConstraints: Bool = false, showUnifications: Bool = true) {
+    errL("TypeCtx.describeState: \(label)")
+    if showConstraints {
+      errL("Constraints:")
+      for (constraint, isResolved) in zip(constraints, constraintsResolved) {
+        errL("  \(isResolved ? "+" : "-") \(constraint)")
+      }
+    }
+    if showUnifications {
+      errL("Unifications:")
+      for (i, origType) in freeUnifications.enumerated() {
+        if let origType = origType {
+          let type = resolved(type: origType)
+          let never = freeNevers.contains(i) ? " (Never)" : ""
+          let frees = type.childFrees.isEmpty ? "" : " : \(type.childFrees.sorted())"
+          errL("  \(i): \(type)\(never)\(frees)")
+        } else {
+          errL("  \(i): nil")
+        }
+      }
+    }
+    errN()
   }
 }
