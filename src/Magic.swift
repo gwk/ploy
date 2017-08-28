@@ -13,6 +13,6 @@ class Magic: Form { // synthesized code.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, ": type: \(type); code: `\(code)`")
+    writeHead(to: &stream, depth, suffix: ": type: \(type); code: `\(code)`")
   }
 }

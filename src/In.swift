@@ -10,9 +10,9 @@ class In: Form { // in statement: `in module-name statements…;`.
     self.defs = defs
     super.init(syn)
   }
-  
+
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, (identifier == nil) ? " MAIN\n" : "\n")
+    writeHead(to: &stream, depth, suffix: (identifier == nil) ? " MAIN\n" : "\n")
     if let identifier = identifier {
       identifier.write(to: &stream, depth + 1)
     }

@@ -13,7 +13,7 @@ class Paren: Form {
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, els.isEmpty ? " ()\n" : "\n")
+    writeHead(to: &stream, depth, suffix: els.isEmpty ? " ()\n" : "\n")
     for a in els {
       a.write(to: &stream, depth + 1)
     }

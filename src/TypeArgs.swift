@@ -10,7 +10,7 @@ class TypeArgs: Form { // type constraint: `<A B>`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, exprs.isEmpty ? " <>\n" : "\n")
+    writeHead(to: &stream, depth, suffix: exprs.isEmpty ? " <>\n" : "\n")
     for e in exprs {
       e.write(to: &stream, depth + 1)
     }

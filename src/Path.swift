@@ -11,7 +11,7 @@ class Path: Form { // path: `LIB/name`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, ": ")
+    writeHead(to: &stream, depth, suffix: ": ")
     var first = true
     for s in syms {
       if first {

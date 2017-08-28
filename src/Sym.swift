@@ -10,7 +10,7 @@ class Sym: Form { // symbol: `name`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, ": \(name)\n")
+    writeHead(to: &stream, depth, suffix: ": \(name)\n")
   }
 
   // MARK: Sym

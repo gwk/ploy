@@ -10,7 +10,7 @@ class LitNum: Form { // numeric literal: `0`.
   }
 
   override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, ": \(val)\n")
+    writeHead(to: &stream, depth, suffix: ": \(val)\n")
   }
 
   var cloned: LitNum {

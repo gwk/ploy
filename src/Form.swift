@@ -13,7 +13,7 @@ class Form: Hashable, CustomStringConvertible, TextOutputStreamable {
 
   var description: String {
     var s = ""
-    writeHead(to: &s, 0, "")
+    writeHead(to: &s, 0, suffix: "")
     return s
   }
 
@@ -33,7 +33,7 @@ class Form: Hashable, CustomStringConvertible, TextOutputStreamable {
     fatalError("Form.write not implemented for type: \(type(of: self))")
   }
 
-  func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, _ suffix: String = "\n") {
+  func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, suffix: String = "\n") {
     stream.write(String(indent: depth))
     stream.write(String(describing: type(of: self)))
     stream.write(":")
