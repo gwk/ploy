@@ -63,7 +63,7 @@ struct RelCon {
 }
 
 
-struct Side {
+struct Side: CustomStringConvertible {
 
   let expr: Expr // the literal expression associated with the constraint; may be a parent.
   let type: Type
@@ -76,6 +76,7 @@ struct Side {
     self.chain = chain
   }
 
+  var description: String { return "\(expr): \(type)" }
   func sub(expr: Expr?, type: Type, desc: String) -> Side {
     if let expr = expr {
       return Side(expr: expr, type: type)

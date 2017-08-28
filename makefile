@@ -27,6 +27,9 @@ cov:
 
 gen: src/Lex.swift
 
+run:
+	sh/run.sh
+
 src/lex.swift: ploy.legs
 	legs $^ -output $@
 

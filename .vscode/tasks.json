@@ -1,13 +1,17 @@
 {
   "version": "2.0.0",
   "type": "process",
-  "suppressTaskName": true,
   "tasks": [
     { "taskName": "build",
       "command": "make",
       "args": ["build"],
       "group": { "kind": "build", "isDefault": true },
       "problemMatcher": "$plumage-swift"
+    },
+    { "taskName": "run",
+      "command": "make",
+      "args": ["run"],
+      "problemMatcher": "$ploy"
     },
     { "taskName": "test-current",
       "command": "make",

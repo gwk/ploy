@@ -1,0 +1,35 @@
+{
+  "name": "ploy",
+  "displayName": "ploy",
+  "description": "Ploy language support.",
+  "version": "1.0.0",
+  "publisher": "gwk",
+  "engines": {"vscode": "^1.0.0"},
+  "categories": ["Languages"],
+  "contributes": {
+    "languages": [
+      { "id": "ploy",
+        "extensions": [".ploy"]
+      }
+    ],
+    "grammars": [
+      { "language": "ploy",
+        "scopeName": "source.ploy",
+        "path": "./syntaxes/ploy.json"
+      }
+    ],
+    "problemMatchers": [
+      { "name": "ploy",
+        "fileLocation": "relative",
+        "pattern": [
+          { "regexp": "([^:]+):(\\d+):(\\d+): ?(.*)",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "message": 4
+          }
+        ]
+      }
+    ]
+  }
+}

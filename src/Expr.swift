@@ -110,7 +110,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
 
   var hashValue: Int { return form.hashValue }
 
-  var description: String { return "Expr(\(form.description))" }
+  var description: String { return form.description }
 
   var sigDom: Expr? {
     switch self {

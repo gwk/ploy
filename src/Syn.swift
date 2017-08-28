@@ -39,7 +39,7 @@ class Syn: CustomStringConvertible {
   }
 
   var description: String {
-    return "\(source.name.withoutPathDir.withoutPathExt):\(lineIdx):\(colIdx)(pos:\(pos) visEnd:\(visEnd) end:\(end))"
+    return "\(source.name):\(lineIdx+1):\(colIdx+1)"
   }
 
   func errDiagnostic(prefix: String, msg: String) {
