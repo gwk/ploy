@@ -203,7 +203,7 @@ class Parser {
       if byte == "_" {
         if underscore {
           errZ(source.diagnostic(pos: pos, linePos: token.linePos, lineIdx: token.lineIdx,
-            prefix: "lexical error", msg: "symbols cannot contain repeated '_' characters."))
+            msg: "lexical error: symbols cannot contain repeated '_' characters."))
           exit(1)
         } else {
           underscore = true
@@ -523,13 +523,13 @@ class Parser {
 
 
   func failLex(token: Token, _ msg: String) -> Never {
-    errZ(source.diagnostic(token: token, prefix: "lexical error", msg: msg))
+    errZ(source.diagnostic(token: token, msg: "lexical error: " + msg))
     exit(1)
   }
 
 
   func failParse(token: Token, _ msg: String) -> Never {
-    errZ(source.diagnostic(token: token, prefix: "parse error", msg: msg))
+    errZ(source.diagnostic(token: token, msg: "parse error: " + msg))
     exit(1)
   }
 
@@ -540,7 +540,7 @@ class Parser {
 
 
   func failEnd(_ msg: String) -> Never {
-    errZ(source.diagnostic(endPos: tokens.last!.end, prefix: "parse error", msg: msg))
+    errZ(source.diagnostic(endPos: tokens.last!.end, msg: "parse error: " + msg))
     exit(1)
   }
 }

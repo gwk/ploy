@@ -1,3 +1,3 @@
-parse error: test/2/parse/adjacent-sym-num.ploy:1:6-7: adjacent forms require a separating space.
+test/2/parse/adjacent-sym-num.ploy:1:6-7: parse error: adjacent forms require a separating space.
 | x = 0a
        ~

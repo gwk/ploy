@@ -1,4 +1,4 @@
-type error: test/2/type/label-extraneous.ploy:3:14-23: argument field #0 has label `i`; expected no label.
+test/2/type/label-extraneous.ploy:3:14-23: type error: argument field #0 has label `i`; expected no label.
   actual type:   (i:Int j:Int);
   expected type: (Int Int).
 | main = exit.f(i=0 j=0)

@@ -7,7 +7,7 @@ class MainSpace: Space {
 
   func getMainDef() -> Def {
     guard let def = defs["main"] else {
-      fail("\(ctx.mainPath): `main` is not defined in MAIN (toplevel namespace).")
+      fail(prefix: "", "\(ctx.mainPath): error: `main` is not defined in MAIN (toplevel namespace).")
     }
     return def
   }

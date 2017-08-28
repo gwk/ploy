@@ -43,6 +43,6 @@ class Syn: CustomStringConvertible {
   }
 
   func errDiagnostic(prefix: String, msg: String) {
-    errZ(source.diagnostic(pos: pos, end: visEnd, linePos: linePos, lineIdx: lineIdx, prefix: prefix, msg: msg))
+    errZ(source.diagnostic(pos: pos, end: visEnd, linePos: linePos, lineIdx: lineIdx, msg: "\(prefix): \(msg)"))
   }
 }

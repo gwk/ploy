@@ -1,4 +1,4 @@
-type error: test/2/type/poly-unconstrained.ploy:6:7-8: polymorph alias 'x': cannot resolve constraint.
+test/2/type/poly-unconstrained.ploy:6:7-8: type error: polymorph alias 'x': cannot resolve constraint.
   actual type:   Poly<Int Str>;
   expected type: ^0.
 |   y = x

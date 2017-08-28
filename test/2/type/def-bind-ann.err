@@ -1,6 +1,6 @@
-type error: test/2/type/def-bind-ann.ploy:1:9-10: annotated: actual type is not expected type. actual type: Int
+test/2/type/def-bind-ann.ploy:1:9-10: type error: annotated: actual type is not expected type. actual type: Int
 | x:Str = 0
           ~
-note: test/2/type/def-bind-ann.ploy:1:3-6: expected type: Str
+test/2/type/def-bind-ann.ploy:1:3-6: note: expected type: Str
 | x:Str = 0
     ~~~
