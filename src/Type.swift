@@ -169,6 +169,12 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
+  var isConcrete: Bool {
+    switch self.kind {
+    case .var_: return false
+    default: return childVars.isEmpty
+    }
+  }
 
   static func ==(l: Type, r: Type) -> Bool { return l === r }
 

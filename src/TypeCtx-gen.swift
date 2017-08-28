@@ -280,25 +280,36 @@ extension TypeCtx {
 
   mutating func instantiate(_ type: Type) -> Type {
     var varsToFrees: [String:Type] = [:]
+    let t = instantiate(type, varsToFrees: &varsToFrees)
+    return t
+  }
+
+
+  mutating func instantiate(_ type: Type, varsToFrees: inout [String:Type]) -> Type {
+    if type.isConcrete { return type }
     switch type.kind {
     case .free, .host, .prim: return type
-    case .all(let members): return .All(Set(members.map { self.instantiate($0) }))
-    case .any(let members): return .Any_(Set(members.map { self.instantiate($0) }))
-    case .poly(let members): return .Poly(Set(members.map { self.instantiate($0) }))
+    case .all(let members): return .All(Set(members.map { self.instantiate($0, varsToFrees: &varsToFrees) }))
+    case .any(let members): return .Any_(Set(members.map { self.instantiate($0, varsToFrees: &varsToFrees) }))
+    case .poly(let members): return .Poly(Set(members.map { self.instantiate($0, varsToFrees: &varsToFrees) }))
     case .sig(let dom, let ret):
-      return .Sig(dom: instantiate(dom), ret: instantiate(ret))
+      return .Sig(dom: instantiate(dom, varsToFrees: &varsToFrees), ret: instantiate(ret, varsToFrees: &varsToFrees))
     case .struct_(let fields, let variants):
-      return .Struct(fields: instantiateFields(fields), variants: instantiateFields(variants))
+      return .Struct(
+        fields: instantiateFields(fields, varsToFrees: &varsToFrees),
+        variants: instantiateFields(variants, varsToFrees: &varsToFrees))
     case .var_(let name):
       return varsToFrees.getOrInsert(name, dflt: { () in self.addFreeType() })
     case .variantMember(let variant):
-      return .VariantMember(variant: variant.substitute(type: instantiate(variant.type)))
+      return .VariantMember(variant: variant.substitute(type: instantiate(variant.type, varsToFrees: &varsToFrees)))
     }
   }
 
 
-  mutating func instantiateFields(_ fields: [TypeField]) -> [TypeField] {
-    return fields.map { $0.substitute(type: self.instantiate($0.type)) }
+
+
+  mutating func instantiateFields(_ fields: [TypeField], varsToFrees: inout [String:Type]) -> [TypeField] {
+    return fields.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) }
   }
 
 

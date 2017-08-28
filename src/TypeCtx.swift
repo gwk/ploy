@@ -15,6 +15,7 @@ struct TypeCtx {
   var synths = [Expr:Expr]()
   var genSyms = [Sym]()
 
+  var searchError: RelCon.Err? = nil
 
   init(globalCtx: GlobalCtx) {
     self.globalCtx = globalCtx
@@ -150,11 +151,15 @@ struct TypeCtx {
         } catch {
           continue
         }
-        if let (_, prev) = match { throw rel.error("multiple morphs match expected: \(prev); \(morph)") }
+        if let (_, prev) = match {
+          searchError = rel.error("multiple morphs match expected: \(prev); \(morph)")
+          return false
+        }
         match = (ctx, morph)
       }
       guard let (ctx, _) = match else { throw rel.error("no morphs match expected") }
       self = ctx
+      searchError = nil
       return true
 
     case (.free(let ia), .free(let ie)):
@@ -313,6 +318,8 @@ struct TypeCtx {
       }
       assert(doneThisRound >= doneCount)
       if doneThisRound == doneCount {
+        if let searchError = searchError { error(searchError) }
+        // If we do not have a specific error from polymorph search, just show generic error for first constraint.
         for (c, isResolved) in zip(constraints, constraintsResolved) {
           if isResolved { continue }
           switch c {
