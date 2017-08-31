@@ -14,7 +14,7 @@ enum Accessor: SubForm {
     case let f as Sym:    self = .sym(f)
     case let f as Tag:    self = .tag(f)
     default:
-      form.failSyntax("\(subj) expects accessor index, symbol, or tag; received \(form.syntaxName).")
+      form.failSyntax("\(subj) expected accessor index, symbol, or tag; received \(form.syntaxName).")
     }
   }
 

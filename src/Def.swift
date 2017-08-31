@@ -21,7 +21,7 @@ enum Def: SubForm {
     case let f as Pub:        self = .pub(f)
     case let f as TypeAlias:  self = .typeAlias(f)
     default:
-      form.failSyntax("\(subj) expects definition but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expected definition; received \(form.syntaxName).")
     }
   }
 

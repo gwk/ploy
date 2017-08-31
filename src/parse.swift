@@ -38,10 +38,10 @@ class Parser {
 
 
   func parseForm<T: Form>(subj: String, exp: String) -> T {
-    if atEnd { failEnd("\(subj) expects \(exp) but encountered end of file.") }
+    if atEnd { failEnd("\(subj) expected \(exp); encountered end of file.") }
     let form = parsePhrase(precedence: 0)
     if let form = form as? T { return form }
-    form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
+    form.failSyntax("\(subj) expected \(exp); received \(form.syntaxName).")
   }
 
 
@@ -292,11 +292,11 @@ class Parser {
 
   func synForTerminator(head: Token, terminator: TokenKind, _ formName: String) -> Syn {
     if atEnd {
-      failParse(token: head, "`\(formName)` form expects \(terminator) terminator; reached end of source text.")
+      failParse(token: head, "`\(formName)` form expected \(terminator) terminator; reached end of source text.")
       // TODO: report correct position.
     }
     if current.kind != terminator {
-      failParse("`\(formName)` form expects \(terminator) terminator; received '\(current.kind)'.")
+      failParse("`\(formName)` form expected \(terminator) terminator; received '\(current.kind)'.")
     }
     let visEnd = current.end
     advance()

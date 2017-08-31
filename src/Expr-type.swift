@@ -49,7 +49,7 @@ extension Expr {
       return Type.Var(sym.name)
 
     default:
-      form.failType("\(subj) expects a type; received \(form.syntaxName).")
+      form.failType("\(subj) expected a type; received \(form.syntaxName).")
     }
   }
 

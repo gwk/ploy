@@ -86,7 +86,7 @@ class Scope: CustomStringConvertible {
     let rec = getRecord(sym: sym)
     switch rec.kind {
     case .type(let type): return type
-    default: sym.failScope("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
+    default: sym.failScope("\(subj) expected a type; `\(rec.name)` refers to a \(rec.kindDesc).")
     }
   }
 
@@ -94,7 +94,7 @@ class Scope: CustomStringConvertible {
     let rec = getRecord(path: path)
     switch rec.kind {
     case .type(let type): return type
-    default: path.failScope("\(subj) expects a type; `\(rec.name)` refers to a \(rec.kindDesc).")
+    default: path.failScope("\(subj) expected a type; `\(rec.name)` refers to a \(rec.kindDesc).")
     }
   }
 }

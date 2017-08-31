@@ -56,7 +56,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as TypeVar:    self = .typeVar(f)
     case let f as Where:      self = .where_(f)
     default:
-      form.failSyntax("\(subj) expects \(exp) but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expected \(exp); received \(form.syntaxName).")
     }
   }
 

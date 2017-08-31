@@ -13,7 +13,7 @@ class TagTest: Form { // accessor: `-tag@?val`.
 
   static func mk(l: Form, _ r: Form) -> Form {
     guard let tag = l as? Tag else {
-      l.failSyntax("tag test expects tag but received \(l.syntaxName).")
+      l.failSyntax("tag test expected tag; received \(l.syntaxName).")
     }
     return TagTest(Syn(l.syn, r.syn),
       tag: tag,

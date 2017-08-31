@@ -87,7 +87,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
 
     case .where_(let where_): where_.fatal("match where clauses not implemented")
 
-    default: pattern.failSyntax("match case expects pattern; received \(cond.form.syntaxName)")
+    default: pattern.failSyntax("match case expected pattern; received \(cond.form.syntaxName)")
     }
   }
 

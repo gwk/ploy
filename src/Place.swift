@@ -11,13 +11,13 @@ enum Place: SubForm { // left side of a binding.
     switch form {
     case let ann as Ann:
       guard case .sym = ann.expr else {
-        ann.expr.failSyntax("\(subj) annnoted place expects symbol but received \(ann.expr.form.syntaxName).")
+        ann.expr.failSyntax("\(subj) annnoted place expected symbol; received \(ann.expr.form.syntaxName).")
       }
       self = .ann(ann)
     case let sym as Sym: self = .sym(sym)
     case let tag as Tag: self = .tag(tag)
     default:
-      form.failSyntax("\(subj) expects symbol, annotated symbol, or tag but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expected symbol, annotated symbol, or tag; received \(form.syntaxName).")
     }
   }
 

@@ -11,7 +11,7 @@ enum Clause: SubForm { // either a `?` case or `/` default.
     case let f as Case:     self = .case_(f)
     case let f as Default:  self = .default_(f)
     default:
-      form.failSyntax("\(subj) expects case (`cond ? expr`) or default (`/ expr`) but received \(form.syntaxName).")
+      form.failSyntax("\(subj) expected case (`cond ? expr`) or default (`/ expr`); received \(form.syntaxName).")
     }
   }
 
