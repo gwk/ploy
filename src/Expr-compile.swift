@@ -3,8 +3,9 @@
 
 extension Expr {
 
-  func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, exp: Type, isTail: Bool) {
+  func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, exp: Type?, isTail: Bool) {
     let type = ctx.typeFor(expr: self)
+    let exp = exp ?? type
     let hasConv = (type != exp)
     if hasConv {
       let conv = Conversion(orig: type, cast: exp)
@@ -16,7 +17,7 @@ extension Expr {
 
     case .acc(let acc):
       em.str(indent, "(")
-      acc.accessee.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: acc.accessee), isTail: false)
+      acc.accessee.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
       em.str(indent + 2, acc.accessor.hostAccessor)
       em.append(")")
 
@@ -28,7 +29,7 @@ extension Expr {
         var isRight = false
         for term in and.terms {
           if isRight { em.append(" &&") }
-          term.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: term), isTail: false)
+          term.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
           isRight = true
         }
         em.append(")")
@@ -42,7 +43,7 @@ extension Expr {
         var isRight = false
         for term in or.terms {
           if isRight { em.append(" ||") }
-          term.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: term), isTail: false)
+          term.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
           isRight = true
         }
         em.append(")")
@@ -62,7 +63,7 @@ extension Expr {
       // this works because functions are currently never convertible,
       // implying that polymorph selection should not in the future be made to rely on this mechanism.
       // from the callee we can extract the expected arg type.
-      call.callee.compile(&ctx, em, indent, exp: calleeType, isTail: false) // exp is ok for now because sigs are not convertible.
+      call.callee.compile(&ctx, em, indent, exp: nil, isTail: false) // exp is ok for now because sigs are not convertible.
       em.append("(")
       call.arg.compile(&ctx, em, indent + 2, exp: calleeType.sigDom, isTail: false)
       em.append(")")
@@ -162,7 +163,7 @@ extension Expr {
 
     case .tagTest(let tagTest):
       em.str(indent, "( '\(tagTest.tag.sym.name)' ==")
-      tagTest.expr.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: tagTest.expr), isTail: false)
+      tagTest.expr.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
       em.append(".$t)") // bling: $t: morph tag.
 
     case .typeAlias:
