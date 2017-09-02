@@ -85,7 +85,7 @@ extension TypeCtx {
 
     case .fn(let fn):
       let type = addType(Expr.sig(fn.sig).type(scope, "signature"))
-      track(expr: .sig(fn.sig), type: type)
+      track(expr: .sig(fn.sig), type: type) // track the sig so that compile can look up the expectation for body.
       guard case .sig(let dom, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
@@ -119,7 +119,6 @@ extension TypeCtx {
         _ = scope.getRecord(identifier: dep)
       }
       let type = addType(hostVal.typeExpr.type(scope, "host value declaration"))
-      track(expr: hostVal.typeExpr, type: type)
       return type
 
     case .litNum:

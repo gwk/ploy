@@ -45,7 +45,8 @@ struct TypeCtx {
 
 
   func typeFor(expr: Expr) -> Type {
-    return resolved(type: exprTypes[expr]!)
+    guard let type = exprTypes[expr] else { expr.form.fatal("untracked expression") }
+    return resolved(type: type)
   }
 
 
