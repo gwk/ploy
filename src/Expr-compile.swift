@@ -149,7 +149,7 @@ extension Expr {
     case .path(let path):
       compileSym(&ctx, em, indent, sym: path.syms.last!, type: type)
 
-    case .reify: fatalError()
+    case .reif: fatalError()
 
     case .sig: fatalError()
 

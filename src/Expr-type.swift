@@ -33,7 +33,7 @@ extension Expr {
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
 
-    case .reify:
+    case .reif:
       fatalError()
 
     case .sig(let sig):

@@ -18,7 +18,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case or(Or)
   case paren(Paren)
   case path(Path)
-  case reify(Reify)
+  case reif(Reif)
   case sig(Sig)
   case sym(Sym)
   case tag(Tag)
@@ -46,7 +46,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as Or:         self = .or(f)
     case let f as Paren:      self = .paren(f)
     case let f as Path:       self = .path(f)
-    case let f as Reify:      self = .reify(f)
+    case let f as Reif:      self = .reif(f)
     case let f as Sig:        self = .sig(f)
     case let f as Sym:        self = .sym(f)
     case let f as Tag:        self = .tag(f)
@@ -83,7 +83,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .or(let or): return or
     case .paren(let paren): return paren
     case .path(let path): return path
-    case .reify(let reify): return reify
+    case .reif(let reif): return reif
     case .sig(let sig): return sig
     case .sym(let sym): return sym
     case .tag(let tag): return tag

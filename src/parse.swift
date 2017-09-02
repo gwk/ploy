@@ -141,7 +141,7 @@ class Parser {
 
   static let adjacencyOperators: [(TokenKind, (Form, Form)->Form)] = [
     (.parenO, CallAdj.mk),
-    (.angleO, Reify.mk),
+    (.angleO, Reif.mk),
   ]
 
 

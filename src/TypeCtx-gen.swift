@@ -161,12 +161,12 @@ extension TypeCtx {
     case .path(let path):
       return constrainSym(sym: path.syms.last!, record: scope.getRecord(path: path))
 
-    case .reify(let reify):
-      let abstractType = reify.abstract.type(scope, "reification abstract type")
-      track(expr: reify.abstract, type: abstractType)
+    case .reif(let reif):
+      let abstractType = reif.abstract.type(scope, "reification abstract type")
+      track(expr: reif.abstract, type: abstractType)
       var typeArgFields: [TypeField] = []
       var labels: Set<String> = []
-      for expr in reify.args.exprs {
+      for expr in reif.args.exprs {
         let typeField = typeFieldForTypeArg(scope, arg: expr)
         if let label = typeField.label {
           if labels.containsOrInsert(label) {

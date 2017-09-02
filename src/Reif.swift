@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Reify: Form { // type reification:  `T<A>`.
+class Reif: Form { // type reification:  `T<A>`.
   let abstract: Expr
   let args: TypeArgs
 
