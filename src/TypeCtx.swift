@@ -23,6 +23,7 @@ struct TypeCtx {
 
 
   mutating func addType(_ type: Type) -> Type {
+    // Add a type to the system of constraints.
     if type.isConstraintEligible { return type }
     let idx = freeUnifications.count
     freeUnifications.append(type)

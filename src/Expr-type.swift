@@ -33,8 +33,9 @@ extension Expr {
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
 
-    case .reif:
-      fatalError()
+    case .reif(let reif):
+      let abstractType = reif.abstract.type(scope, "reification abstract type")
+      return reify(scope, type: abstractType, typeArgs: reif.args)
 
     case .sig(let sig):
       return Type.Sig(dom: sig.dom.type(scope, "signature domain"), ret: sig.ret.type(scope, "signature return"))
@@ -100,5 +101,41 @@ extension Expr {
       type = self.type(scope, "parameter type")
     }
     return TypeField(isVariant: isVariant, label: label, type: type)
+  }
+
+
+  func reify(_ scope: Scope, type: Type, typeArgs: TypeArgs) -> Type {
+    // Note: self is the "abstract" value or type expression.
+    var substitutions: [String:Type] = [:]
+    for arg in typeArgs.exprs {
+      let typeField = arg.typeFieldForTypeArg(scope)
+      if let label = typeField.label {
+        substitutions.insertNewOrElse(label, value: typeField.type) {
+          arg.form.failType("type argument has duplicate label: `\(label)`")
+        }
+      } else {
+        arg.form.failType("unlabeled type arguments not yet supported.")
+      }
+    }
+    // Check that substitution is possible first, because recursive substitution process cannot.
+    let varNames = type.varNames
+    for name in substitutions.keys {
+      if !varNames.contains(name) {
+        form.failType("type does not contain specified type argument: \(name)")
+      }
+    }
+    return type.reify(substitutions)
+  }
+
+
+  func typeFieldForTypeArg(_ scope: Scope) -> TypeField {
+    let type: Type
+    switch self {
+    case .bind(let bind):
+      type = bind.val.type(scope, "type argument")
+    default:
+      type = self.type(scope, "type argument")
+    }
+    return TypeField(isVariant: false, label: self.argLabel, type: type)
   }
 }

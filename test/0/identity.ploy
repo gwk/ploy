@@ -1,8 +1,10 @@
 
-ident = fn ^T%T $;
+Ident =: ^T%T
 
-#idI = ident<Int>
-#idS = ident<Str>
+ident:Ident = fn ^T%T $;
+
+IdentI =: Ident<T=Int>
+identI:IdentI = ident<T=Int>
 
 extensible identE;
 identE += fn Int%Int $;
@@ -15,6 +17,10 @@ main = {
   one:Int = ident.1
   assert.eq(1 one)
   assert.eq(ident.1 ident.1)
+
+  assert.eq(1 identI.1)
+  assert.eq(identI.1 identI.1)
+
   assert.eq(identE.1 identE.1)
 }
 

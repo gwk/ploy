@@ -137,6 +137,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     fatalError()
   }
 
+  var varName: String {
+    if case .var_(let name) = kind { return name }
+    fatalError()
+  }
+
   var frees: Set<Type> {
     if case .free = self.kind {
       assert(childFrees.isEmpty)
@@ -151,6 +156,10 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       return [self]
     }
     return childVars
+  }
+
+  var varNames: Set<String> {
+    return Set(vars.map { $0.varName })
   }
 
   var isResolved: Bool {
@@ -195,34 +204,36 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
 
-  func reify(_ argFields: [TypeField]) -> Type {
+  func reify(_ substitutions: [String:Type]) -> Type {
+    // Recursive helper assumes that the substitution makes sense.
+    // TODO: optimize by checking self.vars.isEmpty?
     switch self.kind {
     case .free, .host, .prim: return self
-    case .all(let members): return .All(reify(argFields, members: members))
-    case .any(let members): return .Any_(reify(argFields, members: members))
-    case .poly(let members): return .Poly(reify(argFields, members: members))
+    case .all(let members): return .All(reify(substitutions, members: members))
+    case .any(let members): return .Any_(reify(substitutions, members: members))
+    case .poly(let members): return .Poly(reify(substitutions, members: members))
     case .sig(let dom, let ret):
-      return .Sig(dom: dom.reify(argFields), ret: ret.reify(argFields))
+      return .Sig(dom: dom.reify(substitutions), ret: ret.reify(substitutions))
     case .struct_(let fields, let variants):
-      return .Struct(fields: reify(argFields, fields: fields), variants: reify(argFields, fields: variants))
+      return .Struct(fields: reify(substitutions, fields: fields), variants: reify(substitutions, fields: variants))
     case .var_(let name):
-      for field in argFields {
-        if field.label == name {
-          return field.type
+      for (n, type) in substitutions {
+        if n == name {
+          return type
         }
       }
       return self
     case .variantMember(let variant):
-      return .VariantMember(variant: variant.substitute(type: variant.type.reify(argFields)))
+      return .VariantMember(variant: variant.substitute(type: variant.type.reify(substitutions)))
     }
   }
 
-  func reify(_ argFields: [TypeField], members: Set<Type>) -> Set<Type> {
-    return Set(members.map { $0.reify(argFields) })
+  func reify(_ substitutions: [String:Type], members: Set<Type>) -> Set<Type> {
+    return Set(members.map { $0.reify(substitutions) })
   }
 
-  func reify(_ argFields: [TypeField], fields: [TypeField]) -> [TypeField] {
-    return fields.map { $0.substitute(type: $0.type.reify(argFields)) }
+  func reify(_ substitutions: [String:Type], fields: [TypeField]) -> [TypeField] {
+    return fields.map { $0.substitute(type: $0.type.reify(substitutions)) }
   }
 }
 

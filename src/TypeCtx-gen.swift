@@ -5,6 +5,7 @@ extension TypeCtx {
 
 
   mutating func track(expr: Expr, type: Type) {
+    // Map an expression to a type, so that the output phase can look up the final resolved type.
     // Note: this functionality requires that a given Expr only be tracked once.
     // Therefore synthesized expressions cannot reuse input exprs multiple times.
     assert(type.isConstraintEligible)
@@ -158,31 +159,18 @@ extension TypeCtx {
       }
       return addType(Type.Struct(fields: fields, variants: variants))
 
-    case .path(let path):
-      return constrainSym(sym: path.syms.last!, record: scope.getRecord(path: path))
+    case .path, .sym:
+      return addType(instantiate(genConstraintsRef(scope, expr: expr)))
 
     case .reif(let reif):
-      let abstractType = reif.abstract.type(scope, "reification abstract type")
-      track(expr: reif.abstract, type: abstractType)
-      var typeArgFields: [TypeField] = []
-      var labels: Set<String> = []
-      for expr in reif.args.exprs {
-        let typeField = typeFieldForTypeArg(scope, arg: expr)
-        if let label = typeField.label {
-          if labels.containsOrInsert(label) {
-            expr.form.failType("type argument has duplicate label: `\(label)`")
-          }
-        }
-        typeArgFields.append(typeField)
-      }
-      let type = abstractType.reify(typeArgFields)
-      return addType(type)
+      // note: we do not instantiate the abstract type or add it to the context until after reification.
+      let abstractType = genConstraintsRef(scope, expr: reif.abstract)
+      let type = addType(instantiate(reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args)))
+      track(expr: reif.abstract, type: type) // so that Expr.compile can just dispatch to reif.abstract.
+      return type
 
     case .sig(let sig):
       sig.failType("type signature cannot be used as a value expression.")
-
-    case .sym(let sym):
-      return constrainSym(sym: sym, record: scope.getRecord(sym: sym))
 
     case .tag(let tag): // bare morph constructor.
       return Type.Variant(label: tag.sym.name, type: typeVoid)
@@ -240,20 +228,6 @@ extension TypeCtx {
   }
 
 
-  mutating func typeFieldForTypeArg(_ scope: LocalScope, arg: Expr) -> TypeField {
-    let type: Type
-    switch arg {
-    case .bind(let bind):
-      type = bind.val.type(scope, "type argument")
-      track(expr: bind.val, type: type)
-    default:
-      type = arg.type(scope, "type argument")
-      track(expr: arg, type: type)
-    }
-    return TypeField(isVariant: false, label: arg.argLabel, type: type)
-  }
-
-
   mutating func genConstraintsBody(_ scope: LocalScope, body: Body) -> Type {
     for stmt in body.stmts {
       let type = genConstraints(scope, expr: stmt)
@@ -263,7 +237,19 @@ extension TypeCtx {
   }
 
 
-  mutating func constrainSym(sym: Sym, record: ScopeRecord) -> Type {
+  mutating func genConstraintsRef(_ scope: LocalScope, expr: Expr) -> Type {
+    let sym: Sym
+    let record: ScopeRecord
+    switch expr {
+    case .path(let path):
+      sym = path.syms.last!
+      record = scope.getRecord(path: path)
+    case .sym(let s):
+      sym = s
+      record = scope.getRecord(sym: s)
+    default:
+      expr.form.failSyntax("reification abstract expression must be a symbol or path; received \(expr.form.syntaxName)")
+    }
     symRecords[sym] = record
     let type: Type
     switch record.kind {
@@ -274,7 +260,7 @@ extension TypeCtx {
     case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }
-    return addType(instantiate(type))
+    return type
   }
 
 
