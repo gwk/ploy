@@ -38,7 +38,6 @@ class Parser {
 
 
   func parseForm<T: Form>(subj: String, exp: String) -> T {
-    if atEnd { failEnd("\(subj) expected \(exp); encountered end of file.") }
     let form = parsePhrase(precedence: 0)
     if let form = form as? T { return form }
     form.failSyntax("\(subj) expected \(exp); received \(form.syntaxName).")
@@ -46,7 +45,9 @@ class Parser {
 
 
   func parseSubForm<T: SubForm>(subj: String, allowSpaces: Bool = true) -> T {
-    return T(form: parsePhrase(precedence: (allowSpaces ? 0 : Parser.unspacedPrecedence)), subj: subj)
+    let form = parsePhrase(precedence: (allowSpaces ? 0 : Parser.unspacedPrecedence))
+    if let subForm = T(form: form) { return subForm }
+    form.failSyntax("\(subj) expected \(T.parseExpDesc); received \(form.syntaxName).")
   }
 
 
@@ -84,6 +85,7 @@ class Parser {
 
 
   func parsePhrase(precedence: Int) -> Form {
+    if atEnd { failEnd("encountered end of file.") }
     var left = parsePoly()
     outer: while !atEnd {
       let leftSpace = left.syn.hasEndSpace

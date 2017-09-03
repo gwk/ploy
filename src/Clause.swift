@@ -1,17 +1,16 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-enum Clause: SubForm { // either a `?` case or `/` default.
+enum Clause: SubForm { // `?` case or `/` default.
 
   case case_(Case)
   case default_(Default)
 
-  init(form: Form, subj: String) {
+  init?(form: Form) {
     switch form {
     case let f as Case:     self = .case_(f)
     case let f as Default:  self = .default_(f)
-    default:
-      form.failSyntax("\(subj) expected case (`cond ? expr`) or default (`/ expr`); received \(form.syntaxName).")
+    default: return nil
     }
   }
 
@@ -21,4 +20,6 @@ enum Clause: SubForm { // either a `?` case or `/` default.
     case .default_(let default_): return default_
     }
   }
+
+  static var parseExpDesc: String { return "case (`cond ? expr`) or default (`/ expr`) clause" }
 }

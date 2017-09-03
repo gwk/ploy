@@ -11,7 +11,7 @@ enum Def: SubForm {
   case pub(Pub)
   case typeAlias(TypeAlias)
 
-  init(form: Form, subj: String) {
+  init?(form: Form) {
     switch form {
     case let f as Bind:       self = .bind(f)
     case let f as Extension:  self = .ext(f)
@@ -20,8 +20,7 @@ enum Def: SubForm {
     case let f as In:         self = .in_(f)
     case let f as Pub:        self = .pub(f)
     case let f as TypeAlias:  self = .typeAlias(f)
-    default:
-      form.failSyntax("\(subj) expected definition; received \(form.syntaxName).")
+    default: return nil
     }
   }
 
@@ -36,6 +35,8 @@ enum Def: SubForm {
     case .typeAlias(let typeAlias): return typeAlias
     }
   }
+
+  static var parseExpDesc: String { return "definition" }
 
   var sym: Sym {
     switch self {

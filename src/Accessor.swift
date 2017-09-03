@@ -8,13 +8,12 @@ enum Accessor: SubForm {
   case tag(Tag)
   case untag(Tag)
 
-  init(form: Form, subj: String) {
+  init?(form: Form) {
     switch form {
     case let f as LitNum: self = .litNum(f)
     case let f as Sym:    self = .sym(f)
     case let f as Tag:    self = .tag(f)
-    default:
-      form.failSyntax("\(subj) expected accessor index, symbol, or tag; received \(form.syntaxName).")
+    default: return nil
     }
   }
 
@@ -26,6 +25,8 @@ enum Accessor: SubForm {
     case .untag(let tag): return tag
     }
   }
+
+  static var parseExpDesc: String { return "index, symbol, or tag accessor" }
 
   var cloned: Accessor {
     switch self {

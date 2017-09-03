@@ -7,17 +7,16 @@ enum Place: SubForm { // left side of a binding.
   case sym(Sym)
   case tag(Tag)
 
-  init(form: Form, subj: String) {
+  init?(form: Form) {
     switch form {
     case let ann as Ann:
       guard case .sym = ann.expr else {
-        ann.expr.failSyntax("\(subj) annnoted place expected symbol; received \(ann.expr.form.syntaxName).")
+        ann.expr.failSyntax("annnoted place expected symbol; received \(ann.expr.form.syntaxName).")
       }
       self = .ann(ann)
     case let sym as Sym: self = .sym(sym)
     case let tag as Tag: self = .tag(tag)
-    default:
-      form.failSyntax("\(subj) expected symbol, annotated symbol, or tag; received \(form.syntaxName).")
+    default: return nil
     }
   }
 
@@ -28,6 +27,8 @@ enum Place: SubForm { // left side of a binding.
     case .tag(let tag): return tag
     }
   }
+
+  static var parseExpDesc: String { return "symbol, annotated symbol, or tag" }
 
   var sym: Sym {
     switch self {

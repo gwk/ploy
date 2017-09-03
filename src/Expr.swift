@@ -30,6 +30,13 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case where_(Where)
 
   init(form: Form, subj: String, exp: String) {
+    guard let s = Expr(form: form) else {
+      form.failSyntax("\(subj) expected \(exp); received \(form.syntaxName).")
+    }
+    self = s
+  }
+
+  init?(form: Form) {
     switch form {
     case let f as Acc:        self = .acc(f)
     case let f as And:        self = .and(f)
@@ -55,13 +62,8 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as TypeArgs:   self = .typeArgs(f)
     case let f as TypeVar:    self = .typeVar(f)
     case let f as Where:      self = .where_(f)
-    default:
-      form.failSyntax("\(subj) expected \(exp); received \(form.syntaxName).")
+    default:  return nil
     }
-  }
-
-  init(form: Form, subj: String) {
-    self.init(form: form, subj: subj, exp: "expression")
   }
 
   var form: Form {
@@ -95,6 +97,8 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .where_(let where_): return where_
     }
   }
+
+  static var parseExpDesc: String { return "expression" }
 
   var cloned: Expr {
     switch self {

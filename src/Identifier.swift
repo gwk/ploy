@@ -5,12 +5,11 @@ enum Identifier: SubForm {
   case path(Path)
   case sym(Sym)
 
-  init(form: Form, subj: String) {
+  init?(form: Form) {
     switch form {
     case let f as Path: self = .path(f)
     case let f as Sym:  self = .sym(f)
-    default:
-      form.failSyntax("\(subj) expected identifier symbol or path; received \(form.syntaxName).")
+    default: return nil
     }
   }
 
@@ -20,6 +19,8 @@ enum Identifier: SubForm {
     case .sym(let sym): return sym
     }
   }
+
+  static var parseExpDesc: String { return "identifier symbol or path" }
 
   var name: String {
     return syms.map({$0.name}).joined(separator: "/")
