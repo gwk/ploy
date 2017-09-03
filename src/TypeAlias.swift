@@ -21,9 +21,5 @@ class TypeAlias: Form { // type binding: `Alias =: Type`.
       expr: Expr(form: r, subj: "type alias", exp: "type expression"))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    sym.write(to: &stream, depth + 1)
-    expr.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [sym, expr] }
 }

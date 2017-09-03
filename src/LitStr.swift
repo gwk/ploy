@@ -9,9 +9,11 @@ class LitStr: Form { // string literal: `'hi', "hi"`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: ": \"\(val)\"\n") // TODO: use source string.
+  override var description: String {
+    return "\(type(of: self)):\(syn): '\(val)'" // TODO: use actual source string?
   }
+
+  override var textTreeChildren: [Any] { return [] }
 }
 
 

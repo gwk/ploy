@@ -12,7 +12,9 @@ class Magic: Form { // synthesized code.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: ": type: \(type); code: `\(code)`")
+  override var description: String {
+    return "\(typeDescription(self)):\(syn): \(type); \(code)"
   }
+
+  override var textTreeChildren: [Any] { return [] }
 }

@@ -17,9 +17,5 @@ class Case: Form { // conditional case: `condition ? consequence`.
       consequence: Expr(form: r, subj: "case", exp: "consequence"))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    condition.write(to: &stream, depth + 1)
-    consequence.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [condition, consequence] }
 }

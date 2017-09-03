@@ -17,9 +17,5 @@ class Where: Form { // where: `x::p`.
       right: Expr(form: r, subj: "where operator"))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    left.write(to: &stream, depth + 1)
-    right.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [left, right] }
 }

@@ -9,12 +9,7 @@ class Expand: Form { // compound macro expansion argument: `[a b]`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    for p in pars {
-      p.write(to: &stream, depth + 1)
-    }
-  }
+  override var textTreeChildren: [Any] { return pars }
 
   func compileExpand(depth: Int, _ scope: LocalScope) -> Type {
     fatalError()

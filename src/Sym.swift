@@ -9,9 +9,11 @@ class Sym: Form { // symbol: `name`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: ": \(name)\n")
+  override var description: String {
+    return "\(type(of: self)):\(syn): \(name)"
   }
+
+  override var textTreeChildren: [Any] { return [] }
 
   // MARK: Sym
 

@@ -9,12 +9,13 @@ class LitNum: Form { // numeric literal: `0`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: ": \(val)\n")
+  override var description: String {
+    return "\(type(of: self)):\(syn): \(val)"
   }
+
+  override var textTreeChildren: [Any] { return [] }
 
   var cloned: LitNum {
     return LitNum(syn, val: val)
   }
 }
-

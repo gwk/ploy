@@ -9,9 +9,6 @@ class Pub: Form { // public modifier: `pub expr;`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    def.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [def] }
 }
 

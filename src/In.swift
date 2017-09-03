@@ -11,13 +11,10 @@ class In: Form { // in statement: `in module-name statements…;`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: (identifier == nil) ? " MAIN\n" : "\n")
-    if let identifier = identifier {
-      identifier.write(to: &stream, depth + 1)
-    }
-    for d in defs {
-      d.write(to: &stream, depth + 1)
-    }
+  override var textTreeChildren: [Any] {
+    var children = [Any]()
+    children.appendOpt(identifier)
+    children.append(defs)
+    return children
   }
 }

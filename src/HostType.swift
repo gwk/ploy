@@ -9,8 +9,5 @@ class HostType: Form { // host type declaration: `host_type sym;`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    sym.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [sym] }
 }

@@ -12,14 +12,9 @@ class Paren: Form {
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: els.isEmpty ? " ()\n" : "\n")
-    for a in els {
-      a.write(to: &stream, depth + 1)
-    }
-  }
+  override var textTreeChildren: [Any] { return els }
 
-  // MARK: Syntactic Compound
+  // MARK: Paren
 
   var isScalarValue: Bool {
     return els.count == 1 && els[0].argLabel == nil

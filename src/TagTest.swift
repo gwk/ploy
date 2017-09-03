@@ -20,9 +20,5 @@ class TagTest: Form { // accessor: `-tag@?val`.
       expr: Expr(form: r, subj: "tag test", exp: "tested expression"))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    tag.write(to: &stream, depth + 1)
-    expr.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [tag, expr] }
 }

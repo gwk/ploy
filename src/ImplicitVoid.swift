@@ -3,7 +3,5 @@
 
 class ImplicitVoid: Form { // the implied expression in an empty body.
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-  }
+  override var textTreeChildren: [Any] { return [] }
 }

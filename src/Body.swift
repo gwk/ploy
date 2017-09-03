@@ -24,11 +24,5 @@ class Body: Form { // body of statements and final expression.
     self.init(syn, stmts: _stmts, expr: _expr)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    for s in stmts {
-      s.write(to: &stream, depth + 1)
-    }
-    expr.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return stmts + [expr] }
 }

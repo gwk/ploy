@@ -13,12 +13,5 @@ class HostVal: Form { // host value declaration: `host_val sym Type;`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    typeExpr.write(to: &stream, depth + 1)
-    code.write(to: &stream, depth + 1)
-    for dep in deps {
-      dep.write(to: &stream, depth + 1)
-    }
-  }
+  override var textTreeChildren: [Any] { return [typeExpr, code] + deps }
 }

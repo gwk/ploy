@@ -10,17 +10,19 @@ class Path: Form { // path: `LIB/name`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: ": ")
+  override var description: String {
+    var desc = "\(type(of: self)):\(syn): "
     var first = true
     for s in syms {
       if first {
         first = false
       } else {
-        stream.write("/")
+        desc.append("/")
       }
-      stream.write(s.name)
+      desc.append(s.name)
     }
-    stream.write("\n")
+    return desc
   }
+
+  override var textTreeChildren: [Any] { return [] }
 }

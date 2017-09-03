@@ -3,7 +3,7 @@
 import Darwin
 
 
-class Form: Hashable, CustomStringConvertible, TextOutputStreamable {
+class Form: Hashable, CustomStringConvertible, TextTreeStreamable {
   let syn: Syn
   init(_ syn: Syn) { self.syn = syn }
 
@@ -11,35 +11,13 @@ class Form: Hashable, CustomStringConvertible, TextOutputStreamable {
 
   var hashValue: Int { return ObjectIdentifier(self).hashValue }
 
-  var description: String {
-    var s = ""
-    writeHead(to: &s, 0, suffix: "")
-    return s
-  }
+  var description: String { return "\(type(of: self)):\(syn)" }
+
+  var textTreeHead: String { return description }
+
+  var textTreeChildren: [Any] { fatalError("textTreeChildren not implemented for type: \(type(of: self))") }
 
   var syntaxName: String { return String(describing: type(of: self)) }
-
-  var fullDesc: String {
-    var s = ""
-    write(to: &s, 0)
-    return s
-  }
-
-  func write<Stream : TextOutputStream>(to stream: inout Stream) {
-    write(to: &stream, 0)
-  }
-
-  func write<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    fatalError("Form.write not implemented for type: \(type(of: self))")
-  }
-
-  func writeHead<Stream: TextOutputStream>(to stream: inout Stream, _ depth: Int, suffix: String = "\n") {
-    stream.write(String(indent: depth))
-    stream.write(String(describing: type(of: self)))
-    stream.write(":")
-    stream.write(String(describing: syn))
-    stream.write(suffix)
-  }
 
   func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) -> Never {
     syn.errDiagnostic(prefix: prefix, msg: msg)

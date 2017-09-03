@@ -13,8 +13,5 @@ class Do: Form { // do block: `{…}`.
     self.init(syn, body: Body(syn, stmts: stmts, expr: expr))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    body.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [body] }
 }

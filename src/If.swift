@@ -11,14 +11,9 @@ class If: Form { // if statement: `if cases… default;`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    for c in cases {
-      c.write(to: &stream, depth + 1)
-    }
-    if let dflt = dflt {
-      dflt.write(to: &stream, depth + 1)
-    }
+  override var textTreeChildren: [Any] {
+    var children: [Any] = cases
+    children.appendOpt(dflt)
+    return children
   }
 }
-

@@ -17,9 +17,5 @@ class Reif: Form { // type reification:  `T<A>`.
       args: r as! TypeArgs)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    abstract.write(to: &stream, depth + 1)
-    args.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [abstract, args] }
 }

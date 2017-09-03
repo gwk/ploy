@@ -18,9 +18,5 @@ class Extension: Form { // extension definition.
       val: Expr(form: r, subj: "extension", exp: "value expression"))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    place.write(to: &stream, depth + 1)
-    val.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [place, val] }
 }

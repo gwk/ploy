@@ -13,15 +13,11 @@ class Match: Form { // match statement: `match cond0 ? then0 … / default;`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    expr.write(to: &stream, depth + 1)
-    for c in cases {
-      c.write(to: &stream, depth + 1)
-    }
-    if let dflt = dflt {
-      dflt.write(to: &stream, depth + 1)
-    }
+  override var textTreeChildren: [Any] {
+    var children: [Any] = [expr]
+    children.append(contentsOf: cases.map {$0})
+    children.appendOpt(dflt)
+    return children
   }
 }
 

@@ -17,9 +17,5 @@ class Union: Form { // union: `A | B`.
       right: Expr(form: r, subj: "union"))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    left.write(to: &stream, depth + 1)
-    right.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [left, right] }
 }

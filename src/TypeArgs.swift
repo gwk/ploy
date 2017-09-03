@@ -9,10 +9,5 @@ class TypeArgs: Form { // type constraint: `<A B>`.
     super.init(syn)
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth, suffix: exprs.isEmpty ? " <>\n" : "\n")
-    for e in exprs {
-      e.write(to: &stream, depth + 1)
-    }
-  }
+  override var textTreeChildren: [Any] { return exprs }
 }

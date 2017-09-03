@@ -17,10 +17,6 @@ class Sig: Form { // function signature: `Domain->Return`.
       ret: Expr(form: r, subj: "signature return"))
   }
 
-  override func write<Stream : TextOutputStream>(to stream: inout Stream, _ depth: Int) {
-    writeHead(to: &stream, depth)
-    dom.write(to: &stream, depth + 1)
-    ret.write(to: &stream, depth + 1)
-  }
+  override var textTreeChildren: [Any] { return [dom, ret] }
 }
 
