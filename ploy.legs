@@ -19,8 +19,8 @@ sym: [$Ascii_Letter _] [$Ascii_Letter $Ascii_Number _]*
 // TODO: more accurate, but then makes error reporting weird:
 //sym: ($Ascii_Letter | _ [$Ascii_Letter $Ascii_Number]) (_? [$Ascii_Letter $Ascii_Number])*
 
-stringDQ: " ( [ $Ascii_Readable - \\ " ] | \\ $Ascii_Readable )* "
-stringSQ: ' ( [ $Ascii_Readable - \\ ' ] | \\ $Ascii_Readable )* '
+stringDQ: " ( [ $Readable - \\ " ] | \\ $Readable )* "
+stringSQ: ' ( [ $Readable - \\ ' ] | \\ $Readable )* '
 
 acc: @
 ann: :
