@@ -74,6 +74,7 @@ class Parser {
 
   func parseBody(subj: String) -> Body {
     let exprs: [Expr] = parseSubForms(subj: "body")
+    if atEnd { failEnd("\(subj) reached end of file.") }
     let syn: Syn
     if let hd = exprs.first?.syn, let tl = exprs.last?.syn {
       syn = Syn(hd, tl)
@@ -85,7 +86,7 @@ class Parser {
 
 
   func parsePhrase(precedence: Int) -> Form {
-    if atEnd { failEnd("encountered end of file.") }
+    if atEnd { failEnd("reached end of file.") }
     var left = parsePoly()
     outer: while !atEnd {
       let leftSpace = left.syn.hasEndSpace
@@ -294,7 +295,7 @@ class Parser {
 
   func synForTerminator(head: Token, terminator: TokenKind, _ formName: String) -> Syn {
     if atEnd {
-      failParse(token: head, "`\(formName)` form expected \(terminator) terminator; reached end of source text.")
+      failParse(token: head, "`\(formName)` form expected \(terminator) terminator; reached end of file.")
       // TODO: report correct position.
     }
     if current.kind != terminator {
@@ -370,8 +371,8 @@ class Parser {
 
   func parseDo() -> Form {
     let head = getCurrentAndAdvance(requireSpace: false)
-    let body = parseBody(subj: "do form")
-    return Do(synForTerminator(head: head, terminator: .braceC, "do form"), body: body)
+    let body = parseBody(subj: "`do` form")
+    return Do(synForTerminator(head: head, terminator: .braceC, "`do` form"), body: body)
   }
 
 
@@ -542,7 +543,7 @@ class Parser {
 
 
   func failEnd(_ msg: String) -> Never {
-    errZ(source.diagnostic(endPos: tokens.last!.end, msg: "parse error: " + msg))
+    errZ(source.diagnosticAtEnd(msg: "parse error: " + msg))
     exit(1)
   }
 }

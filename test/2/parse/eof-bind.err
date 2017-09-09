@@ -1,0 +1,3 @@
+test/2/parse/eof-bind.ploy:2:6: parse error: reached end of file.
+|   x =⏎
+       ^

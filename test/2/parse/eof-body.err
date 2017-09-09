@@ -1,0 +1,3 @@
+test/2/parse/eof-body.ploy:1:9: parse error: `do` form reached end of file.
+| main = {⏎
+          ^
