@@ -226,7 +226,7 @@ class Parser {
       return LitNum(Syn(source: source, token: token, end: parseSpace()), val: Int(val))
     } catch let e as Source.Err {
       switch e {
-      case .overflow: failParse(token: current, "integer literal value overflows I64.")
+      case .overflow: failParse("integer literal value overflows I64.")
       }
     } catch { fatalError() }
   }
