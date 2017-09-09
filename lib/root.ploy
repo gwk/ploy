@@ -1,4 +1,4 @@
-# © 2015 George King. Permission to use this file is granted in ploy/license.txt.
+// © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 in ROOT
 
@@ -7,48 +7,48 @@ false = host_val Bool "false";
 
 not = host_val Bool%Bool "function($) { return !$; }";
 
-extensible dec; # TODO: constraints.
+extensible dec; // TODO: constraints.
 dec += host_val Int%Int "function($) { return $ - 1; }";
 
-extensible inc; # TODO: constraints.
+extensible inc; // TODO: constraints.
 inc += host_val Int%Int "function($) { return $ + 1; }";
 
-extensible add; # TODO: constraints.
+extensible add; // TODO: constraints.
 add += host_val (Int Int)%Int "function($) { return $._0 + $._1; }";
 
-extensible sub; # TODO: constraints.
+extensible sub; // TODO: constraints.
 sub += host_val (Int Int)%Int "function($) { return $._0 - $._1; }";
 
-extensible mul; # TODO: constraints.
+extensible mul; // TODO: constraints.
 mul += host_val (Int Int)%Int "function($) { return $._0 * $._1; }";
 
-extensible div; # TODO: constraints.
+extensible div; // TODO: constraints.
 div += host_val (Int Int)%Int "function($) { return $._0 / $._1; }";
 
-extensible mod; # TODO: constraints.
+extensible mod; // TODO: constraints.
 mod += host_val (Int Int)%Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
 
-extensible rem; # TODO: constraints.
+extensible rem; // TODO: constraints.
 rem += host_val (Int Int)%Int "function($) { return $._0 % $._1; }";
 
 
-extensible eq; # TODO: constraints.
+extensible eq; // TODO: constraints.
 eq += host_val (Int Int)%Bool "function($) { return $._0 == $._1; }";
 eq += host_val (Str Str)%Bool "function($) { return $._0 == $._1; }";
 
-extensible ne; # TODO: constraints.
+extensible ne; // TODO: constraints.
 ne += host_val (Int Int)%Bool "function($) { return $._0 != $._1; }";
 
-extensible ge; # TODO: constraints.
+extensible ge; // TODO: constraints.
 ge += host_val (Int Int)%Bool "function($) { return $._0 >= $._1; }";
 
-extensible gt; # TODO: constraints.
+extensible gt; // TODO: constraints.
 gt += host_val (Int Int)%Bool "function($) { return $._0 >  $._1; }";
 
-extensible le; # TODO: constraints.
+extensible le; // TODO: constraints.
 le += host_val (Int Int)%Bool "function($) { return $._0 <= $._1; }";
 
-extensible lt; # TODO: constraints.
+extensible lt; // TODO: constraints.
 lt += host_val (Int Int)%Bool "function($) { return $._0 <  $._1; }";
 
 
@@ -57,16 +57,16 @@ std_out = host_val FS/File "$g.process.stdout.fd";
 std_err = host_val FS/File "$g.process.stderr.fd";
 
 
-extensible err; # TODO: make generic.
+extensible err; // TODO: make generic.
 err += fn Str%() FS/write(std_err $);
 err += fn Int%() FS/write(std_err $);
 
-extensible out; # TODO: make generic.
+extensible out; // TODO: make generic.
 out += fn Str%() FS/write(std_out $);
 out += fn Int%() FS/write(std_out $);
 
 
-extensible errL; # TODO: make generic.
+extensible errL; // TODO: make generic.
 
 errL += fn Int%()
   err.$
@@ -77,7 +77,7 @@ errL += fn Str%()
   err.'\n';
 
 
-extensible outL; # TODO: make generic.
+extensible outL; // TODO: make generic.
 
 outL += fn Int%()
   out.$

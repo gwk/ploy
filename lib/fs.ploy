@@ -1,13 +1,13 @@
-# © 2015 George King. Permission to use this file is granted in ploy/license.txt.
+// © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 in FS
 host_type File;
 host_type _Fs;
-host_type _WriteSync; # cannot yet treat native js multiparameter functions as ploy functions.
+host_type _WriteSync; // cannot yet treat native js multiparameter functions as ploy functions.
 _fs = host_val _Fs "$require('fs')";
 _writeSync = host_val _WriteSync "FS___fs.writeSync" _fs;
 
-extensible write; # TODO: constraints.
+extensible write; // TODO: constraints.
 write += host_val (File Bool)%() "function($) { FS___writeSync($._0, $._1) }" _writeSync;
 write += host_val (File Int)%()  "function($) { FS___writeSync($._0, $._1) }" _writeSync;
 write += host_val (File Str)%()  "function($) { FS___writeSync($._0, $._1) }" _writeSync;

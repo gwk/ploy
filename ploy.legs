@@ -4,7 +4,7 @@
 newline: \n
 spaces: \s+
 tabs: \t+
-comment: \# [$Readable - \n]*
+comment: / / [$Readable - \n]*
 
 int:      -?    $Dec+   (_ $Dec+)*
 intDec:   -? 0d $Dec+   (_ $Dec+)*

@@ -1,9 +1,9 @@
-# © 2015 George King. Permission to use this file is granted in ploy/license.txt.
+// © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 in PROC
 
-# TODO: these are probably the wrong type;
-# need to repackage into proper ploy types or hide behind accessor functions.
-#cmd  = host_val Xyz HOST___process.argv
-#args = host_val Xyz HOST___process.argv.slice(1)
+// TODO: these are probably the wrong type;
+// need to repackage into proper ploy types or hide behind accessor functions.
+//cmd  = host_val Xyz HOST___process.argv
+//args = host_val Xyz HOST___process.argv.slice(1)
 ;

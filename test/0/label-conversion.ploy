@@ -1,7 +1,7 @@
 
 main = {
 
-  # literal conversions.
+  // literal conversions.
 
   zz:(Int Int) = (0 1)
   assert.eq(0 0@zz)
@@ -39,7 +39,7 @@ main = {
   assert.eq(1 k@j@ij_kl)
   assert.eq(2 l@j@ij_kl)
 
-  # nonliteral shallow conversions.
+  // nonliteral shallow conversions.
 
   p1 = (0 1)
   p2 = (0 (1 2))
@@ -57,7 +57,7 @@ main = {
   assert.eq(1 0@j@s_ij_zz)
   assert.eq(2 1@j@s_ij_zz)
 
-  # nonliteral deep conversions.
+  // nonliteral deep conversions.
 
   d_zz_kl:(Int (k:Int l:Int)) = p2
   assert.eq(0   0@d_zz_kl)

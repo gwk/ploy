@@ -1,4 +1,4 @@
 main = {
   exit.1
-  exit.0 # never reached.
+  exit.0 // never reached.
 }
