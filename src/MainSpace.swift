@@ -7,7 +7,7 @@ class MainSpace: Space {
 
   func getMainDef() -> Def {
     guard let def = defs["main"] else {
-      fail(prefix: "", "\(ctx.mainPath): error: `main` is not defined in MAIN (toplevel namespace).")
+      fail(label: "\(ctx.mainPath): error", "`main` is not defined in MAIN (toplevel namespace).")
     }
     return def
   }
@@ -20,7 +20,7 @@ class MainSpace: Space {
 }
 
 
-func setupRootAndMain(mainPath: String, outFile: OutFile, mapSend: FileHandle) -> (root: Space, main: MainSpace) {
+func setupRootAndMain(mainPath: Path, outFile: File, mapSend: FileHandle) -> (root: Space, main: MainSpace) {
   let ctx = GlobalCtx(mainPath: mainPath, file: outFile, mapSend: mapSend)
   let root = Space(ctx, pathNames: ["ROOT"], parent: nil)
   root.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, kind: .space(root)) // NOTE: reference cycle.

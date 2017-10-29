@@ -10,10 +10,8 @@ _default: test
 
 all: clean gen build test
 
-swift_build = sh/build.sh
-
 build: src/lex.swift
-	$(swift_build)
+	craft-swift
 
 clean:
 	rm -rf _build/*
@@ -23,7 +21,7 @@ clean-ploy:
 	rm -rf _build/debug/ploy*
 
 cov:
-	$(swift_build) -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
+	craft-swift -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
 
 gen: src/Lex.swift
 

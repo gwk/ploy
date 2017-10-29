@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "ploy::ploy"
+               BlueprintIdentifier = "EC3CE2461FA6321C00D66FF8"
                BuildableName = "ploy"
                BlueprintName = "ploy"
                ReferencedContainer = "container:ploy.xcodeproj">
@@ -45,16 +45,19 @@
       debugXPCServices = "NO"
       debugServiceExtension = "internal"
       allowLocationSimulation = "NO">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <PathRunnable
+         runnableDebuggingMode = "0"
+         FilePath = "/Users/gwk/work/ploy/_build/x86_64-apple-macosx10.10/debug/ploy">
+      </PathRunnable>
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "ploy::ploy"
+            BlueprintIdentifier = "EC3CE2461FA6321C00D66FF8"
             BuildableName = "ploy"
             BlueprintName = "ploy"
             ReferencedContainer = "container:ploy.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-mapper"

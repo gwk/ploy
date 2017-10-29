@@ -57,7 +57,7 @@ class Scope: CustomStringConvertible {
     sym.failUndef()
   }
 
-  func getRecord(path: Path) -> ScopeRecord {
+  func getRecord(path: SymPath) -> ScopeRecord {
     var space: Space = globalSpace
     for (i, sym) in path.syms.enumerated() {
       guard let rec = space.getRecordInFrame(sym: sym) else {
@@ -90,7 +90,7 @@ class Scope: CustomStringConvertible {
     }
   }
 
-  func typeBinding(path: Path, subj: String) -> Type {
+  func typeBinding(path: SymPath, subj: String) -> Type {
     let rec = getRecord(path: path)
     switch rec.kind {
     case .type(let type): return type

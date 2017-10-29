@@ -105,7 +105,7 @@ func subAcc(accessor: Accessor, val: Expr) -> Expr {
 }
 
 func synthPath(_ syn: Syn, _ names: String...) -> Expr {
-  return .path(Path(syn, syms: names.map { Sym(syn, name: $0) }))
+  return .path(SymPath(syn, syms: names.map { Sym(syn, name: $0) }))
 }
 
 

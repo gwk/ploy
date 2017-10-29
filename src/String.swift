@@ -1,1 +1,0 @@
-../quilt/src/Quilt/String.swift

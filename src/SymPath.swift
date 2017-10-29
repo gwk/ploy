@@ -1,11 +1,11 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Path: Form { // path: `LIB/name`.
+class SymPath: Form { // path: `LIB/name`.
   let syms: [Sym]
 
   init(_ syn: Syn, syms: [Sym]) {
-    check(syms.count > 0)
+    assert(syms.count > 0)
     self.syms = syms
     super.init(syn)
   }

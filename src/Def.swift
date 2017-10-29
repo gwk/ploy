@@ -66,7 +66,7 @@ enum Def: SubForm {
       ext.fatal("Extension is not an independent definition; compileDef should never be called: \(ext).")
 
     case .extensible(let extensible):
-      let exts = space.exts.getOrInsert(sym.name, dflt: Ref<[Extension]>()).val
+      let exts = space.exts[sym.name, default: []]
       var typesToExts: [Type:Extension] = [:]
       var typesToNeedsLazy: [Type:Bool] = [:]
       for ext in exts {

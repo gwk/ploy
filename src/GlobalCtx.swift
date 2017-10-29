@@ -3,7 +3,7 @@
 import Foundation
 
 
-typealias SrcMapping = (path: String, lineIdx: Int, colIdx: Int, off: Int, frameName: String)
+typealias SrcMapping = (pathString: String, lineIdx: Int, colIdx: Int, off: Int, frameName: String)
 // note: `off` is the relative offset into the generated output string being written,
 // e.g. if we are mapping  a parenthesized symbol "(a)" then off=1.
 
@@ -11,22 +11,21 @@ typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
 
 class GlobalCtx {
-  let mainPath: String
-  let file: OutFile
+  let mainPath: Path
+  let file: File
   let mapSend: FileHandle
   var outLineIdx = 0
   var outColIdx = 0
   var conversions: Set<Conversion> = []
 
-  init(mainPath: String, file: OutFile, mapSend: FileHandle) {
+  init(mainPath: Path, file: File, mapSend: FileHandle) {
     self.mainPath = mainPath
     self.file = file
     self.mapSend = mapSend
   }
 
   func writeMap(_ m: SrcMapping) {
-    assert(!m.path.isEmpty)
-    mapSend.write("\(m.path) \(m.frameName) \(m.lineIdx) \(m.colIdx) \(outLineIdx) \(outColIdx + m.off)\n")
+    mapSend.write("\(m.pathString) \(m.frameName) \(m.lineIdx) \(m.colIdx) \(outLineIdx) \(outColIdx + m.off)\n")
   }
 
   func write(line l: Line) {
@@ -43,7 +42,7 @@ class GlobalCtx {
     if let mapping = l.mapping {
       writeMap(mapping)
     }
-    outColIdx += l.text.characters.count
+    outColIdx += l.text.count
   }
 
   func writeL(_ string: String, _ mapping: SrcMapping? = nil) {

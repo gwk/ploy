@@ -10,7 +10,9 @@ let package = Package(
     .executable(name: "ploy", targets: ["ploy"])
   ],
   targets: [
-    .target(name: "ploy", path: "src")
-  ],
+    .target(name: "ploy",
+      path: ".",
+      exclude: [],
+      sources: ["src", "quilt/src/Quilt"])],
   swiftLanguageVersions: [4]
 )

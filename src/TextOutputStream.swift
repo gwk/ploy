@@ -1,1 +1,0 @@
-../quilt/src/Quilt/TextOutputStream.swift

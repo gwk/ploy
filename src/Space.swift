@@ -5,7 +5,7 @@ class Space: Scope {
 
   let ctx: GlobalCtx
   var defs: [String: Def] = [:]
-  var exts: [String: Ref<[Extension]>] = [:]
+  var exts: [String: [Extension]] = [:]
 
   init(_ ctx: GlobalCtx, pathNames: [String], parent: Space?) {
     self.ctx = ctx
@@ -54,8 +54,7 @@ class Space: Scope {
         space.add(defs: in_.defs, root: root)
 
       case .ext(let ext):
-        let extsRef = exts.getOrInsert(ext.place.sym.name, dflt: Ref<[Extension]>())
-        extsRef.val.append(ext)
+        exts.appendToValue(ext.place.sym.name, ext)
 
       default:
         if let existing = defs[def.sym.name] {

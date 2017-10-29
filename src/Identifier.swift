@@ -2,12 +2,12 @@
 
 enum Identifier: SubForm {
 
-  case path(Path)
+  case path(SymPath)
   case sym(Sym)
 
   init?(form: Form) {
     switch form {
-    case let f as Path: self = .path(f)
+    case let f as SymPath: self = .path(f)
     case let f as Sym:  self = .sym(f)
     default: return nil
     }

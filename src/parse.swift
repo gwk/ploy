@@ -3,10 +3,10 @@
 import Darwin
 
 
-func parsePloy(path: String) -> [Def] {
+func parsePloy(path: Path) -> [Def] {
   do {
-    let bytes = try readBytes(path: path)
-    let source = Source(name: path, text: bytes)
+    let bytes = try File(path: path).readBytes()
+    let source = Source(name: path.expandUser, text: bytes)
     let parser = Parser(source: source)
     return parser.parse()
   } catch let e as File.Err {
@@ -188,7 +188,7 @@ class Parser {
       syms.append(sym)
     }
     if syms.count > 1 {
-      return Path(Syn(syms.first!.syn, syms.last!.syn), syms: syms)
+      return SymPath(Syn(syms.first!.syn, syms.last!.syn), syms: syms)
     } else {
       return sym
     }
@@ -254,7 +254,7 @@ class Parser {
         case "x":   ordPos = pos + 1; ordCount = 2
         case "u":   ordPos = pos + 1; ordCount = 4
         case "U":   ordPos = pos + 1; ordCount = 6
-        default:    failParse("invalid escape character")
+        default: failParse("invalid escape character")
         }
         if let e = e {
           val.append(e)
