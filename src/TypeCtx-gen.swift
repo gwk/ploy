@@ -81,7 +81,7 @@ extension TypeCtx {
       return retType
 
     case .do_(let do_):
-      return genConstraintsBody(LocalScope(parent: scope), body: do_.body)
+      return genConstraintsForBody(LocalScope(parent: scope), body: do_.body)
 
     case .fn(let fn):
       let type = addType(Expr.sig(fn.sig).type(scope, "signature"))
@@ -90,7 +90,7 @@ extension TypeCtx {
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
-      let bodyType = genConstraintsBody(fnScope, body: fn.body)
+      let bodyType = genConstraintsForBody(fnScope, body: fn.body)
       constrain(fn.body.expr, actType: bodyType, expExpr: fn.sig.ret, expType: ret, "function body")
       return type
 
@@ -159,11 +159,11 @@ extension TypeCtx {
       return addType(Type.Struct(fields: fields, variants: variants))
 
     case .path, .sym:
-      return addType(instantiate(genConstraintsRef(scope, expr: expr)))
+      return addType(instantiate(genConstraintsForRef(scope, expr: expr)))
 
     case .reif(let reif):
       // note: we do not instantiate the abstract type or add it to the context until after reification.
-      let abstractType = genConstraintsRef(scope, expr: reif.abstract)
+      let abstractType = genConstraintsForRef(scope, expr: reif.abstract)
       let type = addType(instantiate(reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args)))
       track(expr: reif.abstract, type: type) // so that Expr.compile can just dispatch to reif.abstract.
       return type
@@ -227,7 +227,7 @@ extension TypeCtx {
   }
 
 
-  mutating func genConstraintsBody(_ scope: LocalScope, body: Body) -> Type {
+  mutating func genConstraintsForBody(_ scope: LocalScope, body: Body) -> Type {
     for stmt in body.stmts {
       let type = genConstraints(scope, expr: stmt)
       constrain(stmt, actType: type, expType: typeVoid, "statement")
@@ -236,7 +236,7 @@ extension TypeCtx {
   }
 
 
-  mutating func genConstraintsRef(_ scope: LocalScope, expr: Expr) -> Type {
+  mutating func genConstraintsForRef(_ scope: LocalScope, expr: Expr) -> Type {
     let sym: Sym
     let record: ScopeRecord
     switch expr {
