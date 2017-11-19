@@ -75,7 +75,7 @@ class GlobalCtx {
       switch (orig.kind, cast.kind) {
 
       case (.prim, _) where orig == typeNever:
-        em.str(0, "let \(conv.hostName) = $=>{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); };")
+        em.str(0, "const \(conv.hostName) = $=>{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); };")
 
       case (.struct_(let orig), .struct_(let cast)):
         emitStructToStruct(em, convs: &convs, conv: conv, orig: orig, cast: cast)
@@ -89,7 +89,7 @@ class GlobalCtx {
   func emitStructToStruct(_ em: Emitter, convs: inout [Conversion], conv: Conversion,
    orig: (fields: [TypeField], variants: [TypeField]),
    cast: (fields: [TypeField], variants: [TypeField])) {
-    em.str(0, "let \(conv.hostName) = $=>({ // \(conv)")
+    em.str(0, "const \(conv.hostName) = $=>({ // \(conv)")
     assert(cast.fields.count + cast.variants.count > 0) // conversion to nil is explictly disallowed.
     assert(orig.fields.count == cast.fields.count)
     for (i, (o, c)) in zip(orig.fields, cast.fields).enumerated() {

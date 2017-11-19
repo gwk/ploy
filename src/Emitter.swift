@@ -47,8 +47,8 @@ func compileProgram(mainPath: Path, includePaths: [Path], mainSpace: MainSpace, 
   ctx.writeL("'use strict';")
   ctx.writeL("require('ploy-source-map').install();")
   ctx.writeL("(()=>{ // ploy root scope.")
-  ctx.writeL("let $g = global;") // bling: $g: alias that cannot be shadowed.
-  ctx.writeL("let $require = require;") // bling: $require: alias that cannot be shadowed.
+  ctx.writeL("const $g = global;") // bling: $g: alias that cannot be shadowed.
+  ctx.writeL("const $require = require;") // bling: $require: alias that cannot be shadowed.
   ctx.writeL("function $lazy_sentinal() { throw new Error('PLOY RUNTIME ERROR: lazy value init recursed.') };")
 
   for path in includePaths {

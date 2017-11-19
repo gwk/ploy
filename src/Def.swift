@@ -85,7 +85,7 @@ enum Def: SubForm {
       #if false
       let em = Emitter(ctx: space.ctx)
       let hostName = "\(space.hostPrefix)\(sym.hostName)"
-      em.str(0, "let \(hostName)__$table = {")
+      em.str(0, "const \(hostName)__$table = {")
       // TODO: emit table contents.
       em.append("}")
       em.str(0, "function \(hostName)($){")
@@ -125,7 +125,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
   let hostName = "\(space.hostPrefix)\(place.sym.hostName)\(suffix)"
   if needsLazyDef(val: val, type: type) {
     let acc = "\(hostName)__acc"
-    em.str(0, "var \(acc) = function() {")
+    em.str(0, "let \(acc) = function() {")
     em.str(0, "  \(acc) = $lazy_sentinal;")
     em.str(0, "  let $v = // \(type)") // bling: $v: lazy value.
     val.compile(&ctx, em, 2, exp: type, isTail: false)
@@ -135,7 +135,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     em.flush()
     return (type, needsLazy: true)
   } else {
-    em.str(0, "let \(hostName) = // \(type)")
+    em.str(0, "const \(hostName) = // \(type)")
     val.compile(&ctx, em, 0, exp: type, isTail: false)
     em.append(";")
     em.flush()

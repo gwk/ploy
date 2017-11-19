@@ -53,9 +53,10 @@ extension Expr {
       ann.expr.compile(&ctx, em, indent, exp: type, isTail: isTail)
 
     case .bind(let bind):
-      em.str(indent, "let \(bind.place.sym.hostName) =")
+      em.str(indent, "const \(bind.place.sym.hostName) =")
       let valTypeExpr = bind.place.ann?.typeExpr ?? bind.val
       bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: valTypeExpr), isTail: false)
+      em.append(";")
 
     case .call(let call):
       let calleeType = ctx.typeFor(expr: call.callee)
