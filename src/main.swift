@@ -63,7 +63,7 @@ func main() {
   let libDefs = libPaths.flatMap { parsePloy(path: $0) }
 
   let tmpPath = outPath.append(".tmp")
-  let mapPath = outPath.append(".map")
+  let mapPath = outPath.append(".srcmap")
 
   let tmpFile = guarded { try File(path: tmpPath, mode: .write, create: 0o644) }
 
