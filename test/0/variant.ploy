@@ -2,11 +2,10 @@
 AB =: (-a:Int -b:Int)
 
 main = {
-
-  match (-a=0) -a ? ();
-  match (-b=1) -b ? ();
-  match (-a=0) (-a) ? ();
-  match (-b=1) (-b) ? ();
+  match (-a=0) -a ? void();
+  match (-b=1) -b ? void();
+  match (-a=0) (-a) ? void();
+  match (-b=1) (-b) ? void();
 
   match (-a=0) -a=x ? assert.eq(x 0);
   match (-a=0) (-a=x) ? assert.eq(x 0);

@@ -95,7 +95,7 @@ extension TypeCtx {
       return type
 
     case .if_(let if_):
-      let type = (if_.dflt == nil) ? typeVoid: addFreeType() // all cases must return same type.
+      let type = (if_.dflt == nil) ? typeVoid : addFreeType() // all cases must return same type.
       // note: we could do without the free type by generating constraints for dflt first,
       // but we prefer to generate constraints in lexical order for all cases.
       // TODO: much more to do here when default is missing;
@@ -172,7 +172,7 @@ extension TypeCtx {
       sig.failType("type signature cannot be used as a value expression.")
 
     case .tag(let tag): // bare morph constructor.
-      return Type.Variant(label: tag.sym.name, type: typeVoid)
+      return Type.Variant(label: tag.sym.name, type: typeNull)
 
     case .tagTest(let tagTest):
       let expr = tagTest.expr
@@ -219,7 +219,7 @@ extension TypeCtx {
       type = genConstraints(scope, expr: bind.val)
     case .tag:
       isVariant = true
-      type = typeVoid
+      type = typeNull
     default:
       type = genConstraints(scope, expr: arg)
     }

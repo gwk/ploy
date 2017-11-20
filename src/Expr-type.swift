@@ -95,7 +95,7 @@ extension Expr {
     case .tag(let tag): // bare tag; no payload.
       isVariant = true
       label = tag.sym.name
-      type = typeVoid
+      type = typeNull
 
     default:
       type = self.type(scope, "parameter type")

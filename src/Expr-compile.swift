@@ -93,7 +93,7 @@ extension Expr {
       if let dflt = if_.dflt {
         dflt.expr.compile(&ctx, em, indent + 2, exp: type, isTail: isTail)
       } else {
-        em.str(indent + 2, "null")
+        em.str(indent + 2, "undefined")
       }
       em.append(")")
 
@@ -131,7 +131,7 @@ extension Expr {
     case .paren(let paren):
       if paren.isScalarValue {
         paren.els[0].compile(&ctx, em, indent, exp: type, isTail: isTail)
-      } else if type == typeVoid {
+      } else if type == typeNull {
         em.str(indent, "null")
       } else {
         guard case .struct_(let fields, let variants) = type.kind else { paren.fatal("expected struct type") }
@@ -160,7 +160,9 @@ extension Expr {
       compileSym(&ctx, em, indent, sym: sym, type: type)
 
     case .tag(let tag): // simple morph constructor; no payload.
-      em.str(indent, "{$t:'\(tag.sym.name)', $m:{}}") // bling: $t, $m: morph tag/value. TODO: should be special case without $m.
+      // Note: output must match compileStructVariant.
+      // TODO: alternatively, perhaps could be optimized to a special case without $m.
+      em.str(indent, "{$t:'\(tag.sym.name)', $m:null}") // bling: $t, $m: morph tag/value.
 
     case .tagTest(let tagTest):
       em.str(indent, "( '\(tagTest.tag.sym.name)' ==")
@@ -168,7 +170,7 @@ extension Expr {
       em.append(".$t)") // bling: $t: morph tag.
 
     case .typeAlias:
-      em.str(indent, "null")
+      em.str(indent, "undefined")
 
     case .typeArgs: fatalError()
 
@@ -177,7 +179,7 @@ extension Expr {
     case .where_: fatalError()
 
     case .void:
-      em.str(indent, "null")
+      em.str(indent, "undefined")
     }
 
     if hasConv {
@@ -263,5 +265,4 @@ func compileStructVariant(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, ex
   }
   em.str(indent + 1, "$t:\"\(tag.sym.name)\", $m:") // bling: $t, $m: morph tag/value.
   bind.val.compile(&ctx, em, indent + 2, exp: variant.type, isTail: false)
-  em.append(",")
 }

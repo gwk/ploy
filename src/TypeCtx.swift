@@ -197,8 +197,8 @@ struct TypeCtx {
       return try resolveSigToSig(rel, act: actDR, exp: expDR)
 
     case (.struct_(let actFV), .struct_(let expFV)):
-      if exp == typeVoid {
-        throw rel.error("implicit struct conversion to Void is disallowed")
+      if exp == typeNull {
+        throw rel.error("implicit struct conversion to nil is disallowed")
       }
       return try resolveStructToStruct(rel, act: actFV, exp: expFV)
 

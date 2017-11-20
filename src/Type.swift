@@ -241,7 +241,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 let typeEmpty = Type.Any_([]) // aka "Bottom type"; the empty set.
 let typeEvery = Type.All([]) // aka "Top type"; the set of all objects.
-let typeVoid = Type.Struct(fields: [], variants: [])
+let typeNull = Type.Struct(fields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
 
 let typeBool      = Type.Prim("Bool")
 let typeInt       = Type.Prim("Int")
@@ -249,6 +249,7 @@ let typeNamespace = Type.Prim("Namespace")
 let typeNever     = Type.Prim("Never")
 let typeStr       = Type.Prim("Str")
 let typeType      = Type.Prim("Type")
+let typeVoid      = Type.Prim("Void")
 
 let intrinsicTypes = [
   typeBool,
@@ -259,4 +260,5 @@ let intrinsicTypes = [
   typeNever,
   typeStr,
   typeType,
+  typeVoid,
 ]
