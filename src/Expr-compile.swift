@@ -9,7 +9,7 @@ extension Expr {
     let hasConv = (type != exp)
     if hasConv {
       let conv = Conversion(orig: type, cast: exp)
-      ctx.globalCtx.addConversion(conv)
+      ctx.globalCtx.conversions.insert(conv)
       em.str(indent, "(\(conv.hostName)(")
     }
 
@@ -135,7 +135,8 @@ extension Expr {
         em.str(indent, "null")
       } else {
         guard case .struct_(let fields, let variants) = type.kind else { paren.fatal("expected struct type") }
-        em.str(indent, "{")
+        ctx.globalCtx.constructors.insert(type)
+        em.str(indent, "(new $S\(type.globalIndex)(") // bling: $S: struct constructor.
         var argIndex = 0
         for (i, field) in fields.enumerated() {
           compileStructField(&ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
@@ -145,7 +146,7 @@ extension Expr {
           assert(argIndex == paren.els.lastIndex!)
           compileStructVariant(&ctx, em, indent, expr: paren.els.last!, variant: variants[0])
         }
-        em.append("}")
+        em.append("))")
       }
 
     case .path(let path):
@@ -162,7 +163,8 @@ extension Expr {
     case .tag(let tag): // simple morph constructor; no payload.
       // Note: output must match compileStructVariant.
       // TODO: alternatively, perhaps could be optimized to a special case without $m.
-      em.str(indent, "{$t:'\(tag.sym.name)', $m:null}") // bling: $t, $m: morph tag/value.
+      ctx.globalCtx.constructors.insert(type)
+      em.str(indent, "(new $S\(type.globalIndex)('\(tag.sym.hostName)', null))") // bling: $S: struct constructor; $t, $m: morph tag/value.
 
     case .tagTest(let tagTest):
       em.str(indent, "( '\(tagTest.tag.sym.name)' ==")
@@ -246,7 +248,6 @@ func compileStructField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, pare
 
     default: val = arg
     }
-    em.str(indent + 1, "\(field.hostName(index: parIndex)):")
     val.compile(&ctx, em, indent + 2, exp: field.type, isTail: false)
     em.append(",")
     argIndex += 1
@@ -263,6 +264,6 @@ func compileStructVariant(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, ex
   if tag.sym.name != label {
     tag.sym.fatal("morph constructor label does not match type's variant label `\(label)`")
   }
-  em.str(indent + 1, "$t:\"\(tag.sym.name)\", $m:") // bling: $t, $m: morph tag/value.
+  em.str(indent + 1, "'\(tag.sym.hostName)',")
   bind.val.compile(&ctx, em, indent + 2, exp: variant.type, isTail: false)
 }

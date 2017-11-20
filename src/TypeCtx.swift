@@ -176,7 +176,7 @@ struct TypeCtx {
 
     case (_, .free(let ie)):
       if act == typeNever {
-        // if actual is Never, do not unify; another code paths may return, and we want that type to bind to the free exp.
+        // if actual is Never, do not unify; other code paths may return, and we want that type to bind to the free exp.
         // however this might be the only branch, so we need to remember this and fall back if exp remains free.
         freeNevers.insert(ie)
       } else {
