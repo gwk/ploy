@@ -49,7 +49,7 @@ func compileProgram(mainPath: Path, includePaths: [Path], mainSpace: MainSpace, 
   ctx.writeL("(()=>{ // ploy root scope.")
   ctx.writeL("const $g = global;") // bling: $g: alias that cannot be shadowed.
   ctx.writeL("const $require = require;") // bling: $require: alias that cannot be shadowed.
-  ctx.writeL("function $lazy_sentinal() { throw new Error('PLOY RUNTIME ERROR: lazy value init recursed.') };")
+  ctx.writeL("const $lazy_sentinel = ()=>{ throw new Error('PLOY RUNTIME ERROR: lazy value init recursed.') };")
 
   for path in includePaths {
     let name = path.name
