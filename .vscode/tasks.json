@@ -2,23 +2,23 @@
   "version": "2.0.0",
   "type": "process",
   "tasks": [
-    { "taskName": "build",
+    { "label": "build",
       "command": "make",
       "args": ["build"],
       "group": { "kind": "build", "isDefault": true },
-      "problemMatcher": "$plumage-swift"
+      "problemMatcher": "$craft"
     },
-    { "taskName": "run",
+    { "label": "run",
       "command": "make",
       "args": ["run"],
       "problemMatcher": "$ploy"
     },
-    { "taskName": "test-current",
+    { "label": "test-current",
       "command": "make",
       "args": ["sh/test.sh", "${relativeFile}"],
       "group": { "kind": "test", "isDefault": true }
     },
-    { "taskName": "test",
+    { "label": "test",
       "command": "make",
       "args": ["test"]
     }
