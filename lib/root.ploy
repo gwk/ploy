@@ -69,25 +69,13 @@ out += fn Int%Void FS/write(std_out $);
 
 
 extensible errL; // TODO: make generic.
-
-errL += fn Int%Void
-  err.$
-  err.'\n';
-
-errL += fn Str%Void
-  err.$
-  err.'\n';
+errL += fn Int%Void err.$ err.'\n';
+errL += fn Str%Void err.$ err.'\n';
 
 
 extensible outL; // TODO: make generic.
-
-outL += fn Int%Void
-  out.$
-  out.'\n';
-
-outL += fn Str%Void
-  out.$
-  out.'\n';
+outL += fn Int%Void out.$ out.'\n';
+outL += fn Str%Void out.$ out.'\n';
 
 
 fail = fn Str%Never
