@@ -133,6 +133,9 @@ struct TypeCtx {
 
 
   mutating func resolve(rel: RelCon) throws -> Bool {
+    // Return value indicates whether the constraint was resolved;
+    // returning false allows the solver to defer solving a constraint until additional free variables have been unified.
+
     let act = resolved(type: rel.act.type)
     let exp = resolved(type: rel.exp.type)
 
@@ -140,10 +143,10 @@ struct TypeCtx {
 
     switch (act.kind, exp.kind) {
 
-    case (.poly, .free):
+    case (.poly, .free): // cannot unify an actual polymorph because it prevents polymorph selection; defer instead.
       return false
 
-    case (.poly(let morphs), _):
+    case (.poly(let morphs), _): // actual polymorph; attempt to select a morph.
       var match: (TypeCtx, Type)? = nil
       for morph in morphs {
         assert(morph.isResolved)
@@ -167,7 +170,7 @@ struct TypeCtx {
     case (.free(let ia), .free(let ie)):
       // TODO: determine whether always resolving to lower index is necessary.
       if ia > ie { unify(freeIndex: ia, to: exp); return true }
-      else {       unify(freeIndex: ie, to: act); return true }
+      else       { unify(freeIndex: ie, to: act); return true }
 
     case (.free(let ia), _):
       // note: if expected is Never we do unify; the caller expects to never return.

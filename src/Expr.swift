@@ -52,8 +52,8 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as Match:      self = .match(f)
     case let f as Or:         self = .or(f)
     case let f as Paren:      self = .paren(f)
-    case let f as SymPath:       self = .path(f)
-    case let f as Reif:      self = .reif(f)
+    case let f as SymPath:    self = .path(f)
+    case let f as Reif:       self = .reif(f)
     case let f as Sig:        self = .sig(f)
     case let f as Sym:        self = .sym(f)
     case let f as Tag:        self = .tag(f)
@@ -73,7 +73,6 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .and(let and): return and
     case .bind(let bind): return bind
     case .call(let call): return call
-    //case .typeConsraint(let typeConsraint): return typeConsraint
     case .do_(let do_): return do_
     case .fn(let fn): return fn
     case .hostVal(let hostVal): return hostVal
