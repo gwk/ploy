@@ -12,6 +12,7 @@ outPath="_build/$stem.js"
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
+set -x
 _build/debug/ploy lib -mapper ./gen-source-map -main "$mainPath" -o "$outPath"
 "$outPath" "$@"
 
