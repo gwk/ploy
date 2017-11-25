@@ -214,10 +214,10 @@ struct TypeCtx {
 
 
   mutating func resolveSigToSig(_ rel: RelCon, act: (dom: Type, ret: Type), exp: (dom: Type, ret: Type)) throws -> Bool {
-    try resolveSub(rel,
-      actExpr: rel.act.litExpr?.sigDom, actType: addType(act.dom), actDesc: "signature domain",
-      expExpr: rel.exp.litExpr?.sigDom, expType: addType(exp.dom), expDesc: "signature domain")
-    try resolveSub(rel,
+    try resolveSub(rel, // domain is contravariant.
+      actExpr: rel.exp.litExpr?.sigDom, actType: addType(exp.dom), actDesc: "signature domain", // note reversal.
+      expExpr: rel.act.litExpr?.sigDom, expType: addType(act.dom), expDesc: "signature domain") // note reversal.
+    try resolveSub(rel, // return is covariant.
       actExpr: rel.act.litExpr?.sigRet, actType: addType(act.ret), actDesc: "signature return",
       expExpr: rel.exp.litExpr?.sigRet, expType: addType(exp.ret), expDesc: "signature return")
     return true

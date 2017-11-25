@@ -1,6 +1,6 @@
-test/2/type/sub-sig-field.ploy:1:22-35: type error: annotated: actual struct has 3 fields; expected 2. actual type: (Int Int Int)
-| f:(Int Int)%Int = fn (Int Int Int)%Int 0@$;
-                       ~~~~~~~~~~~~~
-test/2/type/sub-sig-field.ploy:1:3-12: note: expected type: (Int Int)
+test/2/type/sub-sig-field.ploy:1:3-12: type error: annotated: actual struct has 2 fields; expected 3. actual type: (Int Int)
 | f:(Int Int)%Int = fn (Int Int Int)%Int 0@$;
     ~~~~~~~~~
+test/2/type/sub-sig-field.ploy:1:22-35: note: expected type: (Int Int Int)
+| f:(Int Int)%Int = fn (Int Int Int)%Int 0@$;
+                       ~~~~~~~~~~~~~
