@@ -45,7 +45,7 @@ struct PropCon {
 }
 
 
-struct RelCon {
+struct RelCon: CustomStringConvertible {
   // A generic binary relation constraint, consisting of 'actual' and 'expected' sides.
 
   struct Err: Error {
@@ -56,6 +56,8 @@ struct RelCon {
   let act: Side
   let exp: Side
   let desc: String
+
+  var description: String { return "act: \(act); exp: \(exp); desc: \(desc)" }
 
   func error(_ msgThunk: @escaping @autoclosure ()->String) -> Err {
     return Err(rel: self, msgThunk: msgThunk)
@@ -76,7 +78,10 @@ struct Side: CustomStringConvertible {
     self.chain = chain
   }
 
-  var description: String { return "\(expr): \(type)" }
+  var description: String { return "\(chainDesc)\(expr): \(type)" }
+
+  var chainDesc: String { return chain.map({"\($0) -> "}).joined() }
+
   func sub(expr: Expr?, type: Type, desc: String) -> Side {
     if let expr = expr {
       return Side(expr: expr, type: type)
