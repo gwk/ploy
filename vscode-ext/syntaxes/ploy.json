@@ -3,10 +3,15 @@
   "fileTypes": ["ploy"],
   "name": "Ploy",
   "patterns": [
-    { "name": "keyword.ploy",
-      "match": "\\b(and|extensible|host_type|host_val|if|fn|in|match|or|pub)\\b" },
     { "name": "comment.line.ploy",
-      "match": "//[^\\n]*" }
+      "match": "//[^\\n]*" },
+    { "name": "keyword.control.ploy",
+      "match": "\\b(and|extensible|host_type|host_val|if|fn|in|match|or|pub)\\b" },
+    { "name": "keyword.operator.ploy",
+      "match": "[@:=.?\\^%|/$\\-]|\\+=|@\\?|=:|::" },
+    { "name": "punctuation.ploy",
+      "match": "[\\[\\];(){}<>]" }
+
   ],
   "repository": {
   }
