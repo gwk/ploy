@@ -11,6 +11,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case fn(Fn)
   case hostVal(HostVal)
   case if_(If)
+  case intersect(Intersect)
   case litNum(LitNum)
   case litStr(LitStr)
   case magic(Magic)
@@ -26,6 +27,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case typeAlias(TypeAlias)
   case typeArgs(TypeArgs)
   case typeVar(TypeVar)
+  case union(Union)
   case void(ImplicitVoid)
   case where_(Where)
 
@@ -47,6 +49,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as Fn:         self = .fn(f)
     case let f as HostVal:    self = .hostVal(f)
     case let f as If:         self = .if_(f)
+    case let f as Intersect:  self = .intersect(f)
     case let f as LitNum:     self = .litNum(f)
     case let f as LitStr:     self = .litStr(f)
     case let f as Match:      self = .match(f)
@@ -61,6 +64,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case let f as TypeAlias:  self = .typeAlias(f)
     case let f as TypeArgs:   self = .typeArgs(f)
     case let f as TypeVar:    self = .typeVar(f)
+    case let f as Union:      self = .union(f)
     case let f as Where:      self = .where_(f)
     default:  return nil
     }
@@ -77,6 +81,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .fn(let fn): return fn
     case .hostVal(let hostVal): return hostVal
     case .if_(let if_): return if_
+    case .intersect(let intersect): return intersect
     case .litNum(let litNum): return litNum
     case .litStr(let litStr): return litStr
     case .magic(let magic): return magic
@@ -92,6 +97,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .typeAlias(let typeAlias): return typeAlias
     case .typeArgs(let typeArgs): return typeArgs
     case .typeVar(let typeVar): return typeVar
+    case .union(let union): return union
     case .void(let void): return void
     case .where_(let where_): return where_
     }

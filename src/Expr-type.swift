@@ -7,6 +7,12 @@ extension Expr {
     // evaluate `self` as a type expression.
     switch self {
 
+    case .intersect(let intersect):
+      let l = intersect.left.type(scope, "intersect left operand")
+      let r = intersect.right.type(scope, "intersect right operand")
+      do { return try Type.All([l, r].sorted()) }
+      catch let e { form.failType((e as! String)) }
+
     case .paren(let paren):
       if paren.isScalarType {
         return paren.els[0].type(scope, subj)
@@ -48,6 +54,12 @@ extension Expr {
       let type = Type.Var(sym.name)
       _ = scope.addRecord(sym: sym, kind: .type(type))
       return Type.Var(sym.name)
+
+    case .union(let union):
+      let l = union.left.type(scope, "union left operand")
+      let r = union.right.type(scope, "union right operand")
+      do { return try Type.Any_([l, r].sorted()) }
+      catch let e { form.failType(e as! String) }
 
     default:
       form.failType("\(subj) expected a type; received \(form.syntaxName).")

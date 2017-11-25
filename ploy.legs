@@ -29,6 +29,7 @@ call: .
 case: \?
 caret: \^
 extension: \+=
+intersect: \&
 sig: %
 tagTest: @\?
 typeAlias: =:

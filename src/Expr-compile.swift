@@ -97,6 +97,8 @@ extension Expr {
       }
       em.append(")")
 
+    case .intersect: fatalError()
+
     case .litNum(let litNum):
       em.str(indent, String(litNum.val)) // TODO: preserve written format for clarity?
 
@@ -136,7 +138,7 @@ extension Expr {
       } else {
         guard case .struct_(let fields, let variants) = type.kind else { paren.fatal("expected struct type") }
         ctx.globalCtx.constructors.insert(type)
-        em.str(indent, "(new $S\(type.globalIndex)(") // bling: $S: struct constructor.
+        em.str(indent, "(new $C\(type.globalIndex)(") // bling: $C: constructor.
         var argIndex = 0
         for (i, field) in fields.enumerated() {
           compileStructField(&ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
@@ -164,7 +166,7 @@ extension Expr {
       // Note: output must match compileStructVariant.
       // TODO: alternatively, perhaps could be optimized to a special case without $m.
       ctx.globalCtx.constructors.insert(type)
-      em.str(indent, "(new $S\(type.globalIndex)('\(tag.sym.hostName)', null))") // bling: $S: struct constructor; $t, $m: morph tag/value.
+      em.str(indent, "(new $C\(type.globalIndex)('\(tag.sym.hostName)', null))") // bling: $C: constructor; $t, $m: morph tag/value.
 
     case .tagTest(let tagTest):
       em.str(indent, "( '\(tagTest.tag.sym.name)' ==")
@@ -178,10 +180,12 @@ extension Expr {
 
     case .typeVar: fatalError()
 
-    case .where_: fatalError()
+    case .union: fatalError()
 
     case .void:
       em.str(indent, "undefined")
+
+    case .where_: fatalError()
     }
 
     if hasConv {

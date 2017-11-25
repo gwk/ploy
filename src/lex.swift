@@ -36,6 +36,7 @@ public enum TokenKind: CustomStringConvertible {
   case intHex
   case intOct
   case intQuat
+  case intersect
   case invalid
   case match
   case newline
@@ -89,6 +90,7 @@ public enum TokenKind: CustomStringConvertible {
     case .intHex: return "intHex"
     case .intOct: return "intOct"
     case .intQuat: return "intQuat"
+    case .intersect: return "`&`"
     case .invalid: return "invalid"
     case .match: return "`match`"
     case .newline: return "newline"
@@ -506,37 +508,38 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 0x22: state = 5
       case 0x24: state = 6
       case 0x25: state = 7
-      case 0x27: state = 8
-      case 0x28: state = 9
-      case 0x29: state = 10
-      case 0x2b: state = 11
-      case 0x2d: state = 12
-      case 0x2e: state = 13
-      case 0x2f: state = 14
-      case 0x30: state = 15
-      case 0x31...0x39: state = 16
-      case 0x3a: state = 17
-      case 0x3b: state = 18
-      case 0x3c: state = 19
-      case 0x3d: state = 20
-      case 0x3e: state = 21
-      case 0x3f: state = 22
-      case 0x40: state = 23
-      case 0x41...0x5a, 0x5f, 0x62...0x64, 0x67, 0x6a...0x6c, 0x6e, 0x71...0x7a: state = 24
-      case 0x5b: state = 25
-      case 0x5d: state = 26
-      case 0x5e: state = 27
-      case 0x61: state = 28
-      case 0x65: state = 29
-      case 0x66: state = 30
-      case 0x68: state = 31
-      case 0x69: state = 32
-      case 0x6d: state = 33
-      case 0x6f: state = 34
-      case 0x70: state = 35
-      case 0x7b: state = 36
-      case 0x7c: state = 37
-      case 0x7d: state = 38
+      case 0x26: state = 8
+      case 0x27: state = 9
+      case 0x28: state = 10
+      case 0x29: state = 11
+      case 0x2b: state = 12
+      case 0x2d: state = 13
+      case 0x2e: state = 14
+      case 0x2f: state = 15
+      case 0x30: state = 16
+      case 0x31...0x39: state = 17
+      case 0x3a: state = 18
+      case 0x3b: state = 19
+      case 0x3c: state = 20
+      case 0x3d: state = 21
+      case 0x3e: state = 22
+      case 0x3f: state = 23
+      case 0x40: state = 24
+      case 0x41...0x5a, 0x5f, 0x62...0x64, 0x67, 0x6a...0x6c, 0x6e, 0x71...0x7a: state = 25
+      case 0x5b: state = 26
+      case 0x5d: state = 27
+      case 0x5e: state = 28
+      case 0x61: state = 29
+      case 0x65: state = 30
+      case 0x66: state = 31
+      case 0x68: state = 32
+      case 0x69: state = 33
+      case 0x6d: state = 34
+      case 0x6f: state = 35
+      case 0x70: state = 36
+      case 0x7b: state = 37
+      case 0x7c: state = 38
+      case 0x7d: state = 39
       default: state = 1
       }
     }
@@ -554,7 +557,7 @@ public struct Lexer: Sequence, IteratorProtocol {
     case 0: start_main(); return nil
     case 1: // invalid.
       switch byte {
-      case 0x0...0x8, 0xb...0x1f, 0x21, 0x23, 0x26, 0x2a, 0x2c, 0x5c, 0x60, 0x7e...0xff: state = 1; return nil
+      case 0x0...0x8, 0xb...0x1f, 0x21, 0x23, 0x2a, 0x2c, 0x5c, 0x60, 0x7e...0xff: state = 1; return nil
       default:
         start_main()
         return flushToken(kind: .invalid)
@@ -579,34 +582,34 @@ public struct Lexer: Sequence, IteratorProtocol {
     case 5: // main pre-match.
       switch byte {
       case 0x20, 0x21, 0x23...0x5b, 0x5d...0x7e: state = 5; return nil
-      case 0x22: state = 89; return nil
-      case 0x5c: state = 90; return nil
-      case 0xc2: state = 91; return nil
-      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 92; return nil
-      case 0xcd: state = 93; return nil
-      case 0xce: state = 94; return nil
-      case 0xd4: state = 95; return nil
-      case 0xd5: state = 96; return nil
-      case 0xd6: state = 97; return nil
-      case 0xd7: state = 98; return nil
-      case 0xd8: state = 99; return nil
-      case 0xdb: state = 100; return nil
-      case 0xdc: state = 101; return nil
-      case 0xdd: state = 102; return nil
-      case 0xde: state = 103; return nil
-      case 0xdf: state = 104; return nil
-      case 0xe0: state = 105; return nil
-      case 0xe1: state = 106; return nil
-      case 0xe2: state = 107; return nil
-      case 0xe3: state = 108; return nil
-      case 0xe4: state = 109; return nil
-      case 0xe5...0xe8, 0xeb, 0xec: state = 110; return nil
-      case 0xe9: state = 111; return nil
-      case 0xea: state = 112; return nil
-      case 0xed: state = 113; return nil
-      case 0xef: state = 114; return nil
-      case 0xf0: state = 115; return nil
-      case 0xf3: state = 116; return nil
+      case 0x22: state = 60; return nil
+      case 0x5c: state = 61; return nil
+      case 0xc2: state = 62; return nil
+      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 63; return nil
+      case 0xcd: state = 64; return nil
+      case 0xce: state = 65; return nil
+      case 0xd4: state = 66; return nil
+      case 0xd5: state = 67; return nil
+      case 0xd6: state = 68; return nil
+      case 0xd7: state = 69; return nil
+      case 0xd8: state = 70; return nil
+      case 0xdb: state = 71; return nil
+      case 0xdc: state = 72; return nil
+      case 0xdd: state = 73; return nil
+      case 0xde: state = 74; return nil
+      case 0xdf: state = 75; return nil
+      case 0xe0: state = 76; return nil
+      case 0xe1: state = 77; return nil
+      case 0xe2: state = 78; return nil
+      case 0xe3: state = 79; return nil
+      case 0xe4: state = 80; return nil
+      case 0xe5...0xe8, 0xeb, 0xec: state = 81; return nil
+      case 0xe9: state = 82; return nil
+      case 0xea: state = 83; return nil
+      case 0xed: state = 84; return nil
+      case 0xef: state = 85; return nil
+      case 0xf0: state = 86; return nil
+      case 0xf3: state = 87; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
@@ -617,3976 +620,3963 @@ public struct Lexer: Sequence, IteratorProtocol {
     case 7: // sig.
       start_main()
       return flushToken(kind: .sig)
-    case 8: // main pre-match.
+    case 8: // intersect.
+      start_main()
+      return flushToken(kind: .intersect)
+    case 9: // main pre-match.
       switch byte {
-      case 0x20...0x26, 0x28...0x5b, 0x5d...0x7e: state = 8; return nil
-      case 0x27: state = 118; return nil
-      case 0x5c: state = 119; return nil
-      case 0xc2...0xdf: state = 120; return nil
-      case 0xe0: state = 121; return nil
-      case 0xe1: state = 122; return nil
-      case 0xe2...0xec: state = 123; return nil
-      case 0xed: state = 124; return nil
-      case 0xef: state = 125; return nil
-      case 0xf0: state = 126; return nil
-      case 0xf3: state = 127; return nil
+      case 0x20...0x26, 0x28...0x5b, 0x5d...0x7e: state = 9; return nil
+      case 0x27: state = 42; return nil
+      case 0x5c: state = 43; return nil
+      case 0xc2...0xdf: state = 44; return nil
+      case 0xe0: state = 45; return nil
+      case 0xe1: state = 46; return nil
+      case 0xe2...0xec: state = 47; return nil
+      case 0xed: state = 48; return nil
+      case 0xef: state = 49; return nil
+      case 0xf0: state = 50; return nil
+      case 0xf3: state = 51; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 9: // parenO.
+    case 10: // parenO.
       start_main()
       return flushToken(kind: .parenO)
-    case 10: // parenC.
+    case 11: // parenC.
       start_main()
       return flushToken(kind: .parenC)
-    case 11: // main pre-match.
+    case 12: // main pre-match.
       switch byte {
-      case 0x3d: state = 39; return nil
+      case 0x3d: state = 40; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 12: // dash.
+    case 13: // dash.
       switch byte {
-      case 0x30: state = 15; return nil
-      case 0x31...0x39: state = 16; return nil
+      case 0x30: state = 16; return nil
+      case 0x31...0x39: state = 17; return nil
       default:
         start_main()
         return flushToken(kind: .dash)
       }
-    case 13: // call.
+    case 14: // call.
       start_main()
       return flushToken(kind: .call)
-    case 14: // slash.
+    case 15: // slash.
       switch byte {
-      case 0x2f: state = 51; return nil
+      case 0x2f: state = 52; return nil
       default:
         start_main()
         return flushToken(kind: .slash)
       }
-    case 15: // int.
-      switch byte {
-      case 0x2e: state = 52; return nil
-      case 0x30...0x39: state = 16; return nil
-      case 0x5f: state = 53; return nil
-      case 0x62: state = 57; return nil
-      case 0x64: state = 58; return nil
-      case 0x6f: state = 59; return nil
-      case 0x71: state = 60; return nil
-      case 0x78: state = 61; return nil
-      default:
-        start_main()
-        return flushToken(kind: .int)
-      }
     case 16: // int.
       switch byte {
-      case 0x2e: state = 52; return nil
-      case 0x30...0x39: state = 16; return nil
-      case 0x5f: state = 53; return nil
+      case 0x2e: state = 295; return nil
+      case 0x30...0x39: state = 17; return nil
+      case 0x5f: state = 296; return nil
+      case 0x62: state = 482; return nil
+      case 0x64: state = 483; return nil
+      case 0x6f: state = 484; return nil
+      case 0x71: state = 485; return nil
+      case 0x78: state = 486; return nil
       default:
         start_main()
         return flushToken(kind: .int)
       }
-    case 17: // ann.
+    case 17: // int.
       switch byte {
-      case 0x3a: state = 48; return nil
+      case 0x2e: state = 295; return nil
+      case 0x30...0x39: state = 17; return nil
+      case 0x5f: state = 296; return nil
+      default:
+        start_main()
+        return flushToken(kind: .int)
+      }
+    case 18: // ann.
+      switch byte {
+      case 0x3a: state = 41; return nil
       default:
         start_main()
         return flushToken(kind: .ann)
       }
-    case 18: // semicolon.
+    case 19: // semicolon.
       start_main()
       return flushToken(kind: .semicolon)
-    case 19: // angleO.
+    case 20: // angleO.
       start_main()
       return flushToken(kind: .angleO)
-    case 20: // bind.
+    case 21: // bind.
       switch byte {
-      case 0x3a: state = 46; return nil
+      case 0x3a: state = 183; return nil
       default:
         start_main()
         return flushToken(kind: .bind)
       }
-    case 21: // angleC.
+    case 22: // angleC.
       start_main()
       return flushToken(kind: .angleC)
-    case 22: // case.
+    case 23: // case.
       start_main()
       return flushToken(kind: .case_)
-    case 23: // acc.
+    case 24: // acc.
       switch byte {
-      case 0x3f: state = 43; return nil
+      case 0x3f: state = 132; return nil
       default:
         start_main()
         return flushToken(kind: .acc)
       }
-    case 24: // sym.
+    case 25: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 25: // brackO.
+    case 26: // brackO.
       start_main()
       return flushToken(kind: .brackO)
-    case 26: // brackC.
+    case 27: // brackC.
       start_main()
       return flushToken(kind: .brackC)
-    case 27: // caret.
+    case 28: // caret.
       start_main()
       return flushToken(kind: .caret)
-    case 28: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 40; return nil
-      case 0x6e: state = 50; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
     case 29: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x77, 0x79, 0x7a: state = 40; return nil
-      case 0x78: state = 49; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 53; return nil
+      case 0x6e: state = 487; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
     case 30: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 40; return nil
-      case 0x6e: state = 54; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x77, 0x79, 0x7a: state = 53; return nil
+      case 0x78: state = 313; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
     case 31: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6e, 0x70...0x7a: state = 40; return nil
-      case 0x6f: state = 42; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 53; return nil
+      case 0x6e: state = 57; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
     case 32: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x65, 0x67...0x6d, 0x6f...0x7a: state = 40; return nil
-      case 0x66: state = 44; return nil
-      case 0x6e: state = 45; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6e, 0x70...0x7a: state = 53; return nil
+      case 0x6f: state = 56; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
     case 33: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x62...0x7a: state = 40; return nil
-      case 0x61: state = 56; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x65, 0x67...0x6d, 0x6f...0x7a: state = 53; return nil
+      case 0x66: state = 54; return nil
+      case 0x6e: state = 55; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
     case 34: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x71, 0x73...0x7a: state = 40; return nil
-      case 0x72: state = 55; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x62...0x7a: state = 53; return nil
+      case 0x61: state = 58; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
     case 35: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x74, 0x76...0x7a: state = 40; return nil
-      case 0x75: state = 41; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x71, 0x73...0x7a: state = 53; return nil
+      case 0x72: state = 59; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 36: // braceO.
+    case 36: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x74, 0x76...0x7a: state = 53; return nil
+      case 0x75: state = 600; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 37: // braceO.
       start_main()
       return flushToken(kind: .braceO)
-    case 37: // union.
+    case 38: // union.
       start_main()
       return flushToken(kind: .union)
-    case 38: // braceC.
+    case 39: // braceC.
       start_main()
       return flushToken(kind: .braceC)
-    case 39: // extension.
+    case 40: // extension.
       start_main()
       return flushToken(kind: .extension_)
-    case 40: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 41: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x63...0x7a: state = 40; return nil
-      case 0x62: state = 47; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 42: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x72, 0x74...0x7a: state = 40; return nil
-      case 0x73: state = 593; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 43: // tagTest.
+    case 41: // where.
       start_main()
-      return flushToken(kind: .tagTest)
-    case 44: // if.
+      return flushToken(kind: .where_)
+    case 42: // stringSQ.
+      start_main()
+      return flushToken(kind: .stringSQ)
+    case 43: // main pre-match.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
+      case 0x20...0x7e: state = 9; return nil
+      case 0xc2...0xdf: state = 44; return nil
+      case 0xe0: state = 45; return nil
+      case 0xe1: state = 46; return nil
+      case 0xe2...0xec: state = 47; return nil
+      case 0xed: state = 48; return nil
+      case 0xef: state = 49; return nil
+      case 0xf0: state = 50; return nil
+      case 0xf3: state = 51; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 44: // main pre-match.
+      switch byte {
+      case 0x80...0xbf: state = 9; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 45: // main pre-match.
+      switch byte {
+      case 0xa0...0xbf: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 46: // main pre-match.
+      switch byte {
+      case 0x80...0xaa, 0xac...0xbf: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 47: // main pre-match.
+      switch byte {
+      case 0x80...0xbf: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 48: // main pre-match.
+      switch byte {
+      case 0x80...0x9f: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 49: // main pre-match.
+      switch byte {
+      case 0xa4...0xbf: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 50: // main pre-match.
+      switch byte {
+      case 0x90: state = 133; return nil
+      case 0x91: state = 134; return nil
+      case 0x92: state = 135; return nil
+      case 0x93: state = 136; return nil
+      case 0x94: state = 137; return nil
+      case 0x96: state = 138; return nil
+      case 0x97, 0xa0...0xab: state = 47; return nil
+      case 0x98: state = 139; return nil
+      case 0x9b: state = 140; return nil
+      case 0x9d: state = 141; return nil
+      case 0x9e: state = 142; return nil
+      case 0x9f: state = 143; return nil
+      case 0xac: state = 144; return nil
+      case 0xaf: state = 145; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 51: // main pre-match.
+      switch byte {
+      case 0xa0: state = 153; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 52: // comment.
+      switch byte {
+      case 0x20...0x7e: state = 238; return nil
+      case 0xc2: state = 239; return nil
+      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 240; return nil
+      case 0xcd: state = 241; return nil
+      case 0xce: state = 242; return nil
+      case 0xd4: state = 243; return nil
+      case 0xd5: state = 244; return nil
+      case 0xd6: state = 245; return nil
+      case 0xd7: state = 246; return nil
+      case 0xd8: state = 247; return nil
+      case 0xdb: state = 248; return nil
+      case 0xdc: state = 249; return nil
+      case 0xdd: state = 250; return nil
+      case 0xde: state = 251; return nil
+      case 0xdf: state = 252; return nil
+      case 0xe0: state = 253; return nil
+      case 0xe1: state = 254; return nil
+      case 0xe2: state = 255; return nil
+      case 0xe3: state = 256; return nil
+      case 0xe4: state = 257; return nil
+      case 0xe5...0xe8, 0xeb, 0xec: state = 258; return nil
+      case 0xe9: state = 259; return nil
+      case 0xea: state = 260; return nil
+      case 0xed: state = 261; return nil
+      case 0xef: state = 262; return nil
+      case 0xf0: state = 263; return nil
+      case 0xf3: state = 264; return nil
+      default:
+        start_main()
+        return flushToken(kind: .comment)
+      }
+    case 53: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 54: // if.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
         return flushToken(kind: .if_)
       }
-    case 45: // in.
+    case 55: // in.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
         return flushToken(kind: .in_)
       }
-    case 46: // typeAlias.
-      start_main()
-      return flushToken(kind: .typeAlias)
-    case 47: // pub.
+    case 56: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
-      default:
-        start_main()
-        return flushToken(kind: .pub)
-      }
-    case 48: // where.
-      start_main()
-      return flushToken(kind: .where_)
-    case 49: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 40; return nil
-      case 0x74: state = 147; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x72, 0x74...0x7a: state = 53; return nil
+      case 0x73: state = 102; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 50: // sym.
+    case 57: // fn.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x63, 0x65...0x7a: state = 40; return nil
-      case 0x64: state = 117; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 51: // comment.
-      switch byte {
-      case 0x20...0x7e: state = 62; return nil
-      case 0xc2: state = 63; return nil
-      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 64; return nil
-      case 0xcd: state = 65; return nil
-      case 0xce: state = 66; return nil
-      case 0xd4: state = 67; return nil
-      case 0xd5: state = 68; return nil
-      case 0xd6: state = 69; return nil
-      case 0xd7: state = 70; return nil
-      case 0xd8: state = 71; return nil
-      case 0xdb: state = 72; return nil
-      case 0xdc: state = 73; return nil
-      case 0xdd: state = 74; return nil
-      case 0xde: state = 75; return nil
-      case 0xdf: state = 76; return nil
-      case 0xe0: state = 77; return nil
-      case 0xe1: state = 78; return nil
-      case 0xe2: state = 79; return nil
-      case 0xe3: state = 80; return nil
-      case 0xe4: state = 81; return nil
-      case 0xe5...0xe8, 0xeb, 0xec: state = 82; return nil
-      case 0xe9: state = 83; return nil
-      case 0xea: state = 84; return nil
-      case 0xed: state = 85; return nil
-      case 0xef: state = 86; return nil
-      case 0xf0: state = 87; return nil
-      case 0xf3: state = 88; return nil
-      default:
-        start_main()
-        return flushToken(kind: .comment)
-      }
-    case 52: // flt.
-      switch byte {
-      case 0x30...0x39: state = 269; return nil
-      default:
-        start_main()
-        return flushToken(kind: .flt)
-      }
-    case 53: // main post-match.
-      switch byte {
-      case 0x30...0x39: state = 371; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 54: // fn.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
         return flushToken(kind: .fn)
       }
-    case 55: // or.
+    case 58: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
-      default:
-        start_main()
-        return flushToken(kind: .or)
-      }
-    case 56: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 40; return nil
-      case 0x74: state = 129; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 53; return nil
+      case 0x74: state = 599; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 57: // main post-match.
+    case 59: // or.
       switch byte {
-      case 0x30, 0x31: state = 365; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
-        return flushToken(kind: .incomplete)
+        return flushToken(kind: .or)
       }
-    case 58: // main post-match.
-      switch byte {
-      case 0x30...0x39: state = 173; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 59: // main post-match.
-      switch byte {
-      case 0x30...0x37: state = 645; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 60: // main post-match.
-      switch byte {
-      case 0x30...0x33: state = 291; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 61: // main post-match.
-      switch byte {
-      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 130; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 62: // comment.
-      switch byte {
-      case 0x20...0x7e: state = 62; return nil
-      case 0xc2: state = 63; return nil
-      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 64; return nil
-      case 0xcd: state = 65; return nil
-      case 0xce: state = 66; return nil
-      case 0xd4: state = 67; return nil
-      case 0xd5: state = 68; return nil
-      case 0xd6: state = 69; return nil
-      case 0xd7: state = 70; return nil
-      case 0xd8: state = 71; return nil
-      case 0xdb: state = 72; return nil
-      case 0xdc: state = 73; return nil
-      case 0xdd: state = 74; return nil
-      case 0xde: state = 75; return nil
-      case 0xdf: state = 76; return nil
-      case 0xe0: state = 77; return nil
-      case 0xe1: state = 78; return nil
-      case 0xe2: state = 79; return nil
-      case 0xe3: state = 80; return nil
-      case 0xe4: state = 81; return nil
-      case 0xe5...0xe8, 0xeb, 0xec: state = 82; return nil
-      case 0xe9: state = 83; return nil
-      case 0xea: state = 84; return nil
-      case 0xed: state = 85; return nil
-      case 0xef: state = 86; return nil
-      case 0xf0: state = 87; return nil
-      case 0xf3: state = 88; return nil
-      default:
-        start_main()
-        return flushToken(kind: .comment)
-      }
-    case 63: // main post-match.
-      switch byte {
-      case 0xa0...0xac, 0xae...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 64: // main post-match.
-      switch byte {
-      case 0x80...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 65: // main post-match.
-      switch byte {
-      case 0x80...0xb7, 0xba...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 66: // main post-match.
-      switch byte {
-      case 0x84...0x8a, 0x8c, 0x8e...0xa1, 0xa3...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 67: // main post-match.
-      switch byte {
-      case 0x80...0xaf, 0xb1...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 68: // main post-match.
-      switch byte {
-      case 0x80...0x96, 0x99...0x9f, 0xa1...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 69: // main post-match.
-      switch byte {
-      case 0x80...0x87, 0x89, 0x8a, 0x8d...0x8f, 0x91...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 70: // main post-match.
-      switch byte {
-      case 0x80...0x87, 0x90...0xaa, 0xb0...0xb4: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 71: // main post-match.
-      switch byte {
-      case 0x86...0x9b, 0x9e...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 72: // main post-match.
-      switch byte {
-      case 0x80...0x9c, 0x9e...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 73: // main post-match.
-      switch byte {
-      case 0x80...0x8d, 0x90...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 74: // main post-match.
-      switch byte {
-      case 0x80...0x8a, 0x8d...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 75: // main post-match.
-      switch byte {
-      case 0x80...0xb1: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 76: // main post-match.
-      switch byte {
-      case 0x80...0xba: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 77: // main post-match.
-      switch byte {
-      case 0xa0: state = 292; return nil
-      case 0xa1: state = 293; return nil
-      case 0xa2: state = 294; return nil
-      case 0xa3: state = 295; return nil
-      case 0xa4, 0xa5, 0xbc: state = 64; return nil
-      case 0xa6: state = 296; return nil
-      case 0xa7: state = 297; return nil
-      case 0xa8: state = 298; return nil
-      case 0xa9: state = 299; return nil
-      case 0xaa: state = 300; return nil
-      case 0xab: state = 301; return nil
-      case 0xac: state = 302; return nil
-      case 0xad: state = 303; return nil
-      case 0xae: state = 304; return nil
-      case 0xaf: state = 305; return nil
-      case 0xb0: state = 306; return nil
-      case 0xb1: state = 307; return nil
-      case 0xb2: state = 308; return nil
-      case 0xb3: state = 309; return nil
-      case 0xb4: state = 310; return nil
-      case 0xb5: state = 311; return nil
-      case 0xb6: state = 312; return nil
-      case 0xb7: state = 313; return nil
-      case 0xb8: state = 314; return nil
-      case 0xb9: state = 315; return nil
-      case 0xba: state = 316; return nil
-      case 0xbb: state = 317; return nil
-      case 0xbd: state = 318; return nil
-      case 0xbe: state = 319; return nil
-      case 0xbf: state = 320; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 78: // main post-match.
-      switch byte {
-      case 0x80...0x82, 0x84...0x88, 0x90...0x99, 0x9e, 0xac, 0xae, 0xb4...0xb6, 0xb8...0xbb: state = 64; return nil
-      case 0x83: state = 207; return nil
-      case 0x89: state = 208; return nil
-      case 0x8a: state = 209; return nil
-      case 0x8b: state = 210; return nil
-      case 0x8c: state = 211; return nil
-      case 0x8d: state = 212; return nil
-      case 0x8e: state = 141; return nil
-      case 0x8f: state = 213; return nil
-      case 0x9a: state = 214; return nil
-      case 0x9b: state = 215; return nil
-      case 0x9c: state = 216; return nil
-      case 0x9d: state = 217; return nil
-      case 0x9f: state = 218; return nil
-      case 0xa0: state = 219; return nil
-      case 0xa1: state = 220; return nil
-      case 0xa2: state = 221; return nil
-      case 0xa3: state = 222; return nil
-      case 0xa4: state = 223; return nil
-      case 0xa5: state = 224; return nil
-      case 0xa6: state = 189; return nil
-      case 0xa7: state = 225; return nil
-      case 0xa8: state = 226; return nil
-      case 0xa9: state = 227; return nil
-      case 0xaa: state = 228; return nil
-      case 0xad: state = 229; return nil
-      case 0xaf: state = 230; return nil
-      case 0xb0: state = 231; return nil
-      case 0xb1: state = 232; return nil
-      case 0xb2: state = 233; return nil
-      case 0xb3: state = 234; return nil
-      case 0xb7: state = 235; return nil
-      case 0xbc: state = 236; return nil
-      case 0xbd: state = 237; return nil
-      case 0xbe: state = 238; return nil
-      case 0xbf: state = 239; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 79: // main post-match.
-      switch byte {
-      case 0x80: state = 272; return nil
-      case 0x81: state = 273; return nil
-      case 0x82: state = 274; return nil
-      case 0x83: state = 275; return nil
-      case 0x84, 0x85, 0x87...0x8e, 0x92...0xac, 0xb2, 0xb8, 0xbc...0xbe: state = 64; return nil
-      case 0x86: state = 200; return nil
-      case 0x8f: state = 145; return nil
-      case 0x90: state = 276; return nil
-      case 0x91: state = 277; return nil
-      case 0xad: state = 278; return nil
-      case 0xae: state = 279; return nil
-      case 0xaf: state = 280; return nil
-      case 0xb0: state = 281; return nil
-      case 0xb1: state = 282; return nil
-      case 0xb3: state = 283; return nil
-      case 0xb4: state = 284; return nil
-      case 0xb5: state = 285; return nil
-      case 0xb6: state = 286; return nil
-      case 0xb7: state = 287; return nil
-      case 0xb9: state = 288; return nil
-      case 0xba: state = 289; return nil
-      case 0xbb: state = 198; return nil
-      case 0xbf: state = 290; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 80: // main post-match.
-      switch byte {
-      case 0x80, 0x83, 0x85, 0x89, 0x8a, 0x8c...0xbf: state = 64; return nil
-      case 0x81: state = 144; return nil
-      case 0x82: state = 366; return nil
-      case 0x84: state = 367; return nil
-      case 0x86: state = 368; return nil
-      case 0x87: state = 369; return nil
-      case 0x88: state = 282; return nil
-      case 0x8b: state = 145; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 81: // main post-match.
-      switch byte {
-      case 0x80...0xb5, 0xb7...0xbf: state = 64; return nil
-      case 0xb6: state = 222; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 82: // main post-match.
-      switch byte {
-      case 0x80...0xbf: state = 64; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 83: // main post-match.
-      switch byte {
-      case 0x80...0xbe: state = 64; return nil
-      case 0xbf: state = 571; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 84: // main post-match.
-      switch byte {
-      case 0x80...0x91, 0x94...0x97, 0x99, 0x9a, 0x9c, 0x9d, 0xa2, 0xa4, 0xa6, 0xaa, 0xae, 0xb0...0xbf: state = 64; return nil
-      case 0x92: state = 557; return nil
-      case 0x93: state = 558; return nil
-      case 0x98: state = 559; return nil
-      case 0x9b, 0xa1: state = 220; return nil
-      case 0x9e: state = 560; return nil
-      case 0x9f: state = 561; return nil
-      case 0xa0: state = 562; return nil
-      case 0xa3: state = 563; return nil
-      case 0xa5: state = 564; return nil
-      case 0xa7: state = 565; return nil
-      case 0xa8: state = 504; return nil
-      case 0xa9: state = 566; return nil
-      case 0xab: state = 567; return nil
-      case 0xac: state = 568; return nil
-      case 0xad: state = 569; return nil
-      case 0xaf: state = 570; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 85: // main post-match.
-      switch byte {
-      case 0x80...0x9d: state = 64; return nil
-      case 0x9e: state = 369; return nil
-      case 0x9f: state = 390; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 86: // main post-match.
-      switch byte {
-      case 0xa4...0xa8, 0xaa, 0xae, 0xb0...0xb4, 0xba, 0xbd: state = 64; return nil
-      case 0xa9: state = 133; return nil
-      case 0xab: state = 134; return nil
-      case 0xac: state = 135; return nil
-      case 0xad: state = 136; return nil
-      case 0xaf: state = 137; return nil
-      case 0xb5: state = 138; return nil
-      case 0xb6: state = 139; return nil
-      case 0xb7: state = 140; return nil
-      case 0xb8: state = 141; return nil
-      case 0xb9: state = 142; return nil
-      case 0xbb: state = 143; return nil
-      case 0xbc: state = 144; return nil
-      case 0xbe: state = 145; return nil
-      case 0xbf: state = 146; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 87: // main post-match.
-      switch byte {
-      case 0x90: state = 174; return nil
-      case 0x91: state = 175; return nil
-      case 0x92: state = 176; return nil
-      case 0x93: state = 177; return nil
-      case 0x94: state = 178; return nil
-      case 0x96: state = 179; return nil
-      case 0x97, 0xa0...0xa9: state = 82; return nil
-      case 0x98: state = 180; return nil
-      case 0x9b: state = 181; return nil
-      case 0x9d: state = 182; return nil
-      case 0x9e: state = 183; return nil
-      case 0x9f: state = 184; return nil
-      case 0xaa: state = 185; return nil
-      case 0xab: state = 186; return nil
-      case 0xac: state = 187; return nil
-      case 0xaf: state = 188; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 88: // main post-match.
-      switch byte {
-      case 0xa0: state = 270; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 89: // stringDQ.
+    case 60: // stringDQ.
       start_main()
       return flushToken(kind: .stringDQ)
-    case 90: // main pre-match.
+    case 61: // main pre-match.
       switch byte {
       case 0x20...0x7e: state = 5; return nil
-      case 0xc2: state = 91; return nil
-      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 92; return nil
-      case 0xcd: state = 93; return nil
-      case 0xce: state = 94; return nil
-      case 0xd4: state = 95; return nil
-      case 0xd5: state = 96; return nil
-      case 0xd6: state = 97; return nil
-      case 0xd7: state = 98; return nil
-      case 0xd8: state = 99; return nil
-      case 0xdb: state = 100; return nil
-      case 0xdc: state = 101; return nil
-      case 0xdd: state = 102; return nil
-      case 0xde: state = 103; return nil
-      case 0xdf: state = 104; return nil
-      case 0xe0: state = 105; return nil
-      case 0xe1: state = 106; return nil
-      case 0xe2: state = 107; return nil
-      case 0xe3: state = 108; return nil
-      case 0xe4: state = 109; return nil
-      case 0xe5...0xe8, 0xeb, 0xec: state = 110; return nil
-      case 0xe9: state = 111; return nil
-      case 0xea: state = 112; return nil
-      case 0xed: state = 113; return nil
-      case 0xef: state = 114; return nil
-      case 0xf0: state = 115; return nil
-      case 0xf3: state = 116; return nil
+      case 0xc2: state = 62; return nil
+      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 63; return nil
+      case 0xcd: state = 64; return nil
+      case 0xce: state = 65; return nil
+      case 0xd4: state = 66; return nil
+      case 0xd5: state = 67; return nil
+      case 0xd6: state = 68; return nil
+      case 0xd7: state = 69; return nil
+      case 0xd8: state = 70; return nil
+      case 0xdb: state = 71; return nil
+      case 0xdc: state = 72; return nil
+      case 0xdd: state = 73; return nil
+      case 0xde: state = 74; return nil
+      case 0xdf: state = 75; return nil
+      case 0xe0: state = 76; return nil
+      case 0xe1: state = 77; return nil
+      case 0xe2: state = 78; return nil
+      case 0xe3: state = 79; return nil
+      case 0xe4: state = 80; return nil
+      case 0xe5...0xe8, 0xeb, 0xec: state = 81; return nil
+      case 0xe9: state = 82; return nil
+      case 0xea: state = 83; return nil
+      case 0xed: state = 84; return nil
+      case 0xef: state = 85; return nil
+      case 0xf0: state = 86; return nil
+      case 0xf3: state = 87; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 91: // main pre-match.
+    case 62: // main pre-match.
       switch byte {
       case 0xa0...0xac, 0xae...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 92: // main pre-match.
+    case 63: // main pre-match.
       switch byte {
       case 0x80...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 93: // main pre-match.
+    case 64: // main pre-match.
       switch byte {
       case 0x80...0xb7, 0xba...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 94: // main pre-match.
+    case 65: // main pre-match.
       switch byte {
       case 0x84...0x8a, 0x8c, 0x8e...0xa1, 0xa3...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 95: // main pre-match.
+    case 66: // main pre-match.
       switch byte {
       case 0x80...0xaf, 0xb1...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 96: // main pre-match.
+    case 67: // main pre-match.
       switch byte {
       case 0x80...0x96, 0x99...0x9f, 0xa1...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 97: // main pre-match.
+    case 68: // main pre-match.
       switch byte {
       case 0x80...0x87, 0x89, 0x8a, 0x8d...0x8f, 0x91...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 98: // main pre-match.
+    case 69: // main pre-match.
       switch byte {
       case 0x80...0x87, 0x90...0xaa, 0xb0...0xb4: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 99: // main pre-match.
+    case 70: // main pre-match.
       switch byte {
       case 0x86...0x9b, 0x9e...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 100: // main pre-match.
+    case 71: // main pre-match.
       switch byte {
       case 0x80...0x9c, 0x9e...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 101: // main pre-match.
+    case 72: // main pre-match.
       switch byte {
       case 0x80...0x8d, 0x90...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 102: // main pre-match.
+    case 73: // main pre-match.
       switch byte {
       case 0x80...0x8a, 0x8d...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 103: // main pre-match.
+    case 74: // main pre-match.
       switch byte {
       case 0x80...0xb1: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 104: // main pre-match.
+    case 75: // main pre-match.
       switch byte {
       case 0x80...0xba: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 105: // main pre-match.
-      switch byte {
-      case 0xa0: state = 595; return nil
-      case 0xa1: state = 596; return nil
-      case 0xa2: state = 597; return nil
-      case 0xa3: state = 598; return nil
-      case 0xa4, 0xa5, 0xbc: state = 92; return nil
-      case 0xa6: state = 599; return nil
-      case 0xa7: state = 600; return nil
-      case 0xa8: state = 601; return nil
-      case 0xa9: state = 602; return nil
-      case 0xaa: state = 603; return nil
-      case 0xab: state = 604; return nil
-      case 0xac: state = 605; return nil
-      case 0xad: state = 606; return nil
-      case 0xae: state = 607; return nil
-      case 0xaf: state = 608; return nil
-      case 0xb0: state = 609; return nil
-      case 0xb1: state = 610; return nil
-      case 0xb2: state = 611; return nil
-      case 0xb3: state = 612; return nil
-      case 0xb4: state = 613; return nil
-      case 0xb5: state = 614; return nil
-      case 0xb6: state = 615; return nil
-      case 0xb7: state = 616; return nil
-      case 0xb8: state = 617; return nil
-      case 0xb9: state = 618; return nil
-      case 0xba: state = 619; return nil
-      case 0xbb: state = 620; return nil
-      case 0xbd: state = 621; return nil
-      case 0xbe: state = 622; return nil
-      case 0xbf: state = 623; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 106: // main pre-match.
-      switch byte {
-      case 0x80...0x82, 0x84...0x88, 0x90...0x99, 0x9e, 0xac, 0xae, 0xb4...0xb6, 0xb8...0xbb: state = 92; return nil
-      case 0x83: state = 460; return nil
-      case 0x89: state = 461; return nil
-      case 0x8a: state = 462; return nil
-      case 0x8b: state = 463; return nil
-      case 0x8c: state = 464; return nil
-      case 0x8d: state = 465; return nil
-      case 0x8e: state = 329; return nil
-      case 0x8f: state = 466; return nil
-      case 0x9a: state = 433; return nil
-      case 0x9b: state = 467; return nil
-      case 0x9c: state = 468; return nil
-      case 0x9d: state = 469; return nil
-      case 0x9f: state = 470; return nil
-      case 0xa0: state = 471; return nil
-      case 0xa1: state = 376; return nil
-      case 0xa2: state = 472; return nil
-      case 0xa3: state = 351; return nil
-      case 0xa4: state = 473; return nil
-      case 0xa5: state = 474; return nil
-      case 0xa6: state = 409; return nil
-      case 0xa7: state = 475; return nil
-      case 0xa8: state = 476; return nil
-      case 0xa9: state = 477; return nil
-      case 0xaa: state = 478; return nil
-      case 0xad: state = 479; return nil
-      case 0xaf: state = 480; return nil
-      case 0xb0: state = 481; return nil
-      case 0xb1: state = 482; return nil
-      case 0xb2: state = 456; return nil
-      case 0xb3: state = 483; return nil
-      case 0xb7: state = 484; return nil
-      case 0xbc: state = 485; return nil
-      case 0xbd: state = 486; return nil
-      case 0xbe: state = 487; return nil
-      case 0xbf: state = 488; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 107: // main pre-match.
-      switch byte {
-      case 0x80: state = 149; return nil
-      case 0x81: state = 150; return nil
-      case 0x82: state = 151; return nil
-      case 0x83: state = 152; return nil
-      case 0x84, 0x85, 0x87...0x8e, 0x92...0xac, 0xb2, 0xb8, 0xbc...0xbe: state = 92; return nil
-      case 0x86: state = 153; return nil
-      case 0x8f: state = 154; return nil
-      case 0x90: state = 155; return nil
-      case 0x91: state = 156; return nil
-      case 0xad: state = 157; return nil
-      case 0xae: state = 158; return nil
-      case 0xaf: state = 159; return nil
-      case 0xb0: state = 160; return nil
-      case 0xb1: state = 161; return nil
-      case 0xb3: state = 162; return nil
-      case 0xb4: state = 163; return nil
-      case 0xb5: state = 164; return nil
-      case 0xb6: state = 165; return nil
-      case 0xb7: state = 166; return nil
-      case 0xb9: state = 167; return nil
-      case 0xba: state = 168; return nil
-      case 0xbb: state = 169; return nil
-      case 0xbf: state = 170; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 108: // main pre-match.
-      switch byte {
-      case 0x80, 0x83, 0x85, 0x89, 0x8a, 0x8c...0xbf: state = 92; return nil
-      case 0x81: state = 332; return nil
-      case 0x82: state = 425; return nil
-      case 0x84: state = 426; return nil
-      case 0x86: state = 427; return nil
-      case 0x87: state = 171; return nil
-      case 0x88: state = 161; return nil
-      case 0x8b: state = 154; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 109: // main pre-match.
-      switch byte {
-      case 0x80...0xb5, 0xb7...0xbf: state = 92; return nil
-      case 0xb6: state = 351; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 110: // main pre-match.
-      switch byte {
-      case 0x80...0xbf: state = 92; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 111: // main pre-match.
-      switch byte {
-      case 0x80...0xbe: state = 92; return nil
-      case 0xbf: state = 132; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 112: // main pre-match.
-      switch byte {
-      case 0x80...0x91, 0x94...0x97, 0x99, 0x9a, 0x9c, 0x9d, 0xa2, 0xa4, 0xa6, 0xaa, 0xae, 0xb0...0xbf: state = 92; return nil
-      case 0x92: state = 373; return nil
-      case 0x93: state = 374; return nil
-      case 0x98: state = 375; return nil
-      case 0x9b, 0xa1: state = 376; return nil
-      case 0x9e: state = 377; return nil
-      case 0x9f: state = 378; return nil
-      case 0xa0: state = 379; return nil
-      case 0xa3: state = 380; return nil
-      case 0xa5: state = 381; return nil
-      case 0xa7: state = 382; return nil
-      case 0xa8: state = 383; return nil
-      case 0xa9: state = 384; return nil
-      case 0xab: state = 385; return nil
-      case 0xac: state = 386; return nil
-      case 0xad: state = 387; return nil
-      case 0xaf: state = 388; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 113: // main pre-match.
-      switch byte {
-      case 0x80...0x9d: state = 92; return nil
-      case 0x9e: state = 171; return nil
-      case 0x9f: state = 172; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 114: // main pre-match.
-      switch byte {
-      case 0xa4...0xa8, 0xaa, 0xae, 0xb0...0xb4, 0xba, 0xbd: state = 92; return nil
-      case 0xa9: state = 321; return nil
-      case 0xab: state = 322; return nil
-      case 0xac: state = 323; return nil
-      case 0xad: state = 324; return nil
-      case 0xaf: state = 325; return nil
-      case 0xb5: state = 326; return nil
-      case 0xb6: state = 327; return nil
-      case 0xb7: state = 328; return nil
-      case 0xb8: state = 329; return nil
-      case 0xb9: state = 330; return nil
-      case 0xbb: state = 331; return nil
-      case 0xbc: state = 332; return nil
-      case 0xbe: state = 154; return nil
-      case 0xbf: state = 333; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 115: // main pre-match.
-      switch byte {
-      case 0x90: state = 334; return nil
-      case 0x91: state = 335; return nil
-      case 0x92: state = 336; return nil
-      case 0x93: state = 337; return nil
-      case 0x94: state = 338; return nil
-      case 0x96: state = 339; return nil
-      case 0x97, 0xa0...0xa9: state = 110; return nil
-      case 0x98: state = 340; return nil
-      case 0x9b: state = 341; return nil
-      case 0x9d: state = 342; return nil
-      case 0x9e: state = 343; return nil
-      case 0x9f: state = 344; return nil
-      case 0xaa: state = 345; return nil
-      case 0xab: state = 346; return nil
-      case 0xac: state = 347; return nil
-      case 0xaf: state = 348; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 116: // main pre-match.
-      switch byte {
-      case 0xa0: state = 372; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 117: // and.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
-      default:
-        start_main()
-        return flushToken(kind: .and)
-      }
-    case 118: // stringSQ.
-      start_main()
-      return flushToken(kind: .stringSQ)
-    case 119: // main pre-match.
-      switch byte {
-      case 0x20...0x7e: state = 8; return nil
-      case 0xc2...0xdf: state = 120; return nil
-      case 0xe0: state = 121; return nil
-      case 0xe1: state = 122; return nil
-      case 0xe2...0xec: state = 123; return nil
-      case 0xed: state = 124; return nil
-      case 0xef: state = 125; return nil
-      case 0xf0: state = 126; return nil
-      case 0xf3: state = 127; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 120: // main pre-match.
-      switch byte {
-      case 0x80...0xbf: state = 8; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 121: // main pre-match.
-      switch byte {
-      case 0xa0...0xbf: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 122: // main pre-match.
-      switch byte {
-      case 0x80...0xaa, 0xac...0xbf: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 123: // main pre-match.
-      switch byte {
-      case 0x80...0xbf: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 124: // main pre-match.
-      switch byte {
-      case 0x80...0x9f: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 125: // main pre-match.
-      switch byte {
-      case 0xa4...0xbf: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 126: // main pre-match.
-      switch byte {
-      case 0x90: state = 256; return nil
-      case 0x91: state = 257; return nil
-      case 0x92: state = 258; return nil
-      case 0x93: state = 259; return nil
-      case 0x94: state = 260; return nil
-      case 0x96: state = 261; return nil
-      case 0x97, 0xa0...0xab: state = 123; return nil
-      case 0x98: state = 262; return nil
-      case 0x9b: state = 263; return nil
-      case 0x9d: state = 264; return nil
-      case 0x9e: state = 265; return nil
-      case 0x9f: state = 266; return nil
-      case 0xac: state = 267; return nil
-      case 0xaf: state = 268; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 127: // main pre-match.
-      switch byte {
-      case 0xa0: state = 128; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 128: // main pre-match.
-      switch byte {
-      case 0x84...0x87: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 129: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x62, 0x64...0x7a: state = 40; return nil
-      case 0x63: state = 131; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 130: // intHex.
-      switch byte {
-      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 130; return nil
-      case 0x5f: state = 271; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intHex)
-      }
-    case 131: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x67, 0x69...0x7a: state = 40; return nil
-      case 0x68: state = 530; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 132: // main pre-match.
-      switch byte {
-      case 0x80...0x95: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 133: // main post-match.
-      switch byte {
-      case 0x80...0xad, 0xb0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 134: // main post-match.
-      switch byte {
-      case 0x80...0x99: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 135: // main post-match.
-      switch byte {
-      case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 136: // main post-match.
-      switch byte {
-      case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 137: // main post-match.
-      switch byte {
-      case 0x80, 0x81, 0x93...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 138: // main post-match.
-      switch byte {
-      case 0x90...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 139: // main post-match.
-      switch byte {
-      case 0x80...0x8f, 0x92...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 140: // main post-match.
-      switch byte {
-      case 0x80...0x87, 0xb0...0xbd: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 141: // main post-match.
-      switch byte {
-      case 0x80...0x99, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 142: // main post-match.
-      switch byte {
-      case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 143: // main post-match.
-      switch byte {
-      case 0x80...0xbc: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 144: // main post-match.
-      switch byte {
-      case 0x81...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 145: // main post-match.
-      switch byte {
-      case 0x80...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 146: // main post-match.
-      switch byte {
-      case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 147: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x64, 0x66...0x7a: state = 40; return nil
-      case 0x65: state = 148; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 148: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 40; return nil
-      case 0x6e: state = 389; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 149: // main pre-match.
-      switch byte {
-      case 0x80...0x8a, 0x90...0xa9, 0xaf...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 150: // main pre-match.
-      switch byte {
-      case 0x80...0x9f, 0xb0, 0xb1, 0xb4...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 151: // main pre-match.
-      switch byte {
-      case 0x80...0x8e, 0x90...0x9c, 0xa0...0xbe: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 152: // main pre-match.
-      switch byte {
-      case 0x90...0xb0: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 153: // main pre-match.
-      switch byte {
-      case 0x80...0x8b, 0x90...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 154: // main pre-match.
-      switch byte {
-      case 0x80...0xbe: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 155: // main pre-match.
-      switch byte {
-      case 0x80...0xa6: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 156: // main pre-match.
-      switch byte {
-      case 0x80...0x8a, 0xa0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 157: // main pre-match.
-      switch byte {
-      case 0x80...0xb3, 0xb6...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 158: // main pre-match.
-      switch byte {
-      case 0x80...0x95, 0x98...0xb9, 0xbd...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 159: // main pre-match.
-      switch byte {
-      case 0x80...0x88, 0x8a...0x91, 0xac...0xaf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 160: // main pre-match.
-      switch byte {
-      case 0x80...0xae, 0xb0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 161: // main pre-match.
-      switch byte {
-      case 0x80...0x9e, 0xa0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 162: // main pre-match.
-      switch byte {
-      case 0x80...0xb3, 0xb9...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 163: // main pre-match.
-      switch byte {
-      case 0x80...0xa5, 0xa7, 0xad, 0xb0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 164: // main pre-match.
-      switch byte {
-      case 0x80...0xa7, 0xaf, 0xb0, 0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 165: // main pre-match.
-      switch byte {
-      case 0x80...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xb6, 0xb8...0xbe: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 166: // main pre-match.
-      switch byte {
-      case 0x80...0x86, 0x88...0x8e, 0x90...0x96, 0x98...0x9e, 0xa0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 167: // main pre-match.
-      switch byte {
-      case 0x80...0x84: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 168: // main pre-match.
-      switch byte {
-      case 0x80...0x99, 0x9b...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 169: // main pre-match.
-      switch byte {
-      case 0x80...0xb3: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 170: // main pre-match.
-      switch byte {
-      case 0x80...0x95, 0xb0...0xbb: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 171: // main pre-match.
-      switch byte {
-      case 0x80...0xa3, 0xb0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 172: // main pre-match.
-      switch byte {
-      case 0x80...0x86, 0x8b...0xbb: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 173: // intDec.
-      switch byte {
-      case 0x30...0x39: state = 173; return nil
-      case 0x5f: state = 554; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intDec)
-      }
-    case 174: // main post-match.
-      switch byte {
-      case 0x80: state = 491; return nil
-      case 0x81: state = 492; return nil
-      case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 64; return nil
-      case 0x83: state = 76; return nil
-      case 0x84: state = 493; return nil
-      case 0x86: state = 494; return nil
-      case 0x87: state = 495; return nil
-      case 0x8a: state = 214; return nil
-      case 0x8b: state = 496; return nil
-      case 0x8c: state = 369; return nil
-      case 0x8d: state = 497; return nil
-      case 0x8e: state = 498; return nil
-      case 0x8f: state = 499; return nil
-      case 0x92: state = 500; return nil
-      case 0x93: state = 501; return nil
-      case 0x94: state = 502; return nil
-      case 0x95: state = 503; return nil
-      case 0x9c: state = 504; return nil
-      case 0x9d: state = 505; return nil
-      case 0xa0: state = 506; return nil
-      case 0xa1: state = 507; return nil
-      case 0xa2: state = 508; return nil
-      case 0xa3: state = 509; return nil
-      case 0xa4: state = 510; return nil
-      case 0xa6: state = 511; return nil
-      case 0xa7: state = 139; return nil
-      case 0xa8: state = 512; return nil
-      case 0xa9: state = 513; return nil
-      case 0xaa: state = 514; return nil
-      case 0xab: state = 515; return nil
-      case 0xac: state = 516; return nil
-      case 0xad: state = 517; return nil
-      case 0xae: state = 518; return nil
-      case 0xb1: state = 233; return nil
-      case 0xb2: state = 519; return nil
-      case 0xb3: state = 520; return nil
-      case 0xb9: state = 521; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 175: // main post-match.
-      switch byte {
-      case 0x80, 0x86, 0x90, 0x92, 0x98: state = 64; return nil
-      case 0x81: state = 572; return nil
-      case 0x82: state = 573; return nil
-      case 0x83: state = 574; return nil
-      case 0x84: state = 238; return nil
-      case 0x85: state = 575; return nil
-      case 0x87: state = 576; return nil
-      case 0x88: state = 577; return nil
-      case 0x8a: state = 578; return nil
-      case 0x8b: state = 579; return nil
-      case 0x8c: state = 580; return nil
-      case 0x8d: state = 581; return nil
-      case 0x91: state = 582; return nil
-      case 0x93: state = 583; return nil
-      case 0x96: state = 584; return nil
-      case 0x97: state = 556; return nil
-      case 0x99: state = 585; return nil
-      case 0x9a: state = 220; return nil
-      case 0x9b: state = 586; return nil
-      case 0x9c: state = 587; return nil
-      case 0xa2: state = 588; return nil
-      case 0xa3: state = 589; return nil
-      case 0xab: state = 215; return nil
-      case 0xb0: state = 590; return nil
-      case 0xb1: state = 591; return nil
-      case 0xb2: state = 592; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 176: // main post-match.
-      switch byte {
-      case 0x80...0x8d, 0x90, 0x92...0x94: state = 64; return nil
-      case 0x8e: state = 134; return nil
-      case 0x91: state = 245; return nil
-      case 0x95: state = 246; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 177: // main post-match.
-      switch byte {
-      case 0x80...0x8f: state = 64; return nil
-      case 0x90: state = 647; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 178: // main post-match.
-      switch byte {
-      case 0x90...0x98: state = 64; return nil
-      case 0x99: state = 489; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 179: // main post-match.
-      switch byte {
-      case 0xa0...0xa7, 0xac, 0xbc: state = 64; return nil
-      case 0xa8: state = 215; return nil
-      case 0xa9: state = 247; return nil
-      case 0xab: state = 248; return nil
-      case 0xad: state = 249; return nil
-      case 0xae: state = 250; return nil
-      case 0xbd: state = 251; return nil
-      case 0xbe: state = 252; return nil
-      case 0xbf: state = 253; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 180: // main post-match.
-      switch byte {
-      case 0x80...0x9e, 0xa0...0xaa: state = 64; return nil
-      case 0x9f: state = 193; return nil
-      case 0xab: state = 519; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 181: // main post-match.
-      switch byte {
-      case 0x80: state = 242; return nil
-      case 0xb0: state = 64; return nil
-      case 0xb1: state = 243; return nil
-      case 0xb2: state = 244; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 182: // main post-match.
-      switch byte {
-      case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 64; return nil
-      case 0x83: state = 222; return nil
-      case 0x84: state = 392; return nil
-      case 0x85: state = 393; return nil
-      case 0x87: state = 394; return nil
-      case 0x89: state = 395; return nil
-      case 0x8d: state = 396; return nil
-      case 0x91: state = 397; return nil
-      case 0x92: state = 398; return nil
-      case 0x93: state = 399; return nil
-      case 0x94: state = 400; return nil
-      case 0x95: state = 401; return nil
-      case 0x9a: state = 402; return nil
-      case 0x9f: state = 403; return nil
-      case 0xaa: state = 404; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 183: // main post-match.
-      switch byte {
-      case 0x80: state = 523; return nil
-      case 0xa0...0xa2, 0xa4: state = 64; return nil
-      case 0xa3: state = 524; return nil
-      case 0xa5: state = 525; return nil
-      case 0xb8: state = 526; return nil
-      case 0xb9: state = 527; return nil
-      case 0xba: state = 528; return nil
-      case 0xbb: state = 529; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 184: // main post-match.
-      switch byte {
-      case 0x80, 0x85: state = 189; return nil
-      case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 64; return nil
-      case 0x82: state = 190; return nil
-      case 0x83: state = 191; return nil
-      case 0x84: state = 192; return nil
-      case 0x86: state = 193; return nil
-      case 0x87: state = 194; return nil
-      case 0x88: state = 195; return nil
-      case 0x89: state = 196; return nil
-      case 0x9b: state = 197; return nil
-      case 0x9d: state = 198; return nil
-      case 0x9f: state = 199; return nil
-      case 0xa0: state = 200; return nil
-      case 0xa1: state = 201; return nil
-      case 0xa2: state = 202; return nil
-      case 0xa4: state = 203; return nil
-      case 0xa5: state = 204; return nil
-      case 0xa6: state = 205; return nil
-      case 0xa7: state = 206; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 185: // main post-match.
-      switch byte {
-      case 0x80...0x9a, 0x9c...0xbf: state = 64; return nil
-      case 0x9b: state = 240; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 186: // main post-match.
-      switch byte {
-      case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 64; return nil
-      case 0x9c: state = 254; return nil
-      case 0xa0: state = 255; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 187: // main post-match.
-      switch byte {
-      case 0x80...0xb9: state = 64; return nil
-      case 0xba: state = 241; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 188: // main post-match.
-      switch byte {
-      case 0xa0...0xa7: state = 64; return nil
-      case 0xa8: state = 556; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 189: // main post-match.
-      switch byte {
-      case 0x80...0xab, 0xb0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 190: // main post-match.
-      switch byte {
-      case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 191: // main post-match.
-      switch byte {
-      case 0x81...0x8f, 0x91...0xb5: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 192: // main post-match.
-      switch byte {
-      case 0x80...0x8c, 0x90...0xae, 0xb0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 193: // main post-match.
-      switch byte {
-      case 0x80...0xac: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 194: // main post-match.
-      switch byte {
-      case 0xa6...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 195: // main post-match.
-      switch byte {
-      case 0x80...0x82, 0x90...0xbb: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 196: // main post-match.
-      switch byte {
-      case 0x80...0x88, 0x90, 0x91: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 197: // main post-match.
-      switch byte {
-      case 0x80...0x92, 0xa0...0xac, 0xb0...0xb6: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 198: // main post-match.
-      switch byte {
-      case 0x80...0xb3: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 199: // main post-match.
-      switch byte {
-      case 0x80...0x94: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 200: // main post-match.
-      switch byte {
-      case 0x80...0x8b, 0x90...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 201: // main post-match.
-      switch byte {
-      case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 202: // main post-match.
-      switch byte {
-      case 0x80...0x87, 0x90...0xad: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 203: // main post-match.
-      switch byte {
-      case 0x90...0x9e, 0xa0...0xa7, 0xb0, 0xb3...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 204: // main post-match.
-      switch byte {
-      case 0x80...0x8b, 0x90...0x9e: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 205: // main post-match.
-      switch byte {
-      case 0x80...0x91: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 206: // main post-match.
-      switch byte {
-      case 0x80: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 207: // main post-match.
-      switch byte {
-      case 0x80...0x85, 0x87, 0x8d, 0x90...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 208: // main post-match.
-      switch byte {
-      case 0x80...0x88, 0x8a...0x8d, 0x90...0x96, 0x98, 0x9a...0x9d, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 209: // main post-match.
-      switch byte {
-      case 0x80...0x88, 0x8a...0x8d, 0x90...0xb0, 0xb2...0xb5, 0xb8...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 210: // main post-match.
-      switch byte {
-      case 0x80, 0x82...0x85, 0x88...0x96, 0x98...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 211: // main post-match.
-      switch byte {
-      case 0x80...0x90, 0x92...0x95, 0x98...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 212: // main post-match.
-      switch byte {
-      case 0x80...0x9a, 0x9d...0xbc: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 213: // main post-match.
-      switch byte {
-      case 0x80...0xb5, 0xb8...0xbd: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 214: // main post-match.
-      switch byte {
-      case 0x80...0x9c, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 215: // main post-match.
-      switch byte {
-      case 0x80...0xb8: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 216: // main post-match.
-      switch byte {
-      case 0x80...0x8c, 0x8e...0x94, 0xa0...0xb6: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 217: // main post-match.
-      switch byte {
-      case 0x80...0x93, 0xa0...0xac, 0xae...0xb0, 0xb2, 0xb3: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 218: // main post-match.
-      switch byte {
-      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xb9: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 219: // main post-match.
-      switch byte {
-      case 0x80...0x8d, 0x90...0x99, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 220: // main post-match.
-      switch byte {
-      case 0x80...0xb7: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 221: // main post-match.
-      switch byte {
-      case 0x80...0xaa, 0xb0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 222: // main post-match.
-      switch byte {
-      case 0x80...0xb5: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 223: // main post-match.
-      switch byte {
-      case 0x80...0x9e, 0xa0...0xab, 0xb0...0xbb: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 224: // main post-match.
-      switch byte {
-      case 0x80, 0x84...0xad, 0xb0...0xb4: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 225: // main post-match.
-      switch byte {
-      case 0x80...0x89, 0x90...0x9a, 0x9e...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 226: // main post-match.
-      switch byte {
-      case 0x80...0x9b, 0x9e...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 227: // main post-match.
-      switch byte {
-      case 0x80...0x9e, 0xa0...0xbc, 0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 228: // main post-match.
-      switch byte {
-      case 0x80...0x89, 0x90...0x99, 0xa0...0xad, 0xb0...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 229: // main post-match.
-      switch byte {
-      case 0x80...0x8b, 0x90...0xbc: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 230: // main post-match.
-      switch byte {
-      case 0x80...0xb3, 0xbc...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 231: // main post-match.
-      switch byte {
-      case 0x80...0xb7, 0xbb...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 232: // main post-match.
-      switch byte {
-      case 0x80...0x89, 0x8d...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 233: // main post-match.
-      switch byte {
-      case 0x80...0x88: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 234: // main post-match.
-      switch byte {
-      case 0x80...0x87, 0x90...0xb6, 0xb8, 0xb9: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 235: // main post-match.
-      switch byte {
-      case 0x80...0xb5, 0xbb...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 236: // main post-match.
-      switch byte {
-      case 0x80...0x95, 0x98...0x9d, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 237: // main post-match.
-      switch byte {
-      case 0x80...0x85, 0x88...0x8d, 0x90...0x97, 0x99, 0x9b, 0x9d, 0x9f...0xbd: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 238: // main post-match.
-      switch byte {
-      case 0x80...0xb4, 0xb6...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 239: // main post-match.
-      switch byte {
-      case 0x80...0x84, 0x86...0x93, 0x96...0x9b, 0x9d...0xaf, 0xb2...0xb4, 0xb6...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 240: // main post-match.
-      switch byte {
-      case 0x80...0x96: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 241: // main post-match.
-      switch byte {
-      case 0x80...0xa1: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 242: // main post-match.
-      switch byte {
-      case 0x80, 0x81: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 243: // main post-match.
-      switch byte {
-      case 0x80...0xaa, 0xb0...0xbc: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 244: // main post-match.
-      switch byte {
-      case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 245: // main post-match.
-      switch byte {
-      case 0x80...0xae, 0xb0...0xb4: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 246: // main post-match.
-      switch byte {
-      case 0x80...0x83: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 247: // main post-match.
-      switch byte {
-      case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 248: // main post-match.
-      switch byte {
-      case 0x90...0xad, 0xb0...0xb5: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 249: // main post-match.
-      switch byte {
-      case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 250: // main post-match.
-      switch byte {
-      case 0x80...0x8f: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 251: // main post-match.
-      switch byte {
-      case 0x80...0x84, 0x90...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 252: // main post-match.
-      switch byte {
-      case 0x8f...0x9f: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 253: // main post-match.
-      switch byte {
-      case 0xa0: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 254: // main post-match.
-      switch byte {
-      case 0x80...0xb4: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 255: // main post-match.
-      switch byte {
-      case 0x80...0x9d, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 256: // main pre-match.
-      switch byte {
-      case 0x80...0x87, 0x8a...0x95, 0x98...0x9d, 0xa0...0xa4, 0xa6...0xae, 0xb0...0xb3, 0xb9: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 257: // main pre-match.
-      switch byte {
-      case 0x80...0x88, 0x8a...0x8d, 0x90...0x93, 0x96...0x9c, 0xa2, 0xa3, 0xab, 0xb0...0xb2: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 258: // main pre-match.
-      switch byte {
-      case 0x80...0x8e, 0x90...0x95: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 259: // main pre-match.
-      switch byte {
-      case 0x80...0x90: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 260: // main pre-match.
-      switch byte {
-      case 0x90...0x99: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 261: // main pre-match.
-      switch byte {
-      case 0xa0...0xa9, 0xab...0xae, 0xbc...0xbf: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 262: // main pre-match.
-      switch byte {
-      case 0x80...0xab: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 263: // main pre-match.
-      switch byte {
-      case 0x80, 0xb0...0xb2: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 264: // main pre-match.
-      switch byte {
-      case 0x80...0x89, 0x8c, 0x8d, 0x90...0xaa: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 265: // main pre-match.
-      switch byte {
-      case 0x80, 0xa0...0xa5, 0xb8...0xbb: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 266: // main pre-match.
-      switch byte {
-      case 0x80...0x89, 0x8c...0xa2, 0xa4...0xa7: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 267: // main pre-match.
-      switch byte {
-      case 0x80...0xba: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 268: // main pre-match.
-      switch byte {
-      case 0xa0...0xa8: state = 120; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 269: // flt.
-      switch byte {
-      case 0x30...0x39: state = 269; return nil
-      default:
-        start_main()
-        return flushToken(kind: .flt)
-      }
-    case 270: // main post-match.
-      switch byte {
-      case 0x84...0x86: state = 64; return nil
-      case 0x87: state = 555; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 271: // main post-match.
-      switch byte {
-      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 370; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 272: // main post-match.
-      switch byte {
-      case 0x80...0x8a, 0x90...0xa9, 0xaf...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 273: // main post-match.
-      switch byte {
-      case 0x80...0x9f, 0xb0, 0xb1, 0xb4...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 274: // main post-match.
-      switch byte {
-      case 0x80...0x8e, 0x90...0x9c, 0xa0...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 275: // main post-match.
-      switch byte {
-      case 0x90...0xb0: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 276: // main post-match.
-      switch byte {
-      case 0x80...0xa6: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 277: // main post-match.
-      switch byte {
-      case 0x80...0x8a, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 278: // main post-match.
-      switch byte {
-      case 0x80...0xb3, 0xb6...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 279: // main post-match.
-      switch byte {
-      case 0x80...0x95, 0x98...0xb9, 0xbd...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 280: // main post-match.
-      switch byte {
-      case 0x80...0x88, 0x8a...0x91, 0xac...0xaf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 281: // main post-match.
-      switch byte {
-      case 0x80...0xae, 0xb0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 282: // main post-match.
-      switch byte {
-      case 0x80...0x9e, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 283: // main post-match.
-      switch byte {
-      case 0x80...0xb3, 0xb9...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 284: // main post-match.
-      switch byte {
-      case 0x80...0xa5, 0xa7, 0xad, 0xb0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 285: // main post-match.
-      switch byte {
-      case 0x80...0xa7, 0xaf, 0xb0, 0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 286: // main post-match.
-      switch byte {
-      case 0x80...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xb6, 0xb8...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 287: // main post-match.
-      switch byte {
-      case 0x80...0x86, 0x88...0x8e, 0x90...0x96, 0x98...0x9e, 0xa0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 288: // main post-match.
-      switch byte {
-      case 0x80...0x84: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 289: // main post-match.
-      switch byte {
-      case 0x80...0x99, 0x9b...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 290: // main post-match.
-      switch byte {
-      case 0x80...0x95, 0xb0...0xbb: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 291: // intQuat.
-      switch byte {
-      case 0x30...0x33: state = 291; return nil
-      case 0x5f: state = 634; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intQuat)
-      }
-    case 292: // main post-match.
-      switch byte {
-      case 0x80...0xad, 0xb0...0xbe: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 293: // main post-match.
-      switch byte {
-      case 0x80...0x9b, 0x9e: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 294: // main post-match.
-      switch byte {
-      case 0xa0...0xb4, 0xb6...0xbd: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 295: // main post-match.
-      switch byte {
-      case 0x94...0xa1, 0xa3...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 296: // main post-match.
-      switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 297: // main post-match.
-      switch byte {
-      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbb: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 298: // main post-match.
-      switch byte {
-      case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 299: // main post-match.
-      switch byte {
-      case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb5: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 300: // main post-match.
-      switch byte {
-      case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 301: // main post-match.
-      switch byte {
-      case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 302: // main post-match.
-      switch byte {
-      case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 303: // main post-match.
-      switch byte {
-      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 304: // main post-match.
-      switch byte {
-      case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 305: // main post-match.
-      switch byte {
-      case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 306: // main post-match.
-      switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 307: // main post-match.
-      switch byte {
-      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 308: // main post-match.
-      switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 309: // main post-match.
-      switch byte {
-      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 310: // main post-match.
-      switch byte {
-      case 0x81...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xba, 0xbd...0xbf: state = 62; return nil
-      default:
+    case 76: // main pre-match.
+      switch byte {
+      case 0xa0: state = 103; return nil
+      case 0xa1: state = 104; return nil
+      case 0xa2: state = 105; return nil
+      case 0xa3: state = 106; return nil
+      case 0xa4, 0xa5, 0xbc: state = 63; return nil
+      case 0xa6: state = 107; return nil
+      case 0xa7: state = 108; return nil
+      case 0xa8: state = 109; return nil
+      case 0xa9: state = 110; return nil
+      case 0xaa: state = 111; return nil
+      case 0xab: state = 112; return nil
+      case 0xac: state = 113; return nil
+      case 0xad: state = 114; return nil
+      case 0xae: state = 115; return nil
+      case 0xaf: state = 116; return nil
+      case 0xb0: state = 117; return nil
+      case 0xb1: state = 118; return nil
+      case 0xb2: state = 119; return nil
+      case 0xb3: state = 120; return nil
+      case 0xb4: state = 121; return nil
+      case 0xb5: state = 122; return nil
+      case 0xb6: state = 123; return nil
+      case 0xb7: state = 124; return nil
+      case 0xb8: state = 125; return nil
+      case 0xb9: state = 126; return nil
+      case 0xba: state = 127; return nil
+      case 0xbb: state = 128; return nil
+      case 0xbd: state = 129; return nil
+      case 0xbe: state = 130; return nil
+      case 0xbf: state = 131; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 77: // main pre-match.
+      switch byte {
+      case 0x80...0x82, 0x84...0x88, 0x90...0x99, 0x9e, 0xac, 0xae, 0xb4...0xb6, 0xb8...0xbb: state = 63; return nil
+      case 0x83: state = 265; return nil
+      case 0x89: state = 266; return nil
+      case 0x8a: state = 267; return nil
+      case 0x8b: state = 268; return nil
+      case 0x8c: state = 269; return nil
+      case 0x8d: state = 270; return nil
+      case 0x8e: state = 96; return nil
+      case 0x8f: state = 271; return nil
+      case 0x9a: state = 272; return nil
+      case 0x9b: state = 187; return nil
+      case 0x9c: state = 273; return nil
+      case 0x9d: state = 274; return nil
+      case 0x9f: state = 275; return nil
+      case 0xa0: state = 276; return nil
+      case 0xa1: state = 230; return nil
+      case 0xa2: state = 277; return nil
+      case 0xa3: state = 169; return nil
+      case 0xa4: state = 278; return nil
+      case 0xa5: state = 279; return nil
+      case 0xa6: state = 280; return nil
+      case 0xa7: state = 281; return nil
+      case 0xa8: state = 282; return nil
+      case 0xa9: state = 283; return nil
+      case 0xaa: state = 284; return nil
+      case 0xad: state = 285; return nil
+      case 0xaf: state = 286; return nil
+      case 0xb0: state = 287; return nil
+      case 0xb1: state = 288; return nil
+      case 0xb2: state = 289; return nil
+      case 0xb3: state = 290; return nil
+      case 0xb7: state = 291; return nil
+      case 0xbc: state = 292; return nil
+      case 0xbd: state = 293; return nil
+      case 0xbe: state = 218; return nil
+      case 0xbf: state = 294; return nil
+      default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 311: // main post-match.
+    case 78: // main pre-match.
       switch byte {
-      case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 62; return nil
+      case 0x80: state = 195; return nil
+      case 0x81: state = 196; return nil
+      case 0x82: state = 197; return nil
+      case 0x83: state = 198; return nil
+      case 0x84, 0x85, 0x87...0x8e, 0x92...0xac, 0xb2, 0xb8, 0xbc...0xbe: state = 63; return nil
+      case 0x86: state = 199; return nil
+      case 0x8f: state = 100; return nil
+      case 0x90: state = 200; return nil
+      case 0x91: state = 201; return nil
+      case 0xad: state = 202; return nil
+      case 0xae: state = 203; return nil
+      case 0xaf: state = 204; return nil
+      case 0xb0: state = 205; return nil
+      case 0xb1: state = 152; return nil
+      case 0xb3: state = 206; return nil
+      case 0xb4: state = 207; return nil
+      case 0xb5: state = 208; return nil
+      case 0xb6: state = 209; return nil
+      case 0xb7: state = 210; return nil
+      case 0xb9: state = 211; return nil
+      case 0xba: state = 212; return nil
+      case 0xbb: state = 213; return nil
+      case 0xbf: state = 214; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 312: // main post-match.
+    case 79: // main pre-match.
       switch byte {
-      case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 62; return nil
+      case 0x80, 0x83, 0x85, 0x89, 0x8a, 0x8c...0xbf: state = 63; return nil
+      case 0x81: state = 99; return nil
+      case 0x82: state = 148; return nil
+      case 0x84: state = 149; return nil
+      case 0x86: state = 150; return nil
+      case 0x87: state = 151; return nil
+      case 0x88: state = 152; return nil
+      case 0x8b: state = 100; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 313: // main post-match.
+    case 80: // main pre-match.
       switch byte {
-      case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 62; return nil
+      case 0x80...0xb5, 0xb7...0xbf: state = 63; return nil
+      case 0xb6: state = 169; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 314: // main post-match.
+    case 81: // main pre-match.
       switch byte {
-      case 0x81...0xba, 0xbf: state = 62; return nil
+      case 0x80...0xbf: state = 63; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 315: // main post-match.
+    case 82: // main pre-match.
       switch byte {
-      case 0x80...0x9b: state = 62; return nil
+      case 0x80...0xbe: state = 63; return nil
+      case 0xbf: state = 146; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 316: // main post-match.
+    case 83: // main pre-match.
       switch byte {
-      case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 62; return nil
+      case 0x80...0x91, 0x94...0x97, 0x99, 0x9a, 0x9c, 0x9d, 0xa2, 0xa4, 0xa6, 0xaa, 0xae, 0xb0...0xbf: state = 63; return nil
+      case 0x92: state = 298; return nil
+      case 0x93: state = 299; return nil
+      case 0x98: state = 300; return nil
+      case 0x9b, 0xa1: state = 230; return nil
+      case 0x9e: state = 301; return nil
+      case 0x9f: state = 302; return nil
+      case 0xa0: state = 303; return nil
+      case 0xa3: state = 304; return nil
+      case 0xa5: state = 305; return nil
+      case 0xa7: state = 306; return nil
+      case 0xa8: state = 307; return nil
+      case 0xa9: state = 308; return nil
+      case 0xab: state = 309; return nil
+      case 0xac: state = 310; return nil
+      case 0xad: state = 311; return nil
+      case 0xaf: state = 312; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 317: // main post-match.
+    case 84: // main pre-match.
       switch byte {
-      case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 62; return nil
+      case 0x80...0x9d: state = 63; return nil
+      case 0x9e: state = 151; return nil
+      case 0x9f: state = 489; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 318: // main post-match.
+    case 85: // main pre-match.
       switch byte {
-      case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 62; return nil
+      case 0xa4...0xa8, 0xaa, 0xae, 0xb0...0xb4, 0xba, 0xbd: state = 63; return nil
+      case 0xa9: state = 88; return nil
+      case 0xab: state = 89; return nil
+      case 0xac: state = 90; return nil
+      case 0xad: state = 91; return nil
+      case 0xaf: state = 92; return nil
+      case 0xb5: state = 93; return nil
+      case 0xb6: state = 94; return nil
+      case 0xb7: state = 95; return nil
+      case 0xb8: state = 96; return nil
+      case 0xb9: state = 97; return nil
+      case 0xbb: state = 98; return nil
+      case 0xbc: state = 99; return nil
+      case 0xbe: state = 100; return nil
+      case 0xbf: state = 101; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 319: // main post-match.
+    case 86: // main pre-match.
       switch byte {
-      case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 62; return nil
+      case 0x90: state = 154; return nil
+      case 0x91: state = 155; return nil
+      case 0x92: state = 156; return nil
+      case 0x93: state = 157; return nil
+      case 0x94: state = 158; return nil
+      case 0x96: state = 159; return nil
+      case 0x97, 0xa0...0xa9: state = 81; return nil
+      case 0x98: state = 160; return nil
+      case 0x9b: state = 161; return nil
+      case 0x9d: state = 162; return nil
+      case 0x9e: state = 163; return nil
+      case 0x9f: state = 164; return nil
+      case 0xaa: state = 165; return nil
+      case 0xab: state = 166; return nil
+      case 0xac: state = 167; return nil
+      case 0xaf: state = 168; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 320: // main post-match.
+    case 87: // main pre-match.
       switch byte {
-      case 0x80...0x8c, 0x8e...0x9a: state = 62; return nil
+      case 0xa0: state = 297; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 321: // main pre-match.
+    case 88: // main pre-match.
       switch byte {
       case 0x80...0xad, 0xb0...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 322: // main pre-match.
+    case 89: // main pre-match.
       switch byte {
       case 0x80...0x99: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 323: // main pre-match.
+    case 90: // main pre-match.
       switch byte {
       case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 324: // main pre-match.
+    case 91: // main pre-match.
       switch byte {
       case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 325: // main pre-match.
+    case 92: // main pre-match.
       switch byte {
       case 0x80, 0x81, 0x93...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 326: // main pre-match.
+    case 93: // main pre-match.
       switch byte {
       case 0x90...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 327: // main pre-match.
+    case 94: // main pre-match.
       switch byte {
       case 0x80...0x8f, 0x92...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 328: // main pre-match.
+    case 95: // main pre-match.
       switch byte {
       case 0x80...0x87, 0xb0...0xbd: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 329: // main pre-match.
+    case 96: // main pre-match.
       switch byte {
       case 0x80...0x99, 0xa0...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 330: // main pre-match.
+    case 97: // main pre-match.
       switch byte {
       case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 331: // main pre-match.
+    case 98: // main pre-match.
       switch byte {
       case 0x80...0xbc: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 332: // main pre-match.
+    case 99: // main pre-match.
       switch byte {
       case 0x81...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 333: // main pre-match.
+    case 100: // main pre-match.
+      switch byte {
+      case 0x80...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 101: // main pre-match.
       switch byte {
       case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 334: // main pre-match.
+    case 102: // sym.
       switch byte {
-      case 0x80: state = 428; return nil
-      case 0x81: state = 429; return nil
-      case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 92; return nil
-      case 0x83: state = 104; return nil
-      case 0x84: state = 430; return nil
-      case 0x86: state = 431; return nil
-      case 0x87: state = 432; return nil
-      case 0x8a: state = 433; return nil
-      case 0x8b: state = 434; return nil
-      case 0x8c: state = 171; return nil
-      case 0x8d: state = 435; return nil
-      case 0x8e: state = 436; return nil
-      case 0x8f: state = 437; return nil
-      case 0x92: state = 438; return nil
-      case 0x93: state = 439; return nil
-      case 0x94: state = 440; return nil
-      case 0x95: state = 441; return nil
-      case 0x9c: state = 383; return nil
-      case 0x9d: state = 442; return nil
-      case 0xa0: state = 443; return nil
-      case 0xa1: state = 444; return nil
-      case 0xa2: state = 445; return nil
-      case 0xa3: state = 446; return nil
-      case 0xa4: state = 447; return nil
-      case 0xa6: state = 448; return nil
-      case 0xa7: state = 327; return nil
-      case 0xa8: state = 449; return nil
-      case 0xa9: state = 450; return nil
-      case 0xaa: state = 451; return nil
-      case 0xab: state = 452; return nil
-      case 0xac: state = 453; return nil
-      case 0xad: state = 454; return nil
-      case 0xae: state = 455; return nil
-      case 0xb1: state = 456; return nil
-      case 0xb2: state = 457; return nil
-      case 0xb3: state = 458; return nil
-      case 0xb9: state = 459; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 335: // main pre-match.
-      switch byte {
-      case 0x80, 0x86, 0x90, 0x92, 0x98: state = 92; return nil
-      case 0x81: state = 533; return nil
-      case 0x82: state = 534; return nil
-      case 0x83: state = 535; return nil
-      case 0x84: state = 487; return nil
-      case 0x85: state = 536; return nil
-      case 0x87: state = 537; return nil
-      case 0x88: state = 538; return nil
-      case 0x8a: state = 539; return nil
-      case 0x8b: state = 540; return nil
-      case 0x8c: state = 541; return nil
-      case 0x8d: state = 542; return nil
-      case 0x91: state = 543; return nil
-      case 0x93: state = 544; return nil
-      case 0x96: state = 545; return nil
-      case 0x97: state = 522; return nil
-      case 0x99: state = 546; return nil
-      case 0x9a: state = 376; return nil
-      case 0x9b: state = 547; return nil
-      case 0x9c: state = 548; return nil
-      case 0xa2: state = 549; return nil
-      case 0xa3: state = 550; return nil
-      case 0xab: state = 467; return nil
-      case 0xb0: state = 551; return nil
-      case 0xb1: state = 552; return nil
-      case 0xb2: state = 553; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 336: // main pre-match.
-      switch byte {
-      case 0x80...0x8d, 0x90, 0x92...0x94: state = 92; return nil
-      case 0x8e: state = 322; return nil
-      case 0x91: state = 349; return nil
-      case 0x95: state = 350; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 337: // main pre-match.
-      switch byte {
-      case 0x80...0x8f: state = 92; return nil
-      case 0x90: state = 391; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 338: // main pre-match.
-      switch byte {
-      case 0x90...0x98: state = 92; return nil
-      case 0x99: state = 490; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 339: // main pre-match.
-      switch byte {
-      case 0xa0...0xa7, 0xac, 0xbc: state = 92; return nil
-      case 0xa8: state = 467; return nil
-      case 0xa9: state = 637; return nil
-      case 0xab: state = 638; return nil
-      case 0xad: state = 639; return nil
-      case 0xae: state = 640; return nil
-      case 0xbd: state = 641; return nil
-      case 0xbe: state = 642; return nil
-      case 0xbf: state = 643; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 340: // main pre-match.
-      switch byte {
-      case 0x80...0x9e, 0xa0...0xaa: state = 92; return nil
-      case 0x9f: state = 413; return nil
-      case 0xab: state = 457; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 341: // main pre-match.
-      switch byte {
-      case 0x80: state = 406; return nil
-      case 0xb0: state = 92; return nil
-      case 0xb1: state = 407; return nil
-      case 0xb2: state = 408; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 342: // main pre-match.
-      switch byte {
-      case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 92; return nil
-      case 0x83: state = 351; return nil
-      case 0x84: state = 352; return nil
-      case 0x85: state = 353; return nil
-      case 0x87: state = 354; return nil
-      case 0x89: state = 355; return nil
-      case 0x8d: state = 356; return nil
-      case 0x91: state = 357; return nil
-      case 0x92: state = 358; return nil
-      case 0x93: state = 359; return nil
-      case 0x94: state = 360; return nil
-      case 0x95: state = 361; return nil
-      case 0x9a: state = 362; return nil
-      case 0x9f: state = 363; return nil
-      case 0xaa: state = 364; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 343: // main pre-match.
-      switch byte {
-      case 0x80: state = 624; return nil
-      case 0xa0...0xa2, 0xa4: state = 92; return nil
-      case 0xa3: state = 625; return nil
-      case 0xa5: state = 626; return nil
-      case 0xb8: state = 627; return nil
-      case 0xb9: state = 628; return nil
-      case 0xba: state = 629; return nil
-      case 0xbb: state = 630; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 344: // main pre-match.
-      switch byte {
-      case 0x80, 0x85: state = 409; return nil
-      case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 92; return nil
-      case 0x82: state = 410; return nil
-      case 0x83: state = 411; return nil
-      case 0x84: state = 412; return nil
-      case 0x86: state = 413; return nil
-      case 0x87: state = 414; return nil
-      case 0x88: state = 415; return nil
-      case 0x89: state = 416; return nil
-      case 0x9b: state = 417; return nil
-      case 0x9d: state = 169; return nil
-      case 0x9f: state = 418; return nil
-      case 0xa0: state = 153; return nil
-      case 0xa1: state = 419; return nil
-      case 0xa2: state = 420; return nil
-      case 0xa4: state = 421; return nil
-      case 0xa5: state = 422; return nil
-      case 0xa6: state = 423; return nil
-      case 0xa7: state = 424; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 345: // main pre-match.
-      switch byte {
-      case 0x80...0x9a, 0x9c...0xbf: state = 92; return nil
-      case 0x9b: state = 635; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 346: // main pre-match.
-      switch byte {
-      case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 92; return nil
-      case 0x9c: state = 631; return nil
-      case 0xa0: state = 632; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 347: // main pre-match.
-      switch byte {
-      case 0x80...0xb9: state = 92; return nil
-      case 0xba: state = 405; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 348: // main pre-match.
-      switch byte {
-      case 0xa0...0xa7: state = 92; return nil
-      case 0xa8: state = 522; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 349: // main pre-match.
-      switch byte {
-      case 0x80...0xae, 0xb0...0xb4: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 350: // main pre-match.
-      switch byte {
-      case 0x80...0x83: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 351: // main pre-match.
-      switch byte {
-      case 0x80...0xb5: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 352: // main pre-match.
-      switch byte {
-      case 0x80...0xa6, 0xa9...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 353: // main pre-match.
-      switch byte {
-      case 0x80...0xb2, 0xbb...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 354: // main pre-match.
-      switch byte {
-      case 0x80...0xa8: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 355: // main pre-match.
-      switch byte {
-      case 0x80...0x85: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 356: // main pre-match.
-      switch byte {
-      case 0x80...0x96, 0xa0...0xb1: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 357: // main pre-match.
-      switch byte {
-      case 0x80...0x94, 0x96...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 358: // main pre-match.
-      switch byte {
-      case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 359: // main pre-match.
-      switch byte {
-      case 0x80...0x83, 0x85...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 360: // main pre-match.
-      switch byte {
-      case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 361: // main pre-match.
-      switch byte {
-      case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 362: // main pre-match.
-      switch byte {
-      case 0x80...0xa5, 0xa8...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 363: // main pre-match.
-      switch byte {
-      case 0x80...0x8b, 0x8e...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 364: // main pre-match.
-      switch byte {
-      case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 365: // intBin.
-      switch byte {
-      case 0x30, 0x31: state = 365; return nil
-      case 0x5f: state = 648; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intBin)
-      }
-    case 366: // main post-match.
-      switch byte {
-      case 0x80...0x96, 0x99...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 367: // main post-match.
-      switch byte {
-      case 0x85...0xad, 0xb1...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 368: // main post-match.
-      switch byte {
-      case 0x80...0x8e, 0x90...0xba: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 369: // main post-match.
-      switch byte {
-      case 0x80...0xa3, 0xb0...0xbf: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 370: // intHex.
-      switch byte {
-      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 370; return nil
-      case 0x5f: state = 271; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intHex)
-      }
-    case 371: // int.
-      switch byte {
-      case 0x30...0x39: state = 371; return nil
-      case 0x5f: state = 53; return nil
-      default:
-        start_main()
-        return flushToken(kind: .int)
-      }
-    case 372: // main pre-match.
-      switch byte {
-      case 0x84...0x86: state = 92; return nil
-      case 0x87: state = 532; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 373: // main pre-match.
-      switch byte {
-      case 0x80...0x8c, 0x90...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 374: // main pre-match.
-      switch byte {
-      case 0x80...0x86, 0x90...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 375: // main pre-match.
-      switch byte {
-      case 0x80...0xab: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 376: // main pre-match.
-      switch byte {
-      case 0x80...0xb7: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 377: // main pre-match.
-      switch byte {
-      case 0x80...0xae, 0xb0...0xb7: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 378: // main pre-match.
-      switch byte {
-      case 0xb7...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 379: // main pre-match.
-      switch byte {
-      case 0x80...0xab, 0xb0...0xb9: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 380: // main pre-match.
-      switch byte {
-      case 0x80...0x85, 0x8e...0x99, 0xa0...0xbd: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 381: // main pre-match.
-      switch byte {
-      case 0x80...0x93, 0x9f...0xbc: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 382: // main pre-match.
-      switch byte {
-      case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 383: // main pre-match.
-      switch byte {
-      case 0x80...0xb6: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 384: // main pre-match.
-      switch byte {
-      case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 385: // main pre-match.
-      switch byte {
-      case 0x80...0x82, 0x9b...0xb6: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 386: // main pre-match.
-      switch byte {
-      case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 387: // main pre-match.
-      switch byte {
-      case 0x80...0xa5, 0xb0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 388: // main pre-match.
-      switch byte {
-      case 0x80...0xad, 0xb0...0xb9: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 389: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x72, 0x74...0x7a: state = 40; return nil
-      case 0x73: state = 531; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 53; return nil
+      case 0x74: state = 147; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 390: // main post-match.
+    case 103: // main pre-match.
       switch byte {
-      case 0x80...0x86, 0x8b...0xbb: state = 62; return nil
+      case 0x80...0xad, 0xb0...0xbe: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 391: // main pre-match.
+    case 104: // main pre-match.
       switch byte {
-      case 0x80...0xae: state = 5; return nil
+      case 0x80...0x9b, 0x9e: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 392: // main post-match.
+    case 105: // main pre-match.
       switch byte {
-      case 0x80...0xa6, 0xa9...0xbf: state = 62; return nil
+      case 0xa0...0xb4, 0xb6...0xbd: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 393: // main post-match.
+    case 106: // main pre-match.
       switch byte {
-      case 0x80...0xb2, 0xbb...0xbf: state = 62; return nil
+      case 0x94...0xa1, 0xa3...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 394: // main post-match.
+    case 107: // main pre-match.
       switch byte {
-      case 0x80...0xa8: state = 62; return nil
+      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 395: // main post-match.
+    case 108: // main pre-match.
       switch byte {
-      case 0x80...0x85: state = 62; return nil
+      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbb: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 396: // main post-match.
+    case 109: // main pre-match.
       switch byte {
-      case 0x80...0x96, 0xa0...0xb1: state = 62; return nil
+      case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 397: // main post-match.
+    case 110: // main pre-match.
       switch byte {
-      case 0x80...0x94, 0x96...0xbf: state = 62; return nil
+      case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb5: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 398: // main post-match.
+    case 111: // main pre-match.
       switch byte {
-      case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 62; return nil
+      case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 399: // main post-match.
+    case 112: // main pre-match.
       switch byte {
-      case 0x80...0x83, 0x85...0xbf: state = 62; return nil
+      case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 400: // main post-match.
+    case 113: // main pre-match.
       switch byte {
-      case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 62; return nil
+      case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 401: // main post-match.
+    case 114: // main pre-match.
       switch byte {
-      case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 62; return nil
+      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 402: // main post-match.
+    case 115: // main pre-match.
       switch byte {
-      case 0x80...0xa5, 0xa8...0xbf: state = 62; return nil
+      case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 403: // main post-match.
+    case 116: // main pre-match.
       switch byte {
-      case 0x80...0x8b, 0x8e...0xbf: state = 62; return nil
+      case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 404: // main post-match.
+    case 117: // main pre-match.
       switch byte {
-      case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 62; return nil
+      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 405: // main pre-match.
+    case 118: // main pre-match.
       switch byte {
-      case 0x80...0xa1: state = 5; return nil
+      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 406: // main pre-match.
+    case 119: // main pre-match.
       switch byte {
-      case 0x80, 0x81: state = 5; return nil
+      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 407: // main pre-match.
+    case 120: // main pre-match.
       switch byte {
-      case 0x80...0xaa, 0xb0...0xbc: state = 5; return nil
+      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 408: // main pre-match.
+    case 121: // main pre-match.
       switch byte {
-      case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 5; return nil
+      case 0x81...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xba, 0xbd...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 409: // main pre-match.
+    case 122: // main pre-match.
       switch byte {
-      case 0x80...0xab, 0xb0...0xbf: state = 5; return nil
+      case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 410: // main pre-match.
+    case 123: // main pre-match.
       switch byte {
-      case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 5; return nil
+      case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 411: // main pre-match.
+    case 124: // main pre-match.
       switch byte {
-      case 0x81...0x8f, 0x91...0xb5: state = 5; return nil
+      case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 412: // main pre-match.
+    case 125: // main pre-match.
       switch byte {
-      case 0x80...0x8c, 0x90...0xae, 0xb0...0xbf: state = 5; return nil
+      case 0x81...0xba, 0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 413: // main pre-match.
+    case 126: // main pre-match.
       switch byte {
-      case 0x80...0xac: state = 5; return nil
+      case 0x80...0x9b: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 414: // main pre-match.
+    case 127: // main pre-match.
       switch byte {
-      case 0xa6...0xbf: state = 5; return nil
+      case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 415: // main pre-match.
+    case 128: // main pre-match.
       switch byte {
-      case 0x80...0x82, 0x90...0xbb: state = 5; return nil
+      case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 416: // main pre-match.
+    case 129: // main pre-match.
       switch byte {
-      case 0x80...0x88, 0x90, 0x91: state = 5; return nil
+      case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 417: // main pre-match.
+    case 130: // main pre-match.
       switch byte {
-      case 0x80...0x92, 0xa0...0xac, 0xb0...0xb6: state = 5; return nil
+      case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 418: // main pre-match.
+    case 131: // main pre-match.
       switch byte {
-      case 0x80...0x94: state = 5; return nil
+      case 0x80...0x8c, 0x8e...0x9a: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 419: // main pre-match.
+    case 132: // tagTest.
+      start_main()
+      return flushToken(kind: .tagTest)
+    case 133: // main pre-match.
       switch byte {
-      case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 5; return nil
+      case 0x80...0x87, 0x8a...0x95, 0x98...0x9d, 0xa0...0xa4, 0xa6...0xae, 0xb0...0xb3, 0xb9: state = 44; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 420: // main pre-match.
+    case 134: // main pre-match.
       switch byte {
-      case 0x80...0x87, 0x90...0xad: state = 5; return nil
+      case 0x80...0x88, 0x8a...0x8d, 0x90...0x93, 0x96...0x9c, 0xa2, 0xa3, 0xab, 0xb0...0xb2: state = 44; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 421: // main pre-match.
+    case 135: // main pre-match.
       switch byte {
-      case 0x90...0x9e, 0xa0...0xa7, 0xb0, 0xb3...0xbe: state = 5; return nil
+      case 0x80...0x8e, 0x90...0x95: state = 44; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 422: // main pre-match.
+    case 136: // main pre-match.
       switch byte {
-      case 0x80...0x8b, 0x90...0x9e: state = 5; return nil
+      case 0x80...0x90: state = 44; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 423: // main pre-match.
+    case 137: // main pre-match.
       switch byte {
-      case 0x80...0x91: state = 5; return nil
+      case 0x90...0x99: state = 44; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 424: // main pre-match.
+    case 138: // main pre-match.
       switch byte {
-      case 0x80: state = 5; return nil
+      case 0xa0...0xa9, 0xab...0xae, 0xbc...0xbf: state = 44; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 425: // main pre-match.
+    case 139: // main pre-match.
+      switch byte {
+      case 0x80...0xab: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 140: // main pre-match.
+      switch byte {
+      case 0x80, 0xb0...0xb2: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 141: // main pre-match.
+      switch byte {
+      case 0x80...0x89, 0x8c, 0x8d, 0x90...0xaa: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 142: // main pre-match.
+      switch byte {
+      case 0x80, 0xa0...0xa5, 0xb8...0xbb: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 143: // main pre-match.
+      switch byte {
+      case 0x80...0x89, 0x8c...0xa2, 0xa4...0xa7: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 144: // main pre-match.
+      switch byte {
+      case 0x80...0xba: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 145: // main pre-match.
+      switch byte {
+      case 0xa0...0xa8: state = 44; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 146: // main pre-match.
+      switch byte {
+      case 0x80...0x95: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 147: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x61...0x7a: state = 53; return nil
+      case 0x5f: state = 617; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 148: // main pre-match.
       switch byte {
       case 0x80...0x96, 0x99...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 426: // main pre-match.
+    case 149: // main pre-match.
       switch byte {
       case 0x85...0xad, 0xb1...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 427: // main pre-match.
+    case 150: // main pre-match.
       switch byte {
       case 0x80...0x8e, 0x90...0xba: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 428: // main pre-match.
+    case 151: // main pre-match.
       switch byte {
-      case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 5; return nil
+      case 0x80...0xa3, 0xb0...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 429: // main pre-match.
+    case 152: // main pre-match.
       switch byte {
-      case 0x80...0x8d, 0x90...0x9d: state = 5; return nil
+      case 0x80...0x9e, 0xa0...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 430: // main pre-match.
+    case 153: // main pre-match.
       switch byte {
-      case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 5; return nil
+      case 0x84...0x87: state = 44; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 431: // main pre-match.
+    case 154: // main pre-match.
       switch byte {
-      case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 5; return nil
+      case 0x80: state = 351; return nil
+      case 0x81: state = 352; return nil
+      case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 63; return nil
+      case 0x83: state = 75; return nil
+      case 0x84: state = 353; return nil
+      case 0x86: state = 354; return nil
+      case 0x87: state = 355; return nil
+      case 0x8a: state = 272; return nil
+      case 0x8b: state = 356; return nil
+      case 0x8c: state = 151; return nil
+      case 0x8d: state = 357; return nil
+      case 0x8e: state = 358; return nil
+      case 0x8f: state = 359; return nil
+      case 0x92: state = 360; return nil
+      case 0x93: state = 361; return nil
+      case 0x94: state = 362; return nil
+      case 0x95: state = 363; return nil
+      case 0x9c: state = 307; return nil
+      case 0x9d: state = 364; return nil
+      case 0xa0: state = 365; return nil
+      case 0xa1: state = 366; return nil
+      case 0xa2: state = 367; return nil
+      case 0xa3: state = 368; return nil
+      case 0xa4: state = 369; return nil
+      case 0xa6: state = 370; return nil
+      case 0xa7: state = 94; return nil
+      case 0xa8: state = 371; return nil
+      case 0xa9: state = 372; return nil
+      case 0xaa: state = 373; return nil
+      case 0xab: state = 374; return nil
+      case 0xac: state = 375; return nil
+      case 0xad: state = 376; return nil
+      case 0xae: state = 377; return nil
+      case 0xb1: state = 289; return nil
+      case 0xb2: state = 378; return nil
+      case 0xb3: state = 379; return nil
+      case 0xb9: state = 380; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 432: // main pre-match.
+    case 155: // main pre-match.
       switch byte {
-      case 0x90...0xbd: state = 5; return nil
+      case 0x80, 0x86, 0x90, 0x92, 0x98: state = 63; return nil
+      case 0x81: state = 215; return nil
+      case 0x82: state = 216; return nil
+      case 0x83: state = 217; return nil
+      case 0x84: state = 218; return nil
+      case 0x85: state = 219; return nil
+      case 0x87: state = 220; return nil
+      case 0x88: state = 221; return nil
+      case 0x8a: state = 222; return nil
+      case 0x8b: state = 223; return nil
+      case 0x8c: state = 224; return nil
+      case 0x8d: state = 225; return nil
+      case 0x91: state = 226; return nil
+      case 0x93: state = 227; return nil
+      case 0x96: state = 228; return nil
+      case 0x97: state = 184; return nil
+      case 0x99: state = 229; return nil
+      case 0x9a: state = 230; return nil
+      case 0x9b: state = 231; return nil
+      case 0x9c: state = 232; return nil
+      case 0xa2: state = 233; return nil
+      case 0xa3: state = 234; return nil
+      case 0xab: state = 187; return nil
+      case 0xb0: state = 235; return nil
+      case 0xb1: state = 236; return nil
+      case 0xb2: state = 237; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 433: // main pre-match.
+    case 156: // main pre-match.
       switch byte {
-      case 0x80...0x9c, 0xa0...0xbf: state = 5; return nil
+      case 0x80...0x8d, 0x90, 0x92...0x94: state = 63; return nil
+      case 0x8e: state = 89; return nil
+      case 0x91: state = 185; return nil
+      case 0x95: state = 186; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 434: // main pre-match.
+    case 157: // main pre-match.
       switch byte {
-      case 0x80...0x90, 0xa0...0xbb: state = 5; return nil
+      case 0x80...0x8f: state = 63; return nil
+      case 0x90: state = 525; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 435: // main pre-match.
+    case 158: // main pre-match.
       switch byte {
-      case 0x80...0x8a, 0x90...0xba: state = 5; return nil
+      case 0x90...0x98: state = 63; return nil
+      case 0x99: state = 490; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 436: // main pre-match.
+    case 159: // main pre-match.
       switch byte {
-      case 0x80...0x9d, 0x9f...0xbf: state = 5; return nil
+      case 0xa0...0xa7, 0xac, 0xbc: state = 63; return nil
+      case 0xa8: state = 187; return nil
+      case 0xa9: state = 188; return nil
+      case 0xab: state = 189; return nil
+      case 0xad: state = 190; return nil
+      case 0xae: state = 191; return nil
+      case 0xbd: state = 192; return nil
+      case 0xbe: state = 193; return nil
+      case 0xbf: state = 194; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 437: // main pre-match.
+    case 160: // main pre-match.
       switch byte {
-      case 0x80...0x83, 0x88...0x95: state = 5; return nil
+      case 0x80...0x9e, 0xa0...0xaa: state = 63; return nil
+      case 0x9f: state = 326; return nil
+      case 0xab: state = 378; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 438: // main pre-match.
+    case 161: // main pre-match.
       switch byte {
-      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 5; return nil
+      case 0x80: state = 347; return nil
+      case 0xb0: state = 63; return nil
+      case 0xb1: state = 348; return nil
+      case 0xb2: state = 349; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 439: // main pre-match.
+    case 162: // main pre-match.
       switch byte {
-      case 0x80...0x93, 0x98...0xbb: state = 5; return nil
+      case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 63; return nil
+      case 0x83: state = 169; return nil
+      case 0x84: state = 170; return nil
+      case 0x85: state = 171; return nil
+      case 0x87: state = 172; return nil
+      case 0x89: state = 173; return nil
+      case 0x8d: state = 174; return nil
+      case 0x91: state = 175; return nil
+      case 0x92: state = 176; return nil
+      case 0x93: state = 177; return nil
+      case 0x94: state = 178; return nil
+      case 0x95: state = 179; return nil
+      case 0x9a: state = 180; return nil
+      case 0x9f: state = 181; return nil
+      case 0xaa: state = 182; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 440: // main pre-match.
+    case 163: // main pre-match.
       switch byte {
-      case 0x80...0xa7, 0xb0...0xbf: state = 5; return nil
+      case 0x80: state = 338; return nil
+      case 0xa0...0xa2, 0xa4: state = 63; return nil
+      case 0xa3: state = 339; return nil
+      case 0xa5: state = 340; return nil
+      case 0xb8: state = 341; return nil
+      case 0xb9: state = 342; return nil
+      case 0xba: state = 343; return nil
+      case 0xbb: state = 344; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 441: // main pre-match.
+    case 164: // main pre-match.
       switch byte {
-      case 0x80...0xa3, 0xaf: state = 5; return nil
+      case 0x80, 0x85: state = 280; return nil
+      case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 63; return nil
+      case 0x82: state = 323; return nil
+      case 0x83: state = 324; return nil
+      case 0x84: state = 325; return nil
+      case 0x86: state = 326; return nil
+      case 0x87: state = 327; return nil
+      case 0x88: state = 328; return nil
+      case 0x89: state = 329; return nil
+      case 0x9b: state = 330; return nil
+      case 0x9d: state = 213; return nil
+      case 0x9f: state = 331; return nil
+      case 0xa0: state = 199; return nil
+      case 0xa1: state = 332; return nil
+      case 0xa2: state = 333; return nil
+      case 0xa4: state = 334; return nil
+      case 0xa5: state = 335; return nil
+      case 0xa6: state = 336; return nil
+      case 0xa7: state = 337; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 442: // main pre-match.
+    case 165: // main pre-match.
       switch byte {
-      case 0x80...0x95, 0xa0...0xa7: state = 5; return nil
+      case 0x80...0x9a, 0x9c...0xbf: state = 63; return nil
+      case 0x9b: state = 346; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 443: // main pre-match.
+    case 166: // main pre-match.
       switch byte {
-      case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 5; return nil
+      case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 63; return nil
+      case 0x9c: state = 314; return nil
+      case 0xa0: state = 315; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 444: // main pre-match.
+    case 167: // main pre-match.
       switch byte {
-      case 0x80...0x95, 0x97...0xbf: state = 5; return nil
+      case 0x80...0xb9: state = 63; return nil
+      case 0xba: state = 446; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 445: // main pre-match.
+    case 168: // main pre-match.
       switch byte {
-      case 0x80...0x9e, 0xa7...0xaf: state = 5; return nil
+      case 0xa0...0xa7: state = 63; return nil
+      case 0xa8: state = 184; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 446: // main pre-match.
+    case 169: // main pre-match.
       switch byte {
-      case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 5; return nil
+      case 0x80...0xb5: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 447: // main pre-match.
+    case 170: // main pre-match.
       switch byte {
-      case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 5; return nil
+      case 0x80...0xa6, 0xa9...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 448: // main pre-match.
+    case 171: // main pre-match.
       switch byte {
-      case 0x80...0xb7, 0xbc...0xbf: state = 5; return nil
+      case 0x80...0xb2, 0xbb...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 449: // main pre-match.
+    case 172: // main pre-match.
       switch byte {
-      case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb3, 0xb8...0xba, 0xbf: state = 5; return nil
+      case 0x80...0xa8: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 450: // main pre-match.
+    case 173: // main pre-match.
       switch byte {
-      case 0x80...0x87, 0x90...0x98, 0xa0...0xbf: state = 5; return nil
+      case 0x80...0x85: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 451: // main pre-match.
+    case 174: // main pre-match.
       switch byte {
-      case 0x80...0x9f: state = 5; return nil
+      case 0x80...0x96, 0xa0...0xb1: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 452: // main pre-match.
+    case 175: // main pre-match.
       switch byte {
-      case 0x80...0xa6, 0xab...0xb6: state = 5; return nil
+      case 0x80...0x94, 0x96...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 453: // main pre-match.
+    case 176: // main pre-match.
       switch byte {
-      case 0x80...0xb5, 0xb9...0xbf: state = 5; return nil
+      case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 454: // main pre-match.
+    case 177: // main pre-match.
       switch byte {
-      case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 5; return nil
+      case 0x80...0x83, 0x85...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 455: // main pre-match.
+    case 178: // main pre-match.
       switch byte {
-      case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 5; return nil
+      case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 456: // main pre-match.
+    case 179: // main pre-match.
       switch byte {
-      case 0x80...0x88: state = 5; return nil
+      case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 457: // main pre-match.
+    case 180: // main pre-match.
       switch byte {
-      case 0x80...0xb2: state = 5; return nil
+      case 0x80...0xa5, 0xa8...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 458: // main pre-match.
+    case 181: // main pre-match.
       switch byte {
-      case 0x80...0xb2, 0xba...0xbf: state = 5; return nil
+      case 0x80...0x8b, 0x8e...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 459: // main pre-match.
+    case 182: // main pre-match.
       switch byte {
-      case 0xa0...0xbe: state = 5; return nil
+      case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 460: // main pre-match.
+    case 183: // typeAlias.
+      start_main()
+      return flushToken(kind: .typeAlias)
+    case 184: // main pre-match.
       switch byte {
-      case 0x80...0x85, 0x87, 0x8d, 0x90...0xbf: state = 5; return nil
+      case 0x80...0x9d: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 461: // main pre-match.
+    case 185: // main pre-match.
       switch byte {
-      case 0x80...0x88, 0x8a...0x8d, 0x90...0x96, 0x98, 0x9a...0x9d, 0xa0...0xbf: state = 5; return nil
+      case 0x80...0xae, 0xb0...0xb4: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 462: // main pre-match.
+    case 186: // main pre-match.
       switch byte {
-      case 0x80...0x88, 0x8a...0x8d, 0x90...0xb0, 0xb2...0xb5, 0xb8...0xbe: state = 5; return nil
+      case 0x80...0x83: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 463: // main pre-match.
-      switch byte {
-      case 0x80, 0x82...0x85, 0x88...0x96, 0x98...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 464: // main pre-match.
-      switch byte {
-      case 0x80...0x90, 0x92...0x95, 0x98...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 465: // main pre-match.
-      switch byte {
-      case 0x80...0x9a, 0x9d...0xbc: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 466: // main pre-match.
-      switch byte {
-      case 0x80...0xb5, 0xb8...0xbd: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 467: // main pre-match.
+    case 187: // main pre-match.
       switch byte {
       case 0x80...0xb8: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 468: // main pre-match.
+    case 188: // main pre-match.
       switch byte {
-      case 0x80...0x8c, 0x8e...0x94, 0xa0...0xb6: state = 5; return nil
+      case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 469: // main pre-match.
+    case 189: // main pre-match.
       switch byte {
-      case 0x80...0x93, 0xa0...0xac, 0xae...0xb0, 0xb2, 0xb3: state = 5; return nil
+      case 0x90...0xad, 0xb0...0xb5: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 470: // main pre-match.
+    case 190: // main pre-match.
       switch byte {
-      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xb9: state = 5; return nil
+      case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 471: // main pre-match.
+    case 191: // main pre-match.
       switch byte {
-      case 0x80...0x8d, 0x90...0x99, 0xa0...0xbf: state = 5; return nil
+      case 0x80...0x8f: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 472: // main pre-match.
+    case 192: // main pre-match.
       switch byte {
-      case 0x80...0xaa, 0xb0...0xbf: state = 5; return nil
+      case 0x80...0x84, 0x90...0xbe: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 473: // main pre-match.
+    case 193: // main pre-match.
       switch byte {
-      case 0x80...0x9e, 0xa0...0xab, 0xb0...0xbb: state = 5; return nil
+      case 0x8f...0x9f: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 474: // main pre-match.
+    case 194: // main pre-match.
       switch byte {
-      case 0x80, 0x84...0xad, 0xb0...0xb4: state = 5; return nil
+      case 0xa0: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 475: // main pre-match.
+    case 195: // main pre-match.
       switch byte {
-      case 0x80...0x89, 0x90...0x9a, 0x9e...0xbf: state = 5; return nil
+      case 0x80...0x8a, 0x90...0xa9, 0xaf...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 476: // main pre-match.
+    case 196: // main pre-match.
       switch byte {
-      case 0x80...0x9b, 0x9e...0xbf: state = 5; return nil
+      case 0x80...0x9f, 0xb0, 0xb1, 0xb4...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 477: // main pre-match.
+    case 197: // main pre-match.
       switch byte {
-      case 0x80...0x9e, 0xa0...0xbc, 0xbf: state = 5; return nil
+      case 0x80...0x8e, 0x90...0x9c, 0xa0...0xbe: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 478: // main pre-match.
+    case 198: // main pre-match.
       switch byte {
-      case 0x80...0x89, 0x90...0x99, 0xa0...0xad, 0xb0...0xbe: state = 5; return nil
+      case 0x90...0xb0: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 479: // main pre-match.
+    case 199: // main pre-match.
       switch byte {
-      case 0x80...0x8b, 0x90...0xbc: state = 5; return nil
+      case 0x80...0x8b, 0x90...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 480: // main pre-match.
+    case 200: // main pre-match.
       switch byte {
-      case 0x80...0xb3, 0xbc...0xbf: state = 5; return nil
+      case 0x80...0xa6: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 481: // main pre-match.
+    case 201: // main pre-match.
       switch byte {
-      case 0x80...0xb7, 0xbb...0xbf: state = 5; return nil
+      case 0x80...0x8a, 0xa0...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 482: // main pre-match.
+    case 202: // main pre-match.
       switch byte {
-      case 0x80...0x89, 0x8d...0xbf: state = 5; return nil
+      case 0x80...0xb3, 0xb6...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 483: // main pre-match.
+    case 203: // main pre-match.
       switch byte {
-      case 0x80...0x87, 0x90...0xb6, 0xb8, 0xb9: state = 5; return nil
+      case 0x80...0x95, 0x98...0xb9, 0xbd...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 484: // main pre-match.
+    case 204: // main pre-match.
       switch byte {
-      case 0x80...0xb5, 0xbb...0xbf: state = 5; return nil
+      case 0x80...0x88, 0x8a...0x91, 0xac...0xaf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 485: // main pre-match.
+    case 205: // main pre-match.
       switch byte {
-      case 0x80...0x95, 0x98...0x9d, 0xa0...0xbf: state = 5; return nil
+      case 0x80...0xae, 0xb0...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 486: // main pre-match.
+    case 206: // main pre-match.
       switch byte {
-      case 0x80...0x85, 0x88...0x8d, 0x90...0x97, 0x99, 0x9b, 0x9d, 0x9f...0xbd: state = 5; return nil
+      case 0x80...0xb3, 0xb9...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 487: // main pre-match.
+    case 207: // main pre-match.
+      switch byte {
+      case 0x80...0xa5, 0xa7, 0xad, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 208: // main pre-match.
+      switch byte {
+      case 0x80...0xa7, 0xaf, 0xb0, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 209: // main pre-match.
+      switch byte {
+      case 0x80...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xb6, 0xb8...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 210: // main pre-match.
+      switch byte {
+      case 0x80...0x86, 0x88...0x8e, 0x90...0x96, 0x98...0x9e, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 211: // main pre-match.
+      switch byte {
+      case 0x80...0x84: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 212: // main pre-match.
+      switch byte {
+      case 0x80...0x99, 0x9b...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 213: // main pre-match.
+      switch byte {
+      case 0x80...0xb3: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 214: // main pre-match.
+      switch byte {
+      case 0x80...0x95, 0xb0...0xbb: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 215: // main pre-match.
+      switch byte {
+      case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 216: // main pre-match.
+      switch byte {
+      case 0x80...0xbc, 0xbe, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 217: // main pre-match.
+      switch byte {
+      case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 218: // main pre-match.
       switch byte {
       case 0x80...0xb4, 0xb6...0xbf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 488: // main pre-match.
+    case 219: // main pre-match.
+      switch byte {
+      case 0x80...0x83, 0x90...0xb6: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 220: // main pre-match.
+      switch byte {
+      case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 221: // main pre-match.
+      switch byte {
+      case 0x80...0x91, 0x93...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 222: // main pre-match.
+      switch byte {
+      case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 223: // main pre-match.
+      switch byte {
+      case 0x80...0xaa, 0xb0...0xb9: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 224: // main pre-match.
+      switch byte {
+      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 225: // main pre-match.
+      switch byte {
+      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 226: // main pre-match.
+      switch byte {
+      case 0x80...0x99, 0x9b, 0x9d: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 227: // main pre-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0x99: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 228: // main pre-match.
+      switch byte {
+      case 0x80...0xb5, 0xb8...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 229: // main pre-match.
+      switch byte {
+      case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 230: // main pre-match.
+      switch byte {
+      case 0x80...0xb7: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 231: // main pre-match.
+      switch byte {
+      case 0x80...0x89: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 232: // main pre-match.
+      switch byte {
+      case 0x80...0x99, 0x9d...0xab, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 233: // main pre-match.
+      switch byte {
+      case 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 234: // main pre-match.
+      switch byte {
+      case 0x80...0xb2, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 235: // main pre-match.
+      switch byte {
+      case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 236: // main pre-match.
+      switch byte {
+      case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 237: // main pre-match.
+      switch byte {
+      case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 238: // comment.
+      switch byte {
+      case 0x20...0x7e: state = 238; return nil
+      case 0xc2: state = 239; return nil
+      case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 240; return nil
+      case 0xcd: state = 241; return nil
+      case 0xce: state = 242; return nil
+      case 0xd4: state = 243; return nil
+      case 0xd5: state = 244; return nil
+      case 0xd6: state = 245; return nil
+      case 0xd7: state = 246; return nil
+      case 0xd8: state = 247; return nil
+      case 0xdb: state = 248; return nil
+      case 0xdc: state = 249; return nil
+      case 0xdd: state = 250; return nil
+      case 0xde: state = 251; return nil
+      case 0xdf: state = 252; return nil
+      case 0xe0: state = 253; return nil
+      case 0xe1: state = 254; return nil
+      case 0xe2: state = 255; return nil
+      case 0xe3: state = 256; return nil
+      case 0xe4: state = 257; return nil
+      case 0xe5...0xe8, 0xeb, 0xec: state = 258; return nil
+      case 0xe9: state = 259; return nil
+      case 0xea: state = 260; return nil
+      case 0xed: state = 261; return nil
+      case 0xef: state = 262; return nil
+      case 0xf0: state = 263; return nil
+      case 0xf3: state = 264; return nil
+      default:
+        start_main()
+        return flushToken(kind: .comment)
+      }
+    case 239: // main post-match.
+      switch byte {
+      case 0xa0...0xac, 0xae...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 240: // main post-match.
+      switch byte {
+      case 0x80...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 241: // main post-match.
+      switch byte {
+      case 0x80...0xb7, 0xba...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 242: // main post-match.
+      switch byte {
+      case 0x84...0x8a, 0x8c, 0x8e...0xa1, 0xa3...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 243: // main post-match.
+      switch byte {
+      case 0x80...0xaf, 0xb1...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 244: // main post-match.
+      switch byte {
+      case 0x80...0x96, 0x99...0x9f, 0xa1...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 245: // main post-match.
+      switch byte {
+      case 0x80...0x87, 0x89, 0x8a, 0x8d...0x8f, 0x91...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 246: // main post-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0xaa, 0xb0...0xb4: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 247: // main post-match.
+      switch byte {
+      case 0x86...0x9b, 0x9e...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 248: // main post-match.
+      switch byte {
+      case 0x80...0x9c, 0x9e...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 249: // main post-match.
+      switch byte {
+      case 0x80...0x8d, 0x90...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 250: // main post-match.
+      switch byte {
+      case 0x80...0x8a, 0x8d...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 251: // main post-match.
+      switch byte {
+      case 0x80...0xb1: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 252: // main post-match.
+      switch byte {
+      case 0x80...0xba: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 253: // main post-match.
+      switch byte {
+      case 0xa0: state = 527; return nil
+      case 0xa1: state = 528; return nil
+      case 0xa2: state = 529; return nil
+      case 0xa3: state = 530; return nil
+      case 0xa4, 0xa5, 0xbc: state = 240; return nil
+      case 0xa6: state = 531; return nil
+      case 0xa7: state = 532; return nil
+      case 0xa8: state = 533; return nil
+      case 0xa9: state = 534; return nil
+      case 0xaa: state = 535; return nil
+      case 0xab: state = 536; return nil
+      case 0xac: state = 537; return nil
+      case 0xad: state = 538; return nil
+      case 0xae: state = 539; return nil
+      case 0xaf: state = 540; return nil
+      case 0xb0: state = 541; return nil
+      case 0xb1: state = 542; return nil
+      case 0xb2: state = 543; return nil
+      case 0xb3: state = 544; return nil
+      case 0xb4: state = 545; return nil
+      case 0xb5: state = 546; return nil
+      case 0xb6: state = 547; return nil
+      case 0xb7: state = 548; return nil
+      case 0xb8: state = 549; return nil
+      case 0xb9: state = 550; return nil
+      case 0xba: state = 551; return nil
+      case 0xbb: state = 552; return nil
+      case 0xbd: state = 553; return nil
+      case 0xbe: state = 554; return nil
+      case 0xbf: state = 555; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 254: // main post-match.
+      switch byte {
+      case 0x80...0x82, 0x84...0x88, 0x90...0x99, 0x9e, 0xac, 0xae, 0xb4...0xb6, 0xb8...0xbb: state = 240; return nil
+      case 0x83: state = 408; return nil
+      case 0x89: state = 409; return nil
+      case 0x8a: state = 410; return nil
+      case 0x8b: state = 411; return nil
+      case 0x8c: state = 412; return nil
+      case 0x8d: state = 413; return nil
+      case 0x8e: state = 389; return nil
+      case 0x8f: state = 414; return nil
+      case 0x9a: state = 415; return nil
+      case 0x9b: state = 416; return nil
+      case 0x9c: state = 417; return nil
+      case 0x9d: state = 418; return nil
+      case 0x9f: state = 419; return nil
+      case 0xa0: state = 420; return nil
+      case 0xa1: state = 421; return nil
+      case 0xa2: state = 422; return nil
+      case 0xa3: state = 423; return nil
+      case 0xa4: state = 424; return nil
+      case 0xa5: state = 425; return nil
+      case 0xa6: state = 426; return nil
+      case 0xa7: state = 427; return nil
+      case 0xa8: state = 428; return nil
+      case 0xa9: state = 429; return nil
+      case 0xaa: state = 430; return nil
+      case 0xad: state = 431; return nil
+      case 0xaf: state = 432; return nil
+      case 0xb0: state = 433; return nil
+      case 0xb1: state = 434; return nil
+      case 0xb2: state = 435; return nil
+      case 0xb3: state = 436; return nil
+      case 0xb7: state = 437; return nil
+      case 0xbc: state = 438; return nil
+      case 0xbd: state = 439; return nil
+      case 0xbe: state = 440; return nil
+      case 0xbf: state = 441; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 255: // main post-match.
+      switch byte {
+      case 0x80: state = 579; return nil
+      case 0x81: state = 580; return nil
+      case 0x82: state = 581; return nil
+      case 0x83: state = 582; return nil
+      case 0x84, 0x85, 0x87...0x8e, 0x92...0xac, 0xb2, 0xb8, 0xbc...0xbe: state = 240; return nil
+      case 0x86: state = 583; return nil
+      case 0x8f: state = 322; return nil
+      case 0x90: state = 584; return nil
+      case 0x91: state = 585; return nil
+      case 0xad: state = 586; return nil
+      case 0xae: state = 587; return nil
+      case 0xaf: state = 588; return nil
+      case 0xb0: state = 589; return nil
+      case 0xb1: state = 321; return nil
+      case 0xb3: state = 590; return nil
+      case 0xb4: state = 591; return nil
+      case 0xb5: state = 592; return nil
+      case 0xb6: state = 593; return nil
+      case 0xb7: state = 594; return nil
+      case 0xb9: state = 595; return nil
+      case 0xba: state = 596; return nil
+      case 0xbb: state = 597; return nil
+      case 0xbf: state = 598; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 256: // main post-match.
+      switch byte {
+      case 0x80, 0x83, 0x85, 0x89, 0x8a, 0x8c...0xbf: state = 240; return nil
+      case 0x81: state = 316; return nil
+      case 0x82: state = 317; return nil
+      case 0x84: state = 318; return nil
+      case 0x86: state = 319; return nil
+      case 0x87: state = 320; return nil
+      case 0x88: state = 321; return nil
+      case 0x8b: state = 322; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 257: // main post-match.
+      switch byte {
+      case 0x80...0xb5, 0xb7...0xbf: state = 240; return nil
+      case 0xb6: state = 423; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 258: // main post-match.
+      switch byte {
+      case 0x80...0xbf: state = 240; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 259: // main post-match.
+      switch byte {
+      case 0x80...0xbe: state = 240; return nil
+      case 0xbf: state = 616; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 260: // main post-match.
+      switch byte {
+      case 0x80...0x91, 0x94...0x97, 0x99, 0x9a, 0x9c, 0x9d, 0xa2, 0xa4, 0xa6, 0xaa, 0xae, 0xb0...0xbf: state = 240; return nil
+      case 0x92: state = 602; return nil
+      case 0x93: state = 603; return nil
+      case 0x98: state = 604; return nil
+      case 0x9b, 0xa1: state = 421; return nil
+      case 0x9e: state = 605; return nil
+      case 0x9f: state = 606; return nil
+      case 0xa0: state = 607; return nil
+      case 0xa3: state = 608; return nil
+      case 0xa5: state = 609; return nil
+      case 0xa7: state = 610; return nil
+      case 0xa8: state = 460; return nil
+      case 0xa9: state = 611; return nil
+      case 0xab: state = 612; return nil
+      case 0xac: state = 613; return nil
+      case 0xad: state = 614; return nil
+      case 0xaf: state = 615; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 261: // main post-match.
+      switch byte {
+      case 0x80...0x9d: state = 240; return nil
+      case 0x9e: state = 320; return nil
+      case 0x9f: state = 350; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 262: // main post-match.
+      switch byte {
+      case 0xa4...0xa8, 0xaa, 0xae, 0xb0...0xb4, 0xba, 0xbd: state = 240; return nil
+      case 0xa9: state = 381; return nil
+      case 0xab: state = 382; return nil
+      case 0xac: state = 383; return nil
+      case 0xad: state = 384; return nil
+      case 0xaf: state = 385; return nil
+      case 0xb5: state = 386; return nil
+      case 0xb6: state = 387; return nil
+      case 0xb7: state = 388; return nil
+      case 0xb8: state = 389; return nil
+      case 0xb9: state = 390; return nil
+      case 0xbb: state = 391; return nil
+      case 0xbc: state = 316; return nil
+      case 0xbe: state = 322; return nil
+      case 0xbf: state = 392; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 263: // main post-match.
+      switch byte {
+      case 0x90: state = 393; return nil
+      case 0x91: state = 394; return nil
+      case 0x92: state = 395; return nil
+      case 0x93: state = 396; return nil
+      case 0x94: state = 397; return nil
+      case 0x96: state = 398; return nil
+      case 0x97, 0xa0...0xa9: state = 258; return nil
+      case 0x98: state = 399; return nil
+      case 0x9b: state = 400; return nil
+      case 0x9d: state = 401; return nil
+      case 0x9e: state = 402; return nil
+      case 0x9f: state = 403; return nil
+      case 0xaa: state = 404; return nil
+      case 0xab: state = 405; return nil
+      case 0xac: state = 406; return nil
+      case 0xaf: state = 407; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 264: // main post-match.
+      switch byte {
+      case 0xa0: state = 481; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 265: // main pre-match.
+      switch byte {
+      case 0x80...0x85, 0x87, 0x8d, 0x90...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 266: // main pre-match.
+      switch byte {
+      case 0x80...0x88, 0x8a...0x8d, 0x90...0x96, 0x98, 0x9a...0x9d, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 267: // main pre-match.
+      switch byte {
+      case 0x80...0x88, 0x8a...0x8d, 0x90...0xb0, 0xb2...0xb5, 0xb8...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 268: // main pre-match.
+      switch byte {
+      case 0x80, 0x82...0x85, 0x88...0x96, 0x98...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 269: // main pre-match.
+      switch byte {
+      case 0x80...0x90, 0x92...0x95, 0x98...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 270: // main pre-match.
+      switch byte {
+      case 0x80...0x9a, 0x9d...0xbc: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 271: // main pre-match.
+      switch byte {
+      case 0x80...0xb5, 0xb8...0xbd: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 272: // main pre-match.
+      switch byte {
+      case 0x80...0x9c, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 273: // main pre-match.
+      switch byte {
+      case 0x80...0x8c, 0x8e...0x94, 0xa0...0xb6: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 274: // main pre-match.
+      switch byte {
+      case 0x80...0x93, 0xa0...0xac, 0xae...0xb0, 0xb2, 0xb3: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 275: // main pre-match.
+      switch byte {
+      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xb9: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 276: // main pre-match.
+      switch byte {
+      case 0x80...0x8d, 0x90...0x99, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 277: // main pre-match.
+      switch byte {
+      case 0x80...0xaa, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 278: // main pre-match.
+      switch byte {
+      case 0x80...0x9e, 0xa0...0xab, 0xb0...0xbb: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 279: // main pre-match.
+      switch byte {
+      case 0x80, 0x84...0xad, 0xb0...0xb4: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 280: // main pre-match.
+      switch byte {
+      case 0x80...0xab, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 281: // main pre-match.
+      switch byte {
+      case 0x80...0x89, 0x90...0x9a, 0x9e...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 282: // main pre-match.
+      switch byte {
+      case 0x80...0x9b, 0x9e...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 283: // main pre-match.
+      switch byte {
+      case 0x80...0x9e, 0xa0...0xbc, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 284: // main pre-match.
+      switch byte {
+      case 0x80...0x89, 0x90...0x99, 0xa0...0xad, 0xb0...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 285: // main pre-match.
+      switch byte {
+      case 0x80...0x8b, 0x90...0xbc: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 286: // main pre-match.
+      switch byte {
+      case 0x80...0xb3, 0xbc...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 287: // main pre-match.
+      switch byte {
+      case 0x80...0xb7, 0xbb...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 288: // main pre-match.
+      switch byte {
+      case 0x80...0x89, 0x8d...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 289: // main pre-match.
+      switch byte {
+      case 0x80...0x88: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 290: // main pre-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0xb6, 0xb8, 0xb9: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 291: // main pre-match.
+      switch byte {
+      case 0x80...0xb5, 0xbb...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 292: // main pre-match.
+      switch byte {
+      case 0x80...0x95, 0x98...0x9d, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 293: // main pre-match.
+      switch byte {
+      case 0x80...0x85, 0x88...0x8d, 0x90...0x97, 0x99, 0x9b, 0x9d, 0x9f...0xbd: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 294: // main pre-match.
       switch byte {
       case 0x80...0x84, 0x86...0x93, 0x96...0x9b, 0x9d...0xaf, 0xb2...0xb4, 0xb6...0xbe: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 489: // main post-match.
+    case 295: // flt.
       switch byte {
-      case 0x80...0x86: state = 62; return nil
+      case 0x30...0x39: state = 635; return nil
+      default:
+        start_main()
+        return flushToken(kind: .flt)
+      }
+    case 296: // main post-match.
+      switch byte {
+      case 0x30...0x39: state = 345; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 297: // main pre-match.
+      switch byte {
+      case 0x84...0x86: state = 63; return nil
+      case 0x87: state = 571; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 298: // main pre-match.
+      switch byte {
+      case 0x80...0x8c, 0x90...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 299: // main pre-match.
+      switch byte {
+      case 0x80...0x86, 0x90...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 300: // main pre-match.
+      switch byte {
+      case 0x80...0xab: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 301: // main pre-match.
+      switch byte {
+      case 0x80...0xae, 0xb0...0xb7: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 302: // main pre-match.
+      switch byte {
+      case 0xb7...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 303: // main pre-match.
+      switch byte {
+      case 0x80...0xab, 0xb0...0xb9: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 304: // main pre-match.
+      switch byte {
+      case 0x80...0x85, 0x8e...0x99, 0xa0...0xbd: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 305: // main pre-match.
+      switch byte {
+      case 0x80...0x93, 0x9f...0xbc: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 306: // main pre-match.
+      switch byte {
+      case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 307: // main pre-match.
+      switch byte {
+      case 0x80...0xb6: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 308: // main pre-match.
+      switch byte {
+      case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 309: // main pre-match.
+      switch byte {
+      case 0x80...0x82, 0x9b...0xb6: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 310: // main pre-match.
+      switch byte {
+      case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 311: // main pre-match.
+      switch byte {
+      case 0x80...0xa5, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 312: // main pre-match.
+      switch byte {
+      case 0x80...0xad, 0xb0...0xb9: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 313: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 53; return nil
+      case 0x74: state = 521; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 314: // main pre-match.
+      switch byte {
+      case 0x80...0xb4: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 315: // main pre-match.
+      switch byte {
+      case 0x80...0x9d, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 316: // main post-match.
+      switch byte {
+      case 0x81...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 317: // main post-match.
+      switch byte {
+      case 0x80...0x96, 0x99...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 318: // main post-match.
+      switch byte {
+      case 0x85...0xad, 0xb1...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 319: // main post-match.
+      switch byte {
+      case 0x80...0x8e, 0x90...0xba: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 320: // main post-match.
+      switch byte {
+      case 0x80...0xa3, 0xb0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 321: // main post-match.
+      switch byte {
+      case 0x80...0x9e, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 322: // main post-match.
+      switch byte {
+      case 0x80...0xbe: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 323: // main pre-match.
+      switch byte {
+      case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 324: // main pre-match.
+      switch byte {
+      case 0x81...0x8f, 0x91...0xb5: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 325: // main pre-match.
+      switch byte {
+      case 0x80...0x8c, 0x90...0xae, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 326: // main pre-match.
+      switch byte {
+      case 0x80...0xac: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 327: // main pre-match.
+      switch byte {
+      case 0xa6...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 328: // main pre-match.
+      switch byte {
+      case 0x80...0x82, 0x90...0xbb: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 329: // main pre-match.
+      switch byte {
+      case 0x80...0x88, 0x90, 0x91: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 330: // main pre-match.
+      switch byte {
+      case 0x80...0x92, 0xa0...0xac, 0xb0...0xb6: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 331: // main pre-match.
+      switch byte {
+      case 0x80...0x94: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 332: // main pre-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 333: // main pre-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0xad: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 334: // main pre-match.
+      switch byte {
+      case 0x90...0x9e, 0xa0...0xa7, 0xb0, 0xb3...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 335: // main pre-match.
+      switch byte {
+      case 0x80...0x8b, 0x90...0x9e: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 336: // main pre-match.
+      switch byte {
+      case 0x80...0x91: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 337: // main pre-match.
+      switch byte {
+      case 0x80: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 338: // main pre-match.
+      switch byte {
+      case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 339: // main pre-match.
+      switch byte {
+      case 0x80...0x84, 0x87...0x96: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 340: // main pre-match.
+      switch byte {
+      case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 341: // main pre-match.
+      switch byte {
+      case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 342: // main pre-match.
+      switch byte {
+      case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 343: // main pre-match.
+      switch byte {
+      case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 344: // main pre-match.
+      switch byte {
+      case 0xb0, 0xb1: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 345: // int.
+      switch byte {
+      case 0x30...0x39: state = 345; return nil
+      case 0x5f: state = 296; return nil
+      default:
+        start_main()
+        return flushToken(kind: .int)
+      }
+    case 346: // main pre-match.
+      switch byte {
+      case 0x80...0x96: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 347: // main pre-match.
+      switch byte {
+      case 0x80, 0x81: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 348: // main pre-match.
+      switch byte {
+      case 0x80...0xaa, 0xb0...0xbc: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 349: // main pre-match.
+      switch byte {
+      case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 350: // main post-match.
+      switch byte {
+      case 0x80...0x86, 0x8b...0xbb: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 351: // main pre-match.
+      switch byte {
+      case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 352: // main pre-match.
+      switch byte {
+      case 0x80...0x8d, 0x90...0x9d: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 353: // main pre-match.
+      switch byte {
+      case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 354: // main pre-match.
+      switch byte {
+      case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 355: // main pre-match.
+      switch byte {
+      case 0x90...0xbd: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 356: // main pre-match.
+      switch byte {
+      case 0x80...0x90, 0xa0...0xbb: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 357: // main pre-match.
+      switch byte {
+      case 0x80...0x8a, 0x90...0xba: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 358: // main pre-match.
+      switch byte {
+      case 0x80...0x9d, 0x9f...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 359: // main pre-match.
+      switch byte {
+      case 0x80...0x83, 0x88...0x95: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 360: // main pre-match.
+      switch byte {
+      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 361: // main pre-match.
+      switch byte {
+      case 0x80...0x93, 0x98...0xbb: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 362: // main pre-match.
+      switch byte {
+      case 0x80...0xa7, 0xb0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 363: // main pre-match.
+      switch byte {
+      case 0x80...0xa3, 0xaf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 364: // main pre-match.
+      switch byte {
+      case 0x80...0x95, 0xa0...0xa7: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 365: // main pre-match.
+      switch byte {
+      case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 366: // main pre-match.
+      switch byte {
+      case 0x80...0x95, 0x97...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 367: // main pre-match.
+      switch byte {
+      case 0x80...0x9e, 0xa7...0xaf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 368: // main pre-match.
+      switch byte {
+      case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 369: // main pre-match.
+      switch byte {
+      case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 370: // main pre-match.
+      switch byte {
+      case 0x80...0xb7, 0xbc...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 371: // main pre-match.
+      switch byte {
+      case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb3, 0xb8...0xba, 0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 372: // main pre-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0x98, 0xa0...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 373: // main pre-match.
+      switch byte {
+      case 0x80...0x9f: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 374: // main pre-match.
+      switch byte {
+      case 0x80...0xa6, 0xab...0xb6: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 375: // main pre-match.
+      switch byte {
+      case 0x80...0xb5, 0xb9...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 376: // main pre-match.
+      switch byte {
+      case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 377: // main pre-match.
+      switch byte {
+      case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 378: // main pre-match.
+      switch byte {
+      case 0x80...0xb2: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 379: // main pre-match.
+      switch byte {
+      case 0x80...0xb2, 0xba...0xbf: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 380: // main pre-match.
+      switch byte {
+      case 0xa0...0xbe: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 381: // main post-match.
+      switch byte {
+      case 0x80...0xad, 0xb0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 382: // main post-match.
+      switch byte {
+      case 0x80...0x99: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 383: // main post-match.
+      switch byte {
+      case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 384: // main post-match.
+      switch byte {
+      case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 385: // main post-match.
+      switch byte {
+      case 0x80, 0x81, 0x93...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 386: // main post-match.
+      switch byte {
+      case 0x90...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 387: // main post-match.
+      switch byte {
+      case 0x80...0x8f, 0x92...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 388: // main post-match.
+      switch byte {
+      case 0x80...0x87, 0xb0...0xbd: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 389: // main post-match.
+      switch byte {
+      case 0x80...0x99, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 390: // main post-match.
+      switch byte {
+      case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 391: // main post-match.
+      switch byte {
+      case 0x80...0xbc: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 392: // main post-match.
+      switch byte {
+      case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 393: // main post-match.
+      switch byte {
+      case 0x80: state = 447; return nil
+      case 0x81: state = 448; return nil
+      case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 240; return nil
+      case 0x83: state = 252; return nil
+      case 0x84: state = 449; return nil
+      case 0x86: state = 450; return nil
+      case 0x87: state = 451; return nil
+      case 0x8a: state = 415; return nil
+      case 0x8b: state = 452; return nil
+      case 0x8c: state = 320; return nil
+      case 0x8d: state = 453; return nil
+      case 0x8e: state = 454; return nil
+      case 0x8f: state = 455; return nil
+      case 0x92: state = 456; return nil
+      case 0x93: state = 457; return nil
+      case 0x94: state = 458; return nil
+      case 0x95: state = 459; return nil
+      case 0x9c: state = 460; return nil
+      case 0x9d: state = 461; return nil
+      case 0xa0: state = 462; return nil
+      case 0xa1: state = 463; return nil
+      case 0xa2: state = 464; return nil
+      case 0xa3: state = 465; return nil
+      case 0xa4: state = 466; return nil
+      case 0xa6: state = 467; return nil
+      case 0xa7: state = 387; return nil
+      case 0xa8: state = 468; return nil
+      case 0xa9: state = 469; return nil
+      case 0xaa: state = 470; return nil
+      case 0xab: state = 471; return nil
+      case 0xac: state = 472; return nil
+      case 0xad: state = 473; return nil
+      case 0xae: state = 474; return nil
+      case 0xb1: state = 435; return nil
+      case 0xb2: state = 475; return nil
+      case 0xb3: state = 476; return nil
+      case 0xb9: state = 477; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 394: // main post-match.
+      switch byte {
+      case 0x80, 0x86, 0x90, 0x92, 0x98: state = 240; return nil
+      case 0x81: state = 499; return nil
+      case 0x82: state = 500; return nil
+      case 0x83: state = 501; return nil
+      case 0x84: state = 440; return nil
+      case 0x85: state = 502; return nil
+      case 0x87: state = 503; return nil
+      case 0x88: state = 504; return nil
+      case 0x8a: state = 505; return nil
+      case 0x8b: state = 506; return nil
+      case 0x8c: state = 507; return nil
+      case 0x8d: state = 508; return nil
+      case 0x91: state = 509; return nil
+      case 0x93: state = 510; return nil
+      case 0x96: state = 511; return nil
+      case 0x97: state = 512; return nil
+      case 0x99: state = 513; return nil
+      case 0x9a: state = 421; return nil
+      case 0x9b: state = 514; return nil
+      case 0x9c: state = 515; return nil
+      case 0xa2: state = 516; return nil
+      case 0xa3: state = 517; return nil
+      case 0xab: state = 416; return nil
+      case 0xb0: state = 518; return nil
+      case 0xb1: state = 519; return nil
+      case 0xb2: state = 520; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 395: // main post-match.
+      switch byte {
+      case 0x80...0x8d, 0x90, 0x92...0x94: state = 240; return nil
+      case 0x8e: state = 382; return nil
+      case 0x91: state = 523; return nil
+      case 0x95: state = 524; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 396: // main post-match.
+      switch byte {
+      case 0x80...0x8f: state = 240; return nil
+      case 0x90: state = 619; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 397: // main post-match.
+      switch byte {
+      case 0x90...0x98: state = 240; return nil
+      case 0x99: state = 480; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 398: // main post-match.
+      switch byte {
+      case 0xa0...0xa7, 0xac, 0xbc: state = 240; return nil
+      case 0xa8: state = 416; return nil
+      case 0xa9: state = 572; return nil
+      case 0xab: state = 573; return nil
+      case 0xad: state = 574; return nil
+      case 0xae: state = 575; return nil
+      case 0xbd: state = 576; return nil
+      case 0xbe: state = 577; return nil
+      case 0xbf: state = 578; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 399: // main post-match.
+      switch byte {
+      case 0x80...0x9e, 0xa0...0xaa: state = 240; return nil
+      case 0x9f: state = 488; return nil
+      case 0xab: state = 475; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 400: // main post-match.
+      switch byte {
+      case 0x80: state = 443; return nil
+      case 0xb0: state = 240; return nil
+      case 0xb1: state = 444; return nil
+      case 0xb2: state = 445; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 401: // main post-match.
+      switch byte {
+      case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 240; return nil
+      case 0x83: state = 423; return nil
+      case 0x84: state = 558; return nil
+      case 0x85: state = 559; return nil
+      case 0x87: state = 560; return nil
+      case 0x89: state = 561; return nil
+      case 0x8d: state = 562; return nil
+      case 0x91: state = 563; return nil
+      case 0x92: state = 564; return nil
+      case 0x93: state = 565; return nil
+      case 0x94: state = 566; return nil
+      case 0x95: state = 567; return nil
+      case 0x9a: state = 568; return nil
+      case 0x9f: state = 569; return nil
+      case 0xaa: state = 570; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 402: // main post-match.
+      switch byte {
+      case 0x80: state = 491; return nil
+      case 0xa0...0xa2, 0xa4: state = 240; return nil
+      case 0xa3: state = 492; return nil
+      case 0xa5: state = 493; return nil
+      case 0xb8: state = 494; return nil
+      case 0xb9: state = 495; return nil
+      case 0xba: state = 496; return nil
+      case 0xbb: state = 497; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 403: // main post-match.
+      switch byte {
+      case 0x80, 0x85: state = 426; return nil
+      case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 240; return nil
+      case 0x82: state = 620; return nil
+      case 0x83: state = 621; return nil
+      case 0x84: state = 622; return nil
+      case 0x86: state = 488; return nil
+      case 0x87: state = 623; return nil
+      case 0x88: state = 624; return nil
+      case 0x89: state = 625; return nil
+      case 0x9b: state = 626; return nil
+      case 0x9d: state = 597; return nil
+      case 0x9f: state = 627; return nil
+      case 0xa0: state = 583; return nil
+      case 0xa1: state = 628; return nil
+      case 0xa2: state = 629; return nil
+      case 0xa4: state = 630; return nil
+      case 0xa5: state = 631; return nil
+      case 0xa6: state = 632; return nil
+      case 0xa7: state = 633; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 404: // main post-match.
+      switch byte {
+      case 0x80...0x9a, 0x9c...0xbf: state = 240; return nil
+      case 0x9b: state = 522; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 405: // main post-match.
+      switch byte {
+      case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 240; return nil
+      case 0x9c: state = 478; return nil
+      case 0xa0: state = 479; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 406: // main post-match.
+      switch byte {
+      case 0x80...0xb9: state = 240; return nil
+      case 0xba: state = 442; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 407: // main post-match.
+      switch byte {
+      case 0xa0...0xa7: state = 240; return nil
+      case 0xa8: state = 512; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 408: // main post-match.
+      switch byte {
+      case 0x80...0x85, 0x87, 0x8d, 0x90...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 409: // main post-match.
+      switch byte {
+      case 0x80...0x88, 0x8a...0x8d, 0x90...0x96, 0x98, 0x9a...0x9d, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 410: // main post-match.
+      switch byte {
+      case 0x80...0x88, 0x8a...0x8d, 0x90...0xb0, 0xb2...0xb5, 0xb8...0xbe: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 411: // main post-match.
+      switch byte {
+      case 0x80, 0x82...0x85, 0x88...0x96, 0x98...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 412: // main post-match.
+      switch byte {
+      case 0x80...0x90, 0x92...0x95, 0x98...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 413: // main post-match.
+      switch byte {
+      case 0x80...0x9a, 0x9d...0xbc: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 414: // main post-match.
+      switch byte {
+      case 0x80...0xb5, 0xb8...0xbd: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 415: // main post-match.
+      switch byte {
+      case 0x80...0x9c, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 416: // main post-match.
+      switch byte {
+      case 0x80...0xb8: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 417: // main post-match.
+      switch byte {
+      case 0x80...0x8c, 0x8e...0x94, 0xa0...0xb6: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 418: // main post-match.
+      switch byte {
+      case 0x80...0x93, 0xa0...0xac, 0xae...0xb0, 0xb2, 0xb3: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 419: // main post-match.
+      switch byte {
+      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xb9: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 420: // main post-match.
+      switch byte {
+      case 0x80...0x8d, 0x90...0x99, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 421: // main post-match.
+      switch byte {
+      case 0x80...0xb7: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 422: // main post-match.
+      switch byte {
+      case 0x80...0xaa, 0xb0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 423: // main post-match.
+      switch byte {
+      case 0x80...0xb5: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 424: // main post-match.
+      switch byte {
+      case 0x80...0x9e, 0xa0...0xab, 0xb0...0xbb: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 425: // main post-match.
+      switch byte {
+      case 0x80, 0x84...0xad, 0xb0...0xb4: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 426: // main post-match.
+      switch byte {
+      case 0x80...0xab, 0xb0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 427: // main post-match.
+      switch byte {
+      case 0x80...0x89, 0x90...0x9a, 0x9e...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 428: // main post-match.
+      switch byte {
+      case 0x80...0x9b, 0x9e...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 429: // main post-match.
+      switch byte {
+      case 0x80...0x9e, 0xa0...0xbc, 0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 430: // main post-match.
+      switch byte {
+      case 0x80...0x89, 0x90...0x99, 0xa0...0xad, 0xb0...0xbe: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 431: // main post-match.
+      switch byte {
+      case 0x80...0x8b, 0x90...0xbc: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 432: // main post-match.
+      switch byte {
+      case 0x80...0xb3, 0xbc...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 433: // main post-match.
+      switch byte {
+      case 0x80...0xb7, 0xbb...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 434: // main post-match.
+      switch byte {
+      case 0x80...0x89, 0x8d...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 435: // main post-match.
+      switch byte {
+      case 0x80...0x88: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 436: // main post-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0xb6, 0xb8, 0xb9: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 437: // main post-match.
+      switch byte {
+      case 0x80...0xb5, 0xbb...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 438: // main post-match.
+      switch byte {
+      case 0x80...0x95, 0x98...0x9d, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 439: // main post-match.
+      switch byte {
+      case 0x80...0x85, 0x88...0x8d, 0x90...0x97, 0x99, 0x9b, 0x9d, 0x9f...0xbd: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 440: // main post-match.
+      switch byte {
+      case 0x80...0xb4, 0xb6...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 441: // main post-match.
+      switch byte {
+      case 0x80...0x84, 0x86...0x93, 0x96...0x9b, 0x9d...0xaf, 0xb2...0xb4, 0xb6...0xbe: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 442: // main post-match.
+      switch byte {
+      case 0x80...0xa1: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 443: // main post-match.
+      switch byte {
+      case 0x80, 0x81: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 444: // main post-match.
+      switch byte {
+      case 0x80...0xaa, 0xb0...0xbc: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 445: // main post-match.
+      switch byte {
+      case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 446: // main pre-match.
+      switch byte {
+      case 0x80...0xa1: state = 5; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 447: // main post-match.
+      switch byte {
+      case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 448: // main post-match.
+      switch byte {
+      case 0x80...0x8d, 0x90...0x9d: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 449: // main post-match.
+      switch byte {
+      case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 450: // main post-match.
+      switch byte {
+      case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 451: // main post-match.
+      switch byte {
+      case 0x90...0xbd: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 452: // main post-match.
+      switch byte {
+      case 0x80...0x90, 0xa0...0xbb: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 453: // main post-match.
+      switch byte {
+      case 0x80...0x8a, 0x90...0xba: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 454: // main post-match.
+      switch byte {
+      case 0x80...0x9d, 0x9f...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 455: // main post-match.
+      switch byte {
+      case 0x80...0x83, 0x88...0x95: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 456: // main post-match.
+      switch byte {
+      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 457: // main post-match.
+      switch byte {
+      case 0x80...0x93, 0x98...0xbb: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 458: // main post-match.
+      switch byte {
+      case 0x80...0xa7, 0xb0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 459: // main post-match.
+      switch byte {
+      case 0x80...0xa3, 0xaf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 460: // main post-match.
+      switch byte {
+      case 0x80...0xb6: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 461: // main post-match.
+      switch byte {
+      case 0x80...0x95, 0xa0...0xa7: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 462: // main post-match.
+      switch byte {
+      case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 463: // main post-match.
+      switch byte {
+      case 0x80...0x95, 0x97...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 464: // main post-match.
+      switch byte {
+      case 0x80...0x9e, 0xa7...0xaf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 465: // main post-match.
+      switch byte {
+      case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 466: // main post-match.
+      switch byte {
+      case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 467: // main post-match.
+      switch byte {
+      case 0x80...0xb7, 0xbc...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 468: // main post-match.
+      switch byte {
+      case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb3, 0xb8...0xba, 0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 469: // main post-match.
+      switch byte {
+      case 0x80...0x87, 0x90...0x98, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 470: // main post-match.
+      switch byte {
+      case 0x80...0x9f: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 471: // main post-match.
+      switch byte {
+      case 0x80...0xa6, 0xab...0xb6: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 472: // main post-match.
+      switch byte {
+      case 0x80...0xb5, 0xb9...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 473: // main post-match.
+      switch byte {
+      case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 474: // main post-match.
+      switch byte {
+      case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 475: // main post-match.
+      switch byte {
+      case 0x80...0xb2: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 476: // main post-match.
+      switch byte {
+      case 0x80...0xb2, 0xba...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 477: // main post-match.
+      switch byte {
+      case 0xa0...0xbe: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 478: // main post-match.
+      switch byte {
+      case 0x80...0xb4: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 479: // main post-match.
+      switch byte {
+      case 0x80...0x9d, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 480: // main post-match.
+      switch byte {
+      case 0x80...0x86: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 481: // main post-match.
+      switch byte {
+      case 0x84...0x86: state = 240; return nil
+      case 0x87: state = 601; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 482: // main post-match.
+      switch byte {
+      case 0x30, 0x31: state = 556; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 483: // main post-match.
+      switch byte {
+      case 0x30...0x39: state = 640; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 484: // main post-match.
+      switch byte {
+      case 0x30...0x37: state = 618; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 485: // main post-match.
+      switch byte {
+      case 0x30...0x33: state = 526; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 486: // main post-match.
+      switch byte {
+      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 557; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 487: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x63, 0x65...0x7a: state = 53; return nil
+      case 0x64: state = 498; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 488: // main post-match.
+      switch byte {
+      case 0x80...0xac: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 489: // main pre-match.
+      switch byte {
+      case 0x80...0x86, 0x8b...0xbb: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
@@ -4600,1218 +4590,1234 @@ public struct Lexer: Sequence, IteratorProtocol {
       }
     case 491: // main post-match.
       switch byte {
-      case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 62; return nil
+      case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 492: // main post-match.
       switch byte {
-      case 0x80...0x8d, 0x90...0x9d: state = 62; return nil
+      case 0x80...0x84, 0x87...0x96: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 493: // main post-match.
       switch byte {
-      case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 62; return nil
+      case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 494: // main post-match.
       switch byte {
-      case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 62; return nil
+      case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 495: // main post-match.
       switch byte {
-      case 0x90...0xbd: state = 62; return nil
+      case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 496: // main post-match.
       switch byte {
-      case 0x80...0x90, 0xa0...0xbb: state = 62; return nil
+      case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 497: // main post-match.
       switch byte {
-      case 0x80...0x8a, 0x90...0xba: state = 62; return nil
+      case 0xb0, 0xb1: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 498: // main post-match.
+    case 498: // and.
       switch byte {
-      case 0x80...0x9d, 0x9f...0xbf: state = 62; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
-        return flushToken(kind: .incomplete)
+        return flushToken(kind: .and)
       }
     case 499: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x88...0x95: state = 62; return nil
+      case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 500: // main post-match.
       switch byte {
-      case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 62; return nil
+      case 0x80...0xbc, 0xbe, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 501: // main post-match.
       switch byte {
-      case 0x80...0x93, 0x98...0xbb: state = 62; return nil
+      case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 502: // main post-match.
       switch byte {
-      case 0x80...0xa7, 0xb0...0xbf: state = 62; return nil
+      case 0x80...0x83, 0x90...0xb6: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 503: // main post-match.
       switch byte {
-      case 0x80...0xa3, 0xaf: state = 62; return nil
+      case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 504: // main post-match.
       switch byte {
-      case 0x80...0xb6: state = 62; return nil
+      case 0x80...0x91, 0x93...0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 505: // main post-match.
       switch byte {
-      case 0x80...0x95, 0xa0...0xa7: state = 62; return nil
+      case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 506: // main post-match.
       switch byte {
-      case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 62; return nil
+      case 0x80...0xaa, 0xb0...0xb9: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 507: // main post-match.
       switch byte {
-      case 0x80...0x95, 0x97...0xbf: state = 62; return nil
+      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 508: // main post-match.
       switch byte {
-      case 0x80...0x9e, 0xa7...0xaf: state = 62; return nil
+      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 509: // main post-match.
       switch byte {
-      case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 62; return nil
+      case 0x80...0x99, 0x9b, 0x9d: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 510: // main post-match.
       switch byte {
-      case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 62; return nil
+      case 0x80...0x87, 0x90...0x99: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 511: // main post-match.
       switch byte {
-      case 0x80...0xb7, 0xbc...0xbf: state = 62; return nil
+      case 0x80...0xb5, 0xb8...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 512: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb3, 0xb8...0xba, 0xbf: state = 62; return nil
+      case 0x80...0x9d: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 513: // main post-match.
       switch byte {
-      case 0x80...0x87, 0x90...0x98, 0xa0...0xbf: state = 62; return nil
+      case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 514: // main post-match.
       switch byte {
-      case 0x80...0x9f: state = 62; return nil
+      case 0x80...0x89: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 515: // main post-match.
       switch byte {
-      case 0x80...0xa6, 0xab...0xb6: state = 62; return nil
+      case 0x80...0x99, 0x9d...0xab, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 516: // main post-match.
       switch byte {
-      case 0x80...0xb5, 0xb9...0xbf: state = 62; return nil
+      case 0xa0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 517: // main post-match.
       switch byte {
-      case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 62; return nil
+      case 0x80...0xb2, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 518: // main post-match.
       switch byte {
-      case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 62; return nil
+      case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 519: // main post-match.
       switch byte {
-      case 0x80...0xb2: state = 62; return nil
+      case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 520: // main post-match.
       switch byte {
-      case 0x80...0xb2, 0xba...0xbf: state = 62; return nil
+      case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 521: // main post-match.
+    case 521: // sym.
       switch byte {
-      case 0xa0...0xbe: state = 62; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x64, 0x66...0x7a: state = 53; return nil
+      case 0x65: state = 638; return nil
       default:
         start_main()
-        return flushToken(kind: .incomplete)
+        return flushToken(kind: .sym)
       }
-    case 522: // main pre-match.
+    case 522: // main post-match.
       switch byte {
-      case 0x80...0x9d: state = 5; return nil
+      case 0x80...0x96: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 523: // main post-match.
       switch byte {
-      case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 62; return nil
+      case 0x80...0xae, 0xb0...0xb4: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 524: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x87...0x96: state = 62; return nil
+      case 0x80...0x83: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 525: // main post-match.
+    case 525: // main pre-match.
       switch byte {
-      case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 62; return nil
+      case 0x80...0xae: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 526: // main post-match.
+    case 526: // intQuat.
       switch byte {
-      case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 62; return nil
+      case 0x30...0x33: state = 526; return nil
+      case 0x5f: state = 648; return nil
       default:
         start_main()
-        return flushToken(kind: .incomplete)
+        return flushToken(kind: .intQuat)
       }
     case 527: // main post-match.
       switch byte {
-      case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 62; return nil
+      case 0x80...0xad, 0xb0...0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 528: // main post-match.
       switch byte {
-      case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 62; return nil
+      case 0x80...0x9b, 0x9e: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 529: // main post-match.
       switch byte {
-      case 0xb0, 0xb1: state = 62; return nil
+      case 0xa0...0xb4, 0xb6...0xbd: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 530: // match.
+    case 530: // main post-match.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
-      default:
-        start_main()
-        return flushToken(kind: .match)
-      }
-    case 531: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x68, 0x6a...0x7a: state = 40; return nil
-      case 0x69: state = 594; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 532: // main pre-match.
-      switch byte {
-      case 0x80...0xaf: state = 5; return nil
+      case 0x94...0xa1, 0xa3...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 533: // main pre-match.
+    case 531: // main post-match.
       switch byte {
-      case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 5; return nil
+      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 534: // main pre-match.
+    case 532: // main post-match.
       switch byte {
-      case 0x80...0xbc, 0xbe, 0xbf: state = 5; return nil
+      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbb: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 535: // main pre-match.
+    case 533: // main post-match.
       switch byte {
-      case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 5; return nil
+      case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 536: // main pre-match.
+    case 534: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x90...0xb6: state = 5; return nil
+      case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb5: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 537: // main pre-match.
+    case 535: // main post-match.
       switch byte {
-      case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 5; return nil
+      case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 538: // main pre-match.
+    case 536: // main post-match.
       switch byte {
-      case 0x80...0x91, 0x93...0xbe: state = 5; return nil
+      case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 539: // main pre-match.
+    case 537: // main post-match.
       switch byte {
-      case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 5; return nil
+      case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 540: // main pre-match.
+    case 538: // main post-match.
       switch byte {
-      case 0x80...0xaa, 0xb0...0xb9: state = 5; return nil
+      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 541: // main pre-match.
+    case 539: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
+      case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 542: // main pre-match.
+    case 540: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 5; return nil
+      case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 543: // main pre-match.
+    case 541: // main post-match.
       switch byte {
-      case 0x80...0x99, 0x9b, 0x9d: state = 5; return nil
+      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 544: // main pre-match.
+    case 542: // main post-match.
       switch byte {
-      case 0x80...0x87, 0x90...0x99: state = 5; return nil
+      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 545: // main pre-match.
+    case 543: // main post-match.
       switch byte {
-      case 0x80...0xb5, 0xb8...0xbf: state = 5; return nil
+      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 546: // main pre-match.
+    case 544: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 5; return nil
+      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 547: // main pre-match.
+    case 545: // main post-match.
       switch byte {
-      case 0x80...0x89: state = 5; return nil
+      case 0x81...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xba, 0xbd...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 548: // main pre-match.
+    case 546: // main post-match.
       switch byte {
-      case 0x80...0x99, 0x9d...0xab, 0xb0...0xbf: state = 5; return nil
+      case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 549: // main pre-match.
+    case 547: // main post-match.
       switch byte {
-      case 0xa0...0xbf: state = 5; return nil
+      case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 550: // main pre-match.
+    case 548: // main post-match.
       switch byte {
-      case 0x80...0xb2, 0xbf: state = 5; return nil
+      case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 551: // main pre-match.
+    case 549: // main post-match.
       switch byte {
-      case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 5; return nil
+      case 0x81...0xba, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 552: // main pre-match.
+    case 550: // main post-match.
       switch byte {
-      case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 5; return nil
+      case 0x80...0x9b: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 553: // main pre-match.
+    case 551: // main post-match.
       switch byte {
-      case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 5; return nil
+      case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 552: // main post-match.
+      switch byte {
+      case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 553: // main post-match.
+      switch byte {
+      case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 554: // main post-match.
       switch byte {
-      case 0x30...0x39: state = 633; return nil
+      case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 555: // main post-match.
       switch byte {
-      case 0x80...0xaf: state = 62; return nil
+      case 0x80...0x8c, 0x8e...0x9a: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 556: // main post-match.
+    case 556: // intBin.
       switch byte {
-      case 0x80...0x9d: state = 62; return nil
+      case 0x30, 0x31: state = 556; return nil
+      case 0x5f: state = 634; return nil
       default:
         start_main()
-        return flushToken(kind: .incomplete)
+        return flushToken(kind: .intBin)
       }
-    case 557: // main post-match.
+    case 557: // intHex.
       switch byte {
-      case 0x80...0x8c, 0x90...0xbf: state = 62; return nil
+      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 557; return nil
+      case 0x5f: state = 636; return nil
       default:
         start_main()
-        return flushToken(kind: .incomplete)
+        return flushToken(kind: .intHex)
       }
     case 558: // main post-match.
       switch byte {
-      case 0x80...0x86, 0x90...0xbf: state = 62; return nil
+      case 0x80...0xa6, 0xa9...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 559: // main post-match.
       switch byte {
-      case 0x80...0xab: state = 62; return nil
+      case 0x80...0xb2, 0xbb...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 560: // main post-match.
       switch byte {
-      case 0x80...0xae, 0xb0...0xb7: state = 62; return nil
+      case 0x80...0xa8: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 561: // main post-match.
       switch byte {
-      case 0xb7...0xbf: state = 62; return nil
+      case 0x80...0x85: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 562: // main post-match.
       switch byte {
-      case 0x80...0xab, 0xb0...0xb9: state = 62; return nil
+      case 0x80...0x96, 0xa0...0xb1: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 563: // main post-match.
       switch byte {
-      case 0x80...0x85, 0x8e...0x99, 0xa0...0xbd: state = 62; return nil
+      case 0x80...0x94, 0x96...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 564: // main post-match.
       switch byte {
-      case 0x80...0x93, 0x9f...0xbc: state = 62; return nil
+      case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 565: // main post-match.
       switch byte {
-      case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 62; return nil
+      case 0x80...0x83, 0x85...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 566: // main post-match.
       switch byte {
-      case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 62; return nil
+      case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 567: // main post-match.
       switch byte {
-      case 0x80...0x82, 0x9b...0xb6: state = 62; return nil
+      case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 568: // main post-match.
       switch byte {
-      case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 62; return nil
+      case 0x80...0xa5, 0xa8...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 569: // main post-match.
       switch byte {
-      case 0x80...0xa5, 0xb0...0xbf: state = 62; return nil
+      case 0x80...0x8b, 0x8e...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 570: // main post-match.
       switch byte {
-      case 0x80...0xad, 0xb0...0xb9: state = 62; return nil
+      case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 571: // main post-match.
+    case 571: // main pre-match.
       switch byte {
-      case 0x80...0x95: state = 62; return nil
+      case 0x80...0xaf: state = 5; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 572: // main post-match.
       switch byte {
-      case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 62; return nil
+      case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 573: // main post-match.
       switch byte {
-      case 0x80...0xbc, 0xbe, 0xbf: state = 62; return nil
+      case 0x90...0xad, 0xb0...0xb5: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 574: // main post-match.
       switch byte {
-      case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 62; return nil
+      case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 575: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x90...0xb6: state = 62; return nil
+      case 0x80...0x8f: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 576: // main post-match.
       switch byte {
-      case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 62; return nil
+      case 0x80...0x84, 0x90...0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 577: // main post-match.
       switch byte {
-      case 0x80...0x91, 0x93...0xbe: state = 62; return nil
+      case 0x8f...0x9f: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 578: // main post-match.
       switch byte {
-      case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 62; return nil
+      case 0xa0: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 579: // main post-match.
       switch byte {
-      case 0x80...0xaa, 0xb0...0xb9: state = 62; return nil
+      case 0x80...0x8a, 0x90...0xa9, 0xaf...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 580: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 62; return nil
+      case 0x80...0x9f, 0xb0, 0xb1, 0xb4...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 581: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 62; return nil
+      case 0x80...0x8e, 0x90...0x9c, 0xa0...0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 582: // main post-match.
       switch byte {
-      case 0x80...0x99, 0x9b, 0x9d: state = 62; return nil
+      case 0x90...0xb0: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 583: // main post-match.
       switch byte {
-      case 0x80...0x87, 0x90...0x99: state = 62; return nil
+      case 0x80...0x8b, 0x90...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 584: // main post-match.
       switch byte {
-      case 0x80...0xb5, 0xb8...0xbf: state = 62; return nil
+      case 0x80...0xa6: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 585: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 62; return nil
+      case 0x80...0x8a, 0xa0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 586: // main post-match.
       switch byte {
-      case 0x80...0x89: state = 62; return nil
+      case 0x80...0xb3, 0xb6...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 587: // main post-match.
       switch byte {
-      case 0x80...0x99, 0x9d...0xab, 0xb0...0xbf: state = 62; return nil
+      case 0x80...0x95, 0x98...0xb9, 0xbd...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 588: // main post-match.
       switch byte {
-      case 0xa0...0xbf: state = 62; return nil
+      case 0x80...0x88, 0x8a...0x91, 0xac...0xaf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 589: // main post-match.
       switch byte {
-      case 0x80...0xb2, 0xbf: state = 62; return nil
+      case 0x80...0xae, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 590: // main post-match.
       switch byte {
-      case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 62; return nil
+      case 0x80...0xb3, 0xb9...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 591: // main post-match.
       switch byte {
-      case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 62; return nil
+      case 0x80...0xa5, 0xa7, 0xad, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 592: // main post-match.
       switch byte {
-      case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 62; return nil
+      case 0x80...0xa7, 0xaf, 0xb0, 0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 593: // sym.
+    case 593: // main post-match.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 40; return nil
-      case 0x74: state = 636; return nil
+      case 0x80...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xb6, 0xb8...0xbe: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 594: // main post-match.
+      switch byte {
+      case 0x80...0x86, 0x88...0x8e, 0x90...0x96, 0x98...0x9e, 0xa0...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 595: // main post-match.
+      switch byte {
+      case 0x80...0x84: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 596: // main post-match.
+      switch byte {
+      case 0x80...0x99, 0x9b...0xbf: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 597: // main post-match.
+      switch byte {
+      case 0x80...0xb3: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 598: // main post-match.
+      switch byte {
+      case 0x80...0x95, 0xb0...0xbb: state = 238; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 599: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x62, 0x64...0x7a: state = 53; return nil
+      case 0x63: state = 652; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 594: // sym.
+    case 600: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x63...0x7a: state = 40; return nil
-      case 0x62: state = 644; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x63...0x7a: state = 53; return nil
+      case 0x62: state = 637; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 595: // main pre-match.
+    case 601: // main post-match.
       switch byte {
-      case 0x80...0xad, 0xb0...0xbe: state = 5; return nil
+      case 0x80...0xaf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 596: // main pre-match.
+    case 602: // main post-match.
       switch byte {
-      case 0x80...0x9b, 0x9e: state = 5; return nil
+      case 0x80...0x8c, 0x90...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 597: // main pre-match.
+    case 603: // main post-match.
       switch byte {
-      case 0xa0...0xb4, 0xb6...0xbd: state = 5; return nil
+      case 0x80...0x86, 0x90...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 598: // main pre-match.
+    case 604: // main post-match.
       switch byte {
-      case 0x94...0xa1, 0xa3...0xbf: state = 5; return nil
+      case 0x80...0xab: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 599: // main pre-match.
+    case 605: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 5; return nil
+      case 0x80...0xae, 0xb0...0xb7: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 600: // main pre-match.
+    case 606: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbb: state = 5; return nil
+      case 0xb7...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 601: // main pre-match.
+    case 607: // main post-match.
       switch byte {
-      case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 5; return nil
+      case 0x80...0xab, 0xb0...0xb9: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 602: // main pre-match.
+    case 608: // main post-match.
       switch byte {
-      case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb5: state = 5; return nil
+      case 0x80...0x85, 0x8e...0x99, 0xa0...0xbd: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 603: // main pre-match.
+    case 609: // main post-match.
       switch byte {
-      case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
+      case 0x80...0x93, 0x9f...0xbc: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 604: // main pre-match.
+    case 610: // main post-match.
       switch byte {
-      case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9: state = 5; return nil
+      case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 605: // main pre-match.
+    case 611: // main post-match.
       switch byte {
-      case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
+      case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 606: // main pre-match.
+    case 612: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 5; return nil
+      case 0x80...0x82, 0x9b...0xb6: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 607: // main pre-match.
+    case 613: // main post-match.
       switch byte {
-      case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 5; return nil
+      case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 608: // main pre-match.
+    case 614: // main post-match.
       switch byte {
-      case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 5; return nil
+      case 0x80...0xa5, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 609: // main pre-match.
+    case 615: // main post-match.
       switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 5; return nil
+      case 0x80...0xad, 0xb0...0xb9: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 610: // main pre-match.
+    case 616: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 5; return nil
+      case 0x80...0x95: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 611: // main pre-match.
+    case 617: // sym.
       switch byte {
-      case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75, 0x77...0x7a: state = 53; return nil
+      case 0x74: state = 641; return nil
+      case 0x76: state = 642; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 618: // intOct.
+      switch byte {
+      case 0x30...0x37: state = 618; return nil
+      case 0x5f: state = 639; return nil
+      default:
+        start_main()
+        return flushToken(kind: .intOct)
+      }
+    case 619: // main post-match.
+      switch byte {
+      case 0x80...0xae: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 612: // main pre-match.
+    case 620: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 5; return nil
+      case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 613: // main pre-match.
+    case 621: // main post-match.
       switch byte {
-      case 0x81...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xba, 0xbd...0xbf: state = 5; return nil
+      case 0x81...0x8f, 0x91...0xb5: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 614: // main pre-match.
+    case 622: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 5; return nil
+      case 0x80...0x8c, 0x90...0xae, 0xb0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 615: // main pre-match.
+    case 623: // main post-match.
       switch byte {
-      case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 5; return nil
+      case 0xa6...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 616: // main pre-match.
+    case 624: // main post-match.
       switch byte {
-      case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 5; return nil
+      case 0x80...0x82, 0x90...0xbb: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 617: // main pre-match.
+    case 625: // main post-match.
       switch byte {
-      case 0x81...0xba, 0xbf: state = 5; return nil
+      case 0x80...0x88, 0x90, 0x91: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 618: // main pre-match.
+    case 626: // main post-match.
       switch byte {
-      case 0x80...0x9b: state = 5; return nil
+      case 0x80...0x92, 0xa0...0xac, 0xb0...0xb6: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 619: // main pre-match.
+    case 627: // main post-match.
       switch byte {
-      case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 5; return nil
+      case 0x80...0x94: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 620: // main pre-match.
+    case 628: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 5; return nil
+      case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 621: // main pre-match.
+    case 629: // main post-match.
       switch byte {
-      case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 5; return nil
+      case 0x80...0x87, 0x90...0xad: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 622: // main pre-match.
+    case 630: // main post-match.
       switch byte {
-      case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 5; return nil
+      case 0x90...0x9e, 0xa0...0xa7, 0xb0, 0xb3...0xbe: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 623: // main pre-match.
+    case 631: // main post-match.
       switch byte {
-      case 0x80...0x8c, 0x8e...0x9a: state = 5; return nil
+      case 0x80...0x8b, 0x90...0x9e: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 624: // main pre-match.
+    case 632: // main post-match.
       switch byte {
-      case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 5; return nil
+      case 0x80...0x91: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 625: // main pre-match.
+    case 633: // main post-match.
       switch byte {
-      case 0x80...0x84, 0x87...0x96: state = 5; return nil
+      case 0x80: state = 238; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 626: // main pre-match.
+    case 634: // main post-match.
       switch byte {
-      case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 5; return nil
+      case 0x30, 0x31: state = 646; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 627: // main pre-match.
+    case 635: // flt.
       switch byte {
-      case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 5; return nil
+      case 0x30...0x39: state = 635; return nil
+      default:
+        start_main()
+        return flushToken(kind: .flt)
+      }
+    case 636: // main post-match.
+      switch byte {
+      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 650; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 628: // main pre-match.
+    case 637: // pub.
       switch byte {
-      case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 5; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
+      default:
+        start_main()
+        return flushToken(kind: .pub)
+      }
+    case 638: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 53; return nil
+      case 0x6e: state = 644; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 639: // main post-match.
+      switch byte {
+      case 0x30...0x37: state = 651; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
-    case 629: // main pre-match.
+    case 640: // intDec.
       switch byte {
-      case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 630: // main pre-match.
-      switch byte {
-      case 0xb0, 0xb1: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 631: // main pre-match.
-      switch byte {
-      case 0x80...0xb4: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 632: // main pre-match.
-      switch byte {
-      case 0x80...0x9d, 0xa0...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 633: // intDec.
-      switch byte {
-      case 0x30...0x39: state = 633; return nil
-      case 0x5f: state = 554; return nil
+      case 0x30...0x39: state = 640; return nil
+      case 0x5f: state = 643; return nil
       default:
         start_main()
         return flushToken(kind: .intDec)
       }
-    case 634: // main post-match.
+    case 641: // sym.
       switch byte {
-      case 0x30...0x33: state = 649; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 635: // main pre-match.
-      switch byte {
-      case 0x80...0x96: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 636: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x61...0x7a: state = 40; return nil
-      case 0x5f: state = 650; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x78, 0x7a: state = 53; return nil
+      case 0x79: state = 649; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 637: // main pre-match.
+    case 642: // sym.
       switch byte {
-      case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 5; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x62...0x7a: state = 53; return nil
+      case 0x61: state = 657; return nil
       default:
         start_main()
-        return flushToken(kind: .incomplete)
+        return flushToken(kind: .sym)
       }
-    case 638: // main pre-match.
+    case 643: // main post-match.
       switch byte {
-      case 0x90...0xad, 0xb0...0xb5: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 639: // main pre-match.
-      switch byte {
-      case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 640: // main pre-match.
-      switch byte {
-      case 0x80...0x8f: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 641: // main pre-match.
-      switch byte {
-      case 0x80...0x84, 0x90...0xbe: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 642: // main pre-match.
-      switch byte {
-      case 0x8f...0x9f: state = 5; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 643: // main pre-match.
-      switch byte {
-      case 0xa0: state = 5; return nil
+      case 0x30...0x39: state = 647; return nil
       default:
         start_main()
         return flushToken(kind: .incomplete)
       }
     case 644: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6b, 0x6d...0x7a: state = 40; return nil
-      case 0x6c: state = 646; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x72, 0x74...0x7a: state = 53; return nil
+      case 0x73: state = 645; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 645: // intOct.
+    case 645: // sym.
       switch byte {
-      case 0x30...0x37: state = 645; return nil
-      case 0x5f: state = 651; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x68, 0x6a...0x7a: state = 53; return nil
+      case 0x69: state = 655; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 646: // intBin.
+      switch byte {
+      case 0x30, 0x31: state = 646; return nil
+      case 0x5f: state = 634; return nil
+      default:
+        start_main()
+        return flushToken(kind: .intBin)
+      }
+    case 647: // intDec.
+      switch byte {
+      case 0x30...0x39: state = 647; return nil
+      case 0x5f: state = 643; return nil
+      default:
+        start_main()
+        return flushToken(kind: .intDec)
+      }
+    case 648: // main post-match.
+      switch byte {
+      case 0x30...0x33: state = 656; return nil
+      default:
+        start_main()
+        return flushToken(kind: .incomplete)
+      }
+    case 649: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6f, 0x71...0x7a: state = 53; return nil
+      case 0x70: state = 653; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 650: // intHex.
+      switch byte {
+      case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 650; return nil
+      case 0x5f: state = 636; return nil
+      default:
+        start_main()
+        return flushToken(kind: .intHex)
+      }
+    case 651: // intOct.
+      switch byte {
+      case 0x30...0x37: state = 651; return nil
+      case 0x5f: state = 639; return nil
       default:
         start_main()
         return flushToken(kind: .intOct)
       }
-    case 646: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x64, 0x66...0x7a: state = 40; return nil
-      case 0x65: state = 654; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 647: // main post-match.
-      switch byte {
-      case 0x80...0xae: state = 62; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 648: // main post-match.
-      switch byte {
-      case 0x30, 0x31: state = 656; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
-    case 649: // intQuat.
-      switch byte {
-      case 0x30...0x33: state = 649; return nil
-      case 0x5f: state = 634; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intQuat)
-      }
-    case 650: // sym.
-      switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75, 0x77...0x7a: state = 40; return nil
-      case 0x74: state = 652; return nil
-      case 0x76: state = 653; return nil
-      default:
-        start_main()
-        return flushToken(kind: .sym)
-      }
-    case 651: // main post-match.
-      switch byte {
-      case 0x30...0x37: state = 657; return nil
-      default:
-        start_main()
-        return flushToken(kind: .incomplete)
-      }
     case 652: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x78, 0x7a: state = 40; return nil
-      case 0x79: state = 658; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x67, 0x69...0x7a: state = 53; return nil
+      case 0x68: state = 659; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
     case 653: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x62...0x7a: state = 40; return nil
-      case 0x61: state = 655; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x64, 0x66...0x7a: state = 53; return nil
+      case 0x65: state = 654; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 654: // extensible.
+    case 654: // host_type.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
-        return flushToken(kind: .extensible)
+        return flushToken(kind: .host_type)
       }
     case 655: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6b, 0x6d...0x7a: state = 40; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x63...0x7a: state = 53; return nil
+      case 0x62: state = 658; return nil
+      default:
+        start_main()
+        return flushToken(kind: .sym)
+      }
+    case 656: // intQuat.
+      switch byte {
+      case 0x30...0x33: state = 656; return nil
+      case 0x5f: state = 648; return nil
+      default:
+        start_main()
+        return flushToken(kind: .intQuat)
+      }
+    case 657: // sym.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6b, 0x6d...0x7a: state = 53; return nil
       case 0x6c: state = 660; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 656: // intBin.
-      switch byte {
-      case 0x30, 0x31: state = 656; return nil
-      case 0x5f: state = 648; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intBin)
-      }
-    case 657: // intOct.
-      switch byte {
-      case 0x30...0x37: state = 657; return nil
-      case 0x5f: state = 651; return nil
-      default:
-        start_main()
-        return flushToken(kind: .intOct)
-      }
     case 658: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6f, 0x71...0x7a: state = 40; return nil
-      case 0x70: state = 659; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6b, 0x6d...0x7a: state = 53; return nil
+      case 0x6c: state = 661; return nil
       default:
         start_main()
         return flushToken(kind: .sym)
       }
-    case 659: // sym.
+    case 659: // match.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x64, 0x66...0x7a: state = 40; return nil
-      case 0x65: state = 661; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
-        return flushToken(kind: .sym)
+        return flushToken(kind: .match)
       }
     case 660: // host_val.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
       default:
         start_main()
         return flushToken(kind: .host_val)
       }
-    case 661: // host_type.
+    case 661: // sym.
       switch byte {
-      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 40; return nil
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x64, 0x66...0x7a: state = 53; return nil
+      case 0x65: state = 662; return nil
       default:
         start_main()
-        return flushToken(kind: .host_type)
+        return flushToken(kind: .sym)
+      }
+    case 662: // extensible.
+      switch byte {
+      case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 53; return nil
+      default:
+        start_main()
+        return flushToken(kind: .extensible)
       }
 
     default: fatalError("step: lexer is in impossible state: \(state)")

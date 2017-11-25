@@ -2,6 +2,9 @@
 
 in ROOT
 
+nil = ()
+Null =: ()
+
 true  = host_val Bool "true";
 false = host_val Bool "false";
 
@@ -35,22 +38,28 @@ rem += host_val (Int Int)%Int "function($) { return $._0 % $._1; }";
 
 
 extensible eq; // TODO: constraints.
+eq += fn (() ())%Bool true;
 eq += host_val (Int Int)%Bool "function($) { return $._0 == $._1; }";
 eq += host_val (Str Str)%Bool "function($) { return $._0 == $._1; }";
 
 extensible ne; // TODO: constraints.
+ne += fn (() ())%Bool false;
 ne += host_val (Int Int)%Bool "function($) { return $._0 != $._1; }";
 
 extensible ge; // TODO: constraints.
+ge += fn (() ())%Bool true;
 ge += host_val (Int Int)%Bool "function($) { return $._0 >= $._1; }";
 
 extensible gt; // TODO: constraints.
+gt += fn (() ())%Bool false;
 gt += host_val (Int Int)%Bool "function($) { return $._0 >  $._1; }";
 
 extensible le; // TODO: constraints.
+le += fn (() ())%Bool true;
 le += host_val (Int Int)%Bool "function($) { return $._0 <= $._1; }";
 
 extensible lt; // TODO: constraints.
+lt += fn (() ())%Bool false;
 lt += host_val (Int Int)%Bool "function($) { return $._0 <  $._1; }";
 
 
@@ -60,10 +69,12 @@ std_err = host_val FS/File "$g.process.stderr.fd";
 
 
 extensible err; // TODO: make generic.
+err += fn ()%Void FS/write(std_err "()");
 err += fn Str%Void FS/write(std_err $);
 err += fn Int%Void FS/write(std_err $);
 
 extensible out; // TODO: make generic.
+out += fn ()%Void FS/write(std_out "()");
 out += fn Str%Void FS/write(std_out $);
 out += fn Int%Void FS/write(std_out $);
 

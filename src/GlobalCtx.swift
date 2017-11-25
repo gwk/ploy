@@ -60,6 +60,7 @@ class GlobalCtx {
     outColIdx = 0
   }
 
+
   func emitConversions() {
     var convs = conversions.sorted()
     var i = 0
@@ -68,30 +69,37 @@ class GlobalCtx {
       i += 1
       let orig = conv.orig
       let cast = conv.cast
+      var shouldEmitCastConstructor = true
       let em = Emitter(ctx: self)
-      em.str(0, "const \(conv.hostName) = $=> ")
+      em.str(0, "const \(conv.hostName) = $=> // \(conv)")
+
       switch (orig.kind, cast.kind) {
 
       case (.prim, _) where orig == typeNever: // Never is treated by the type checker as compatible with any expected type.
-        em.append("{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); };")
+        em.str(2, "{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); }")
+        shouldEmitCastConstructor = false
 
       case (.struct_(let o), .struct_(let c)):
-        self.constructors.insert(cast)
-        em.append("(new $S\(cast.globalIndex)( // \(conv)") // bling: $S: struct constructor.
-        emitStructToStruct(em, convs: &convs, conv: conv, orig: o, cast: c)
-        em.append("));")
+        emitStructToStruct(em, convs: &convs, castIdx: cast.globalIndex, orig: o, cast: c)
+
+      case (_, .any(let castMembers)):
+        emitConvToUnion(em, convs: &convs, castIdx: cast.globalIndex, orig: orig, castMembers: castMembers)
 
       default: fatalError("impossible conversion: \(conv)")
       }
+
       em.flush()
+      if shouldEmitCastConstructor { self.constructors.insert(cast) }
     }
   }
 
-  func emitStructToStruct(_ em: Emitter, convs: inout [Conversion], conv: Conversion,
+
+  func emitStructToStruct(_ em: Emitter, convs: inout [Conversion], castIdx: Int,
    orig: (fields: [TypeField], variants: [TypeField]),
    cast: (fields: [TypeField], variants: [TypeField])) {
     assert(cast.fields.count + cast.variants.count > 0) // conversion to nil is explictly disallowed.
     assert(orig.fields.count == cast.fields.count)
+    em.str(2, "(new $C\(castIdx)(") // bling: $C: constructor.
     for (i, (o, c)) in zip(orig.fields, cast.fields).enumerated() {
       let oName = o.hostName(index: i)
       if o.type != c.type {
@@ -100,14 +108,34 @@ class GlobalCtx {
           conversions.insert(fieldConv)
           convs.append(fieldConv)
         }
-        em.str(2, "\(fieldConv.hostName)($.\(oName)),")
+        em.str(4, "\(fieldConv.hostName)($.\(oName)),")
       } else {
-        em.str(2, "$.\(oName),")
+        em.str(4, "$.\(oName),")
       }
     }
     if !cast.variants.isEmpty {
       assert(!orig.variants.isEmpty)
-      em.str(2, "$.$t, $.$m") // bling: $t: morph tag; $m: morph value.
+      em.str(4, "$.$t, $.$m") // bling: $t: morph tag; $m: morph value.
+    }
+    em.append("));")
+  }
+
+
+  func emitConvToUnion(_ em: Emitter, convs: inout[Conversion], castIdx: Int, orig: Type, castMembers: [Type]) {
+    assert(!castMembers.isEmpty)
+
+    switch orig.kind {
+
+    case .any(let origMembers):
+      let tableName = "$ct\(orig.globalIndex)_\(castIdx)" // bling: $ct: union tag table.
+      em.str(2, "(new $C\(castIdx)(\(tableName)[$.$u], $.$m));") // bling: $C: constructor; $u: union morph tag; $m: morph value.
+      let table = origMembers.map { castMembers.index(of: $0)! }
+      let indices = table.descriptions.joined(separator: ",")
+      em.str(0, "const \(tableName) = [\(indices)];")
+
+    default:
+      guard let tag = castMembers.index(of: orig) else { fatalError("orig type `\(orig)` is not member of union: \(castMembers)") }
+      em.str(2, "(new $C\(castIdx)(\(tag), $));") // bling: $C: constructor.
     }
   }
 
@@ -115,11 +143,14 @@ class GlobalCtx {
   func emitConstructors() {
     for type in constructors.sorted() {
       let em = Emitter(ctx: self)
-      em.str(0, "class $S\(type.globalIndex) {")
+      em.str(0, "class $C\(type.globalIndex) {") // bling: $C: constructor.
       switch type.kind {
 
       case .struct_(let fields, let variants):
         emitStructConstructor(em, type: type, fields: fields, variants: variants)
+
+      case .any(let members):
+        emitUnionConstructor(em, type: type, members: members)
 
       default: fatalError("impossible constructor: \(type)")
       }
@@ -133,14 +164,22 @@ class GlobalCtx {
     let fieldParNames: [String] = fields.enumerated().map {$1.hostName(index: $0)}
     let fieldPars: String = fieldParNames.joined(separator: ", ")
     let variantPars = variants.isEmpty ? "" : "$t, $m" // bling: $t: morph tag; $m: morph value.
-    em.append(" constructor(\(fieldPars)\(variantPars)) { // \(type)") // bling: $S: struct constructor.
+    em.str(2, "constructor(\(fieldPars)\(variantPars)) { // \(type)")
     for (i, f) in fields.enumerated() {
       let n = f.hostName(index: i)
-      em.str(2, "this.\(n) = \(n);")
+      em.str(4, "this.\(n) = \(n);")
     }
     if !variants.isEmpty {
-      em.str(2, "this.$t = $t; this.$m = $m;") // bling: $t: morph tag; $m: morph value.
+      em.str(4, "this.$t = $t; this.$m = $m;") // bling: $t: morph tag; $m: morph value.
     }
+    em.append("}")
+  }
+
+
+  func emitUnionConstructor(_ em: Emitter, type: Type, members: [Type]) {
+    assert(!members.isEmpty)
+    em.str(2, "constructor($u, $m) { // \(type)") // bling: $u: union morph tag; $m: morph value.
+    em.str(4, "this.$u = $u; this.$m = $m") // bling: $u: union morph tag; $m: morph value.
     em.append("}")
   }
 }

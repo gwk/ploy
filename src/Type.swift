@@ -4,11 +4,11 @@
 class Type: CustomStringConvertible, Hashable, Comparable {
 
   enum Kind {
-    case all(members: Set<Type>)
-    case any(members: Set<Type>)
+    case all(members: [Type])
+    case any(members: [Type])
     case free(index: Int)
     case host
-    case poly(members: Set<Type>)
+    case poly(members: [Type])
     case prim
     case sig(dom: Type, ret: Type)
     case struct_(fields: [TypeField], variants: [TypeField])
@@ -44,20 +44,24 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return type
   }
 
-  class func All(_ members: Set<Type>) -> Type {
-    let desc = members.isEmpty ? "Every" : "All<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+  class func All(_ members: [Type]) throws -> Type {
+    assert(members.isSorted, "members: \(members)")
+    let merged = try computeIntersect(types: members)
+    let desc = merged.isEmpty ? "Every" : "All<\(merged.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(desc, (
-      kind: .all(members: members),
-      frees: Set(members.flatMap { $0.frees }),
-      vars: Set(members.flatMap { $0.vars })))
+      kind: .all(members: merged),
+      frees: Set(merged.flatMap { $0.frees }),
+      vars: Set(merged.flatMap { $0.vars })))
   }
 
-  class func Any_(_ members: Set<Type>) -> Type {
-    let desc = members.isEmpty ? "Empty" : "Any_<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+  class func Any_(_ members: [Type]) throws -> Type {
+    assert(members.isSorted, "members: \(members)")
+    let merged = try computeUnion(types: members)
+    let desc = merged.isEmpty ? "Empty" : "Any<\(merged.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(desc, (
-      kind: .any(members: members),
-      frees: Set(members.flatMap { $0.frees }),
-      vars: Set(members.flatMap { $0.vars })))
+      kind: .any(members: merged),
+      frees: Set(merged.flatMap { $0.frees }),
+      vars: Set(merged.flatMap { $0.vars })))
   }
 
   class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
@@ -76,7 +80,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return Type(desc, kind: .host)
   }
 
-  class func Poly(_ members: Set<Type>) -> Type {
+  class func Poly(_ members: [Type]) -> Type {
+    assert(members.isSorted, "members: \(members)")
+    // TODO: assert disjoint.
     let desc = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(desc, (
       kind: .poly(members: members),
@@ -122,6 +128,34 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       frees: variant.type.frees,
       vars: variant.type.vars))
   }
+
+
+  class func computeIntersect(types: [Type]) throws -> [Type] {
+    var merged: [Type] = []
+    for type in types {
+      switch type.kind {
+      case .all(let members): merged.append(contentsOf: members)
+      case .any: throw "type intersection contains union member: `\(type)`"
+      case .poly: throw "type intersection contains poly member: `\(type)`"
+      default: throw "type intersection not yet implemented." // merged.append(type)
+      }
+    }
+    return merged
+  }
+
+
+  class func computeUnion(types: [Type]) throws -> [Type] {
+    var merged: [Type] = []
+    for type in types {
+      switch type.kind {
+      case .any(let members): merged.append(contentsOf: members)
+      case .poly: throw "type union contains poly member: `\(type)`"
+      default: merged.append(type)
+      }
+    }
+    return merged
+  }
+
 
   var nestedSigDescription: String {
     switch kind {
@@ -203,14 +237,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
-
   func reify(_ substitutions: [String:Type]) -> Type {
     // Recursive helper assumes that the substitution makes sense.
     // TODO: optimize by checking self.vars.isEmpty?
     switch self.kind {
     case .free, .host, .prim: return self
-    case .all(let members): return .All(reify(substitutions, members: members))
-    case .any(let members): return .Any_(reify(substitutions, members: members))
+    case .all(let members): return try! .All(reify(substitutions, members: members))
+    case .any(let members): return try! .Any_(reify(substitutions, members: members))
     case .poly(let members): return .Poly(reify(substitutions, members: members))
     case .sig(let dom, let ret):
       return .Sig(dom: dom.reify(substitutions), ret: ret.reify(substitutions))
@@ -228,8 +261,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
-  func reify(_ substitutions: [String:Type], members: Set<Type>) -> Set<Type> {
-    return Set(members.map { $0.reify(substitutions) })
+  func reify(_ substitutions: [String:Type], members: [Type]) -> [Type] {
+    return members.map({ $0.reify(substitutions) }).sorted()
   }
 
   func reify(_ substitutions: [String:Type], fields: [TypeField]) -> [TypeField] {
@@ -239,8 +272,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 
 
-let typeEmpty = Type.Any_([]) // aka "Bottom type"; the empty set.
-let typeEvery = Type.All([]) // aka "Top type"; the set of all objects.
+let typeEmpty = try! Type.Any_([]) // aka "Bottom type"; the empty set.
+let typeEvery = try! Type.All([]) // aka "Top type"; the set of all objects.
 let typeNull = Type.Struct(fields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
 
 let typeBool      = Type.Prim("Bool")

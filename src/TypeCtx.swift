@@ -55,9 +55,9 @@ struct TypeCtx {
     if type.isResolved { return type }
     switch type.kind {
     case .all(let members):
-      return Type.All(Set(members.map { self.resolved(type: $0) }))
+      return try! Type.All(members.map { self.resolved(type: $0) })
     case .any(let members):
-      return Type.Any_(Set(members.map { self.resolved(type: $0) }))
+      return try! Type.Any_(members.map { self.resolved(type: $0) })
     case .struct_(let fields, let variants):
       return Type.Struct(
         fields: fields.map() { self.resolved(par: $0) },
@@ -162,6 +162,9 @@ struct TypeCtx {
         }
         match = (ctx, morph)
       }
+      if case .any(let unionMembers) = exp.kind, match == nil { // expected type is dynamic.
+        fatalError("polymorphic union matching unimplemented: \(unionMembers)")
+      }
       guard let (ctx, _) = match else { throw rel.error("no morphs match expected") }
       self = ctx
       searchError = nil
@@ -184,6 +187,14 @@ struct TypeCtx {
         freeNevers.insert(ie)
       } else {
         unify(freeIndex: ie, to: addType(act))
+      }
+      return true
+
+    case (.any(let actMembers), .any(let expMembers)):
+      for actMember in actMembers {
+        if !expMembers.contains(actMember) {
+          throw rel.error("actual `Any` type is not subset of `Any` expected type; outstanding member: `\(actMember)`")
+        }
       }
       return true
 

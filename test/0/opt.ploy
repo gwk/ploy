@@ -1,0 +1,23 @@
+main = {
+  accept_opt = fn Opt<El=Int>%Void;
+  accept_tri = fn (Null|Int|Str)%Void;
+
+  accept_opt()
+  accept_opt.1
+
+  accept_tri()
+  accept_tri.1
+
+  a:Opt<El=Int> = ()
+  b:Opt<El=Int> = 1
+
+  accept_opt.a
+  accept_opt.b
+
+  accept_tri.a
+  accept_tri.b
+
+  //assert.eq(nil nil)
+  //assert.eq(a nil)
+  //assert.eq(b 1)
+}

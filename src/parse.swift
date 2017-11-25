@@ -92,8 +92,8 @@ class Parser {
       let leftSpace = left.syn.hasEndSpace
       for i in precedence..<Parser.opPrecedenceGroups.count {
         let group = Parser.opPrecedenceGroups[i]
+        let expSpace = (i < Parser.unspacedPrecedence)
         for (kind, handler) in group {
-          let expSpace = (i < Parser.unspacedPrecedence)
           if (leftSpace == expSpace) && current.kind == kind {
             let opToken = current
             advance()
@@ -130,6 +130,7 @@ class Parser {
       (.extension_, Extension.mk),
       (.case_, Case.mk)],
     [ (.union, Union.mk)],
+    [ (.intersect, Intersect.mk)],
     [ (.where_, Where.mk),
       (.ann, Ann.mk)],
     [ (.tagTest, TagTest.mk),

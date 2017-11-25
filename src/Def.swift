@@ -81,7 +81,8 @@ enum Def: SubForm {
         typesToExts[type] = ext
         typesToNeedsLazy[type] = needsLazy
       }
-      let type = Type.Poly(Set(typesToNeedsLazy.keys))
+      // TODO: verify that types do not intersect ambiguously.
+      let type = Type.Poly(typesToNeedsLazy.keys.sorted())
       #if false
       let em = Emitter(ctx: space.ctx)
       let hostName = "\(space.hostPrefix)\(sym.hostName)"

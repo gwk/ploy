@@ -114,6 +114,8 @@ extension TypeCtx {
       }
       return type
 
+    case .intersect: fatalError()
+
     case .hostVal(let hostVal):
       for dep in hostVal.deps {
         _ = scope.getRecord(identifier: dep)
@@ -192,6 +194,8 @@ extension TypeCtx {
 
     case .typeVar(let typeVar):
       typeVar.failType("type variable declaration cannot be used as a value expression.")
+
+    case .union: fatalError()
 
     case .void:
       return typeVoid
@@ -274,9 +278,9 @@ extension TypeCtx {
     if type.isConcrete { return type }
     switch type.kind {
     case .free, .host, .prim: return type
-    case .all(let members): return .All(Set(members.map { self.instantiate($0, varsToFrees: &varsToFrees) }))
-    case .any(let members): return .Any_(Set(members.map { self.instantiate($0, varsToFrees: &varsToFrees) }))
-    case .poly(let members): return .Poly(Set(members.map { self.instantiate($0, varsToFrees: &varsToFrees) }))
+    case .all(let members): return try! .All(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
+    case .any(let members): return try! .Any_(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
+    case .poly(let members): return .Poly(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
     case .sig(let dom, let ret):
       return .Sig(dom: instantiate(dom, varsToFrees: &varsToFrees), ret: instantiate(ret, varsToFrees: &varsToFrees))
     case .struct_(let fields, let variants):
