@@ -57,7 +57,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func Any_(_ members: [Type]) throws -> Type {
     assert(members.isSorted, "members: \(members)")
     let merged = try computeUnion(types: members)
-    let desc = merged.isEmpty ? "Empty" : "Any<\(merged.map({$0.description}).sorted().joined(separator: " "))>"
+    let desc = merged.isEmpty ? "Never" : "Any<\(merged.map({$0.description}).sorted().joined(separator: " "))>"
     return memoize(desc, (
       kind: .any(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -272,21 +272,19 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 
 
-let typeEmpty = try! Type.Any_([]) // aka "Bottom type"; the empty set.
+let typeNever = try! Type.Any_([]) // aka "Bottom type"; the type with no values.
 let typeEvery = try! Type.All([]) // aka "Top type"; the set of all objects.
 let typeNull = Type.Struct(fields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
 
 let typeBool      = Type.Prim("Bool")
 let typeInt       = Type.Prim("Int")
 let typeNamespace = Type.Prim("Namespace")
-let typeNever     = Type.Prim("Never")
 let typeStr       = Type.Prim("Str")
 let typeType      = Type.Prim("Type")
-let typeVoid      = Type.Prim("Void")
+let typeVoid      = Type.Prim("Void") // Note: Void is distinct from Never.
 
 let intrinsicTypes = [
   typeBool,
-  typeEmpty,
   typeEvery,
   typeInt,
   typeNamespace,
