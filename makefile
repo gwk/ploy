@@ -11,10 +11,12 @@ _default: test
 all: clean gen build test
 
 build: src/lex.swift
-	craft-swift
+	notify -after 8 -title 'Ploy build' craft-swift
 
 clean:
 	rm -rf _build/*
+
+clean-lex:
 	rm src/lex.swift
 
 clean-ploy:
