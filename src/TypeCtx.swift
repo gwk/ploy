@@ -3,21 +3,13 @@
 
 struct TypeCtx {
 
-  let globalCtx: GlobalCtx
-
   var constraints = [Constraint]()
   var constraintsResolved = [Bool]()
   var freeUnifications = [Type?]()
   var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
 
-  var exprTypes = [Expr:Type]() // maps expressions to their types.
-  var symRecords = [Sym:ScopeRecord]()
-
   var searchError: RelCon.Err? = nil
 
-  init(globalCtx: GlobalCtx) {
-    self.globalCtx = globalCtx
-  }
 
   mutating func addType(_ type: Type) -> Type {
     // Add a type to the system of constraints.
@@ -38,12 +30,6 @@ struct TypeCtx {
   mutating func addConstraint(_ constraint: Constraint) {
     constraints.append(constraint)
     constraintsResolved.append(false)
-  }
-
-
-  func typeFor(expr: Expr) -> Type {
-    guard let type = exprTypes[expr] else { expr.form.fatal("untracked expression") }
-    return resolved(type: type)
   }
 
 
@@ -350,14 +336,6 @@ struct TypeCtx {
     for idx in freeNevers {
       if freeUnifications[idx] == nil {
         freeUnifications[idx] = typeNever
-      }
-    }
-
-    // check that resolution is complete.
-    for expr in exprTypes.keys {
-      let type = typeFor(expr: expr)
-      if type.frees.count > 0 {
-        fatalError("unresolved frees in type: \(type)")
       }
     }
   }

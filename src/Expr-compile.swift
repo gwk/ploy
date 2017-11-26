@@ -3,7 +3,7 @@
 
 extension Expr {
 
-  func compile(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, exp: Type?, isTail: Bool) {
+  func compile(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, exp: Type?, isTail: Bool) {
     let type = ctx.typeFor(expr: self)
     let exp = exp ?? type
     let hasConv = (type != exp)
@@ -17,7 +17,7 @@ extension Expr {
 
     case .acc(let acc):
       em.str(indent, "(")
-      acc.accessee.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
+      acc.accessee.compile(ctx, em, indent + 2, exp: nil, isTail: false)
       em.str(indent + 2, acc.accessor.hostAccessor)
       em.append(")")
 
@@ -29,7 +29,7 @@ extension Expr {
         var isRight = false
         for term in and.terms {
           if isRight { em.append(" &&") }
-          term.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
+          term.compile(ctx, em, indent + 2, exp: nil, isTail: false)
           isRight = true
         }
         em.append(")")
@@ -43,19 +43,19 @@ extension Expr {
         var isRight = false
         for term in or.terms {
           if isRight { em.append(" ||") }
-          term.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
+          term.compile(ctx, em, indent + 2, exp: nil, isTail: false)
           isRight = true
         }
         em.append(")")
       }
 
     case .ann(let ann):
-      ann.expr.compile(&ctx, em, indent, exp: type, isTail: isTail)
+      ann.expr.compile(ctx, em, indent, exp: type, isTail: isTail)
 
     case .bind(let bind):
       em.str(indent, "const \(bind.place.sym.hostName) =")
       let valTypeExpr = bind.place.ann?.typeExpr ?? bind.val
-      bind.val.compile(&ctx, em, indent + 2, exp: ctx.typeFor(expr: valTypeExpr), isTail: false)
+      bind.val.compile(ctx, em, indent + 2, exp: ctx.typeFor(expr: valTypeExpr), isTail: false)
       em.append(";")
 
     case .call(let call):
@@ -64,19 +64,19 @@ extension Expr {
       // this works because functions are currently never convertible,
       // implying that polymorph selection should not in the future be made to rely on this mechanism.
       // from the callee we can extract the expected arg type.
-      call.callee.compile(&ctx, em, indent, exp: nil, isTail: false) // exp is ok for now because sigs are not convertible.
+      call.callee.compile(ctx, em, indent, exp: nil, isTail: false) // exp is ok for now because sigs are not convertible.
       em.append("(")
-      call.arg.compile(&ctx, em, indent + 2, exp: calleeType.sigDom, isTail: false)
+      call.arg.compile(ctx, em, indent + 2, exp: calleeType.sigDom, isTail: false)
       em.append(")")
 
     case .do_(let do_):
       em.str(indent, "(()=>{")
-      compileBody(&ctx, em, indent + 2, body: do_.body, type: type, isTail: isTail)
+      compileBody(ctx, em, indent + 2, body: do_.body, type: type, isTail: isTail)
       em.append("})()")
 
     case .fn(let fn):
       em.str(indent,  "(function self($){")
-      compileBody(&ctx, em, indent + 2, body: fn.body, type: ctx.typeFor(expr: .sig(fn.sig)).sigRet, isTail: isTail)
+      compileBody(ctx, em, indent + 2, body: fn.body, type: ctx.typeFor(expr: .sig(fn.sig)).sigRet, isTail: isTail)
       em.append("})")
 
     case .hostVal(let hostVal):
@@ -85,13 +85,13 @@ extension Expr {
     case .if_(let if_):
       em.str(indent, "(")
       for c in if_.cases {
-        c.condition.compile(&ctx, em, indent + 2, exp: typeBool, isTail: false)
+        c.condition.compile(ctx, em, indent + 2, exp: typeBool, isTail: false)
         em.append(" ?")
-        c.consequence.compile(&ctx, em, indent + 2, exp: type, isTail: isTail)
+        c.consequence.compile(ctx, em, indent + 2, exp: type, isTail: isTail)
         em.append(" :")
       }
       if let dflt = if_.dflt {
-        dflt.expr.compile(&ctx, em, indent + 2, exp: type, isTail: isTail)
+        dflt.expr.compile(ctx, em, indent + 2, exp: type, isTail: isTail)
       } else {
         em.str(indent + 2, "undefined")
       }
@@ -131,7 +131,7 @@ extension Expr {
 
     case .paren(let paren):
       if paren.isScalarValue {
-        paren.els[0].compile(&ctx, em, indent, exp: type, isTail: isTail)
+        paren.els[0].compile(ctx, em, indent, exp: type, isTail: isTail)
       } else if type == typeNull {
         em.str(indent, "null")
       } else {
@@ -140,26 +140,26 @@ extension Expr {
         em.str(indent, "(new $C\(type.globalIndex)(") // bling: $C: constructor.
         var argIndex = 0
         for (i, field) in fields.enumerated() {
-          compileStructField(&ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
+          compileStructField(ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
         }
         if !variants.isEmpty {
           assert(variants.count == 1)
           assert(argIndex == paren.els.lastIndex!)
-          compileStructVariant(&ctx, em, indent, expr: paren.els.last!, variant: variants[0])
+          compileStructVariant(ctx, em, indent, expr: paren.els.last!, variant: variants[0])
         }
         em.append("))")
       }
 
     case .path(let path):
-      compileSym(&ctx, em, indent, sym: path.syms.last!, type: type)
+      compileSym(ctx, em, indent, sym: path.syms.last!, type: type)
 
     case .reif(let reif):
-      reif.abstract.compile(&ctx, em, indent, exp: exp, isTail: isTail)
+      reif.abstract.compile(ctx, em, indent, exp: exp, isTail: isTail)
 
     case .sig: fatalError()
 
     case .sym(let sym):
-      compileSym(&ctx, em, indent, sym: sym, type: type)
+      compileSym(ctx, em, indent, sym: sym, type: type)
 
     case .tag(let tag): // simple morph constructor; no payload.
       // Note: output must match compileStructVariant.
@@ -169,7 +169,7 @@ extension Expr {
 
     case .tagTest(let tagTest):
       em.str(indent, "( '\(tagTest.tag.sym.name)' ==")
-      tagTest.expr.compile(&ctx, em, indent + 2, exp: nil, isTail: false)
+      tagTest.expr.compile(ctx, em, indent + 2, exp: nil, isTail: false)
       em.append(".$t)") // bling: $t: morph tag.
 
     case .typeAlias:
@@ -192,7 +192,7 @@ extension Expr {
     }
   }
 
-  func compileSym(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, sym: Sym, type: Type) {
+  func compileSym(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, sym: Sym, type: Type) {
     let scopeRecord = ctx.symRecords[sym]!
     let code: String
     switch scopeRecord.kind {
@@ -216,23 +216,23 @@ extension Expr {
 }
 
 
-func compileBody(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, body: Body, type: Type, isTail: Bool) {
+func compileBody(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, body: Body, type: Type, isTail: Bool) {
   for stmt in body.stmts {
-    stmt.compile(&ctx, em, indent, exp: typeVoid, isTail: false)
+    stmt.compile(ctx, em, indent, exp: typeVoid, isTail: false)
     em.append(";")
   }
   let hasRet = (type != typeVoid)
   if hasRet {
     em.str(indent, "return (")
   }
-  body.expr.compile(&ctx, em, indent, exp: type, isTail: isTail)
+  body.expr.compile(ctx, em, indent, exp: type, isTail: isTail)
   if hasRet {
     em.append(")")
   }
 }
 
 
-func compileStructField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, paren: Paren, field: TypeField, parIndex: Int, argIndex: inout Int) {
+func compileStructField(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, paren: Paren, field: TypeField, parIndex: Int, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr
@@ -251,7 +251,7 @@ func compileStructField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, pare
 
     default: val = arg
     }
-    val.compile(&ctx, em, indent + 2, exp: field.type, isTail: false)
+    val.compile(ctx, em, indent + 2, exp: field.type, isTail: false)
     em.append(",")
     argIndex += 1
   } else { // TODO: support default arguments.
@@ -260,7 +260,7 @@ func compileStructField(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, pare
 }
 
 
-func compileStructVariant(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, expr: Expr, variant: TypeField) {
+func compileStructVariant(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, expr: Expr, variant: TypeField) {
   guard case .bind(let bind) = expr else { fatalError() }
   guard case .tag(let tag) = bind.place else { fatalError() }
   guard let label = variant.label else { fatalError() }
@@ -268,5 +268,5 @@ func compileStructVariant(_ ctx: inout TypeCtx, _ em: Emitter, _ indent: Int, ex
     tag.sym.fatal("morph constructor label does not match type's variant label `\(label)`")
   }
   em.str(indent + 1, "'\(tag.sym.hostName)',")
-  bind.val.compile(&ctx, em, indent + 2, exp: variant.type, isTail: false)
+  bind.val.compile(ctx, em, indent + 2, exp: variant.type, isTail: false)
 }

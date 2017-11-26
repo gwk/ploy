@@ -115,13 +115,9 @@ enum Def: SubForm {
 func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
   let defCtx = DefCtx(globalCtx: space.ctx)
   let val = val.simplify(defCtx)
-  var ctx = TypeCtx(globalCtx: space.ctx)
-  var type = ctx.genConstraints(LocalScope(parent: space), expr: val)
-  if let ann = place.ann {
-    type = ctx.constrainAnn(space, expr: val, type: type, ann: ann)
-  }
-  ctx.resolveAll()
-  type = ctx.resolved(type: type)
+  let unresolvedType = defCtx.genConstraints(LocalScope(parent: space), expr: val, ann: place.ann)
+  defCtx.typecheck()
+  let type = defCtx.typeCtx.resolved(type: unresolvedType)
   let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
   let em = Emitter(ctx: space.ctx)
   //let fullName = "\(space.name)/\(place.sym.name)"
@@ -131,7 +127,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     em.str(0, "let \(acc) = function() {")
     em.str(0, "  \(acc) = $lazy_sentinel;")
     em.str(0, "  const $v = // \(type)") // bling: $v: lazy value.
-    val.compile(&ctx, em, 2, exp: type, isTail: false)
+    val.compile(defCtx, em, 2, exp: type, isTail: false)
     em.append(";")
     em.str(0, "  \(acc) = function() { return $v };")
     em.str(0, "  return $v; }")
@@ -139,7 +135,7 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     return (type, needsLazy: true)
   } else {
     em.str(0, "const \(hostName) = // \(type)")
-    val.compile(&ctx, em, 0, exp: type, isTail: false)
+    val.compile(defCtx, em, 0, exp: type, isTail: false)
     em.append(";")
     em.flush()
     return (type, needsLazy: false)

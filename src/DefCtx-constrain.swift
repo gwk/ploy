@@ -1,10 +1,10 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-extension TypeCtx {
+extension DefCtx {
 
 
-  mutating func track(expr: Expr, type: Type) {
+  func track(expr: Expr, type: Type) {
     // Map an expression to a type, so that the output phase can look up the final resolved type.
     // Note: this functionality requires that a given Expr only be tracked once.
     // Therefore synthesized expressions cannot reuse input exprs multiple times.
@@ -13,22 +13,32 @@ extension TypeCtx {
   }
 
 
-  mutating func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
-    addConstraint(.rel(RelCon(
+  func genConstraints(_ scope: LocalScope, expr: Expr, ann: Ann?) -> Type {
+    // Entry point into constraint generation.
+    var type = genConstraints(scope, expr: expr)
+    if let ann = ann {
+      type = constrainAnn(scope, expr: expr, type: type, ann: ann)
+    }
+    return type
+  }
+
+
+  func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
+    typeCtx.addConstraint(.rel(RelCon(
       act: Side(expr: actExpr, type: actType),
       exp: Side(expr: expExpr ?? actExpr, type: expType),
       desc: desc)))
   }
 
 
-  mutating func constrain(acc: Acc, accesseeType: Type) -> Type {
-    let accType = addFreeType()
-    addConstraint(.prop(PropCon(acc: acc, accesseeType: accesseeType, accType: accType)))
+  func constrain(acc: Acc, accesseeType: Type) -> Type {
+    let accType = typeCtx.addFreeType()
+    typeCtx.addConstraint(.prop(PropCon(acc: acc, accesseeType: accesseeType, accType: accType)))
     return accType
   }
 
 
-  mutating func genConstraints(_ scope: LocalScope, expr: Expr) -> Type {
+  func genConstraints(_ scope: LocalScope, expr: Expr) -> Type {
     let type = genConstraintsDisp(scope, expr: expr)
     assert(type.isConstraintEligible)
     track(expr: expr, type: type)
@@ -36,7 +46,7 @@ extension TypeCtx {
   }
 
 
-  mutating func genConstraintsDisp(_ scope: LocalScope, expr: Expr) -> Type {
+  func genConstraintsDisp(_ scope: LocalScope, expr: Expr) -> Type {
     switch expr {
 
     case .acc(let acc):
@@ -73,9 +83,9 @@ extension TypeCtx {
     case .call(let call):
       let calleeType = genConstraints(scope, expr: call.callee)
       let argType = genConstraints(scope, expr: call.arg)
-      let domType = addFreeType() // necessary to get the act/exp direction right.
-      let retType = addFreeType()
-      let sigType = addType(Type.Sig(dom: domType, ret: retType))
+      let domType = typeCtx.addFreeType() // necessary to get the act/exp direction right.
+      let retType = typeCtx.addFreeType()
+      let sigType = typeCtx.addType(Type.Sig(dom: domType, ret: retType))
       constrain(call.callee, actType: calleeType, expType: sigType, "callee")
       constrain(call.arg, actType: argType, expType: domType, "argument")
       return retType
@@ -84,7 +94,7 @@ extension TypeCtx {
       return genConstraintsForBody(LocalScope(parent: scope), body: do_.body)
 
     case .fn(let fn):
-      let type = addType(Expr.sig(fn.sig).type(scope, "signature"))
+      let type = typeCtx.addType(Expr.sig(fn.sig).type(scope, "signature"))
       track(expr: .sig(fn.sig), type: type) // track the sig so that compile can look up the expectation for body.
       guard case .sig(let dom, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
@@ -95,7 +105,7 @@ extension TypeCtx {
       return type
 
     case .if_(let if_):
-      let type = (if_.dflt == nil) ? typeVoid : addFreeType() // all cases must return same type.
+      let type = (if_.dflt == nil) ? typeVoid : typeCtx.addFreeType() // all cases must return same type.
       // note: we could do without the free type by generating constraints for dflt first,
       // but we prefer to generate constraints in lexical order for all cases.
       // TODO: much more to do here when default is missing;
@@ -120,7 +130,7 @@ extension TypeCtx {
       for dep in hostVal.deps {
         _ = scope.getRecord(identifier: dep)
       }
-      let type = addType(hostVal.typeExpr.type(scope, "host value declaration"))
+      let type = typeCtx.addType(hostVal.typeExpr.type(scope, "host value declaration"))
       return type
 
     case .litNum:
@@ -154,15 +164,15 @@ extension TypeCtx {
           fields.append(member)
         }
       }
-      return addType(Type.Struct(fields: fields, variants: variants))
+      return typeCtx.addType(Type.Struct(fields: fields, variants: variants))
 
     case .path, .sym:
-      return addType(instantiate(genConstraintsForRef(scope, expr: expr)))
+      return typeCtx.addType(instantiate(genConstraintsForRef(scope, expr: expr)))
 
     case .reif(let reif):
       // note: we do not instantiate the abstract type or add it to the context until after reification.
       let abstractType = genConstraintsForRef(scope, expr: reif.abstract)
-      let type = addType(instantiate(reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args)))
+      let type = typeCtx.addType(instantiate(reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args)))
       track(expr: reif.abstract, type: type) // so that Expr.compile can just dispatch to reif.abstract.
       return type
 
@@ -175,7 +185,8 @@ extension TypeCtx {
     case .tagTest(let tagTest):
       let expr = tagTest.expr
       let actType = genConstraints(scope, expr: expr)
-      let expType = addType(Type.VariantMember(variant: TypeField(isVariant: true, label: tagTest.tag.sym.name, type: addFreeType())))
+      let expVariant = TypeField(isVariant: true, label: tagTest.tag.sym.name, type: typeCtx.addFreeType())
+      let expType = typeCtx.addType(Type.VariantMember(variant: expVariant))
       constrain(expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
       return typeBool
 
@@ -202,7 +213,7 @@ extension TypeCtx {
   }
 
 
-  mutating func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
+  func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
     let annType = ann.typeExpr.type(scope, "type annotation")
     track(expr: ann.typeExpr, type: annType)
     constrain(expr, actType: type, expExpr: ann.typeExpr, expType: annType, "annotated:")
@@ -210,7 +221,7 @@ extension TypeCtx {
   }
 
 
-  mutating func typeFieldForArg(_ scope: LocalScope, arg: Expr) -> TypeField {
+  func typeFieldForArg(_ scope: LocalScope, arg: Expr) -> TypeField {
     var isVariant = false
     let type: Type
     switch arg {
@@ -227,7 +238,7 @@ extension TypeCtx {
   }
 
 
-  mutating func genConstraintsForBody(_ scope: LocalScope, body: Body) -> Type {
+  func genConstraintsForBody(_ scope: LocalScope, body: Body) -> Type {
     for stmt in body.stmts {
       let type = genConstraints(scope, expr: stmt)
       constrain(stmt, actType: type, expType: typeVoid, "statement")
@@ -236,7 +247,7 @@ extension TypeCtx {
   }
 
 
-  mutating func genConstraintsForRef(_ scope: LocalScope, expr: Expr) -> Type {
+  func genConstraintsForRef(_ scope: LocalScope, expr: Expr) -> Type {
     let sym: Sym
     let record: ScopeRecord
     switch expr {
@@ -254,7 +265,7 @@ extension TypeCtx {
     switch record.kind {
     case .lazy(let t): type = t
     case .poly(let polytype, _):
-      type = addFreeType() // morph type.
+      type = typeCtx.addFreeType() // morph type.
       constrain(.sym(sym), actType: polytype, expType: type, "polymorph alias '\(sym.name)':")
     case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
@@ -263,14 +274,14 @@ extension TypeCtx {
   }
 
 
-  mutating func instantiate(_ type: Type) -> Type {
+  func instantiate(_ type: Type) -> Type {
     var varsToFrees: [String:Type] = [:]
     let t = instantiate(type, varsToFrees: &varsToFrees)
     return t
   }
 
 
-  mutating func instantiate(_ type: Type, varsToFrees: inout [String:Type]) -> Type {
+  func instantiate(_ type: Type, varsToFrees: inout [String:Type]) -> Type {
     if type.isConcrete { return type }
     switch type.kind {
     case .free, .host, .prim: return type
@@ -284,14 +295,14 @@ extension TypeCtx {
         fields: instantiateFields(fields, varsToFrees: &varsToFrees),
         variants: instantiateFields(variants, varsToFrees: &varsToFrees))
     case .var_(let name):
-      return varsToFrees.getOrInsert(name, dflt: { () in self.addFreeType() })
+      return varsToFrees.getOrInsert(name, dflt: { () in self.typeCtx.addFreeType() })
     case .variantMember(let variant):
       return .VariantMember(variant: variant.substitute(type: instantiate(variant.type, varsToFrees: &varsToFrees)))
     }
   }
 
 
-  mutating func instantiateFields(_ fields: [TypeField], varsToFrees: inout [String:Type]) -> [TypeField] {
+  func instantiateFields(_ fields: [TypeField], varsToFrees: inout [String:Type]) -> [TypeField] {
     return fields.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) }
   }
 }

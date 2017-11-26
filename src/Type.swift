@@ -64,7 +64,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: Set(merged.flatMap { $0.vars })))
   }
 
-  class func Free(_ index: Int) -> Type { // should only be called by TypeCtx.addFreeType.
+  class func Free(_ index: Int) -> Type { // should only be called by addFreeType.
     if index < allFreeTypes.count {
       return allFreeTypes[index]
     }
