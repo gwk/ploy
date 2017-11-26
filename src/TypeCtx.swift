@@ -173,14 +173,14 @@ struct TypeCtx {
       else       { unify(freeIndex: ie, to: act); return true }
 
     case (.free(let ia), _):
-      // note: if expected is Never we do unify; the caller expects to never return.
+      // If expected is Never then unify; the caller expects to never return.
       unify(freeIndex: ia, to: addType(exp));
       return true
 
     case (_, .free(let ie)):
       if act == typeNever {
-        // if actual is Never, do not unify; other code paths may return, and we want that type to bind to the free exp.
-        // however this might be the only branch, so we need to remember this and fall back if exp remains free.
+        // If actual is Never, then do not unify; other code paths may return, and we want that type to bind to the free exp.
+        // However this might be the only branch, so we need to remember the Never and fall back to it if exp remains free.
         freeNevers.insert(ie)
       } else {
         unify(freeIndex: ie, to: addType(act))
