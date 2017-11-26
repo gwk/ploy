@@ -12,15 +12,12 @@ struct TypeCtx {
 
   var exprTypes = [Expr:Type]() // maps expressions to their types.
   var symRecords = [Sym:ScopeRecord]()
-  var synths = [Expr:Expr]()
-  var genSyms = [Sym]()
 
   var searchError: RelCon.Err? = nil
 
   init(globalCtx: GlobalCtx) {
     self.globalCtx = globalCtx
   }
-
 
   mutating func addType(_ type: Type) -> Type {
     // Add a type to the system of constraints.

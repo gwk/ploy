@@ -127,8 +127,7 @@ extension Expr {
     case .magic(let magic):
       em.str(indent, magic.code)
 
-    case .match:
-      ctx.getSynth(source: self).compile(&ctx, em, indent, exp: type, isTail: isTail)
+    case .match: fatalError()
 
     case .paren(let paren):
       if paren.isScalarValue {

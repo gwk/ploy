@@ -1,13 +1,14 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-func genMatch(match: Match, valSym: Sym) -> Expr {
+func genMatch(_ ctx: DefCtx, match: Expr, expr: Expr, cases: [Case], dflt: Default?) -> Expr {
   // Reduce the match form down to simpler syntax.
   // This is a purely syntactic process; the result is type checked.
-  let exprBind = Expr.bind(Bind(match.expr.syn, place: .sym(valSym), val: match.expr))
+  let valSym = ctx.genSym(parent: match)
+  let exprBind = Expr.bind(Bind(expr.syn, place: .sym(valSym), val: expr))
   let if_ = If(match.syn,
-    cases: match.cases.map { genMatchCase(matchValSym: valSym, case_: $0) },
-    dflt: match.dflt ?? Default(match.syn, expr: .call(Call(match.syn,
+    cases: cases.map { genMatchCase(matchValSym: valSym, case_: $0) },
+    dflt: dflt ?? Default(match.syn, expr: .call(Call(match.syn,
       callee: .sym(Sym(match.syn, name: "fail")),
       arg: .litStr(LitStr(match.syn, val: "match failed: \(match.syn)."))))))
   return .do_(Do(match.syn, stmts: [exprBind], expr: .if_(if_)))
@@ -17,8 +18,7 @@ func genMatch(match: Match, valSym: Sym) -> Expr {
 func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
   // Synthesize an `if` case from a `match` case.
   // matchValSym is the generated sym bound to the match value expression.
-  // All syntax nodes must not appear more than once in the output tree;
-  // in other words it must be a real tree and not a DAG; see TypeCtx.track().
+  // All syntax nodes must not appear more than once in the output tree; see TypeCtx.track().
   // Instead we clone nodes that get used more than once.
   // Note: the synthesized calls to ROOT/eq result in somewhat cryptic type errors regarding type of 'eq'.
   // Not sure how that should be addressed;

@@ -113,6 +113,8 @@ enum Def: SubForm {
 
 
 func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
+  let defCtx = DefCtx(globalCtx: space.ctx)
+  let val = val.simplify(defCtx)
   var ctx = TypeCtx(globalCtx: space.ctx)
   var type = ctx.genConstraints(LocalScope(parent: space), expr: val)
   if let ann = place.ann {

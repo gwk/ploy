@@ -132,11 +132,7 @@ extension TypeCtx {
     case .magic(let magic):
       return magic.type
 
-    case .match(let match):
-      let valSym = genSym(parent: match.expr)
-      let do_ = putSynth(source: expr, expr: genMatch(match: match, valSym: valSym))
-      let type = genConstraints(scope, expr: do_)
-      return type
+    case .match: fatalError() // removed by simplify().
 
     case .paren(let paren):
       if paren.isScalarValue {
@@ -295,27 +291,7 @@ extension TypeCtx {
   }
 
 
-
-
   mutating func instantiateFields(_ fields: [TypeField], varsToFrees: inout [String:Type]) -> [TypeField] {
     return fields.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) }
-  }
-
-
-  mutating func putSynth(source: Expr, expr: Expr) -> Expr {
-    synths.insertNew(source, value: expr)
-    return expr
-  }
-
-
-  mutating func getSynth(source: Expr) -> Expr {
-    return synths[source]!
-  }
-
-
-  mutating func genSym(parent: Expr) -> Sym {
-    let sym = Sym(parent.syn, name: "$g\(genSyms.count)") // bling: $g<i>: gensym.
-    genSyms.append(sym)
-    return sym
   }
 }

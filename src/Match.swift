@@ -20,4 +20,3 @@ class Match: Form { // match statement: `match cond0 ? then0 … / default;`.
     return children
   }
 }
-
