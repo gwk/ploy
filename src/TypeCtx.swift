@@ -4,7 +4,6 @@
 struct TypeCtx {
 
   var constraints = [Constraint]()
-  var constraintsResolved = [Bool]()
   var freeUnifications = [Type?]()
   var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
 
@@ -29,7 +28,6 @@ struct TypeCtx {
 
   mutating func addConstraint(_ constraint: Constraint) {
     constraints.append(constraint)
-    constraintsResolved.append(false)
   }
 
 
@@ -292,44 +290,32 @@ struct TypeCtx {
 
 
   mutating func resolveAll() {
-    var doneCount = 0
-    while doneCount < constraints.count {
+    while !constraints.isEmpty {
+      var deferredConstraints: [Constraint] = []
       var i = 0
-      var doneThisRound = 0
       while i < constraints.count { // use while loop because constraints array may grow during iteration.
-        let index = i
-        i += 1
-        if constraintsResolved[index] {
-          doneThisRound += 1
-          continue
-        }
-        let constraint = constraints[index]
+        let constraint = constraints[i]
         do {
           let done = try resolve(constraint)
-          if done {
-            constraintsResolved[index] = true
-            doneThisRound += 1
-          } // else deferred to next round.
+          if !done {
+            deferredConstraints.append(constraint)
+          }
         } catch let err as RelCon.Err {
           error(err)
         } catch let err as PropCon.Err {
           error(err)
         } catch { fatalError() }
+        i += 1
       }
-      assert(doneThisRound >= doneCount)
-      if doneThisRound == doneCount {
+      if deferredConstraints.count == constraints.count { // no progress; error.
         if let searchError = searchError { error(searchError) }
         // If we do not have a specific error from polymorph search, just show generic error for first constraint.
-        for (c, isResolved) in zip(constraints, constraintsResolved) {
-          if isResolved { continue }
-          switch c {
-          case .prop(let prop): error(prop.error("cannot resolve constraint"))
-          case .rel(let rel): error(rel.error("cannot resolve constraint"))
-          }
+        switch deferredConstraints.first! {
+        case .prop(let prop): error(prop.error("cannot resolve constraint"))
+        case .rel(let rel): error(rel.error("cannot resolve constraint"))
         }
-        fatalError("resolve loop did not progress") // should be unreachable.
       }
-      doneCount = doneThisRound
+      constraints = deferredConstraints
     }
 
     // fill in frees that were only bound to Never.
@@ -367,8 +353,8 @@ struct TypeCtx {
     errL("TypeCtx.describeState: \(label)")
     if showConstraints {
       errL("Constraints:")
-      for (constraint, isResolved) in zip(constraints, constraintsResolved) {
-        errL("  \(isResolved ? "+" : "-") \(constraint)")
+      for c in constraints {
+        errL("  \(c)")
       }
     }
     if showUnifications {
