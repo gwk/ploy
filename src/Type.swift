@@ -47,7 +47,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func All(_ members: [Type]) throws -> Type {
     assert(members.isSorted, "members: \(members)")
     let merged = try computeIntersect(types: members)
-    let desc = merged.isEmpty ? "Every" : "All<\(merged.map({$0.description}).sorted().joined(separator: " "))>"
+    let desc = merged.isEmpty ? "Every" : "All<\(merged.descriptions.sorted().joined(separator: " "))>"
     return memoize(desc, (
       kind: .all(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -57,7 +57,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func Any_(_ members: [Type]) throws -> Type {
     assert(members.isSorted, "members: \(members)")
     let merged = try computeUnion(types: members)
-    let desc = merged.isEmpty ? "Never" : "Any<\(merged.map({$0.description}).sorted().joined(separator: " "))>"
+    let desc = merged.isEmpty ? "Never" : "Any<\(merged.descriptions.sorted().joined(separator: " "))>"
     return memoize(desc, (
       kind: .any(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -83,7 +83,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func Poly(_ members: [Type]) -> Type {
     assert(members.isSorted, "members: \(members)")
     // TODO: assert disjoint.
-    let desc = "Poly<\(members.map({$0.description}).sorted().joined(separator: " "))>"
+    let desc = "Poly<\(members.descriptions.sorted().joined(separator: " "))>"
     return memoize(desc, (
       kind: .poly(members: members),
       frees: Set(members.flatMap { $0.frees }),
@@ -104,7 +104,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   class func Struct(fields: [TypeField], variants: [TypeField]) -> Type {
     let members = fields + variants
-    let descs = members.map({$0.description}).joined(separator: " ")
+    let descs = members.descriptions.joined(separator: " ")
     let desc = "(\(descs))"
     return memoize(desc, (
       kind: .struct_(fields: fields, variants: variants),
@@ -262,7 +262,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   func reify(_ substitutions: [String:Type], members: [Type]) -> [Type] {
-    return members.map({ $0.reify(substitutions) }).sorted()
+    return members.sortedMap{ $0.reify(substitutions) }
   }
 
   func reify(_ substitutions: [String:Type], fields: [TypeField]) -> [TypeField] {
