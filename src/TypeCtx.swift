@@ -281,6 +281,7 @@ struct TypeCtx {
     throw rel.error("actual variants do not contain expected variant label: `-\(expVariant.label!)`")
   }
 
+
   mutating func resolveSub(constraint: Constraint) throws {
     let done = try resolve(constraint)
     if !done {
@@ -385,6 +386,7 @@ struct TypeCtx {
         "\n  \(r.exp.chainDesc)expected type: \(exp)")
     }
   }
+
 
   func describeState(_ label: String = "", showConstraints: Bool = false, showUnifications: Bool = true) {
     errL("TypeCtx.describeState: \(label)")
