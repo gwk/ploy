@@ -1,0 +1,3 @@
+s:(Int (Int Int)) = (0 (0 nil))
+
+main = void.s
