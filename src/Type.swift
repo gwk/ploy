@@ -244,13 +244,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     // TODO: optimize by checking self.vars.isEmpty?
     switch self.kind {
     case .free, .host, .prim: return self
-    case .all(let members): return try! .All(reify(substitutions, members: members))
-    case .any(let members): return try! .Any_(reify(substitutions, members: members))
-    case .poly(let members): return .Poly(reify(substitutions, members: members))
-    case .sig(let dom, let ret):
-      return .Sig(dom: dom.reify(substitutions), ret: ret.reify(substitutions))
-    case .struct_(let fields, let variants):
-      return .Struct(fields: reify(substitutions, fields: fields), variants: reify(substitutions, fields: variants))
     case .var_(let name):
       for (n, type) in substitutions {
         if n == name {
@@ -258,6 +251,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
         }
       }
       return self
+    case .all(let members): return try! .All(reify(substitutions, members: members))
+    case .any(let members): return try! .Any_(reify(substitutions, members: members))
+    case .poly(let members): return .Poly(reify(substitutions, members: members))
+    case .sig(let dom, let ret):
+      return .Sig(dom: dom.reify(substitutions), ret: ret.reify(substitutions))
+    case .struct_(let fields, let variants):
+      return .Struct(fields: reify(substitutions, fields: fields), variants: reify(substitutions, fields: variants))
     case .variantMember(let variant):
       return .VariantMember(variant: variant.substitute(type: variant.type.reify(substitutions)))
     }
