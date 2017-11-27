@@ -239,36 +239,37 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     }
   }
 
+
+  func  transformLeaves(_ fn: (Type)->Type) -> Type {
+    switch self.kind {
+    case .free, .host, .prim, .var_: return fn(self)
+    case .all(let members): return try! .All(members.sortedMap{$0.transformLeaves(fn)})
+    case .any(let members): return try! .Any_(members.sortedMap{$0.transformLeaves(fn)})
+    case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
+    case .sig(let dom, let ret): return .Sig(dom: dom.transformLeaves(fn), ret: ret.transformLeaves(fn))
+    case .struct_(let fields, let variants):
+      return .Struct(fields: fields.map{$0.transformType(fn)}, variants: variants.map{$0.transformType(fn)})
+    case .variantMember(let variant): return .VariantMember(variant: variant.transformType(fn))
+    }
+
+  }
+
+
   func reify(_ substitutions: [String:Type]) -> Type {
     // Recursive helper assumes that the substitution makes sense.
     // TODO: optimize by checking self.vars.isEmpty?
-    switch self.kind {
-    case .free, .host, .prim: return self
-    case .var_(let name):
-      for (n, type) in substitutions {
-        if n == name {
-          return type
+    return transformLeaves { type in
+      switch type.kind {
+      case .var_(let name):
+        for (n, sub) in substitutions {
+          if n == name {
+            return sub
+          }
         }
+        return type
+      default: return type
       }
-      return self
-    case .all(let members): return try! .All(reify(substitutions, members: members))
-    case .any(let members): return try! .Any_(reify(substitutions, members: members))
-    case .poly(let members): return .Poly(reify(substitutions, members: members))
-    case .sig(let dom, let ret):
-      return .Sig(dom: dom.reify(substitutions), ret: ret.reify(substitutions))
-    case .struct_(let fields, let variants):
-      return .Struct(fields: reify(substitutions, fields: fields), variants: reify(substitutions, fields: variants))
-    case .variantMember(let variant):
-      return .VariantMember(variant: variant.substitute(type: variant.type.reify(substitutions)))
     }
-  }
-
-  func reify(_ substitutions: [String:Type], members: [Type]) -> [Type] {
-    return members.sortedMap{ $0.reify(substitutions) }
-  }
-
-  func reify(_ substitutions: [String:Type], fields: [TypeField]) -> [TypeField] {
-    return fields.map { $0.substitute(type: $0.type.reify(substitutions)) }
   }
 }
 
