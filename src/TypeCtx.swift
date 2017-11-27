@@ -131,10 +131,10 @@ struct TypeCtx {
     case (.poly, _): // actual polymorph; attempt to select a morph.
       return try resolvePoly(rel, act: act, exp: exp)
 
-    case (.free(let ia), .free(let ie)):
-      // TODO: determine whether always resolving to lower index is necessary.
-      if ia > ie { unify(freeIndex: ia, to: exp); return true }
-      else       { unify(freeIndex: ie, to: act); return true }
+    case (.free(let ia), .free):
+      // Propagate the actual type as far as possible. TODO: figure out if this matters.
+      unify(freeIndex: ia, to: exp)
+      return true
 
     case (.free(let ia), _):
       // If expected is Never then unify; the caller expects to never return.
