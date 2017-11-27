@@ -80,7 +80,7 @@ struct Side: CustomStringConvertible {
 
   var description: String { return "\(chainDesc)\(expr): \(type)" }
 
-  var chainDesc: String { return chain.map({"\($0) -> "}).joined() }
+  var chainDesc: String { return chain.map({"\($0) of "}).joined() }
 
   func sub(expr: Expr?, type: Type, desc: String) -> Side {
     if let expr = expr {
