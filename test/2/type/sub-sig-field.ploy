@@ -1,3 +1,0 @@
-f:(Int Int)%Int = fn (Int Int Int)%Int 0@$;
-
-main = exit.f(0 0 0)

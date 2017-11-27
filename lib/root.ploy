@@ -8,7 +8,7 @@ Null =: ()
 true  = host_val Bool "true";
 false = host_val Bool "false";
 
-void = fn ()%Void;
+void = fn ^T%Void;
 
 not = host_val Bool%Bool "function($) { return !$; }";
 
