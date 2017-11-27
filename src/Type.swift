@@ -140,6 +140,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       default: throw "type intersection not yet implemented." // merged.append(type)
       }
     }
+    merged.sort()
     return merged
   }
 
@@ -153,6 +154,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       default: merged.append(type)
       }
     }
+    merged.sort()
     return merged
   }
 
