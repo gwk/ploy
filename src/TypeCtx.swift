@@ -274,7 +274,7 @@ struct TypeCtx {
   mutating func resolveSub(_ rel: RelCon,
    actExpr: Expr?, actType: Type, actDesc: String,
    expExpr: Expr?, expType: Type, expDesc: String) throws {
-    try resolveSub(constraint: Constraint.rel(RelCon(
+    try resolveSub(constraint: .rel(RelCon(
       act: rel.act.sub(expr: actExpr, type: actType, desc: actDesc),
       exp: rel.exp.sub(expr: expExpr, type: expType, desc: expDesc),
       desc: rel.desc)))
