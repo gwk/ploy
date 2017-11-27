@@ -5,6 +5,7 @@ struct TypeCtx {
 
   var constraints = [Constraint]()
   var freeUnifications = [Type?]()
+  var freeParents: [Int] = [] // Map free indices to parent context.
   var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
 
   var searchError: RelCon.Err? = nil
@@ -127,29 +128,8 @@ struct TypeCtx {
     case (.poly, .free): // cannot unify an actual polymorph because it prevents polymorph selection; defer instead.
       return false
 
-    case (.poly(let morphs), _): // actual polymorph; attempt to select a morph.
-      var match: (TypeCtx, Type)? = nil
-      for morph in morphs {
-        assert(morph.isResolved)
-        var ctx = self // copy ctx.
-        do {
-          try ctx.resolveSub(rel, actType: morph, actDesc: "morph")
-        } catch {
-          continue
-        }
-        if let (_, prev) = match {
-          searchError = rel.error("multiple morphs match expected: \(prev); \(morph)")
-          return false
-        }
-        match = (ctx, morph)
-      }
-      if case .any(let unionMembers) = exp.kind, match == nil { // expected type is dynamic.
-        fatalError("polymorphic union matching unimplemented: \(unionMembers)")
-      }
-      guard let (ctx, _) = match else { throw rel.error("no morphs match expected") }
-      self = ctx
-      searchError = nil
-      return true
+    case (.poly, _): // actual polymorph; attempt to select a morph.
+      return try resolvePoly(rel, act: act, exp: exp)
 
     case (.free(let ia), .free(let ie)):
       // TODO: determine whether always resolving to lower index is necessary.
@@ -202,6 +182,40 @@ struct TypeCtx {
 
     default: throw rel.error("actual type is not expected type")
     }
+  }
+
+
+  mutating func resolvePoly(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
+    guard case .poly(let morphs) = act.kind else { fatalError() }
+    assert(exp.vars.isEmpty)
+    var subCtx = TypeCtx()
+    let subExp = subCtx.copy(parentType: exp)
+    var matchMorph: Type? = nil
+    var matchCtx = subCtx // overwritten by matching iteration.
+    for morph in morphs {
+      assert(morph.isResolved)
+      assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles.
+      var childCtx = subCtx // copy.
+      childCtx.addConstraint(.rel(RelCon(
+        act: Side(expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)),
+        exp: Side(expr: rel.exp.expr, type: childCtx.addType(subExp), chain: rel.exp.chain),
+        desc: rel.desc)))
+      do { try childCtx.resolveAll() }
+      catch { continue }
+      if let prev = matchMorph {
+        searchError = rel.error("multiple morphs match expected: \(prev); \(morph)")
+        return false
+      }
+      matchMorph = morph
+      matchCtx = childCtx
+    }
+    if case .any(let unionMembers) = exp.kind, matchMorph == nil { // expected type is dynamic.
+      fatalError("polymorphic union matching unimplemented: \(unionMembers)")
+    }
+    if matchMorph == nil { throw rel.error("no morphs match expected") }
+    mergeSubCtx(matchCtx)
+    searchError = nil
+    return true
   }
 
 
@@ -281,49 +295,92 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveSub(_ rel: RelCon, actType: Type, actDesc: String) throws {
-    try resolveSub(constraint: Constraint.rel(RelCon(
-      act: Side(expr: rel.act.expr, type: actType, chain: .link(actDesc, rel.act.chain)),
-      exp: rel.exp,
-      desc: rel.desc)))
+  mutating func copy(parentType: Type) -> Type {
+    return parentType.transformLeaves { type in
+      switch type.kind {
+      case .free(let index):
+        assert(self.freeUnifications.count == self.freeParents.count)
+        // Note: the counts match because we are creating a new child ctx.
+        // Once resolution begins, addType can cause freeUnifications to grow.
+        self.freeParents.append(index)
+        return self.addFreeType()
+      default: return type
+      }
+    }
   }
 
 
-  mutating func resolveAll() {
-    while !constraints.isEmpty {
-      var deferredConstraints: [Constraint] = []
-      var i = 0
-      while i < constraints.count { // use while loop because constraints array may grow during iteration.
-        let constraint = constraints[i]
-        do {
-          let done = try resolve(constraint)
-          if !done {
-            deferredConstraints.append(constraint)
-          }
-        } catch let err as RelCon.Err {
-          error(err)
-        } catch let err as PropCon.Err {
-          error(err)
-        } catch { fatalError() }
-        i += 1
+  func copyForParent(type: Type) -> Type {
+    return type.transformLeaves { type in
+      switch type.kind {
+      case .free(let index): return .Free(self.freeParents[index])
+      default: return type
       }
-      if deferredConstraints.count == constraints.count { // no progress; error.
+    }
+  }
+
+
+  mutating func mergeSubCtx(_ ctx: TypeCtx) {
+    assert(ctx.searchError == nil)
+    for (childType, parentIdx) in zip(ctx.freeUnifications, ctx.freeParents) {
+      // Note: freeUnifications might now be larger than freeParents, due to addType.
+      // These get ignored, because they cannot possibly be referenced by the parent context.
+      guard let childType = childType else { continue } // not resolved by child
+      let parentType = ctx.copyForParent(type: childType)
+      if case .free(let i) = parentType.kind { assert(i != parentIdx) } // a free should never point to itself.
+      freeUnifications[parentIdx] = parentType
+    }
+    for i in ctx.freeNevers {
+      freeNevers.insert(ctx.freeParents[i])
+    }
+  }
+
+
+  mutating func resolveRound() throws -> [Constraint] {
+    var deferred: [Constraint] = []
+    var i = 0
+    while i < constraints.count { // use while loop because constraints array may grow during iteration.
+      let constraint = constraints[i]
+      let done = try resolve(constraint)
+      if !done {
+        deferred.append(constraint)
+      }
+      i += 1
+    }
+    return deferred
+  }
+
+
+  mutating func resolveAll() throws {
+    while !constraints.isEmpty {
+      let deferred = try resolveRound()
+      if deferred.count == constraints.count { // no progress; error.
         if let searchError = searchError { error(searchError) }
         // If we do not have a specific error from polymorph search, just show generic error for first constraint.
-        switch deferredConstraints.first! {
-        case .prop(let prop): error(prop.error("cannot resolve constraint"))
-        case .rel(let rel): error(rel.error("cannot resolve constraint"))
+        switch deferred.first! {
+        case .prop(let prop): throw prop.error("cannot resolve constraint")
+        case .rel(let rel): throw rel.error("cannot resolve constraint")
         }
       }
-      constraints = deferredConstraints
+      constraints = deferred
     }
-
     // fill in frees that were only bound to Never.
     for idx in freeNevers {
       if freeUnifications[idx] == nil {
         freeUnifications[idx] = typeNever
       }
     }
+  }
+
+
+  mutating func resolveOrError() {
+    do {
+      try resolveAll()
+    } catch let err as PropCon.Err {
+      error(err)
+    } catch let err as RelCon.Err {
+      error(err)
+    } catch { fatalError() }
   }
 
 
@@ -360,13 +417,13 @@ struct TypeCtx {
     if showUnifications {
       errL("Unifications:")
       for (i, origType) in freeUnifications.enumerated() {
+        let never = freeNevers.contains(i) ? " (Never)" : ""
         if let origType = origType {
           let type = resolved(type: origType)
-          let never = freeNevers.contains(i) ? " (Never)" : ""
           let frees = type.childFrees.isEmpty ? "" : " : \(type.childFrees.sorted())"
-          errL("  \(i): \(type)\(never)\(frees)")
+          errL("  \(i): \(origType)\t-- \(type)\(never)\(frees)")
         } else {
-          errL("  \(i): nil")
+          errL("  \(i): nil\(never)")
         }
       }
     }

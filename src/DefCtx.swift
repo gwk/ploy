@@ -17,7 +17,7 @@ class DefCtx {
 
 
   func typecheck() {
-    typeCtx.resolveAll()
+    typeCtx.resolveOrError()
     // check that resolution is complete.
     for expr in exprTypes.keys {
       let type = typeFor(expr: expr)
