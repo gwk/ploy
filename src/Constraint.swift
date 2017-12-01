@@ -49,44 +49,61 @@ struct RelCon: CustomStringConvertible {
   // A generic binary relation constraint, consisting of 'actual' and 'expected' sides.
 
   struct Err: Error {
+    typealias MsgThunk = (String, String) -> String
     let rel: RelCon
-    let msgThunk: ()->String
+    let msgThunk: MsgThunk
   }
 
   let act: Side
   let exp: Side
   let desc: String
 
-  var description: String { return "act: \(act); exp: \(exp); desc: \(desc)" }
+  var description: String { return "\(act.role.desc): \(act); \(exp.role.desc): \(exp); desc: \(desc)" }
 
-  func error(_ msgThunk: @escaping @autoclosure ()->String) -> Err {
-    return Err(rel: self, msgThunk: msgThunk)
-  }
+  func error(_ msgThunk: @escaping (String, String) -> String) -> Err { return Err(rel: self, msgThunk: msgThunk) }
 }
 
 
 struct Side: CustomStringConvertible {
 
+  enum Role {
+    case act
+    case exp
+    case dom
+    case ret
+
+    var desc: String {
+      switch self {
+      case .act: return "actual"
+      case .exp: return "expected"
+      case .dom: return "domain"
+      case .ret: return "return"
+      }
+    }
+  }
+
+  let role: Role
   let expr: Expr // the literal expression associated with the constraint; may be a parent.
   let type: Type
   let chain: Chain<String> // describes the path into the parent literal expression.
 
-  init(expr: Expr, type: Type, chain: Chain<String> = .end) {
+  init(_ role: Role, expr: Expr, type: Type, chain: Chain<String> = .end) {
     assert(type.isConstraintEligible)
+    self.role = role
     self.expr = expr
     self.type = type
     self.chain = chain
   }
 
-  var description: String { return "\(chainDesc)\(expr): \(type)" }
+  var description: String { return "\(role.desc): \(chainDesc)\(expr): \(type)" }
 
   var chainDesc: String { return chain.map({"\($0) of "}).joined() }
 
-  func sub(expr: Expr?, type: Type, desc: String) -> Side {
+  func sub(_ role: Role, expr: Expr?, type: Type, desc: String) -> Side {
     if let expr = expr {
-      return Side(expr: expr, type: type)
+      return Side(role, expr: expr, type: type)
     } else {
-      return Side(expr: self.expr, type: type, chain: .link(desc, chain))
+      return Side(role, expr: self.expr, type: type, chain: .link(desc, chain))
     }
   }
 

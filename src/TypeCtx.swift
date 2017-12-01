@@ -89,8 +89,8 @@ struct TypeCtx {
         for variant in variants {
           if variant.label! == name {
             try resolveSub(constraint: .rel(RelCon(
-              act: Side(expr: .acc(prop.acc), type: variant.type),
-              exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
+              act: Side(.act, expr: .acc(prop.acc), type: variant.type),
+              exp: Side(.exp, expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
               desc: "variant")))
             return true
           }
@@ -100,8 +100,8 @@ struct TypeCtx {
         for (i, field) in fields.enumerated() {
           if field.accessorString(index: i) == accessor.accessorString {
             try resolveSub(constraint: .rel(RelCon(
-              act: Side(expr: .acc(prop.acc), type: field.type),
-              exp: Side(expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
+              act: Side(.act, expr: .acc(prop.acc), type: field.type),
+              exp: Side(.exp, expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
               desc: "access")))
             return true
           }
@@ -154,14 +154,14 @@ struct TypeCtx {
     case (.any(let actMembers), .any(let expMembers)):
       for actMember in actMembers {
         if !expMembers.contains(actMember) {
-          throw rel.error("actual `Any` type is not subset of `Any` expected type; outstanding member: `\(actMember)`")
+          throw rel.error({"\($0) `Any` type is not subset of `Any` \($1) type; outstanding member: `\(actMember)`"})
         }
       }
       return true
 
     case (_, .any(let members)):
       if !members.contains(act) {
-        throw rel.error("actual type is not a member of `Any` expected type")
+        throw rel.error({"\($0) type is not a member of `Any` \($1) type"})
       }
       return true
 
@@ -173,14 +173,14 @@ struct TypeCtx {
 
     case (.struct_(let actFV), .struct_(let expFV)):
       if exp == typeNull {
-        throw rel.error("implicit struct conversion to nil is disallowed")
+        throw rel.error({(_, _) in "implicit struct conversion to nil is disallowed"})
       }
       return try resolveStructToStruct(rel, act: actFV, exp: expFV)
 
     case (.struct_(_, let actVariants), .variantMember(let expVariant)):
       return try resolveStructToVariantMember(rel, actVariants: actVariants, expVariant: expVariant)
 
-    default: throw rel.error("actual type is not expected type")
+    default: throw rel.error({"\($0) type is not \($1) type"})
     }
   }
 
@@ -197,13 +197,13 @@ struct TypeCtx {
       assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles.
       var childCtx = subCtx // copy.
       childCtx.addConstraint(.rel(RelCon(
-        act: Side(expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)),
-        exp: Side(expr: rel.exp.expr, type: childCtx.addType(subExp), chain: rel.exp.chain),
+        act: Side(.act, expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)),
+        exp: Side(.exp, expr: rel.exp.expr, type: childCtx.addType(subExp), chain: rel.exp.chain),
         desc: rel.desc)))
       do { try childCtx.resolveAll() }
       catch { continue }
       if let prev = matchMorph {
-        searchError = rel.error("multiple morphs match expected: \(prev), \(morph)")
+        searchError = rel.error({"multiple morphs of \($0) match \($1): \(prev), \(morph)"})
         return false
       }
       matchMorph = morph
@@ -212,7 +212,7 @@ struct TypeCtx {
     if case .any(let unionMembers) = exp.kind, matchMorph == nil { // expected type is dynamic.
       fatalError("polymorphic union matching unimplemented: \(unionMembers)")
     }
-    if matchMorph == nil { throw rel.error("no morphs match expected") }
+    if matchMorph == nil { throw rel.error({"no morphs of \($0) match \($1)"}) }
     mergeSubCtx(matchCtx)
     searchError = nil
     return true
@@ -235,13 +235,13 @@ struct TypeCtx {
    exp: (fields: [TypeField], variants: [TypeField])) throws -> Bool {
     if exp.fields.count != act.fields.count {
       let nFields = pluralize(act.fields.count, "field")
-      throw rel.error("actual struct has \(nFields); expected \(exp.fields.count)")
+      throw rel.error({"\($0) struct has \(nFields); \($1) struct has \(exp.fields.count)"})
     }
     let litActFields = rel.act.litExpr?.parenFieldEls
     let litExpFields = rel.exp.litExpr?.parenFieldEls
     for (index, (actField, expField)) in zip(act.fields, exp.fields).enumerated() {
       if actField.label != nil && actField.label != expField.label {
-        throw rel.error("field #\(index) has \(actField.labelMsg); expected \(expField.labelMsg)")
+        throw rel.error({"\($0) field #\(index) has \(actField.labelMsg); \($1) field has \(expField.labelMsg)"})
       }
       try resolveSub(rel,
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
@@ -258,7 +258,7 @@ struct TypeCtx {
             continue actual
         }
       }
-      throw rel.error("actual variant tag not found in expected variants: `-\(actVariant.label!)`")
+      throw rel.error({"\($0) variant tag not found in \($1) variants: `-\(actVariant.label!)`"})
     }
     return true
   }
@@ -273,7 +273,7 @@ struct TypeCtx {
       return true
       }
     }
-    throw rel.error("actual variants do not contain expected variant label: `-\(expVariant.label!)`")
+    throw rel.error({"\($0) variants do not contain \($1) variant label: `-\(expVariant.label!)`"})
   }
 
 
@@ -289,8 +289,8 @@ struct TypeCtx {
    actExpr: Expr?, actType: Type, actDesc: String,
    expExpr: Expr?, expType: Type, expDesc: String) throws {
     try resolveSub(constraint: .rel(RelCon(
-      act: rel.act.sub(expr: actExpr, type: actType, desc: actDesc),
-      exp: rel.exp.sub(expr: expExpr, type: expType, desc: expDesc),
+      act: rel.act.sub(.act, expr: actExpr, type: actType, desc: actDesc),
+      exp: rel.exp.sub(.exp, expr: expExpr, type: expType, desc: expDesc),
       desc: rel.desc)))
   }
 
@@ -359,7 +359,7 @@ struct TypeCtx {
         // If we do not have a specific error from polymorph search, just show generic error for first constraint.
         switch deferred.first! {
         case .prop(let prop): throw prop.error("cannot resolve constraint")
-        case .rel(let rel): throw rel.error("cannot resolve constraint")
+        case .rel(let rel): throw rel.error({(_, _) in "cannot resolve constraint"})
         }
       }
       constraints = deferred
@@ -393,15 +393,15 @@ struct TypeCtx {
 
   func error(_ err: RelCon.Err) -> Never {
     let r = err.rel
-    let msg = err.msgThunk()
+    let msg = err.msgThunk(r.act.role.desc, r.exp.role.desc)
     let act = resolved(type: r.act.type)
     let exp = resolved(type: r.exp.type)
     if r.act.expr != r.exp.expr {
-      r.act.expr.form.failType("\(r.desc) \(msg). \(r.act.chainDesc)actual type: \(act)",
-        notes: (r.exp.expr.form, "\(r.exp.chainDesc)expected type: \(exp)"))
+      r.act.expr.form.failType("\(r.desc) \(msg). \(r.act.chainDesc)\(r.act.role.desc) type: \(act)",
+        notes: (r.exp.expr.form, "\(r.exp.chainDesc)\(r.exp.role.desc) type: \(exp)"))
     } else {
-      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(r.act.chainDesc)actual type:   \(act)" +
-        "\n  \(r.exp.chainDesc)expected type: \(exp)")
+      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(r.act.chainDesc)\(r.act.role.desc) type:   \(act)" +
+        "\n  \(r.exp.chainDesc)\(r.exp.role.desc) type: \(exp)")
     }
   }
 

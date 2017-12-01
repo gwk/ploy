@@ -1,0 +1,6 @@
+test/2/type/ret-mismatch.ploy:1:19-22: type error: function body actual type is not expected type. actual type: Str
+| main = fn ()%Void "x";
+                    ~~~
+test/2/type/ret-mismatch.ploy:1:14-18: note: expected type: Void
+| main = fn ()%Void "x";
+               ~~~~

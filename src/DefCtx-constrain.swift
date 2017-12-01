@@ -23,10 +23,12 @@ extension DefCtx {
   }
 
 
-  func constrain(_ actExpr: Expr, actType: Type, expExpr: Expr? = nil, expType: Type, _ desc: String) {
+  func constrain(
+   actRole: Side.Role = .act, actExpr: Expr, actType: Type,
+   expRole: Side.Role = .exp, expExpr: Expr? = nil, expType: Type, _ desc: String) {
     typeCtx.addConstraint(.rel(RelCon(
-      act: Side(expr: actExpr, type: actType),
-      exp: Side(expr: expExpr ?? actExpr, type: expType),
+      act: Side(actRole, expr: actExpr, type: actType),
+      exp: Side(expRole, expr: expExpr ?? actExpr, type: expType),
       desc: desc)))
   }
 
@@ -56,14 +58,14 @@ extension DefCtx {
     case .and(let and):
       for term in and.terms {
         let termType = genConstraints(scope, expr: term)
-        constrain(term, actType: termType, expType: typeBool, "`and` term")
+        constrain(actExpr: term, actType: termType, expType: typeBool, "`and` term")
       }
       return typeBool
 
     case .or(let or):
       for term in or.terms {
         let termType = genConstraints(scope, expr: term)
-        constrain(term, actType: termType, expType: typeBool, "`or` term")
+        constrain(actExpr: term, actType: termType, expType: typeBool, "`or` term")
       }
       return typeBool
 
@@ -86,8 +88,8 @@ extension DefCtx {
       let domType = typeCtx.addFreeType() // necessary to get the act/exp direction right.
       let retType = typeCtx.addFreeType()
       let sigType = typeCtx.addType(Type.Sig(dom: domType, ret: retType))
-      constrain(call.callee, actType: calleeType, expType: sigType, "callee")
-      constrain(call.arg, actType: argType, expType: domType, "argument")
+      constrain(actExpr: call.callee, actType: calleeType, expType: sigType, "callee")
+      constrain(actExpr: call.arg, actType: argType, expType: domType, "argument")
       return retType
 
     case .do_(let do_):
@@ -101,7 +103,7 @@ extension DefCtx {
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
       let bodyType = genConstraintsForBody(fnScope, body: fn.body)
-      constrain(fn.body.expr, actType: bodyType, expExpr: fn.sig.ret, expType: ret, "function body")
+      constrain(actExpr: fn.body.expr, actType: bodyType, expExpr: fn.sig.ret, expType: ret, "function body")
       return type
 
     case .if_(let if_):
@@ -115,12 +117,12 @@ extension DefCtx {
         let cons = case_.consequence
         let condType = genConstraints(scope, expr: cond)
         let consType = genConstraints(scope, expr: cons)
-        constrain(cond, actType: condType, expType: typeBool, "if form condition")
-        constrain(cons, actType: consType, expType: type, "if form consequence")
+        constrain(actExpr: cond, actType: condType, expType: typeBool, "if form condition")
+        constrain(actExpr: cons, actType: consType, expType: type, "if form consequence")
       }
       if let dflt = if_.dflt {
         let dfltType = genConstraints(scope, expr: dflt.expr)
-        constrain(dflt.expr, actType: dfltType, expType: type, "if form default")
+        constrain(actExpr: dflt.expr, actType: dfltType, expType: type, "if form default")
       }
       return type
 
@@ -187,7 +189,7 @@ extension DefCtx {
       let actType = genConstraints(scope, expr: expr)
       let expVariant = TypeField(isVariant: true, label: tagTest.tag.sym.name, type: typeCtx.addFreeType())
       let expType = typeCtx.addType(Type.VariantMember(variant: expVariant))
-      constrain(expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
+      constrain(actExpr: expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
       return typeBool
 
     case .typeAlias(let typeAlias):
@@ -216,7 +218,7 @@ extension DefCtx {
   func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
     let annType = ann.typeExpr.type(scope, "type annotation")
     track(expr: ann.typeExpr, type: annType)
-    constrain(expr, actType: type, expExpr: ann.typeExpr, expType: annType, "annotated:")
+    constrain(actExpr: expr, actType: type, expExpr: ann.typeExpr, expType: annType, "annotated:")
     return annType
   }
 
@@ -241,7 +243,7 @@ extension DefCtx {
   func genConstraintsForBody(_ scope: LocalScope, body: Body) -> Type {
     for stmt in body.stmts {
       let type = genConstraints(scope, expr: stmt)
-      constrain(stmt, actType: type, expType: typeVoid, "statement")
+      constrain(actExpr: stmt, actType: type, expType: typeVoid, "statement")
     }
     return genConstraints(scope, expr: body.expr)
   }
@@ -266,7 +268,7 @@ extension DefCtx {
     case .lazy(let t): type = t
     case .poly(let polytype, _):
       type = typeCtx.addFreeType() // morph type.
-      constrain(.sym(sym), actType: polytype, expType: type, "polymorph alias '\(sym.name)':")
+      constrain(actExpr: .sym(sym), actType: polytype, expType: type, "polymorph alias '\(sym.name)':")
     case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }
