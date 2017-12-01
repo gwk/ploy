@@ -203,7 +203,7 @@ struct TypeCtx {
       do { try childCtx.resolveAll() }
       catch { continue }
       if let prev = matchMorph {
-        searchError = rel.error("multiple morphs match expected: \(prev); \(morph)")
+        searchError = rel.error("multiple morphs match expected: \(prev), \(morph)")
         return false
       }
       matchMorph = morph
