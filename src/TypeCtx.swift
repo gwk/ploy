@@ -221,8 +221,8 @@ struct TypeCtx {
 
   mutating func resolveSigToSig(_ rel: RelCon, act: (dom: Type, ret: Type), exp: (dom: Type, ret: Type)) throws -> Bool {
     try resolveSub(rel, // domain is contravariant.
-      actExpr: rel.exp.litExpr?.sigDom, actType: addType(exp.dom), actDesc: "signature domain", // note reversal.
-      expExpr: rel.act.litExpr?.sigDom, expType: addType(act.dom), expDesc: "signature domain") // note reversal.
+      actRole: .act, actExpr: rel.exp.litExpr?.sigDom, actType: addType(exp.dom), actDesc: "signature domain", // note reversal.
+      expRole: .dom, expExpr: rel.act.litExpr?.sigDom, expType: addType(act.dom), expDesc: "signature domain") // note reversal.
     try resolveSub(rel, // return is covariant.
       actExpr: rel.act.litExpr?.sigRet, actType: addType(act.ret), actDesc: "signature return",
       expExpr: rel.exp.litExpr?.sigRet, expType: addType(exp.ret), expDesc: "signature return")
@@ -286,8 +286,8 @@ struct TypeCtx {
 
 
   mutating func resolveSub(_ rel: RelCon,
-   actExpr: Expr?, actType: Type, actDesc: String,
-   expExpr: Expr?, expType: Type, expDesc: String) throws {
+   actRole: Side.Role = .act, actExpr: Expr?, actType: Type, actDesc: String,
+   expRole: Side.Role = .exp, expExpr: Expr?, expType: Type, expDesc: String) throws {
     try resolveSub(constraint: .rel(RelCon(
       act: rel.act.sub(.act, expr: actExpr, type: actType, desc: actDesc),
       exp: rel.exp.sub(.exp, expr: expExpr, type: expType, desc: expDesc),

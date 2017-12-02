@@ -1,0 +1,13 @@
+main = {
+  f = fn (Int|Str)%Int 0;
+
+  f1:(Int%Int) = f // convert dom.
+  void.f1.0
+
+  f2:((Int|Str)%(Int|Str)) = f // convert ret.
+  void.f2.0
+  void.f2.'a'
+
+  f3:(Int%(Int|Str)) = f // convert dom and ret.
+  void.f3.0
+}

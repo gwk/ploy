@@ -81,7 +81,6 @@ class GlobalCtx {
   func emitConversion(conv: Conversion) {
     let orig = conv.orig
     let cast = conv.cast
-    var shouldEmitCastConstructor = true
     let em = Emitter(ctx: self)
     em.str(0, "const \(conv.hostName) = $o=> // \(conv)") // bling: $o: original.
 
@@ -89,19 +88,37 @@ class GlobalCtx {
 
     case (.prim, _) where orig == typeNever: // Never is treated by the type checker as compatible with any expected type.
       em.str(2, "{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); }")
-      shouldEmitCastConstructor = false
+
+    case (.sig(let o), .sig(let c)):
+      emitSigToSig(em, castIdx: cast.globalIndex, orig: o, cast: c)
 
     case (.struct_(let o), .struct_(let c)):
+      self.addConstructor(type: cast)
       emitStructToStruct(em, castIdx: cast.globalIndex, orig: o, cast: c)
 
     case (_, .any(let castMembers)):
+      self.addConstructor(type: cast)
       emitConvToUnion(em, castIdx: cast.globalIndex, orig: orig, castMembers: castMembers)
 
     default: fatalError("impossible conversion: \(conv)")
     }
-
     em.flush()
-    if shouldEmitCastConstructor { self.addConstructor(type: cast) }
+  }
+
+
+  func emitSigToSig(_ em: Emitter, castIdx: Int,
+   orig: (dom: Type, ret: Type), cast: (dom: Type, ret: Type)) {
+    em.str(2, "$=>(") // converted value is a new function.
+    var call = "$o($)"
+    if let domConv = conversionFor(orig: cast.dom, cast: orig.dom) { // note: contravariant.
+      call = "$o(\(domConv.hostName)($))" // convert outer argument to match original function.
+    }
+    if let retConv = conversionFor(orig: orig.ret, cast: cast.ret) { // convert return value of the original function.
+      em.str(2, "\(retConv.hostName)(\(call))")
+    } else {
+      em.str(2, call)
+    }
+    em.append(")")
   }
 
 
