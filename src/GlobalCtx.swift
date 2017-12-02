@@ -5,7 +5,7 @@ import Foundation
 
 typealias SrcMapping = (pathString: String, lineIdx: Int, colIdx: Int, off: Int, frameName: String)
 // note: `off` is the relative offset into the generated output string being written,
-// e.g. if we are mapping  a parenthesized symbol "(a)" then off=1.
+// e.g. if we are mapping a parenthesized symbol "(a)" then off=1.
 
 typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
