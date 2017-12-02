@@ -85,11 +85,11 @@ extension DefCtx {
     case .call(let call):
       let calleeType = genConstraints(scope, expr: call.callee)
       let argType = genConstraints(scope, expr: call.arg)
-      let domType = typeCtx.addFreeType() // necessary to get the act/exp direction right.
+      let domType = typeCtx.addFreeType()
       let retType = typeCtx.addFreeType()
       let sigType = typeCtx.addType(Type.Sig(dom: domType, ret: retType))
       constrain(actExpr: call.callee, actType: calleeType, expType: sigType, "callee")
-      constrain(actExpr: call.arg, actType: argType, expType: domType, "argument")
+      constrain(actRole: .arg, actExpr: call.arg, actType: argType, expRole: .dom, expExpr: call.callee, expType: domType, "call")
       return retType
 
     case .do_(let do_):

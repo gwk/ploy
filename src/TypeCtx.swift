@@ -400,7 +400,7 @@ struct TypeCtx {
       r.act.expr.form.failType("\(r.desc) \(msg). \(r.act.chainDesc)\(r.act.role.desc) type: \(act)",
         notes: (r.exp.expr.form, "\(r.exp.chainDesc)\(r.exp.role.desc) type: \(exp)"))
     } else {
-      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(r.act.chainDesc)\(r.act.role.desc) type:   \(act)" +
+      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(r.act.chainDesc)\(r.act.role.desc) type: \(act)" +
         "\n  \(r.exp.chainDesc)\(r.exp.role.desc) type: \(exp)")
     }
   }

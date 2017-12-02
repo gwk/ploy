@@ -69,6 +69,7 @@ struct Side: CustomStringConvertible {
   enum Role {
     case act
     case exp
+    case arg
     case dom
     case ret
 
@@ -76,6 +77,7 @@ struct Side: CustomStringConvertible {
       switch self {
       case .act: return "actual"
       case .exp: return "expected"
+      case .arg: return "argument"
       case .dom: return "domain"
       case .ret: return "return"
       }

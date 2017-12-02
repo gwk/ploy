@@ -1,0 +1,6 @@
+f = fn Int%Void;
+
+main = {
+  u:(Int|Str) = 0
+  f.u
+}

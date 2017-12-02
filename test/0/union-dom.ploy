@@ -1,0 +1,7 @@
+
+f = fn (Int|Str)%Void;
+
+main = {
+  f.0
+  f.'a'
+}
