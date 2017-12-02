@@ -42,7 +42,7 @@ enum Accessor: SubForm {
     case .litNum(let litNum): return "._\(litNum.val)"
     case .sym(let sym): return ".\(sym.hostName)"
     case .tag: fatalError("tag accessors not yet implemented")
-    case .untag: return  ".$m"
+    case .untag(let tag): return  ".\(tag.sym.hostName)"
     }
   }
 

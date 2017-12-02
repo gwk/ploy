@@ -121,7 +121,7 @@ class GlobalCtx {
     }
     if !cast.variants.isEmpty {
       assert(!orig.variants.isEmpty)
-      em.str(4, "$o.$v, $o.$m") // bling: $o: original; $v: variant tag; $m: morph value.
+      em.str(4, "$o.$v, $o[$o.$v]") // bling: $o: original; $v: variant tag.
     }
     em.append("));")
   }
@@ -135,7 +135,7 @@ class GlobalCtx {
     case .any(let origMembers):
       let tableName = "$ct\(orig.globalIndex)_\(castIdx)" // bling: $ct: union tag table.
       em.str(2, "(new $C\(castIdx)(\(tableName)[$o.$u], $o.$m));")
-      // bling: $C: constructor; $o: original; $u: union variant tag; $m: morph value.
+      // bling: $C: constructor; $o: original; $u: union tag; $m: morph value.
       let table = origMembers.map { castMembers.index(of: $0)! }
       let indices = table.descriptions.joined(separator: ",")
       em.str(0, "const \(tableName) = [\(indices)];")
@@ -169,14 +169,14 @@ class GlobalCtx {
     assert(fields.count + variants.count > 0) // nil is not constructed; represented by JS "null".
     let fieldParNames: [String] = fields.enumerated().map {$1.hostName(index: $0)}
     let fieldPars: String = fieldParNames.joined(separator: ", ")
-    let variantPars = variants.isEmpty ? "" : "$v, $m" // bling: $v: variant tag; $m: morph value.
+    let variantPars = variants.isEmpty ? "" : "$v, $vv" // bling: $v: variant tag; $vv: variant value parameter.
     em.str(2, "constructor(\(fieldPars)\(variantPars)) { // \(type)")
     for (i, f) in fields.enumerated() {
       let n = f.hostName(index: i)
       em.str(4, "this.\(n) = \(n);")
     }
     if !variants.isEmpty {
-      em.str(4, "this.$v = $v; this.$m = $m;") // bling: $v: variant tag; $m: morph value.
+      em.str(4, "this.$v = $v; this[$v] = $vv;") // bling: $v: variant tag; $m: variant value parameter.
     }
     em.append("}")
   }
@@ -184,7 +184,7 @@ class GlobalCtx {
 
   func emitUnionConstructor(_ em: Emitter, type: Type, members: [Type]) {
     assert(!members.isEmpty)
-    em.str(2, "constructor($u, $m) { // \(type)") // bling: $u: union variant tag; $m: morph value.
+    em.str(2, "constructor($u, $m) { // \(type)") // bling: $u: union tag; $m: morph value.
     em.str(4, "this.$u = $u; this.$m = $m") // bling: $u: union tag; $m: morph value.
     em.append("}")
   }
