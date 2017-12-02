@@ -161,14 +161,14 @@ extension Expr {
 
     case .tag(let tag): // simple morph constructor; no payload.
       // Note: output must match compileStructVariant.
-      // TODO: alternatively, perhaps could be optimized to a special case without $m.
+      // TODO: alternatively, could be optimized to not emit a boxed value, which always contains nil.
       ctx.globalCtx.addConstructor(type: type)
-      em.str(indent, "(new $C\(type.globalIndex)('\(tag.sym.hostName)', null))") // bling: $C: constructor; $t, $m: morph tag/value.
+      em.str(indent, "(new $C\(type.globalIndex)('\(tag.sym.hostName)', null))") // bling: $C: constructor.
 
     case .tagTest(let tagTest):
       em.str(indent, "( '\(tagTest.tag.sym.name)' ==")
       tagTest.expr.compile(ctx, em, indent + 2, exp: nil, isTail: false)
-      em.append(".$t)") // bling: $t: morph tag.
+      em.append(".$v)") // bling: $v: variant tag.
 
     case .typeAlias:
       em.str(indent, "undefined")
