@@ -6,10 +6,8 @@ extension Expr {
   func compile(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, exp: Type?, isTail: Bool) {
     let type = ctx.typeFor(expr: self)
     let exp = exp ?? type
-    let hasConv = (type != exp)
-    if hasConv {
-      let conv = Conversion(orig: type, cast: exp)
-      ctx.globalCtx.conversions.insert(conv)
+    let conv = ctx.globalCtx.conversionFor(orig: type, cast: exp)
+    if let conv = conv {
       em.str(indent, "(\(conv.hostName)(")
     }
 
@@ -136,7 +134,7 @@ extension Expr {
         em.str(indent, "null")
       } else {
         guard case .struct_(let fields, let variants) = type.kind else { paren.fatal("expected struct type") }
-        ctx.globalCtx.constructors.insert(type)
+        ctx.globalCtx.addConstructor(type: type)
         em.str(indent, "(new $C\(type.globalIndex)(") // bling: $C: constructor.
         var argIndex = 0
         for (i, field) in fields.enumerated() {
@@ -164,7 +162,7 @@ extension Expr {
     case .tag(let tag): // simple morph constructor; no payload.
       // Note: output must match compileStructVariant.
       // TODO: alternatively, perhaps could be optimized to a special case without $m.
-      ctx.globalCtx.constructors.insert(type)
+      ctx.globalCtx.addConstructor(type: type)
       em.str(indent, "(new $C\(type.globalIndex)('\(tag.sym.hostName)', null))") // bling: $C: constructor; $t, $m: morph tag/value.
 
     case .tagTest(let tagTest):
@@ -187,7 +185,7 @@ extension Expr {
     case .where_: fatalError()
     }
 
-    if hasConv {
+    if conv != nil {
       em.append("))")
     }
   }

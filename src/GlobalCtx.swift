@@ -14,15 +14,32 @@ class GlobalCtx {
   let mainPath: Path
   let file: File
   let mapSend: FileHandle
-  var outLineIdx = 0
-  var outColIdx = 0
-  var conversions: Set<Conversion> = []
-  var constructors: Set<Type> = []
+  private var outLineIdx = 0
+  private var outColIdx = 0
+  private var conversions: Set<Conversion> = []
+  private var constructors: Set<Type> = []
 
   init(mainPath: Path, file: File, mapSend: FileHandle) {
     self.mainPath = mainPath
     self.file = file
     self.mapSend = mapSend
+  }
+
+  func conversionFor(orig: Type, cast: Type) -> Conversion? {
+    if orig == cast { return nil }
+    let conv = Conversion(orig: orig, cast: cast)
+    if !conversions.contains(conv) {
+      conversions.insert(conv)
+      emitConversion(conv: conv)
+    }
+    return conv
+  }
+
+  func addConstructor(type: Type) {
+    if !constructors.contains(type) {
+      constructors.insert(type)
+      emitConstructor(type: type)
+    }
   }
 
   func writeMap(_ m: SrcMapping) {
@@ -61,40 +78,34 @@ class GlobalCtx {
   }
 
 
-  func emitConversions() {
-    var convs = conversions.sorted()
-    var i = 0
-    while i < convs.count {
-      let conv = convs[i]
-      i += 1
-      let orig = conv.orig
-      let cast = conv.cast
-      var shouldEmitCastConstructor = true
-      let em = Emitter(ctx: self)
-      em.str(0, "const \(conv.hostName) = $=> // \(conv)")
+  func emitConversion(conv: Conversion) {
+    let orig = conv.orig
+    let cast = conv.cast
+    var shouldEmitCastConstructor = true
+    let em = Emitter(ctx: self)
+    em.str(0, "const \(conv.hostName) = $=> // \(conv)")
 
-      switch (orig.kind, cast.kind) {
+    switch (orig.kind, cast.kind) {
 
-      case (.prim, _) where orig == typeNever: // Never is treated by the type checker as compatible with any expected type.
-        em.str(2, "{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); }")
-        shouldEmitCastConstructor = false
+    case (.prim, _) where orig == typeNever: // Never is treated by the type checker as compatible with any expected type.
+      em.str(2, "{ throw new Error('PLOY RUNTIME ERROR: Never function returned.'); }")
+      shouldEmitCastConstructor = false
 
-      case (.struct_(let o), .struct_(let c)):
-        emitStructToStruct(em, convs: &convs, castIdx: cast.globalIndex, orig: o, cast: c)
+    case (.struct_(let o), .struct_(let c)):
+      emitStructToStruct(em, castIdx: cast.globalIndex, orig: o, cast: c)
 
-      case (_, .any(let castMembers)):
-        emitConvToUnion(em, convs: &convs, castIdx: cast.globalIndex, orig: orig, castMembers: castMembers)
+    case (_, .any(let castMembers)):
+      emitConvToUnion(em, castIdx: cast.globalIndex, orig: orig, castMembers: castMembers)
 
-      default: fatalError("impossible conversion: \(conv)")
-      }
-
-      em.flush()
-      if shouldEmitCastConstructor { self.constructors.insert(cast) }
+    default: fatalError("impossible conversion: \(conv)")
     }
+
+    em.flush()
+    if shouldEmitCastConstructor { self.addConstructor(type: cast) }
   }
 
 
-  func emitStructToStruct(_ em: Emitter, convs: inout [Conversion], castIdx: Int,
+  func emitStructToStruct(_ em: Emitter, castIdx: Int,
    orig: (fields: [TypeField], variants: [TypeField]),
    cast: (fields: [TypeField], variants: [TypeField])) {
     assert(cast.fields.count + cast.variants.count > 0) // conversion to nil is explictly disallowed.
@@ -102,12 +113,7 @@ class GlobalCtx {
     em.str(2, "(new $C\(castIdx)(") // bling: $C: constructor.
     for (i, (o, c)) in zip(orig.fields, cast.fields).enumerated() {
       let oName = o.hostName(index: i)
-      if o.type != c.type {
-        let fieldConv = Conversion(orig: o.type, cast: c.type)
-        if !conversions.contains(fieldConv) {
-          conversions.insert(fieldConv)
-          convs.append(fieldConv)
-        }
+      if let fieldConv = conversionFor(orig: o.type, cast: c.type) {
         em.str(4, "\(fieldConv.hostName)($.\(oName)),")
       } else {
         em.str(4, "$.\(oName),")
@@ -121,7 +127,7 @@ class GlobalCtx {
   }
 
 
-  func emitConvToUnion(_ em: Emitter, convs: inout[Conversion], castIdx: Int, orig: Type, castMembers: [Type]) {
+  func emitConvToUnion(_ em: Emitter, castIdx: Int, orig: Type, castMembers: [Type]) {
     assert(!castMembers.isEmpty)
 
     switch orig.kind {
@@ -140,23 +146,21 @@ class GlobalCtx {
   }
 
 
-  func emitConstructors() {
-    for type in constructors.sorted() {
-      let em = Emitter(ctx: self)
-      em.str(0, "class $C\(type.globalIndex) {") // bling: $C: constructor.
-      switch type.kind {
+  func emitConstructor(type: Type) {
+    let em = Emitter(ctx: self)
+    em.str(0, "class $C\(type.globalIndex) {") // bling: $C: constructor.
+    switch type.kind {
 
-      case .struct_(let fields, let variants):
-        emitStructConstructor(em, type: type, fields: fields, variants: variants)
+    case .struct_(let fields, let variants):
+      emitStructConstructor(em, type: type, fields: fields, variants: variants)
 
-      case .any(let members):
-        emitUnionConstructor(em, type: type, members: members)
+    case .any(let members):
+      emitUnionConstructor(em, type: type, members: members)
 
-      default: fatalError("impossible constructor: \(type)")
-      }
-      em.append("}")
-      em.flush()
+    default: fatalError("impossible constructor: \(type)")
     }
+    em.append("}")
+    em.flush()
   }
 
   func emitStructConstructor(_ em: Emitter, type: Type, fields: [TypeField], variants: [TypeField]) {

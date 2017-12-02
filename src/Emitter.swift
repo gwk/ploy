@@ -61,8 +61,6 @@ func compileProgram(mainPath: Path, includePaths: [Path], mainSpace: MainSpace, 
   }
 
   let mainSyn = mainSpace.compileMain()
-  ctx.emitConversions()
-  ctx.emitConstructors() // must follow emitConversions, which can add additional constructors.
 
   ctx.writeL()
   let mainMapping = (pathString: mainSyn.source.name, lineIdx: mainSyn.lineIdx, colIdx: mainSyn.colIdx, off: 0, frameName: "<ploy>")
