@@ -103,7 +103,7 @@ extension DefCtx {
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)
       let bodyType = genConstraintsForBody(fnScope, body: fn.body)
-      constrain(actExpr: fn.body.expr, actType: bodyType, expExpr: fn.sig.ret, expType: ret, "function body")
+      constrain(actExpr: fn.body.expr, actType: bodyType, expRole: .ret, expExpr: fn.sig.ret, expType: ret, "function body")
       return type
 
     case .if_(let if_):
