@@ -83,7 +83,7 @@ class GlobalCtx {
     let cast = conv.cast
     var shouldEmitCastConstructor = true
     let em = Emitter(ctx: self)
-    em.str(0, "const \(conv.hostName) = $=> // \(conv)")
+    em.str(0, "const \(conv.hostName) = $o=> // \(conv)") // bling: $o: original.
 
     switch (orig.kind, cast.kind) {
 
@@ -114,14 +114,14 @@ class GlobalCtx {
     for (i, (o, c)) in zip(orig.fields, cast.fields).enumerated() {
       let oName = o.hostName(index: i)
       if let fieldConv = conversionFor(orig: o.type, cast: c.type) {
-        em.str(4, "\(fieldConv.hostName)($.\(oName)),")
+        em.str(4, "\(fieldConv.hostName)($o.\(oName)),") // bling: $o: original.
       } else {
-        em.str(4, "$.\(oName),")
+        em.str(4, "$o.\(oName),") // bling: $o: original.
       }
     }
     if !cast.variants.isEmpty {
       assert(!orig.variants.isEmpty)
-      em.str(4, "$.$t, $.$m") // bling: $t: morph tag; $m: morph value.
+      em.str(4, "$o.$t, $o.$m") // bling: $o: original; $t: morph tag; $m: morph value.
     }
     em.append("));")
   }
@@ -134,14 +134,15 @@ class GlobalCtx {
 
     case .any(let origMembers):
       let tableName = "$ct\(orig.globalIndex)_\(castIdx)" // bling: $ct: union tag table.
-      em.str(2, "(new $C\(castIdx)(\(tableName)[$.$u], $.$m));") // bling: $C: constructor; $u: union morph tag; $m: morph value.
+      em.str(2, "(new $C\(castIdx)(\(tableName)[$o.$u], $o.$m));")
+      // bling: $C: constructor; $o: original; $u: union morph tag; $m: morph value.
       let table = origMembers.map { castMembers.index(of: $0)! }
       let indices = table.descriptions.joined(separator: ",")
       em.str(0, "const \(tableName) = [\(indices)];")
 
     default:
       guard let tag = castMembers.index(of: orig) else { fatalError("orig type `\(orig)` is not member of union: \(castMembers)") }
-      em.str(2, "(new $C\(castIdx)(\(tag), $));") // bling: $C: constructor.
+      em.str(2, "(new $C\(castIdx)(\(tag), $o));") // bling: $C: constructor; $o: original.
     }
   }
 
