@@ -188,10 +188,9 @@ struct TypeCtx {
   mutating func resolvePoly(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
     guard case .poly(let morphs) = act.kind else { fatalError() }
     assert(exp.vars.isEmpty)
-    var subCtx = TypeCtx()
-    let subExp = subCtx.copy(parentType: exp)
+    let (subCtx, subExp) = subCtxAndType(parentType: exp)
     var matchMorph: Type? = nil
-    var matchCtx = subCtx // overwritten by matching iteration.
+    var matchCtx = TypeCtx() // overwritten by matching iteration.
     for morph in morphs {
       assert(morph.isResolved)
       assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles.
@@ -318,6 +317,13 @@ struct TypeCtx {
       default: return type
       }
     }
+  }
+
+
+  func subCtxAndType(parentType: Type) -> (TypeCtx, Type) {
+    var subCtx = TypeCtx()
+    let childType = subCtx.copy(parentType: parentType)
+    return (subCtx, childType)
   }
 
 
