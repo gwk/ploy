@@ -203,7 +203,9 @@ struct TypeCtx {
       do { try childCtx.resolveAll() }
       catch { continue }
       if let prev = matchMorph {
-        searchError = rel.error({"multiple morphs of \($0) match \($1): \(prev), \(morph)"})
+        if searchError == nil { // can have multiple search errors; keep the first one.
+          searchError = rel.error({"multiple morphs of \($0) match \($1): \(prev), \(morph)"})
+        }
         return false
       }
       matchMorph = morph
@@ -214,7 +216,6 @@ struct TypeCtx {
     }
     if matchMorph == nil { throw rel.error({"no morphs of \($0) match \($1)"}) }
     mergeSubCtx(matchCtx)
-    searchError = nil
     return true
   }
 
@@ -353,6 +354,7 @@ struct TypeCtx {
 
   mutating func resolveAll() throws {
     while !constraints.isEmpty {
+      searchError = nil
       let deferred = try resolveRound()
       if deferred.count == constraints.count { // no progress; error.
         if let searchError = searchError { error(searchError) }
