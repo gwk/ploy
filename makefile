@@ -39,9 +39,5 @@ test: build
 test/%: build
 	iotest -fail-fast $@
 
-xcode:
-	swift package generate-xcodeproj
-
-
 _build:
 	mkdir -p $@
