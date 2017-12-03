@@ -1,7 +1,0 @@
-
-main = {
-  x = 1
-  { x = 2
-    assert.eq(x 2) }
-  assert.eq(x 1)
-}

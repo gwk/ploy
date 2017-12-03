@@ -1,9 +1,0 @@
-
-main = {
-  x = 1
-  f = fn ()%Void
-    x = 2
-    assert.eq(x 2);
-  f()
-  assert.eq(x 1)
-}
