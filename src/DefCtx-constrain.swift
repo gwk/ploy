@@ -8,7 +8,6 @@ extension DefCtx {
     // Map an expression to a type, so that the output phase can look up the final resolved type.
     // Note: this functionality requires that a given Expr only be tracked once.
     // Therefore synthesized expressions cannot reuse input exprs multiple times.
-    assert(type.isConstraintEligible)
     exprTypes.insertNew(expr, value: type)
   }
 
@@ -42,7 +41,6 @@ extension DefCtx {
 
   func genConstraints(_ scope: LocalScope, expr: Expr) -> Type {
     let type = genConstraintsDisp(scope, expr: expr)
-    assert(type.isConstraintEligible)
     track(expr: expr, type: type)
     return type
   }
@@ -87,7 +85,7 @@ extension DefCtx {
       let argType = genConstraints(scope, expr: call.arg)
       let domType = typeCtx.addFreeType()
       let retType = typeCtx.addFreeType()
-      let sigType = typeCtx.addType(Type.Sig(dom: domType, ret: retType))
+      let sigType = Type.Sig(dom: domType, ret: retType)
       constrain(actExpr: call.callee, actType: calleeType, expType: sigType, "callee")
       constrain(actRole: .arg, actExpr: call.arg, actType: argType, expRole: .dom, expExpr: call.callee, expType: domType, "call")
       return retType
@@ -96,7 +94,7 @@ extension DefCtx {
       return genConstraintsForBody(LocalScope(parent: scope), body: do_.body)
 
     case .fn(let fn):
-      let type = typeCtx.addType(Expr.sig(fn.sig).type(scope, "signature"))
+      let type = Expr.sig(fn.sig).type(scope, "signature")
       track(expr: .sig(fn.sig), type: type) // track the sig so that compile can look up the expectation for body.
       guard case .sig(let dom, let ret) = type.kind else { fatalError() }
       let fnScope = LocalScope(parent: scope)
@@ -132,7 +130,7 @@ extension DefCtx {
       for dep in hostVal.deps {
         _ = scope.getRecord(identifier: dep)
       }
-      let type = typeCtx.addType(hostVal.typeExpr.type(scope, "host value declaration"))
+      let type = hostVal.typeExpr.type(scope, "host value declaration")
       return type
 
     case .litNum:
@@ -166,15 +164,15 @@ extension DefCtx {
           fields.append(member)
         }
       }
-      return typeCtx.addType(Type.Struct(fields: fields, variants: variants))
+      return Type.Struct(fields: fields, variants: variants)
 
     case .path, .sym:
-      return typeCtx.addType(instantiate(genConstraintsForRef(scope, expr: expr)))
+      return instantiate(genConstraintsForRef(scope, expr: expr))
 
     case .reif(let reif):
       // note: we do not instantiate the abstract type or add it to the context until after reification.
       let abstractType = genConstraintsForRef(scope, expr: reif.abstract)
-      let type = typeCtx.addType(instantiate(reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args)))
+      let type = instantiate(reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args))
       track(expr: reif.abstract, type: type) // so that Expr.compile can just dispatch to reif.abstract.
       return type
 
@@ -188,7 +186,7 @@ extension DefCtx {
       let expr = tagTest.expr
       let actType = genConstraints(scope, expr: expr)
       let expVariant = TypeField(isVariant: true, label: tagTest.tag.sym.name, type: typeCtx.addFreeType())
-      let expType = typeCtx.addType(Type.VariantMember(variant: expVariant))
+      let expType = Type.VariantMember(variant: expVariant)
       constrain(actExpr: expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
       return typeBool
 

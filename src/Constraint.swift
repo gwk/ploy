@@ -32,8 +32,6 @@ struct PropCon {
   let accType: Type
 
   init(acc: Acc, accesseeType: Type, accType: Type) {
-    assert(accesseeType.isConstraintEligible)
-    assert(accType.isConstraintEligible)
     self.acc = acc
     self.accesseeType = accesseeType
     self.accType = accType
@@ -90,7 +88,6 @@ struct Side: CustomStringConvertible {
   let chain: Chain<String> // describes the path into the parent literal expression.
 
   init(_ role: Role, expr: Expr, type: Type, chain: Chain<String> = .end) {
-    assert(type.isConstraintEligible)
     self.role = role
     self.expr = expr
     self.type = type

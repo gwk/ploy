@@ -64,7 +64,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: Set(merged.flatMap { $0.vars })))
   }
 
-  class func Free(_ index: Int) -> Type { // should only be called by addFreeType.
+  class func Free(_ index: Int) -> Type { // should only be called by addFreeType and copyForParent.
     if index < allFreeTypes.count {
       return allFreeTypes[index]
     }
@@ -201,15 +201,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   var isResolved: Bool {
     switch self.kind {
     case .free: return false
-    default: return childFrees.isEmpty
-    }
-  }
-
-  var isConstraintEligible: Bool {
-    // For a type to appear in a constraint, it must either be completely reified already,
-    // or else be a free type that points into the freeUnifications array of the TypeCtx.
-    switch self.kind {
-    case .free: return true
     default: return childFrees.isEmpty
     }
   }

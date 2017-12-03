@@ -11,15 +11,6 @@ struct TypeCtx {
   var searchError: RelCon.Err? = nil
 
 
-  mutating func addType(_ type: Type) -> Type {
-    // Add a type to the system of constraints.
-    if type.isConstraintEligible { return type }
-    let idx = freeUnifications.count
-    freeUnifications.append(type)
-    return Type.Free(idx)
-  }
-
-
   mutating func addFreeType() -> Type {
     let idx = freeUnifications.count
     freeUnifications.append(nil)
@@ -64,7 +55,6 @@ struct TypeCtx {
 
 
   mutating func unify(freeIndex: Int, to type: Type) {
-    assert(type.isConstraintEligible)
     freeUnifications[freeIndex] = type
   }
 
@@ -138,7 +128,7 @@ struct TypeCtx {
 
     case (.free(let ia), _):
       // If expected is Never then unify; the caller expects to never return.
-      unify(freeIndex: ia, to: addType(exp));
+      unify(freeIndex: ia, to: exp);
       return true
 
     case (_, .free(let ie)):
@@ -147,7 +137,7 @@ struct TypeCtx {
         // However this might be the only branch, so we need to remember the Never and fall back to it if exp remains free.
         freeNevers.insert(ie)
       } else {
-        unify(freeIndex: ie, to: addType(act))
+        unify(freeIndex: ie, to: act)
       }
       return true
 
@@ -197,7 +187,7 @@ struct TypeCtx {
       var childCtx = subCtx // copy.
       childCtx.addConstraint(.rel(RelCon(
         act: Side(.act, expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)),
-        exp: Side(.exp, expr: rel.exp.expr, type: childCtx.addType(subExp), chain: rel.exp.chain),
+        exp: Side(.exp, expr: rel.exp.expr, type: subExp, chain: rel.exp.chain),
         desc: rel.desc)))
       do { try childCtx.resolveAll() }
       catch { continue }
@@ -221,11 +211,11 @@ struct TypeCtx {
 
   mutating func resolveSigToSig(_ rel: RelCon, act: (dom: Type, ret: Type), exp: (dom: Type, ret: Type)) throws -> Bool {
     try resolveSub(rel, // domain is contravariant.
-      actRole: .act, actExpr: rel.exp.litExpr?.sigDom, actType: addType(exp.dom), actDesc: "signature domain", // note reversal.
-      expRole: .dom, expExpr: rel.act.litExpr?.sigDom, expType: addType(act.dom), expDesc: "signature domain") // note reversal.
+      actRole: .act, actExpr: rel.exp.litExpr?.sigDom, actType: exp.dom, actDesc: "signature domain", // note reversal.
+      expRole: .dom, expExpr: rel.act.litExpr?.sigDom, expType: act.dom, expDesc: "signature domain") // note reversal.
     try resolveSub(rel, // return is covariant.
-      actExpr: rel.act.litExpr?.sigRet, actType: addType(act.ret), actDesc: "signature return",
-      expExpr: rel.exp.litExpr?.sigRet, expType: addType(exp.ret), expDesc: "signature return")
+      actExpr: rel.act.litExpr?.sigRet, actType: act.ret, actDesc: "signature return",
+      expExpr: rel.exp.litExpr?.sigRet, expType: exp.ret, expDesc: "signature return")
     return true
   }
 
