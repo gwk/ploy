@@ -1,4 +1,4 @@
-test/2/type/union-arg-to-prim-dom.ploy:5:5-6: type error: call argument type is not domain type. argument type: Any<Int Str>
+test/2/type/union-arg-to-prim-dom.ploy:5:5-6: type error: call argument type is not domain type. argument type: (Int|Str)
 |   f.u
       ~
 test/2/type/union-arg-to-prim-dom.ploy:5:3-4: note: domain type: Int

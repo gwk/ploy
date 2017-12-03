@@ -47,7 +47,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func All(_ members: [Type]) throws -> Type {
     assert(members.isSorted, "members: \(members)")
     let merged = try computeIntersect(types: members)
-    let desc = merged.isEmpty ? "Every" : "All<\(merged.descriptions.sorted().joined(separator: " "))>"
+    let desc = merged.isEmpty ? "Every" : "(\(merged.descriptions.sorted().joined(separator: "&")))"
     return memoize(desc, (
       kind: .all(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -57,7 +57,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   class func Any_(_ members: [Type]) throws -> Type {
     assert(members.isSorted, "members: \(members)")
     let merged = try computeUnion(types: members)
-    let desc = merged.isEmpty ? "Never" : "Any<\(merged.descriptions.sorted().joined(separator: " "))>"
+    let desc = merged.isEmpty ? "Never" : "(\(merged.descriptions.sorted().joined(separator: "|")))"
     return memoize(desc, (
       kind: .any(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
