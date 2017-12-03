@@ -1,0 +1,5 @@
+test/2/type/poly-val-is-set-of-dom.ploy:7:10-11: type error: polymorph alias 'x': multiple morphs of actual match expected: Int, Str.
+  actual type: Poly<Int Str>
+  expected type: (Int|Str)
+| main = f.x
+           ~
