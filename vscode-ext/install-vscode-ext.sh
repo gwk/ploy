@@ -7,5 +7,5 @@ VSCODE_EXT="$HOME/.vscode-insiders/extensions/ploy"
 
 rm -rf "$VSCODE_EXT"
 mkdir -p "$VSCODE_EXT"
-cp vscode-ext/package.json "$VSCODE_EXT/"
+cp vscode-ext/*.json "$VSCODE_EXT/"
 cp -r vscode-ext/syntaxes "$VSCODE_EXT/"

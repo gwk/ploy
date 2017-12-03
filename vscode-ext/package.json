@@ -9,7 +9,8 @@
   "contributes": {
     "languages": [
       { "id": "ploy",
-        "extensions": [".ploy"]
+        "extensions": [".ploy"],
+        "configuration": "./ploy-configuration.json"
       }
     ],
     "grammars": [
