@@ -1,0 +1,8 @@
+in TEST
+x = 0:Int
+;
+
+main = {
+  assert.eq(TEST/x 0)
+  x = 0
+  exit.x }

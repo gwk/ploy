@@ -1,5 +1,0 @@
-in TEST
-x = 0:Int
-;
-
-main = exit.TEST/x
