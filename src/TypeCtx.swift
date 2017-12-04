@@ -276,8 +276,8 @@ struct TypeCtx {
 
 
   mutating func resolveSub(_ rel: RelCon,
-   actRole: Side.Role = .act, actExpr: Expr?, actType: Type, actDesc: String,
-   expRole: Side.Role = .exp, expExpr: Expr?, expType: Type, expDesc: String) throws {
+   actRole: Side.Role = .act, actExpr: Expr? = nil, actType: Type, actDesc: String,
+   expRole: Side.Role = .exp, expExpr: Expr? = nil, expType: Type, expDesc: String) throws {
     try resolveSub(constraint: .rel(RelCon(
       act: rel.act.sub(.act, expr: actExpr, type: actType, desc: actDesc),
       exp: rel.exp.sub(.exp, expr: expExpr, type: expType, desc: expDesc),
