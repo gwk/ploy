@@ -45,9 +45,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func All(_ members: [Type]) throws -> Type {
-    assert(members.isSorted, "members: \(members)")
     let merged = try computeIntersect(types: members)
-    let desc = merged.isEmpty ? "Every" : "(\(merged.descriptions.sorted().joined(separator: "&")))"
+    if merged.count == 1 { return merged[0] }
+    let desc = merged.isEmpty ? "Every" : "(\(merged.descriptions.joined(separator: "&")))"
     return memoize(desc, (
       kind: .all(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -55,9 +55,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Any_(_ members: [Type]) throws -> Type {
-    assert(members.isSorted, "members: \(members)")
     let merged = try computeUnion(types: members)
-    let desc = merged.isEmpty ? "Never" : "(\(merged.descriptions.sorted().joined(separator: "|")))"
+    if merged.count == 1 { return merged[0] }
+    let desc = merged.isEmpty ? "Never" : "(\(merged.descriptions.joined(separator: "|")))"
     return memoize(desc, (
       kind: .any(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -131,31 +131,29 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 
   class func computeIntersect(types: [Type]) throws -> [Type] {
-    var merged: [Type] = []
+    var merged: Set<Type> = []
     for type in types {
       switch type.kind {
-      case .all(let members): merged.append(contentsOf: members)
+      case .all(let members): merged.insert(contentsOf: members)
       case .any: throw "type intersection contains union member: `\(type)`"
       case .poly: throw "type intersection contains poly member: `\(type)`"
       default: throw "type intersection not yet implemented." // merged.append(type)
       }
     }
-    merged.sort()
-    return merged
+    return merged.sorted()
   }
 
 
   class func computeUnion(types: [Type]) throws -> [Type] {
-    var merged: [Type] = []
+    var merged: Set<Type> = []
     for type in types {
       switch type.kind {
-      case .any(let members): merged.append(contentsOf: members)
+      case .any(let members): merged.insert(contentsOf: members)
       case .poly: throw "type union contains poly member: `\(type)`"
-      default: merged.append(type)
+      default: merged.insert(type)
       }
     }
-    merged.sort()
-    return merged
+    return merged.sorted()
   }
 
 
