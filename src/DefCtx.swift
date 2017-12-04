@@ -6,10 +6,10 @@ class DefCtx {
   let globalCtx: GlobalCtx
   var typeCtx = TypeCtx()
 
-  var genSyms = [Sym]()
-
   var exprTypes = [Expr:Type]() // maps expressions to their types.
   var symRecords = [Sym:ScopeRecord]()
+
+  private var genSymCount = 0
 
   init(globalCtx: GlobalCtx) {
     self.globalCtx = globalCtx
@@ -29,8 +29,8 @@ class DefCtx {
 
 
   func genSym(parent: Expr) -> Sym {
-    let sym = Sym(parent.syn, name: "$g\(genSyms.count)") // bling: $g<i>: gensym.
-    genSyms.append(sym)
+    let sym = Sym(parent.syn, name: "$g\(genSymCount)") // bling: $g<i>: gensym.
+    genSymCount += 1
     return sym
   }
 
