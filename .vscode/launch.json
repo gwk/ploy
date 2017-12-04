@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Launch",
+      "cwd": "${workspaceRoot}/_build/test",
+      "program": "${workspaceRoot}/_build/debug/ploy",
+      "sourceLanguages": ["swift"],
+      "args": [
+        "-mapper", "${workspaceRoot}/gen-source-map",
+        "${workspaceRoot}/lib",
+        "-main", "${workspaceRoot}/test/_repro.ploy",
+        "-o", "${workspaceRoot}/_build/test/_repro",
+
+      ],
+    }
+  ]
+}
