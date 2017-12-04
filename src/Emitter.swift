@@ -27,7 +27,7 @@ class Emitter {
 
   func str(_ indent: Int, _ text: String, syn: Syn? = nil, off: Int = 0, frameName: String = "") {
     let mapping: SrcMapping? = syn.and({
-      (pathString: $0.source.name, line: $0.lineIdx, col: $0.colIdx, off: off, frameName: frameName)
+      (pathString: $0.source.name, lineIdx: $0.lineIdx, colIdx: $0.colIdx, off: off, frameName: frameName)
     })
     lines.append((indent: indent, text: text, mapping: mapping))
   }
