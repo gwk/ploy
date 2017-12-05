@@ -362,12 +362,6 @@ struct TypeCtx {
       }
       constraints = deferred
     }
-    // fill in frees that were only bound to Never.
-    for idx in freeNevers {
-      if freeUnifications[idx] == nil {
-        freeUnifications[idx] = typeNever
-      }
-    }
   }
 
 
@@ -379,6 +373,12 @@ struct TypeCtx {
     } catch let err as RelCon.Err {
       error(err)
     } catch { fatalError() }
+    // fill in frees that were only bound to Never.
+    for idx in freeNevers {
+      if freeUnifications[idx] == nil {
+        freeUnifications[idx] = typeNever
+      }
+    }
   }
 
 
