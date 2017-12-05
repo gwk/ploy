@@ -55,7 +55,9 @@ enum Def: SubForm {
     switch self {
 
     case .bind(let bind):
-      let (type, needsLazy) = compileBindingVal(space: space, place: bind.place, val: bind.val, addTypeSuffix: false)
+      let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: bind.place, val: bind.val)
+      let hostName = "\(space.hostPrefix)\(bind.place.sym.hostName)"
+      let needsLazy = compileVal(defCtx: defCtx, hostName: hostName, val: val, type: type)
       if needsLazy {
         return .lazy(type)
       } else {
@@ -68,33 +70,22 @@ enum Def: SubForm {
     case .extensible(let extensible):
       let exts = space.exts[sym.name, default: []]
       var typesToExts: [Type:Extension] = [:]
-      var typesToNeedsLazy: [Type:Bool] = [:]
+      var typesToMorphs: [Type:Morph] = [:]
       for ext in exts {
-        // TODO: this is problematic because we emit all extensions as soon as the extensible is referenced.
-        // However, lazy emission is more complicated.
-        let (type, needsLazy) = compileBindingVal(space: space, place: ext.place, val: ext.val, addTypeSuffix: true)
+        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: ext.place, val: ext.val)
         if let existing = typesToExts[type] {
           extensible.failType("extensible has duplicate type: \(type)", notes:
             (existing, "conflicting extension"),
             (ext, "conflicting extension"))
         }
         typesToExts[type] = ext
-        typesToNeedsLazy[type] = needsLazy
+        // Since we do not know if any given morph will get used, save each DefCtx and emit code lazily.
+        typesToMorphs[type] = Morph(defCtx: defCtx, val: val, type: type)
       }
       // TODO: verify that types do not intersect ambiguously.
-      let type = Type.Poly(typesToNeedsLazy.keys.sorted())
-      #if false
-      let em = Emitter(ctx: space.ctx)
-      let hostName = "\(space.hostPrefix)\(sym.hostName)"
-      em.str(0, "const \(hostName)__$table = {")
-      // TODO: emit table contents.
-      em.append("}")
-      em.str(0, "function \(hostName)($){")
-      em.str(0, "  throw new Error('PLOY RUNTIME ERROR: extensible dispatch not implemented')") // TODO: dispatch.
-      em.append("}")
-      em.flush()
-      #endif
-      return .poly(type, morphsToNeedsLazy: typesToNeedsLazy)
+      let hostName = "\(space.hostPrefix)\(extensible.sym.hostName)"
+      let type = Type.Poly(typesToMorphs.keys.sorted())
+      return .poly(PolyRecord(sym: sym, hostName: hostName, type: type, typesToMorphs: typesToMorphs))
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
@@ -112,17 +103,18 @@ enum Def: SubForm {
 }
 
 
-func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Bool) -> (Type, needsLazy: Bool) {
+func simplifyAndTypecheckVal(space: Space, place: Place, val: Expr) -> (DefCtx, Expr, Type) {
   let defCtx = DefCtx(globalCtx: space.ctx)
-  let val = val.simplify(defCtx)
-  let unresolvedType = defCtx.genConstraints(LocalScope(parent: space), expr: val, ann: place.ann)
+  let simplifiedVal = val.simplify(defCtx)
+  let unresolvedType = defCtx.genConstraints(LocalScope(parent: space), expr: simplifiedVal, ann: place.ann)
   defCtx.typecheck()
-  let type = defCtx.typeCtx.resolved(type: unresolvedType)
-  let suffix = (addTypeSuffix ? "__\(type.globalIndex)" : "")
-  let em = Emitter(ctx: space.ctx)
-  //let fullName = "\(space.name)/\(place.sym.name)"
-  let hostName = "\(space.hostPrefix)\(place.sym.hostName)\(suffix)"
-  if needsLazyDef(val: val, type: type) {
+  return (defCtx, simplifiedVal, defCtx.typeCtx.resolved(type: unresolvedType))
+}
+
+
+func compileVal(defCtx: DefCtx, hostName: String, val: Expr, type: Type) -> Bool {
+  let em = Emitter(ctx: defCtx.globalCtx)
+  if needsLazyDef(val: val) {
     let acc = "\(hostName)__acc"
     em.str(0, "let \(acc) = function() {")
     em.str(0, "  \(acc) = $lazy_sentinel;")
@@ -132,50 +124,23 @@ func compileBindingVal(space: Space, place: Place, val: Expr, addTypeSuffix: Boo
     em.str(0, "  \(acc) = function() { return $v };")
     em.str(0, "  return $v; }")
     em.flush()
-    return (type, needsLazy: true)
+    return true
   } else {
     em.str(0, "const \(hostName) = // \(type)")
     val.compile(defCtx, em, 0, exp: type, isTail: false)
     em.append(";")
     em.flush()
-    return (type, needsLazy: false)
-  }
-}
-
-
-func needsLazyDef(val: Expr, type: Type) -> Bool {
-  switch val {
-  case .fn, .hostVal, .litNum, .litStr: return false
-  case .ann(let ann): return needsLazyDef(val: ann.expr, type: type)
-  case .paren(let paren):
-    if paren.isScalarValue {
-      return needsLazyDef(val: paren.els[0], type: type)
-    } else {
-      return hasLazyMember(paren: paren, type: type)
-    }
-  case .sym:
-    switch type.kind {
-    case .sig: return false
-    default: return true
-    }
-  default: return true
-  }
-}
-
-
-func hasLazyMember(paren: Paren, type: Type) -> Bool {
-  guard case .struct_(let fields, let variants) = type.kind else { fatalError() }
-  var i = 0
-  for typeField in fields {
-    if needsLazyDef(val: paren.els[i], type: typeField.type) { return true }
-    i += 1
-  }
-  if variants.isEmpty {
-    assert(i == paren.els.count)
     return false
-  } else {
-    assert(variants.count == 1)
-    assert(i == paren.els.lastIndex)
-    return needsLazyDef(val: paren.els[i], type: variants[0].type)
+  }
+}
+
+
+func needsLazyDef(val: Expr) -> Bool {
+  switch val {
+  case .bind(let bind): return needsLazyDef(val: bind.val)
+  case .fn, .hostVal, .litNum, .litStr: return false
+  case .ann(let ann): return needsLazyDef(val: ann.expr)
+  case .paren(let paren): return paren.els.any { needsLazyDef(val: $0) }
+  default: return true
   }
 }

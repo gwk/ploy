@@ -264,9 +264,9 @@ extension DefCtx {
     let type: Type
     switch record.kind {
     case .lazy(let t): type = t
-    case .poly(let polytype, _):
+    case .poly(let polyRec):
       type = typeCtx.addFreeType() // morph type.
-      constrain(actExpr: .sym(sym), actType: polytype, expType: type, "polymorph alias '\(sym.name)':")
+      constrain(actExpr: .sym(sym), actType: polyRec.type, expType: type, "polymorph alias '\(sym.name)':")
     case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }

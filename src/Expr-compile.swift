@@ -200,10 +200,8 @@ extension Expr {
       code = "\(scopeRecord.hostName)__acc()"
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
-    case .poly(_, let morphsToNeedsLazy):
-      let needsLazy = morphsToNeedsLazy[type]!
-      let lazySuffix = (needsLazy ? "__acc()" : "")
-      code = "\(scopeRecord.hostName)__\(type.globalIndex)\(lazySuffix)"
+    case .poly(let polyRec):
+      code = polyRec.lazilyEmitMorph(type: type)
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:
