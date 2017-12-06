@@ -1,5 +1,0 @@
-test/2/type/poly-val-unconstrained.ploy:6:7-8: type error: polymorph alias 'x': cannot resolve constraint.
-  actual type: Poly<Int Str>
-  expected type: ^0
-|   y = x
-        ~

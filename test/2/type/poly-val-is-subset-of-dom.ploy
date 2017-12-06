@@ -1,7 +1,0 @@
-extensible x;
-x += 0
-x += ''
-
-f = fn (()|Int|Str)%Void;
-
-main = f.x

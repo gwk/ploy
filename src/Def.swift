@@ -73,6 +73,7 @@ enum Def: SubForm {
       var typesToMorphs: [Type:Morph] = [:]
       for ext in exts {
         let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: ext.place, val: ext.val)
+        guard case .sig = type.kind else { val.form.failType("morph must be a function; resolved type: \(type)") }
         if let existing = typesToExts[type] {
           extensible.failType("extensible has duplicate type: \(type)", notes:
             (existing, "conflicting extension"),

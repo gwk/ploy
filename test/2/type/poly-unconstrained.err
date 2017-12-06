@@ -1,0 +1,5 @@
+test/2/type/poly-unconstrained.ploy:6:7-8: type error: polymorph alias 'f': actual polymorph cannot resolve against expected free type.
+  actual type: Poly<()%Int ()%Str>
+  expected type: ^0
+|   g = f
+        ~

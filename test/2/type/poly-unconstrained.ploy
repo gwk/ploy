@@ -1,0 +1,7 @@
+extensible f;
+f += fn ()%Int 0;
+f += fn ()%Str 'a';
+
+main = {
+  g = f
+}

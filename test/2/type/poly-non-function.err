@@ -1,0 +1,3 @@
+test/2/type/poly-non-function.ploy:2:6-7: type error: morph must be a function; resolved type: Int
+| x += 0
+       ~

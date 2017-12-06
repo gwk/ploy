@@ -116,6 +116,9 @@ struct TypeCtx {
     switch (act.kind, exp.kind) {
 
     case (.poly, .free): // cannot unify an actual polymorph because it prevents polymorph selection; defer instead.
+      if searchError == nil { // can have multiple search errors; keep the first one.
+        searchError = rel.error({"\($0) polymorph cannot resolve against \($1) free type"})
+      }
       return false
 
     case (.poly, _): // actual polymorph; attempt to select a morph.

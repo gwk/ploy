@@ -1,0 +1,5 @@
+test/2/type/poly-multiple-morphs-match.ploy:6:7-8: type error: polymorph alias 'f': multiple morphs of actual match expected: ()%Int, ()%Str.
+  actual type: Poly<()%Int ()%Str>
+  expected type: ()%^2
+|   x = f()
+        ~
