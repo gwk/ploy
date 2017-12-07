@@ -46,17 +46,18 @@ struct PropCon {
 struct RelCon: CustomStringConvertible {
   // A generic binary relation constraint, consisting of 'actual' and 'expected' sides.
 
-  struct Err: Error {
+  struct Err: Error, CustomStringConvertible {
     typealias MsgThunk = (String, String) -> String
     let rel: RelCon
     let msgThunk: MsgThunk
+    var description: String { return "Err(rel: `\(rel)`; msg: `\(msgThunk(rel.act.role.desc, rel.exp.role.desc))`)" }
   }
 
   let act: Side
   let exp: Side
   let desc: String
 
-  var description: String { return "\(act.role.desc): \(act); \(exp.role.desc): \(exp); desc: \(desc)" }
+  var description: String { return "\(act); \(exp); desc: \(desc)" }
 
   func error(_ msgThunk: @escaping (String, String) -> String) -> Err { return Err(rel: self, msgThunk: msgThunk) }
 }
