@@ -149,16 +149,12 @@ class GlobalCtx {
 
     switch orig.kind {
 
-    case .any(let origMembers):
-      let tableName = "$ct\(orig.globalIndex)_\(castIdx)" // bling: $ct: union tag table.
-      em.str(2, "(new $C\(castIdx)(\(tableName)[$o.$u], $o.$m));")
+    case .any:
+      em.str(2, "(new $C\(castIdx)($o.$u, $o.$m));") // since tag is just the type name, no conversion is necessary.
       // bling: $C: constructor; $o: original; $u: union tag; $m: morph value.
-      let table = origMembers.map { castMembers.index(of: $0)! }
-      let indices = table.descriptions.joined(separator: ",")
-      em.str(0, "const \(tableName) = [\(indices)];")
 
     default:
-      guard let tag = castMembers.index(of: orig) else { fatalError("orig type `\(orig)` is not member of union: \(castMembers)") }
+      let tag = "'\(orig)'" // tag is just the type name; assume that no JS string liteural escaping is necessary.
       em.str(2, "(new $C\(castIdx)(\(tag), $o));") // bling: $C: constructor; $o: original.
     }
   }
