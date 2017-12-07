@@ -1,10 +1,9 @@
 {
   "version": "0.2.0",
   "configurations": [
-    {
+    { "name": "Compiler",
       "type": "lldb",
       "request": "launch",
-      "name": "Launch",
       "cwd": "${workspaceRoot}/_build/test",
       "program": "${workspaceRoot}/_build/debug/ploy",
       "sourceLanguages": ["swift"],
@@ -13,8 +12,14 @@
         "${workspaceRoot}/lib",
         "-main", "${workspaceRoot}/test/_repro.ploy",
         "-o", "${workspaceRoot}/_build/test/_repro",
-
       ],
+    },
+    { "name": "Compiled JS",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceRoot}/_build/test",
+      "program": "${file}",
+      "args": []
     }
   ]
 }
