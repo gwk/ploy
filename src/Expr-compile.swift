@@ -201,7 +201,7 @@ extension Expr {
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
     case .poly(let polyRec):
-      code = polyRec.lazilyEmitMorph(type: type)
+      code = polyRec.lazilyEmitMorph(globalCtx: ctx.globalCtx, type: type)
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:

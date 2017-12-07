@@ -115,14 +115,18 @@ struct TypeCtx {
 
     switch (act.kind, exp.kind) {
 
-    case (.poly, .free): // cannot unify an actual polymorph because it prevents polymorph selection; defer instead.
-      if searchError == nil { // can have multiple search errors; keep the first one.
-        searchError = rel.error({"\($0) polymorph cannot resolve against \($1) free type"})
-      }
+    case (.poly, .free): // cannot polymorph against free because it prevents polymorph selection; defer instead.
+      if searchError == nil { searchError = rel.error({"\($0) cannot resolve against \($1) free type"}) }
       return false
 
-    case (.poly, _): // actual polymorph; attempt to select a morph.
-      return try resolvePoly(rel, act: act, exp: exp)
+    case (.poly, .sig): // select a single morph.
+      return try resolvePolydefToSig(rel, act: act, exp: exp)
+
+    case (.poly, .polymorph): throw rel.error({"\($0) to \($1) polymorphs not yet implemented"})
+
+    case (.poly, .any): throw rel.error({"\($0) to \($1) union not yet implemented"})
+
+    case (.poly, _): throw rel.error({"\($0) cannot resolve against \($1) type"})
 
     case (.free(let ia), .free):
       // Propagate the actual type as far as possible. TODO: figure out if this matters.
@@ -161,6 +165,9 @@ struct TypeCtx {
     case (.prim, _) where act == typeNever: // never is compatible with any expected type.
       return true
 
+    case (.polymorph, .sig):
+      return try resolvePolymorphToSig(rel, act: act, exp: exp)
+
     case (.sig(let actDR), .sig(let expDR)):
       return try resolveSigToSig(rel, act: actDR, exp: expDR)
 
@@ -177,37 +184,120 @@ struct TypeCtx {
     }
   }
 
+  enum MorphResult {
+    case none
+    case match(Type)
+    case multiple(Type, Type)
+  }
 
-  mutating func resolvePoly(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
-    guard case .poly(let morphs) = act.kind else { fatalError() }
-    assert(exp.vars.isEmpty)
+  mutating func resolveMorphsToExp(_ rel: RelCon, act: Type, exp: Type, morphs: [Type], merge: Bool) -> MorphResult { // returns matching morh type.
     let (subCtx, subExp) = subCtxAndType(parentType: exp)
     var matchMorph: Type? = nil
     var matchCtx = TypeCtx() // overwritten by matching iteration.
     for morph in morphs {
       assert(morph.isResolved)
-      assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles.
+      assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles?
       var childCtx = subCtx // copy.
+      // errL(""); childCtx.describeState("MORPH: \(morph); EXP: \(subExp)")
       childCtx.addConstraint(.rel(RelCon(
-        act: Side(.act, expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)),
+        act: Side(.act, expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)), // ok to pass morph directly, because it is resolved.
         exp: Side(.exp, expr: rel.exp.expr, type: subExp, chain: rel.exp.chain),
         desc: rel.desc)))
       do { try childCtx.resolveAll() }
-      catch { continue }
+      catch { continue } // TODO: return search error?
       if let prev = matchMorph {
-        if searchError == nil { // can have multiple search errors; keep the first one.
-          searchError = rel.error({"multiple morphs of \($0) match \($1): \(prev), \(morph)"})
-        }
-        return false
+        return .multiple(prev, morph)
       }
       matchMorph = morph
       matchCtx = childCtx
     }
-    if case .any(let unionMembers) = exp.kind, matchMorph == nil { // expected type is dynamic.
-      fatalError("polymorphic union matching unimplemented: \(unionMembers)")
+    if let matchMorph = matchMorph {
+      if merge { mergeSubCtx(matchCtx) } // unifies the poly ref free to the morph, plus any others, e.g. expSig.ret.
+      return .match(matchMorph)
     }
-    if matchMorph == nil { throw rel.error({"no morphs of \($0) match \($1)"}) }
-    mergeSubCtx(matchCtx)
+    return .none
+  }
+
+
+  mutating func resolvePolydefToSig(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
+    guard case .poly(let morphs) = act.kind else { fatalError() }
+    guard case .sig(let expDom, let expRet) = exp.kind else { fatalError() }
+
+    switch resolveMorphsToExp(rel, act: act, exp: exp, morphs: morphs, merge: true) {
+    case .none: break
+    case .match: return true
+    case .multiple(let prev, let match):
+      if searchError == nil { searchError = rel.error({"multiple morphs of \($0) match \($1): \(prev), \(match)"}) }
+      return false
+    }
+
+    guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no morphs of \($0) match \($1) type"}) }
+    // no exact match, try to synthesize a polymorphic function that matches the expected union dom.
+
+    if !expDom.childFrees.isEmpty { // cannot synthesize with an unresolved expected domain.
+      if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polymorphic function against free \($1) union domain"}) }
+      return false
+    }
+
+    var reqMorphs: [Type] = [] // subset of morphs that are relevant.
+    for expDomMember in expDomMembers {
+      let expMemberSig = Type.Sig(dom: expDomMember, ret: expRet)
+      switch resolveMorphsToExp(rel, act: act, exp: expMemberSig, morphs: morphs, merge: false) {
+      case .none:
+        throw rel.error({"no morphs of \($0) match \($1) domain member: \(expDomMember)"})
+      case .match(let morph):
+        reqMorphs.append(morph)
+      case .multiple(let m0, let m1):
+        if searchError == nil { searchError = rel.error({"multiple morphs of \($0) match \($1): \(m0), \(m1)"}) }
+        return false
+      }
+    }
+    let polymorph = Type.Polymorph(reqMorphs)
+    try resolveSub(rel,
+      actType: polymorph, actDesc: "polymorphic function",
+      expType: exp, expDesc: "signature")
+    return true
+  }
+
+
+  mutating func resolvePolymorphToSig(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
+    guard case .polymorph(let morphs) = act.kind else { fatalError() }
+    guard case .sig(let expDom, let expRet) = exp.kind else { fatalError() }
+
+    switch resolveMorphsToExp(rel, act: act, exp: exp, morphs: morphs, merge: true) {
+    case .none: break
+    case .match: return true
+    case .multiple(let m0, let m1):
+      if searchError == nil { searchError = rel.error({"multiple morphs of \($0) polymorph match \($1): \(m0), \(m1)"}) }
+      return false
+    }
+
+    guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no morphs of \($0) polymorph match \($1) type"}) }
+    // no exact match, try to synthesize a polymorphic function that matches the expected union dom.
+
+    if !expDom.childFrees.isEmpty { // cannot synthesize with an unresolved expected domain.
+      if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polymorph against unresolved \($1) union domain"}) }
+      return false
+    }
+
+    var reqMorphs: [Type] = [] // subset of morphs that are relevant.
+    for expDomMember in expDomMembers {
+      let expMemberSig = Type.Sig(dom: expDomMember, ret: expRet)
+      switch resolveMorphsToExp(rel, act: act, exp: expMemberSig, morphs: morphs, merge: false) {
+      case .none:
+        throw rel.error({"no morphs of \($0) polymorph match \($1) domain morph: \(expDom)"})
+      case .match(let match):
+        reqMorphs.append(match)
+      case .multiple(let m0, let m1):
+        if searchError == nil { searchError = rel.error({"multiple morphs of \($0) polymorph match \($1): \(m0), \(m1)"}) }
+        return false
+      }
+    }
+    let reqRets = Set(reqMorphs.map({$0.sigRet})).sorted()
+    let actRet = try Type.Any_(reqRets)
+    try resolveSub(rel,
+      actType: actRet, actDesc: "polymorphic return",
+      expType: expRet, expDesc: "signature return")
     return true
   }
 

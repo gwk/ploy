@@ -9,6 +9,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case free(index: Int)
     case host
     case poly(members: [Type])
+    case polymorph(members: [Type])
     case prim
     case sig(dom: Type, ret: Type)
     case struct_(fields: [TypeField], variants: [TypeField])
@@ -81,11 +82,22 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Poly(_ members: [Type]) -> Type {
-    assert(members.isSorted, "members: \(members)")
+    assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
     let desc = "Poly<\(members.descriptions.sorted().joined(separator: " "))>"
     return memoize(desc, (
       kind: .poly(members: members),
+      frees: Set(members.flatMap { $0.frees }),
+      vars: Set(members.flatMap { $0.vars })))
+  }
+
+  class func Polymorph(_ members: [Type]) -> Type {
+    assert(members.isSortedStrict, "members: \(members)")
+    // TODO: assert disjoint.
+    if members.count == 1 { return members[0] }
+    let desc = "(\(members.descriptions.sorted().joined(separator: " + ")))"
+    return memoize(desc, (
+      kind: .polymorph(members: members),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -235,6 +247,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .all(let members): return try! .All(members.sortedMap{$0.transformLeaves(fn)})
     case .any(let members): return try! .Any_(members.sortedMap{$0.transformLeaves(fn)})
     case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
+    case .polymorph(let members): return .Polymorph(members.sortedMap{$0.transformLeaves(fn)})
     case .sig(let dom, let ret): return .Sig(dom: dom.transformLeaves(fn), ret: ret.transformLeaves(fn))
     case .struct_(let fields, let variants):
       return .Struct(fields: fields.map{$0.transformType(fn)}, variants: variants.map{$0.transformType(fn)})

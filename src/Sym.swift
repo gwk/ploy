@@ -10,7 +10,7 @@ class Sym: Form { // symbol: `name`.
   }
 
   override var description: String {
-    return "\(type(of: self)):\(syn): \(name)"
+    return "\(type(of: self)):\(syn):`\(name)`"
   }
 
   override var textTreeChildren: [Any] { return [] }

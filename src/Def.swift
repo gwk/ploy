@@ -81,7 +81,7 @@ enum Def: SubForm {
         }
         typesToExts[type] = ext
         // Since we do not know if any given morph will get used, save each DefCtx and emit code lazily.
-        typesToMorphs[type] = Morph(defCtx: defCtx, val: val, type: type)
+        typesToMorphs[type] = Morph(defCtx: defCtx, val: val)
       }
       // TODO: verify that types do not intersect ambiguously.
       let hostName = "\(space.hostPrefix)\(extensible.sym.hostName)"

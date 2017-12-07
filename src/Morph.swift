@@ -3,12 +3,9 @@
 class Morph {
   var defCtx: DefCtx?
   let val: Expr
-  let type: Type
-  var needsLazy: Bool? = nil
 
-  init(defCtx: DefCtx, val: Expr, type: Type) {
+  init(defCtx: DefCtx?, val: Expr) {
     self.defCtx = defCtx
     self.val = val
-    self.type = type
   }
 }

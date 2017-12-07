@@ -1,0 +1,11 @@
+extensible f;
+f += fn Int%Void;
+f += fn Str%Void;
+
+
+main = {
+  f.0
+  f.'a'
+  f(0:(Int|Str))
+  f('a':(Int|Str))
+}
