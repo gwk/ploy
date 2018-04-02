@@ -115,8 +115,6 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     }
   }
 
-  var hashValue: Int { return form.hashValue }
-
   var description: String { return form.description }
 
   var sigDom: Expr? {
