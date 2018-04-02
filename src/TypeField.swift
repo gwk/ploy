@@ -37,6 +37,4 @@ struct TypeField: Equatable, CustomStringConvertible {
   func transformType(_ transform: (Type)->Type) -> TypeField {
     return substitute(type: transform(type))
   }
-
-  static func ==(l: TypeField, r: TypeField) -> Bool { return l.label == r.label && l.type == r.type }
 }

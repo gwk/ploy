@@ -12,7 +12,6 @@ struct Conversion: Comparable, Hashable, CustomStringConvertible {
 
   var hostName: String { return "$c\(orig.globalIndex)_\(cast.globalIndex)" } // bling: $c<i>_<j>: conversion.
 
-  public static func ==(l: Conversion, r: Conversion) -> Bool { return l.orig == r.orig && l.cast == r.cast }
-  public static func <(l: Conversion, r: Conversion) -> Bool { return l.orig < r.orig || l.orig == r.orig && l.cast < r.cast }
 }
 
+func <(l: Conversion, r: Conversion) -> Bool { return l.orig < r.orig || l.orig == r.orig && l.cast < r.cast }
