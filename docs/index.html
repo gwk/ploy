@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+ <title>index.html</title>
+ <meta name="description" content="" />
+ <meta name="author" content="" />
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=" />
+  <style type="text/css">
+a { background-color: transparent; }
+a:active { outline: 0; }
+a:hover { outline: 0; }
+a:link { color: #1010A0; }
+a:visited { color: #301080; border-bottom: 3px solid; }
+blockquote { border-left-color: #E0E0E0; border-left-style: solid; border-left-width: 0.333rem; margin: 0; padding: 0 0.667rem; }
+body { margin: 0 auto; max-width: 64rem; border: transparent solid 0.5rem; }
+body footer { border-top-color: #E8E8E8; border-top-style: solid; border-top-width: 1px; color: #606060; font-size: .875rem; margin: 1rem 0 0 0; }
+code { font-family: source code pro, terminal, monospace; }
+code.inline { background-color: #F0F0F0; border-color: #D0D0D0; border-radius: 2px; border-style: solid; border-width: 0.5px; overflow-wrap: break-word; white-space: pre-wrap; }
+code.line { display: block; margin: 0; overflow-wrap: break-word; padding: 0 0 0 0.5rem; text-indent: -0.5rem; white-space: pre-wrap; }
+div.code-block { background-color: #F8F8F8; border-color: #D0D0D0; border-radius: 4px; border-style: solid; border-width: 0.5px; font-size: 1rem; margin: 1rem 0; padding: 0.1rem; }
+div.embed-label { background-color: #FFFFFF; border-bottom-style: none; border-color: #E0E0E0; border-style: solid solid none solid; border-top-left-radius: 4px; border-top-right-radius: 4px; border-width: 0.5px; color: #404040; display: inline-block; font-family: source code pro, terminal, monospace; font-size: 0.8rem; margin-top: 1rem; }
+div.embed-label + * { border-top-left-radius: 0; margin-top: 0.5px; }
+footer { display: block; }
+h1 { font-size: 1.8rem; margin: 0.9rem 0; }
+h2 { font-size: 1.6rem; margin: 0.8rem 0; }
+h3 { font-size: 1.4rem; margin: 0.7rem 0; }
+h4 { font-size: 1.3rem; margin: 0.65rem 0; }
+h5 { font-size: 1.2rem; margin: 0.6rem 0; }
+h6 { font-size: 1.1rem; margin: 0.55rem 0; }
+header { display: block; }
+html { background: white; color: black; font-family: source sans pro, sans-serif; font-size: 1rem; }
+nav { display: block; }
+p { margin: 0.5rem 0; }
+section { display: block; }
+section.S1 { border-top-color: #E8E8E8; border-top-style: solid; border-top-width: 1px; margin: 1.8rem 0; }
+section.S2 { margin: 1.6rem 0; }
+section.S3 { margin: 1.4rem 0; }
+section.S4 { margin: 1.3rem 0; }
+section.S5 { margin: 1.2rem 0; }
+section.S6 { margin: 1.1rem 0; }
+section#s0 { border-top-width: 0; }
+table { background: #F0F0F0; border-radius: 4px; border: #D0D0D0 0.5px solid; }
+table th { padding: 0.25rem 0.25rem; }
+table th:first-child { padding-left: 0.25rem; text-align: left; }
+table td { background: #FAFAFA; font-family: monospace; padding:0.25rem; white-space: pre; }
+table td:first-child { border-left: 0; padding-left: 0.25rem; text-align: left; }
+table tr { padding-left: 0.25rem; text-align: left; }
+table tr:last-child td { border-bottom: 0; }
+table tr:last-child td:first-child { border-bottom-left-radius: 2px; }
+table tr:last-child td:last-child { border-bottom-right-radius: 2px; }
+table tr:nth-child(odd) td { background: #FFFFFF; }
+table tr:nth-child(even) td { background: #FBFBFB; }
+table tr:hover td { background: #F0F0F0; }
+ul { line-height: 1.333rem; list-style-position: outside; list-style-type: disc; margin-left: 1rem; padding-left: 0.1rem; }
+@media print { @page { margin: 2cm; }
+}
+  </style>
+  <script type="text/javascript"> "use strict";
+function scrollToElementId(id) {
+  window.scrollTo(0, document.getElementById(id).offsetTop);
+}
+
+var in_pres_mode = false;
+function togglePresentationMode() {
+  in_pres_mode = !in_pres_mode;
+  for (var sid of paging_ids) {
+    var section = document.getElementById(sid);
+    if (section.id == 'body') {
+      // skip; not actually a section.
+    } else {
+      section.style['margin'] = in_pres_mode ? '100vh 0 0 0' : '0';
+    }
+  }
+  var footer = document.getElementById('footer');
+  footer.style['margin'] = in_pres_mode ? '100vh 0 0 0' : '0';
+}
+
+var section_ids = null;
+var paging_ids = null;
+var paging_idx = 0;
+
+window.onkeydown = function(e) {
+  if (e.keyCode === 37) { // left.
+    if (paging_idx > 0) {
+      paging_idx -= 1;
+    }
+    scrollToElementId(paging_ids[paging_idx]);
+  } else if (e.keyCode === 39) { // right.
+    if (paging_idx < paging_ids.length - 1) {
+      paging_idx += 1;
+    }
+    scrollToElementId(paging_ids[paging_idx]);
+  }
+};
+
+window.onkeypress = function(e) {
+  if (e.charCode === 112) { // 'p'.
+    togglePresentationMode();
+  }
+};
+</script>
+</head>
+<body id="body">
+<section class="S1" id="s0">
+  <h1 id="h0">Ploy</h1>
+  <p>
+    Ploy is an experimental, general purpose programming language. It is a statically typed language, and aspires to be a pragmatic choice for both small and large-scale projects. The language design is inspired by aspects of Lisp and Scheme, as well as a variety of statically typed languages. Ploy is in an early stage of development, and is not yet practically useful.
+  </p>
+  <section class="S2" id="s0.1">
+    <h2 id="h0.1">License</h2>
+    <p>
+      Ploy is licensed under the ISC License, a permissive open source license similar to 2-clause BSD.
+    </p>
+  </section>
+  <section class="S2" id="s0.2">
+    <h2 id="h0.2">Examples</h2>
+<div class="code-block">
+<code class="line"># TODO.</code>
+</div>
+  </section>
+</section>
+<section class="S1" id="s1">
+  <h1 id="h1">Approach</h1>
+  <p>
+    I am currently writing a bootstrap compiler in Swift, which outputs JavaScript for Node. I chose Swift because its type system has some similarities to what I imagine for Ploy, because of the convenient debugging UI built into Xcode, and because I am familiar with Apple's toolchain and platform. I chose JavaScript as the first target language because it let me defer memory management questions that I would have to address immediately with C or LLVM, and because JavaScript appeals to such a large audience.
+  </p>
+  <p>
+    The main limitation of this approach is that without an interpreter or just-in-time compiler, lisp-like macros are not possible. JIT capabilities could be added by linking in Node (or just V8 and adding the necessary host functions); however there would also be a lot of work involved in creating the type definitions of syntax objects that would be evaluated and then spliced back into the compiler's syntax tree.
+  </p>
+  <p>
+    The long term goal is to write a self-hosting Ploy compiler in Ploy, and to find an implementation strategy for macros and metaprogramming that is reasonably straightforward.
+  </p>
+</section>
+<section class="S1" id="s2">
+  <h1 id="h2">Goals</h1>
+  <p>
+    See docs/goals.
+  </p>
+</section>
+<section class="S1" id="s3">
+  <h1 id="h3">Progress</h1>
+  <section class="S2" id="s3.1">
+    <h2 id="h3.1">Grammar and parser</h2>
+    <p>
+      The grammar has not been formally defined, but has been designed to require no backtracking in the recursive-decent parser. This greatly simplifies the implementation of the parser by hand, and I believe it also makes reasoning about the syntactic structure of code and parse errors much simpler. The language uses a small set of binary infix operators, grouped into just a few levels of precedence, and with precedence groups all operators are right-associative. These constraints on the grammar make the language simple to explain and the parser easier to implement. The parser uses an "operator precedence" style algorithm to handle infix operators.
+    </p>
+  </section>
+  <section class="S2" id="s3.2">
+    <h2 id="h3.2">Type System</h2>
+    <p>
+      The type system is currently quite rudimentary. It has support for primitive and compound types (more conventionally known as "tuple" types). Compound types use conventional structural typing, meaning that two compound types are equal if they have the same shape. Struct and Enum (tagged union types) do not yet compile; these will most likely be nominitively typed, meaning that any named struct is equivalent only to itself. I am putting off issues related to subtyping for now, but eventually I would like to explore dynamic type and subtyping (and the associated questions of covariance and contravariance), notinos like set-theoretic type unions and intersections, type classes, etc.
+    </p>
+    <p>
+      Functional types, including higher order function types, appear to work but have been only minimally tested.
+    </p>
+    <p>
+      Function signatures in Ploy are defined by a single input type, and a single return type. Multiple parameters, parameter names, parameter defaults, and variadic parameters are all provided through the semantics of compound literals. This is similar to ML and Haskell, in which all functions take a single argument, but somewhat different in spirit, since those languages make heavy use of currying to pass multiple arguments, while in Ploy the convention is to pass multiple arguments as elements of a compound literal.
+    </p>
+  </section>
+  <section class="S2" id="s3.3">
+    <h2 id="h3.3">Namespaces</h2>
+    <p>
+      Namespaces work, but need more testing like everything else. See docs/goals.
+    </p>
+  </section>
+  <section class="S2" id="s3.4">
+    <h2 id="h3.4">Generic Functions</h2>
+    <p>
+      Generic functions are a current priority. See docs/goals.
+    </p>
+    <p>
+      The first step is to implement static function overloading. Dynamic, multiple dispatch (similar to Julia) would be an interesting future addition, but requires a lot of thought regarding runtime type information.
+    </p>
+  </section>
+  <section class="S2" id="s3.5">
+    <h2 id="h3.5">Type Inference</h2>
+    <p>
+      There is a very limited inference system, which is necessary for the compilation of compound values, but also alleviate the need for annotating local bindings.
+    </p>
+  </section>
+  <section class="S2" id="s3.6">
+    <h2 id="h3.6">Tests</h2>
+    <p>
+      The project has a custom python test script that executes <code class="inline">.test</code> files. These files are essentially python dictionary literals, which I prefer over JSON because triple-quote string literals can be used to specify multi-line expectations. More documentation around the test system is in order, but for now look at the existing tests to start, and read tools/test.py if issues come up.
+    </p>
+  </section>
+</section>
+<section class="S1" id="s4">
+  <h1 id="h4">Requirements</h1>
+  <p>
+    Ploy is developed with the following tools:
+  <br />
+    - OS X 10.10
+  <br />
+    - Swift 2 and Xcode 7 (latest beta)
+  <br />
+    - gnu bash 3.2.57
+  <br />
+    - python 3.4.3
+  </p>
+</section>
+<section class="S1" id="s5">
+  <h1 id="h5">Usage</h1>
+<div class="code-block">
+<code class="line">$ sh/run.sh my-program.ploy arg1 …</code>
+<code class="line"># compile to _build/my-program and run with arg1 ….</code>
+<code class="line"></code>
+<code class="line">$ sh/test.sh</code>
+<code class="line"># run the tests.</code>
+</div>
+</section>
+<script type="text/javascript"> "use strict";
+section_ids = ['s0','s0.1','s0.2','s1','s2','s3','s3.1','s3.2','s3.3','s3.4','s3.5','s3.6','s4','s5'];
+paging_ids = ['body', 's0','s0.1','s0.2','s1','s2','s3','s3.1','s3.2','s3.3','s3.4','s3.5','s3.6','s4','s5'];
+</script>
+<footer id="footer">
+© 2015 George King.<br />
+Permission to use this file is granted in ploy/license.txt.
+</footer>
+</body>
+</html>

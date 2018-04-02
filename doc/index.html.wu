@@ -80,10 +80,8 @@ Ploy is developed with the following tools:
 
 # Usage
 
-  $ sh/run.sh my-program.ploy arg1 …
-  # compile to _build/my-program and run with arg1 ….
-
-  $ sh/test.sh
-  # run the tests.
-
-
+| $ sh/run.sh my-program.ploy arg1 …
+| # compile to _build/my-program and run with arg1 ….
+|
+| $ sh/test.sh
+| # run the tests.

@@ -4,7 +4,7 @@
 # $<: The name of the first prerequisite.
 # $^: The names of all the prerequisites, with spaces between them.
 
-.PHONY: _default all build clean cov gen test xcode
+.PHONY: _default all build clean cov docs gen test xcode
 
 _default: test
 
@@ -21,6 +21,9 @@ clean-lex:
 
 clean-ploy:
 	rm -rf _build/debug/ploy*
+
+docs:
+	craft-docs
 
 cov:
 	craft-swift -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
