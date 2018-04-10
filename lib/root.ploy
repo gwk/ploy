@@ -63,7 +63,6 @@ lt += fn (() ())%Bool false;
 lt += host_val (Int Int)%Bool "function($) { return $._0 <  $._1; }";
 
 
-exit = host_val Int%Never "function($) { HOST___process.exit($); }" HOST/_process;
 std_out = host_val FS/File "$g.process.stdout.fd";
 std_err = host_val FS/File "$g.process.stderr.fd";
 
@@ -89,12 +88,13 @@ outL += fn Int%Void out.$ out.'\n';
 outL += fn Str%Void out.$ out.'\n';
 
 
+exit = host_val Int%Never "function($) { HOST___process.exit($); }" HOST/_process;
+
 fail = fn Str%Never
   errL.$
   exit.1;
 
 abort = host_val Str%Never "function($) { throw new Error($); }";
-
 
 assert = fn Bool%Void
   if not.$ ? abort.'assert failed.';;
