@@ -150,11 +150,11 @@ class GlobalCtx {
     switch orig.kind {
 
     case .any:
-      em.str(2, "(new $C\(castIdx)($o.$u, $o.$m));") // since tag is just the type name, no conversion is necessary.
+      em.str(2, "(new $C\(castIdx)($o.$u, $o.$m));") // since tag is just the type name, no conversion between tags is necessary.
       // bling: $C: constructor; $o: original; $u: union tag; $m: morph value.
 
     default:
-      let tag = "'\(orig)'" // tag is just the type name; assume that no JS string liteural escaping is necessary.
+      let tag = "'\(orig)'" // tag is just the type name; assume that no JS string literal escaping is necessary.
       em.str(2, "(new $C\(castIdx)(\(tag), $o));") // bling: $C: constructor; $o: original.
     }
   }
@@ -189,7 +189,7 @@ class GlobalCtx {
       em.str(4, "this.\(n) = \(n);")
     }
     if !variants.isEmpty {
-      em.str(4, "this.$v = $v; this[$v] = $vv;") // bling: $v: variant tag; $m: variant value parameter.
+      em.str(4, "this.$v = $v; this[$v] = $vv;") // bling: $v: variant tag; $vv: variant value parameter.
     }
     em.append("}")
   }

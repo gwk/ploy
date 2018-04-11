@@ -286,7 +286,7 @@ let typeInt       = Type.Prim("Int")
 let typeNamespace = Type.Prim("Namespace")
 let typeStr       = Type.Prim("Str")
 let typeType      = Type.Prim("Type")
-let typeVoid      = Type.Prim("Void") // Note: Void is distinct from Never.
+let typeVoid      = Type.Prim("Void") // Note: Void is distinct from Null and Never.
 
 let intrinsicTypes = [
   typeBool,
