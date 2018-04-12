@@ -3,6 +3,9 @@
 import Darwin
 
 
+typealias PloyToken = Token<TokenKind>
+
+
 func parsePloy(path: Path) -> [Def] {
   do {
     let bytes = try File(path: path).readBytes()
@@ -17,16 +20,16 @@ func parsePloy(path: Path) -> [Def] {
 
 class Parser {
   let source: Source
-  let tokens: [Token]
+  let tokens: [PloyToken]
   var tokenPos: Int = 0
 
   init(source: Source) {
     self.source = source
-    self.tokens = Array(source.lex())
+    self.tokens = Array(Lexer(source: source))
   }
 
   var atEnd: Bool { return tokenPos == tokens.count }
-  var current: Token { return tokens[tokenPos] }
+  var current: PloyToken { return tokens[tokenPos] }
 
 
   func parse() -> [Def] {
@@ -225,7 +228,7 @@ class Parser {
       let val = try source.parseSignedNumber(token: current)
       let token = getCurrentAndAdvance()
       return LitNum(Syn(source: source, token: token, end: parseSpace()), val: Int(val))
-    } catch let e as Source.Err {
+    } catch let e as PloyToken.Err {
       switch e {
       case .overflow: failParse("integer literal value overflows I64.")
       }
@@ -294,7 +297,7 @@ class Parser {
   // MARK: compound helpers.
 
 
-  func synForTerminator(head: Token, terminator: TokenKind, _ formName: String) -> Syn {
+  func synForTerminator(head: PloyToken, terminator: TokenKind, _ formName: String) -> Syn {
     if atEnd {
       failParse(token: head, "`\(formName)` form expected \(terminator) terminator; reached end of file.")
       // TODO: report correct position.
@@ -308,7 +311,7 @@ class Parser {
   }
 
 
-  func synForSemicolon(head: Token, _ formName: String) -> Syn {
+  func synForSemicolon(head: PloyToken, _ formName: String) -> Syn {
     return synForTerminator(head: head, terminator: .semicolon, formName)
   }
 
@@ -505,14 +508,14 @@ class Parser {
   func advance() { tokenPos += 1 }
 
 
-  func getCurrentAndAdvance() -> Token {
+  func getCurrentAndAdvance() -> PloyToken {
     let token = current
     advance()
     return token
   }
 
 
-  func getCurrentAndAdvance(requireSpace: Bool) -> Token {
+  func getCurrentAndAdvance(requireSpace: Bool) -> PloyToken {
     let token = current
     advance()
     if requireSpace {
@@ -526,13 +529,13 @@ class Parser {
   }
 
 
-  func failLex(token: Token, _ msg: String) -> Never {
+  func failLex(token: PloyToken, _ msg: String) -> Never {
     errZ(source.diagnostic(token: token, msg: "lexical error: " + msg))
     exit(1)
   }
 
 
-  func failParse(token: Token, _ msg: String) -> Never {
+  func failParse(token: PloyToken, _ msg: String) -> Never {
     errZ(source.diagnostic(token: token, msg: "parse error: " + msg))
     exit(1)
   }

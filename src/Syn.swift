@@ -26,11 +26,11 @@ class Syn: CustomStringConvertible {
     assert(visEnd <= end, "Syn end is invalid: \(self)")
   }
 
-  convenience init(source: Source, token: Token, visEnd: Int? = nil, end: Int) {
+  convenience init(source: Source, token: PloyToken, visEnd: Int? = nil, end: Int) {
     self.init(source: source, lineIdx: token.lineIdx, linePos: token.linePos, pos: token.pos, visEnd: visEnd ?? token.end, end: end)
   }
 
-  convenience init(_ l: Token, _ r: Syn) {
+  convenience init(_ l: PloyToken, _ r: Syn) {
     self.init(source: r.source, lineIdx: l.lineIdx, linePos: l.linePos, pos: l.pos, visEnd: r.visEnd, end: r.end)
   }
 

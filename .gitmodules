@@ -1,3 +1,7 @@
+[submodule "legs"]
+	path = legs
+	url = git@github.com:gwk/legs.git
+
 [submodule "quilt"]
 	path = quilt
 	url = git@github.com:gwk/quilt.git

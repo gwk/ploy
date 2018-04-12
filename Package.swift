@@ -15,6 +15,7 @@ let package = Package(
       exclude: [],
       sources: [
         "src",
+        "legs/legs/legs_base.swift",
         "quilt/src/Quilt/AppendableStruct.swift",
         "quilt/src/Quilt/ArithmeticProtocol.swift",
         "quilt/src/Quilt/Array.swift",
