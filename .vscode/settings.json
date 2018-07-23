@@ -4,6 +4,7 @@
     "_build": true,
     "_build/_repro.js": false,
     "ploy.xcodeproj": true,
+    "quilt/_build": true,
     "quilt/src/QuiltGeometry": true,
     "quilt/src/QuiltMac": true,
     "quilt/src/QuiltSceneKit": true,
