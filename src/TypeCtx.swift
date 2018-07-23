@@ -332,7 +332,7 @@ struct TypeCtx {
     }
     actual: for (actIdx, actVariant) in act.variants.enumerated() {
       let litActVariants = rel.act.litExpr?.parenVariantEls
-      for (expIdx, expVariant) in exp.variants.enumerated() { // TODO: fix quadratic behavior.
+      for (expIdx, expVariant) in exp.variants.enumerated() { // TODO: fix quadratic performance.
         if expVariant.label == actVariant.label {
           let litExpVariants = rel.exp.litExpr?.parenVariantEls
           try resolveSub(rel,
