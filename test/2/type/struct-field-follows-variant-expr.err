@@ -1,0 +1,3 @@
+test/2/type/struct-field-follows-variant-expr.ploy:2:11-12: syntax error: struct literal field cannot follow a variant.
+|   _ = (-t 0)
+            ~

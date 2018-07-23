@@ -29,7 +29,7 @@ extension Expr {
             firstVariantForm = par.form
           }
         } else if let first = firstVariantForm {
-            par.failSyntax("struct field cannot follow a variant",
+            par.failSyntax("struct field cannot follow a variant.",
               notes: (first, "first variant is here."))
         } else {
           if let first = firstLabeledForm, !typeField.hasLabel {
