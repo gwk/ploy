@@ -1,0 +1,6 @@
+test/2/type/struct-positional-follows-label-type.ploy:2:12-15: syntax error: struct positional field cannot follow a labeled field.
+|   _:(a:Int Int) = (0 0)
+             ~~~
+test/2/type/struct-positional-follows-label-type.ploy:2:6-11: note: first labeled field is here.
+|   _:(a:Int Int) = (0 0)
+       ~~~~~

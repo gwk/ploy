@@ -7,10 +7,6 @@ main = {
   assert.eq(0 0@zz)
   assert.eq(1 1@zz)
 
-  iz:(i:Int Int) = (0 1)
-  assert.eq(0 i@iz)
-  assert.eq(1 1@iz)
-
   zj:(Int j:Int) = (0 1)
   assert.eq(0 0@zj)
   assert.eq(1 j@zj)

@@ -19,6 +19,7 @@ extension Expr {
       }
       var fields = [TypeField]()
       var variants = [TypeField]()
+      var firstLabeledForm: Form? = nil
       var firstVariantForm: Form? = nil
       for par in paren.els {
         let typeField = par.getTypeField(scope)
@@ -29,8 +30,15 @@ extension Expr {
           }
         } else if let first = firstVariantForm {
             par.failSyntax("struct field cannot follow a variant",
-              notes: (first, "first variant is here"))
+              notes: (first, "first variant is here."))
         } else {
+          if let first = firstLabeledForm, !typeField.hasLabel {
+            par.failSyntax("struct positional field cannot follow a labeled field.",
+              notes: (first, "first labeled field is here."))
+          }
+          if firstLabeledForm == nil && typeField.hasLabel {
+            firstLabeledForm = par.form
+          }
           fields.append(typeField)
         }
       }

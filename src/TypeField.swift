@@ -26,6 +26,8 @@ struct TypeField: Equatable, CustomStringConvertible {
     return "\(isVariant ? "-" : "")\(l)\(type)"
   }
 
+  var hasLabel: Bool { return label != nil }
+
   func accessorString(index: Int) -> String { return label ?? String(index) }
 
   func hostName(index: Int) -> String { return label ?? "_\(index)" }

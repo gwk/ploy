@@ -73,8 +73,8 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
       let variantEls = paren.variantEls
       if let variant = variantEls.first {
         if variantEls.count > 1 {
-          variantEls[1].failSyntax("destructuring does not support more than one variant",
-            notes: (variant.form, "first variant is here"))
+          variantEls[1].failSyntax("destructuring does not support more than one variant.",
+            notes: (variant.form, "first variant is here."))
         }
         destructure(val: val, pattern: variant)
       }
@@ -85,9 +85,9 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
     case .tag(let tag):
       tests.append(synthTagTest(tag: tag, val: val))
 
-    case .where_(let where_): where_.fatal("match where clauses not implemented")
+    case .where_(let where_): where_.fatal("match where clauses not implemented.")
 
-    default: pattern.failSyntax("match case expected pattern; received \(cond.form.syntaxName)")
+    default: pattern.failSyntax("match case expected pattern; received \(cond.form.syntaxName).")
     }
   }
 

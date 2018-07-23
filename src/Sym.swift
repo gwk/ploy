@@ -26,6 +26,6 @@ class Sym: Form { // symbol: `name`.
   }
 
   func failRedef(original: Sym?) -> Never {
-    failScope("redefinition of `\(name)`", notes: (original, "original definition here:"))
+    failScope("redefinition of `\(name)`", notes: (original, "original definition is here."))
   }
 }
