@@ -2,4 +2,4 @@
 this is essentially the union type `Any<<> <Int> <Int Int>>`;
 Dflt exists to prevent combinatorial explosion and provide clarity of intent.
 
-The parameter of a function signature is an 'Any' type; it accepts any of the member types.
+In this view, the parameter of a function signature is an 'Any' type; it accepts any of the member types.
