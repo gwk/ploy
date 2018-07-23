@@ -316,7 +316,9 @@ struct TypeCtx {
   mutating func resolveStructToStruct(_ rel: RelCon,
    act: (fields: [TypeField], variants: [TypeField]),
    exp: (fields: [TypeField], variants: [TypeField])) throws -> Bool {
-    if exp.fields.count != act.fields.count {
+
+    // Resolve fields.
+    if act.fields.count != exp.fields.count {
       let nFields = pluralize(act.fields.count, "field")
       throw rel.error({"\($0) struct has \(nFields); \($1) struct has \(exp.fields.count)"})
     }
@@ -330,6 +332,8 @@ struct TypeCtx {
         actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
         expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
     }
+
+    // Resolve variants.
     actual: for (actIdx, actVariant) in act.variants.enumerated() {
       let litActVariants = rel.act.litExpr?.parenVariantEls
       for (expIdx, expVariant) in exp.variants.enumerated() { // TODO: fix quadratic performance.
