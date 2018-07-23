@@ -1,6 +1,0 @@
-test/2/type/sub/struct-field-field-type.ploy:1:27-30: type error: annotated: actual type is not expected type. actual type: ()
-| s:(Int (Int Int)) = (0 (0 nil))
-                            ~~~
-test/2/type/sub/struct-field-field-type.ploy:1:13-16: note: expected type: Int
-| s:(Int (Int Int)) = (0 (0 nil))
-              ~~~

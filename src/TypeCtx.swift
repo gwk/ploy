@@ -318,19 +318,28 @@ struct TypeCtx {
    exp: (fields: [TypeField], variants: [TypeField])) throws -> Bool {
 
     // Resolve fields.
-    if act.fields.count != exp.fields.count {
-      let nFields = pluralize(act.fields.count, "field")
-      throw rel.error({"\($0) struct has \(nFields); \($1) struct has \(exp.fields.count)"})
-    }
     let litActFields = rel.act.litExpr?.parenFieldEls
     let litExpFields = rel.exp.litExpr?.parenFieldEls
-    for (index, (actField, expField)) in zip(act.fields, exp.fields).enumerated() {
-      if actField.label != nil && actField.label != expField.label {
-        throw rel.error({"\($0) field #\(index) has \(actField.labelMsg); \($1) field has \(expField.labelMsg)"})
+    var ai = 0
+    var hasLabel = false
+    for (ei, expField) in exp.fields.enumerated() {
+      assert(expField.hasLabel || !hasLabel)
+      hasLabel = expField.hasLabel
+      if ai == act.fields.count {
+        let nFields = pluralize(ai, "field")
+        throw rel.error({"\($0) struct has \(nFields); \($1) struct has \(exp.fields.count)"})
+      }
+      let actField = act.fields[ai]
+      if actField.hasLabel && actField.label != expField.label {
+        throw rel.error({"\($0) field is labeled `\(actField.label!)`; \($1) field is `\(expField.accessorString(index: ei))`"})
       }
       try resolveSub(rel,
-        actExpr: litActFields?[index], actType: actField.type, actDesc: "field \(index)",
-        expExpr: litExpFields?[index], expType: expField.type, expDesc: "field \(index)")
+        actExpr: litActFields?[ai], actType: actField.type, actDesc: "field \(ai)",
+        expExpr: litExpFields?[ei], expType: expField.type, expDesc: "field \(ei)")
+      ai += 1
+    }
+    if ai < act.fields.count && !act.fields[ai].hasLabel {
+      throw rel.error({"\($0) struct has extraneous positional field \(ai) not present in \($1) struct"})
     }
 
     // Resolve variants.

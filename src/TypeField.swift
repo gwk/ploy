@@ -7,14 +7,6 @@ struct TypeField: Equatable, CustomStringConvertible {
   let label: String?
   let type: Type
 
-  var labelMsg: String {
-    if let label = label {
-      return "label `\(label)`"
-     } else {
-       return "no label"
-     }
-  }
-
   init(isVariant: Bool, label: String?, type: Type) {
     self.isVariant = isVariant
     self.label = label
@@ -39,4 +31,12 @@ struct TypeField: Equatable, CustomStringConvertible {
   func transformType(_ transform: (Type)->Type) -> TypeField {
     return substitute(type: transform(type))
   }
+}
+
+
+func countUnlabeledFields(_ fields:[TypeField]) -> Int {
+  for (i, f) in fields.enumerated() {
+    if f.hasLabel { return i }
+  }
+  return fields.count
 }

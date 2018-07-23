@@ -1,0 +1,3 @@
+main = {
+  _:(Int Int Int) = (0 0)
+}

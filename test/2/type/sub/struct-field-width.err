@@ -1,6 +1,0 @@
-test/2/type/sub/struct-field-width.ploy:1:24-31: type error: annotated: actual struct has 3 fields; expected struct has 2. actual type: (Int Int Int)
-| s:(Int (Int Int)) = (0 (0 0 0))
-                         ~~~~~~~
-test/2/type/sub/struct-field-width.ploy:1:8-17: note: expected type: (Int Int)
-| s:(Int (Int Int)) = (0 (0 0 0))
-         ~~~~~~~~~
