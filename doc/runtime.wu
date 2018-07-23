@@ -1,0 +1,29 @@
+writeup v0
+© 2015 George King. Permission to use this file is granted in ploy/license.txt.
+
+
+# Ploy/JavaScript Runtime
+
+Ploy is designed to work with multiple backends, specifically JavaScript for the web and future native backends. I am taking care to avoid letting JavaScript details leak into the language design.
+
+
+# Objects
+
+Currently, Ploy objects compile to JS objects as follows:
+* Int: number
+* Flt: number
+* Str: string
+* Null: null
+* Functions: JS functions
+* Structs and Unions: JS classes
+* Interfaces: ?
+Structs and Unions are declared as JS types with opaque names of the form `C<N>`, where `<N>` is the type's global index.
+
+
+# Polyfunctions
+
+Polyfunctions compile into a JS function for each morph.
+
+# Generic Functions
+
+Generic functions compile into a single JS function.

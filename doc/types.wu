@@ -1,0 +1,36 @@
+writeup v0
+
+
+# Ploy's Type System
+
+
+Ploy's type system takes inspiration primarily from ML.
+
+
+# Primitives
+
+
+# Structs
+
+Structs in Ploy are composite types, comprised of any of three kinds of components, in order:
+* positional/unnamed/unlabeled fields (which are assigned 0-indexed integer names);
+* named/labeled fields;
+* variants.
+
+Thus, Ploy's struct type combines the traditional notions of tuples, records, and enums/datatypes/"tagged unions" into a single syntax.
+
+Positional fields must precede any named fields and variants; variants must appear after any fields.
+
+There is no such thing as a struct consisting of a single positional field; simply use the field type instead.
+
+Order is preserved for all components. However the conversion/subtyping rules allow reordering of named fields and variants. Additionally, positional fields can be converted into named fields.
+
+
+# Functions
+
+
+# Polyfunctions
+
+
+# Type Variables
+

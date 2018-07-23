@@ -1,0 +1,15 @@
+writeup v0
+
+
+# Subtyping in Ploy
+
+Subtyping in functional languages comes in different flavors:
+* functions: `f:Int -> Int? = fn Int? -> Int ...; # Contravariant domain, covariant return.`
+* records (width): `r:(x:Int y:Int) = (x:1 y:2 z:3) # Use wider type as narrower type by dropping extra fields.`
+* records (depth): `r:(x:Int? y:Int?) = (x:1 y:2) # Covariant field types.`
+* records (permutation): `r:(y:Int x:Int) = (x:1 y:2) # Reordering of fields.`
+* enums (variant): `maybe:(-none -some:Int) = -some:1 # Use a type with fewer variants than the destination type.`
+
+Subtyping also has various meanings in object-oriented programming, which are less relevant here:
+* class hierarchies, which conflate types with taxonomy and dispatch.
+* mutable fields, which complicate variance semantics.
