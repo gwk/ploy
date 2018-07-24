@@ -4152,7 +4152,6 @@ public struct Lexer: Sequence, IteratorProtocol {
 
       default: fatalError("Lexer.next: impossible state: \(state)")
       }
-
       if byte == 0x0a {
         source.newlinePositions.append(pos)
       }
