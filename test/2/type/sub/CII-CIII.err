@@ -1,4 +1,4 @@
-test/2/type/sub/CII-CIII.ploy:2:21-26: type error: annotated: actual struct has 2 fields; expected struct has 3. actual type: (Int Int)
+test/2/type/sub/CII-CIII.ploy:2:21-26: type error: annotated: actual struct has 2 positional fields; expected struct has 3. actual type: (Int Int)
 |   _:(Int Int Int) = (0 0)
                       ~~~~~
 test/2/type/sub/CII-CIII.ploy:2:5-18: note: expected type: (Int Int Int)

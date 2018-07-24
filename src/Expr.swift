@@ -144,16 +144,9 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     }
   }
 
-  var parenFieldEls: [Expr]? {
+  var parenMembers: [Expr]? {
     switch self {
-    case .paren(let paren): return paren.fieldEls
-    default: return nil
-    }
-  }
-
-  var parenVariantEls: [Expr]? {
-    switch self {
-    case .paren(let paren): return paren.variantEls
+    case .paren(let paren): return paren.els
     default: return nil
     }
   }
@@ -161,6 +154,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   var argLabel: String? {
     switch self {
     case .bind(let bind): return bind.place.sym.name
+    case .tag(let tag): return tag.sym.name
     default: return nil
     }
   }

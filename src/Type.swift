@@ -12,9 +12,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case polymorph(members: [Type])
     case prim
     case sig(dom: Type, ret: Type)
-    case struct_(fields: [TypeField], variants: [TypeField])
+    case struct_(posFields:[Type], labFields: [TypeLabField], variants: [TypeVariant])
     case var_(name: String)
-    case variantMember(variant: TypeField)
+    case variantMember(variant: TypeVariant)
   }
 
   static var allTypes: [String: Type] = [:]
@@ -114,14 +114,19 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars: dom.vars.union(ret.vars)))
   }
 
-  class func Struct(fields: [TypeField], variants: [TypeField]) -> Type {
-    let members = fields + variants
-    let descs = members.descriptions.joined(separator: " ")
-    let desc = "(\(descs))"
+  class func Struct(posFields: [Type], labFields: [TypeLabField], variants: [TypeVariant]) -> Type {
+    var descs = Array(posFields.descriptions)
+    descs.append(contentsOf: labFields.descriptions)
+    descs.append(contentsOf: variants.descriptions)
+    let desc_j = descs.descriptions.joined(separator: " ")
+    let desc = "(\(desc_j))"
+    var memberTypes = posFields
+    memberTypes.append(contentsOf: labFields.map{$0.type})
+    memberTypes.append(contentsOf: variants.map{$0.type})
     return memoize(desc, (
-      kind: .struct_(fields: fields, variants: variants),
-      frees: Set(members.flatMap { $0.type.frees }),
-      vars:  Set(members.flatMap { $0.type.vars })))
+      kind: .struct_(posFields: posFields, labFields: labFields, variants: variants),
+      frees: Set(memberTypes.flatMap { $0.frees }),
+      vars:  Set(memberTypes.flatMap { $0.vars })))
   }
 
   class func Var(_ name: String) -> Type {
@@ -130,10 +135,10 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   class func Variant(label: String, type: Type) -> Type {
-    return Struct(fields: [], variants: [TypeField(isVariant: true, label: label, type: type)])
+    return Struct(posFields: [], labFields: [], variants: [TypeVariant(label: label, type: type)])
   }
 
-  class func VariantMember(variant: TypeField) -> Type {
+  class func VariantMember(variant: TypeVariant) -> Type {
     let desc = "(\(variant)...)"
     return memoize(desc, (
       kind: .variantMember(variant: variant),
@@ -249,8 +254,11 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
     case .polymorph(let members): return .Polymorph(members.sortedMap{$0.transformLeaves(fn)})
     case .sig(let dom, let ret): return .Sig(dom: dom.transformLeaves(fn), ret: ret.transformLeaves(fn))
-    case .struct_(let fields, let variants):
-      return .Struct(fields: fields.map{$0.transformType(fn)}, variants: variants.map{$0.transformType(fn)})
+    case .struct_(let posFields, let labFields, let variants):
+      return .Struct(
+        posFields: posFields.map(fn),
+        labFields: labFields.map{$0.transformType(fn)},
+        variants: variants.map{$0.transformType(fn)})
     case .variantMember(let variant): return .VariantMember(variant: variant.transformType(fn))
     }
 
@@ -279,7 +287,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
 let typeNever = try! Type.Any_([]) // aka "Bottom type"; the type with no values.
 let typeEvery = try! Type.All([]) // aka "Top type"; the set of all objects.
-let typeNull = Type.Struct(fields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
+let typeNull = Type.Struct(posFields: [], labFields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
 
 let typeBool      = Type.Prim("Bool")
 let typeInt       = Type.Prim("Int")

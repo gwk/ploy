@@ -54,29 +54,32 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
         callee: synthPath(syn, "ROOT", "eq"),
         args: val.cloned, .litStr(litStr))) // sole use of litStr.
 
-    case .paren(let paren):
-      if paren.isScalarValue { // match syntax follows that of value constructors, as opposed to type declarations.
+    case .paren(let paren): // Match syntax follows that of literal value constructors, as opposed to type declarations.
+      if paren.isScalarValue {
         destructure(val: val, pattern: paren.els[0])
         return
       }
-      // note the difference in access for fields versus the sole variant:
-      // we iterate over fields and decompose `val` with `SubAcc`;
-      // for the optional variant we recurse into `destructure`, passing the whole `val`.
-      for (i, el) in paren.fieldEls.enumerated() {
-        var elVal: Expr
-        switch el {
-        case .bind: elVal = val.cloned // pass the whole val; bind case above handles subAcc.
-        default: elVal = subAcc(accessor: .litNum(LitNum(el.syn, val: i)), val: val)
+      // Note the difference in access for fields versus the sole variant:
+      // For fields, decompose `val` with `subAcc`.
+      // For the optional variant, recurse into `destructure`, passing the whole `val`,
+      // which then gets destructured by the `.bind` or `.tag` case.
+      var prevVariant: Expr? = nil
+      for (i, el) in paren.els.enumerated() {
+        if el.isTagged { // Variant.
+          if let prevVariant = prevVariant {
+            el.failSyntax("destructuring does not support more than one variant.",
+              notes: (prevVariant.form, "first variant is here."))
+          }
+          prevVariant = el
+          destructure(val: val, pattern: el)
+        } else { // Field.
+          switch el {
+          case .bind:
+            destructure(val: val.cloned, pattern: el) // Pass the whole val, which then gets destructured appropriately.
+          default:
+            destructure(val:subAcc(accessor: .litNum(LitNum(el.syn, val: i)), val: val), pattern: el)
+          }
         }
-        destructure(val: elVal, pattern: el)
-      }
-      let variantEls = paren.variantEls
-      if let variant = variantEls.first {
-        if variantEls.count > 1 {
-          variantEls[1].failSyntax("destructuring does not support more than one variant.",
-            notes: (variant.form, "first variant is here."))
-        }
-        destructure(val: val, pattern: variant)
       }
 
     case .sym(let sym):

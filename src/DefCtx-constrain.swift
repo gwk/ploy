@@ -148,28 +148,32 @@ extension DefCtx {
       if paren.isScalarValue {
         return genConstraints(scope, expr: paren.els[0])
       }
-      var fields = [TypeField]()
-      var variants = [TypeField]()
+      var posFields = [Type]()
+      var labFields = [TypeLabField]()
+      var variants = [TypeVariant]()
       for el in paren.els {
-        let member = self.typeFieldForArg(scope, arg: el)
-        if member.isVariant {
+        switch self.typeMemberForArg(scope, arg: el) {
+        case .variant(let variant):
           if !variants.isEmpty {
             el.failSyntax("struct literal cannot contain multiple tagged elements.")
           }
-          variants.append(member)
-        } else {
+          variants.append(variant)
+        case .posField(let posField):
+          if !labFields.isEmpty {
+            el.failSyntax("struct literal positional field cannot follow a labeled field.")
+          }
           if !variants.isEmpty {
-            el.failSyntax("struct literal field cannot follow a variant.")
+            el.failSyntax("struct literal positional field cannot follow a variant.")
           }
-          if let prev = fields.last {
-            if prev.hasLabel && !member.hasLabel {
-              el.failSyntax("struct literal positional field cannot follow a labeled field.")
-            }
+          posFields.append(posField)
+        case .labField(let labField):
+          if !variants.isEmpty {
+            el.failSyntax("struct literal labeled field cannot follow a variant.")
           }
-          fields.append(member)
+          labFields.append(labField)
         }
       }
-      return Type.Struct(fields: fields, variants: variants)
+      return Type.Struct(posFields: posFields, labFields: labFields, variants: variants)
 
     case .path, .sym:
       return instantiate(genConstraintsForRef(scope, expr: expr))
@@ -190,7 +194,7 @@ extension DefCtx {
     case .tagTest(let tagTest):
       let expr = tagTest.expr
       let actType = genConstraints(scope, expr: expr)
-      let expVariant = TypeField(isVariant: true, label: tagTest.tag.sym.name, type: typeCtx.addFreeType())
+      let expVariant = TypeVariant(label: tagTest.tag.sym.name, type: typeCtx.addFreeType())
       let expType = Type.VariantMember(variant: expVariant)
       constrain(actExpr: expr, actType: actType, expExpr: .tag(tagTest.tag), expType: expType, "tag test")
       return typeBool
@@ -226,20 +230,21 @@ extension DefCtx {
   }
 
 
-  func typeFieldForArg(_ scope: LocalScope, arg: Expr) -> TypeField {
-    var isVariant = false
-    let type: Type
+  func typeMemberForArg(_ scope: LocalScope, arg: Expr) -> TypeMember {
     switch arg {
     case .bind(let bind):
-      isVariant = bind.place.isTag
-      type = genConstraints(scope, expr: bind.val)
+      let label = arg.argLabel!
+      let type = genConstraints(scope, expr: bind.val)
+      if bind.place.isTag {
+        return .variant(TypeVariant(label: label, type: type))
+      } else {
+        return .labField(TypeLabField(label: label, type: type))
+      }
     case .tag:
-      isVariant = true
-      type = typeNull
+      return .variant(TypeVariant(label: arg.argLabel!, type: typeNull))
     default:
-      type = genConstraints(scope, expr: arg)
+      return .posField(genConstraints(scope, expr: arg))
     }
-    return TypeField(isVariant: isVariant, label: arg.argLabel, type: type)
   }
 
 
@@ -296,19 +301,15 @@ extension DefCtx {
     case .polymorph(let members): return .Polymorph(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
     case .sig(let dom, let ret):
       return .Sig(dom: instantiate(dom, varsToFrees: &varsToFrees), ret: instantiate(ret, varsToFrees: &varsToFrees))
-    case .struct_(let fields, let variants):
+    case .struct_(let posFields, let labFields, let variants):
       return .Struct(
-        fields: instantiateFields(fields, varsToFrees: &varsToFrees),
-        variants: instantiateFields(variants, varsToFrees: &varsToFrees))
+        posFields: posFields.map { self.instantiate($0, varsToFrees: &varsToFrees) },
+        labFields: labFields.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) },
+        variants: variants.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) })
     case .var_(let name):
       return varsToFrees.getOrInsert(name, dflt: { () in self.typeCtx.addFreeType() })
     case .variantMember(let variant):
       return .VariantMember(variant: variant.substitute(type: instantiate(variant.type, varsToFrees: &varsToFrees)))
     }
-  }
-
-
-  func instantiateFields(_ fields: [TypeField], varsToFrees: inout [String:Type]) -> [TypeField] {
-    return fields.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) }
   }
 }

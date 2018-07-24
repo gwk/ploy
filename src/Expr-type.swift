@@ -17,32 +17,40 @@ extension Expr {
       if paren.isScalarType {
         return paren.els[0].type(scope, subj)
       }
-      var fields = [TypeField]()
-      var variants = [TypeField]()
+      var posFields = [Type]()
+      var labFields = [TypeLabField]()
+      var variants = [TypeVariant]()
       var firstLabeledForm: Form? = nil
       var firstVariantForm: Form? = nil
       for par in paren.els {
-        let typeField = par.getTypeField(scope)
-        if typeField.isVariant {
-          variants.append(typeField)
+        switch par.getTypeMember(scope) {
+        case .variant(let variant):
+          variants.append(variant)
           if firstVariantForm == nil {
             firstVariantForm = par.form
           }
-        } else if let first = firstVariantForm {
-            par.failSyntax("struct field cannot follow a variant.",
+        case .posField(let posField):
+          if let first = firstVariantForm {
+            par.failSyntax("struct positional field cannot follow a variant.",
               notes: (first, "first variant is here."))
-        } else {
-          if let first = firstLabeledForm, !typeField.hasLabel {
+          }
+          if let first = firstLabeledForm {
             par.failSyntax("struct positional field cannot follow a labeled field.",
               notes: (first, "first labeled field is here."))
           }
-          if firstLabeledForm == nil && typeField.hasLabel {
+          posFields.append(posField)
+        case .labField(let labField):
+          if let first = firstVariantForm {
+            par.failSyntax("struct labeled field cannot follow a variant.",
+              notes: (first, "first variant is here."))
+          }
+          labFields.append(labField)
+          if firstLabeledForm == nil {
             firstLabeledForm = par.form
           }
-          fields.append(typeField)
         }
       }
-      return Type.Struct(fields: fields, variants: variants)
+      return Type.Struct(posFields: posFields, labFields: labFields, variants: variants)
 
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
@@ -75,66 +83,61 @@ extension Expr {
   }
 
 
-  func getTypeField(_ scope: Scope) -> TypeField {
+  func getTypeMember(_ scope: Scope) -> TypeMember {
     var isVariant = false
     var label: String? = nil
     var type = typeVoid
 
-    func handle(ann: Ann) {
+    func handle(ann: Ann) -> TypeMember {
       switch ann.expr {
       case .sym(let sym):
-        label = sym.name
-        type = ann.typeExpr.type(scope, "parameter type")
+        return .labField(TypeLabField(label: sym.name, type: ann.typeExpr.type(scope, "parameter type"))) // TODO: change to "field type".
       case .tag(let tag):
-        isVariant = true
-        label = tag.sym.name
-        type = ann.typeExpr.type(scope, "variant type")
+        return .variant(TypeVariant(label: tag.sym.name, type: ann.typeExpr.type(scope, "variant type")))
       default: ann.expr.failSyntax("annotated parameter requires a symbol or tag label.")
       }
     }
 
     switch self {
 
-    case .ann(let ann): handle(ann: ann)
+    case .ann(let ann): return handle(ann: ann)
 
     case .bind(let bind):
       switch bind.place {
       case .ann(let ann):
-        handle(ann: ann)
+        let _ = handle(ann: ann)
         fatalError("TODO: handle default value.")
       case .sym(let sym): // infer type from default expression.
-        label = sym.name
-        type = typeVoid // TODO
+        let _ = sym.name
         fatalError("TODO: handle default value.")
       case .tag(let tag): // infer type from default expression.
-        label = tag.sym.name
-        type = typeVoid // TODO
+        let _ = tag.sym.name
         fatalError("TODO: handle default value.")
       }
 
     case .tag(let tag): // bare tag; no payload.
-      isVariant = true
-      label = tag.sym.name
-      type = typeNull
+      return .variant(TypeVariant(label: tag.sym.name, type: typeNull))
 
     default:
-      type = self.type(scope, "parameter type")
+      return .posField(self.type(scope, "parameter type"))
     }
-    return TypeField(isVariant: isVariant, label: label, type: type)
   }
 
 
   func reify(_ scope: Scope, type: Type, typeArgs: TypeArgs) -> Type {
-    // Note: self is the "abstract" value or type expression.
+    // Note: self is the "abstract" value-expr or type-expr.
     var substitutions: [String:Type] = [:]
     for arg in typeArgs.exprs {
-      let typeField = arg.typeFieldForTypeArg(scope)
-      if let label = typeField.label {
-        substitutions.insertNewOrElse(label, value: typeField.type) {
+      switch arg.typeMemberForTypeArg(scope) {
+      case .posField:
+        arg.form.failType("positional arguments for types are not yet supported.")
+      case .labField(let labField):
+        let label = labField.label
+        substitutions.insertNewOrElse(label, value: labField.type) {
           arg.form.failType("type argument has duplicate label: `\(label)`")
         }
-      } else {
-        arg.form.failType("unlabeled type arguments not yet supported.")
+      case .variant:
+        arg.form.failType("variant arguments for types are not supported.") // Possible?
       }
     }
     // Check that substitution is possible first, because recursive substitution process cannot.
@@ -148,14 +151,12 @@ extension Expr {
   }
 
 
-  func typeFieldForTypeArg(_ scope: Scope) -> TypeField {
-    let type: Type
+  func typeMemberForTypeArg(_ scope: Scope) -> TypeMember {
     switch self {
     case .bind(let bind):
-      type = bind.val.type(scope, "type argument")
+      return .labField(TypeLabField(label: self.argLabel!, type: bind.val.type(scope, "type argument")))
     default:
-      type = self.type(scope, "type argument")
+      return .posField(self.type(scope, "type argument"))
     }
-    return TypeField(isVariant: false, label: self.argLabel, type: type)
   }
 }

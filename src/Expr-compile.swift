@@ -133,12 +133,15 @@ extension Expr {
       } else if type == typeNull {
         em.str(indent, "null")
       } else {
-        guard case .struct_(let fields, let variants) = type.kind else { paren.fatal("expected struct type") }
+        guard case .struct_(let posFields, let labFields, let variants) = type.kind else { paren.fatal("expected struct type") }
         ctx.globalCtx.addConstructor(type: type)
         em.str(indent, "(new $C\(type.globalIndex)(") // bling: $C: constructor.
         var argIndex = 0
-        for (i, field) in fields.enumerated() {
-          compileStructField(ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
+        for (i, fieldType) in posFields.enumerated() {
+          compileStructPositionalField(ctx, em, indent, paren: paren, fieldType: fieldType, parIndex: i, argIndex: &argIndex)
+        }
+        for (i, field) in labFields.enumerated() {
+          compileStructLabeledField(ctx, em, indent, paren: paren, field: field, parIndex: i, argIndex: &argIndex)
         }
         if !variants.isEmpty {
           assert(variants.count == 1)
@@ -228,23 +231,28 @@ func compileBody(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, body: Body, type: 
 }
 
 
-func compileStructField(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, paren: Paren, field: TypeField, parIndex: Int, argIndex: inout Int) {
+func compileStructPositionalField(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, paren: Paren, fieldType: Type, parIndex: Int, argIndex: inout Int) {
+  if argIndex < paren.els.count {
+    let arg = paren.els[argIndex]
+    if case .bind = arg { arg.form.fatal("expected positional field; found bind.") }
+    arg.compile(ctx, em, indent + 2, exp: fieldType, isTail: false)
+    em.append(",")
+    argIndex += 1
+  } else { // TODO: support default arguments.
+    paren.fatal("missing argument for parameter")
+  }
+}
+
+
+func compileStructLabeledField(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, paren: Paren, field: TypeLabField, parIndex: Int, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
     let val: Expr
     switch arg {
-
     case .bind(let bind):
       let argLabel = bind.place.sym.name
-      if let label = field.label {
-        if argLabel != label {
-          bind.place.sym.fatal("argument label does not match type field label `\(label)`")
-        }
-      } else {
-        bind.place.sym.fatal("argument label does not match unlabeled type field")
-      }
+      if argLabel != field.label { bind.place.sym.fatal("argument label does not match type field label `\(field.label)`") }
       val = bind.val
-
     default: val = arg
     }
     val.compile(ctx, em, indent + 2, exp: field.type, isTail: false)
@@ -256,12 +264,11 @@ func compileStructField(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, paren: Pare
 }
 
 
-func compileStructVariant(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, expr: Expr, variant: TypeField) {
-  guard case .bind(let bind) = expr else { fatalError() }
-  guard case .tag(let tag) = bind.place else { fatalError() }
-  guard let label = variant.label else { fatalError() }
-  if tag.sym.name != label {
-    tag.sym.fatal("morph constructor label does not match type's variant label `\(label)`")
+func compileStructVariant(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, expr: Expr, variant: TypeVariant) {
+  guard case .bind(let bind) = expr else { fatalError() } // TODO: support bare tag.
+  guard case .tag(let tag) = bind.place else { fatalError() } // TODO: skip this and use variant.hostName.
+  if tag.sym.name != variant.label {
+    tag.sym.fatal("morph constructor label does not match type's variant label `\(variant.label)`")
   }
   em.str(indent + 1, "'\(tag.sym.hostName)',")
   bind.val.compile(ctx, em, indent + 2, exp: variant.type, isTail: false)

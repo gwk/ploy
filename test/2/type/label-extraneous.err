@@ -1,4 +1,4 @@
-test/2/type/label-extraneous.ploy:3:14-23: type error: call argument field is labeled `i`; domain field is `0`. argument type: (i:Int j:Int)
+test/2/type/label-extraneous.ploy:3:14-23: type error: call argument struct has 0 positional fields; domain struct has 2. argument type: (i:Int j:Int)
 | main = exit.f(i=0 j=0)
                ~~~~~~~~~
 test/2/type/label-extraneous.ploy:3:13-14: note: domain type: (Int Int)

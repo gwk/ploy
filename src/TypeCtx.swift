@@ -31,10 +31,11 @@ struct TypeCtx {
       return try! Type.All(members.map { self.resolved(type: $0) })
     case .any(let members):
       return try! Type.Any_(members.map { self.resolved(type: $0) })
-    case .struct_(let fields, let variants):
+    case .struct_(let posFields, let labFields, let variants):
       return Type.Struct(
-        fields: fields.map() { self.resolved(par: $0) },
-        variants: variants.map() { self.resolved(par: $0) })
+        posFields: posFields.map() { self.resolved(type: $0) },
+        labFields: labFields.map() { TypeLabField(label: $0.label, type: self.resolved(type: $0.type)) },
+        variants: variants.map() { TypeVariant(label: $0.label, type: self.resolved(type: $0.type)) })
     case .free(let freeIndex):
       if let substitution = freeUnifications[freeIndex] {
         return resolved(type: substitution)
@@ -42,15 +43,9 @@ struct TypeCtx {
     case .sig(let dom, let ret):
       return Type.Sig(dom: resolved(type: dom), ret: resolved(type: ret))
     case .variantMember(let variant):
-      return Type.VariantMember(variant: resolved(par: variant))
+      return Type.VariantMember(variant: TypeVariant(label: variant.label, type: resolved(type: variant.type)))
     default: fatalError("type kind cannot contain frees: \(type)")
     }
-  }
-
-
-  private func resolved(par: TypeField) -> TypeField {
-    let type = resolved(type: par.type)
-    return TypeField(isVariant: par.isVariant, label: par.label, type: type)
   }
 
 
@@ -73,11 +68,11 @@ struct TypeCtx {
     let accessor = prop.acc.accessor
 
     switch accesseeType.kind {
-    case .struct_(let fields, let variants):
+    case .struct_(let posFields, let labFields, let variants):
       if case .untag(let tag) = accessor {
         let name = tag.sym.name
         for variant in variants {
-          if variant.label! == name {
+          if variant.label == name {
             try resolveSub(constraint: .rel(RelCon(
               act: Side(.act, expr: .acc(prop.acc), type: variant.type),
               exp: Side(.exp, expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
@@ -87,8 +82,17 @@ struct TypeCtx {
         }
         throw prop.error("accessee has no variant named `\(name)`")
       } else {
-        for (i, field) in fields.enumerated() {
-          if field.accessorString(index: i) == accessor.accessorString {
+        for (i, fieldType) in posFields.enumerated() {
+          if String(i) == accessor.accessorString {
+            try resolveSub(constraint: .rel(RelCon(
+              act: Side(.act, expr: .acc(prop.acc), type: fieldType),
+              exp: Side(.exp, expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
+              desc: "access")))
+            return true
+          }
+        }
+        for field in labFields {
+          if field.accessorString == accessor.accessorString {
             try resolveSub(constraint: .rel(RelCon(
               act: Side(.act, expr: .acc(prop.acc), type: field.type),
               exp: Side(.exp, expr: .acc(prop.acc), type: accType), // originally a free, but may have resolved.
@@ -177,7 +181,7 @@ struct TypeCtx {
       }
       return try resolveStructToStruct(rel, act: actFV, exp: expFV)
 
-    case (.struct_(_, let actVariants), .variantMember(let expVariant)):
+    case (.struct_(_, _, let actVariants), .variantMember(let expVariant)):
       return try resolveStructToVariantMember(rel, actVariants: actVariants, expVariant: expVariant)
 
     default: throw rel.error({"\($0) type is not \($1) type"})
@@ -314,53 +318,92 @@ struct TypeCtx {
 
 
   mutating func resolveStructToStruct(_ rel: RelCon,
-   act: (fields: [TypeField], variants: [TypeField]),
-   exp: (fields: [TypeField], variants: [TypeField])) throws -> Bool {
+   act: (posFields: [Type], labFields: [TypeLabField], variants: [TypeVariant]),
+   exp: (posFields: [Type], labFields: [TypeLabField], variants: [TypeVariant])) throws -> Bool {
 
-    // Resolve fields.
-    let litActFields = rel.act.litExpr?.parenFieldEls
-    let litExpFields = rel.exp.litExpr?.parenFieldEls
+    let actLitMembers = rel.act.litExpr?.parenMembers
+    let expLitMembers = rel.exp.litExpr?.parenMembers
     var ai = 0
-    var hasLabel = false
-    for (ei, expField) in exp.fields.enumerated() {
-      assert(expField.hasLabel || !hasLabel)
-      hasLabel = expField.hasLabel
-      if ai == act.fields.count {
-        let nFields = pluralize(ai, "field")
-        throw rel.error({"\($0) struct has \(nFields); \($1) struct has \(exp.fields.count)"})
+    var ei = 0
+
+    let epc = exp.posFields.count
+    let apc = act.posFields.count
+    let elc = exp.labFields.count
+    let alc = act.labFields.count
+    let efc = epc + elc
+    let afc = apc + alc
+
+    // Positional fields.
+    while ei < epc {
+      let expType = exp.posFields[ei]
+      if ai == apc {
+        let act_pos_fields = pluralize(apc, "positional field")
+        throw rel.error({"\($0) struct has \(act_pos_fields); \($1) struct has \(epc)"})
       }
-      let actField = act.fields[ai]
-      if actField.hasLabel && actField.label != expField.label {
-        throw rel.error({"\($0) field is labeled `\(actField.label!)`; \($1) field is `\(expField.accessorString(index: ei))`"})
-      }
+      let actType = act.posFields[ai]
       try resolveSub(rel,
-        actExpr: litActFields?[ai], actType: actField.type, actDesc: "field \(ai)",
-        expExpr: litExpFields?[ei], expType: expField.type, expDesc: "field \(ei)")
+        actExpr: actLitMembers?[ai], actType: actType, actDesc: "field \(ai)",
+        expExpr: expLitMembers?[ei], expType: expType, expDesc: "field \(ei)")
+      ei += 1
       ai += 1
     }
-    if ai < act.fields.count && !act.fields[ai].hasLabel {
+
+    // Labeled Fields.
+    while ei < efc {
+      let expField = exp.labFields[ei-epc]
+      let labelDesc = "field `\(expField.label)`"
+      let actType: Type
+      let actDesc: String
+      if ai == afc {
+          throw rel.error({"\($0) struct is missing \($1) field `\(expField.label)`"})
+      } else if ai >= apc { // Actual labeled field; check that labels match.
+        let actField = act.labFields[ai-apc]
+        if actField.label != expField.label {
+          throw rel.error({"\($0) field is labeled `\(actField.label)`; \($1) field is labeled `\(expField.label)`"})
+        }
+        actType = actField.type
+        actDesc = labelDesc
+      } else { // Actual positional field for expected labeled field.
+        actType = act.posFields[ai]
+        actDesc = "field \(ai)"
+      }
+      try resolveSub(rel,
+        actExpr: actLitMembers?[ai], actType: actType, actDesc: actDesc,
+        expExpr: expLitMembers?[ei], expType: expField.type, expDesc: labelDesc)
+      ei += 1
+      ai += 1
+    }
+    if ai < apc {
       throw rel.error({"\($0) struct has extraneous positional field \(ai) not present in \($1) struct"})
     }
+    if ai < afc {
+      let actLabel = exp.labFields[ai-apc].label
+      throw rel.error({"\($0) struct has extraneous labeled field `\(actLabel)` not present in \($1) struct"})
+    }
 
-    // Resolve variants.
-    actual: for (actIdx, actVariant) in act.variants.enumerated() {
-      let litActVariants = rel.act.litExpr?.parenVariantEls
-      for (expIdx, expVariant) in exp.variants.enumerated() { // TODO: fix quadratic performance.
-        if expVariant.label == actVariant.label {
-          let litExpVariants = rel.exp.litExpr?.parenVariantEls
-          try resolveSub(rel,
-            actExpr: litActVariants?[actIdx], actType: actVariant.type, actDesc: "variant \(actIdx)",
-            expExpr: litExpVariants?[expIdx], expType: expVariant.type, expDesc: "variant \(expIdx)")
-            continue actual
-        }
+    // Variants.
+    let expVariants:[String:(Int, TypeVariant)] = Dictionary(uniqueKeysWithValues: exp.variants.enumerated().map{
+      ($0.1.label, (epc + elc + $0.0, $0.1))})
+
+    while ai < afc + act.variants.count {
+      let avi = ai - afc
+      assertLT(avi, act.variants.count)
+      let actVariant = act.variants[avi]
+      let label = actVariant.label
+      guard let (ei, expVariant) = expVariants[label] else {
+        throw rel.error({"\($0) variant tag not found in \($1) variants: `-\(label)`"})
       }
-      throw rel.error({"\($0) variant tag not found in \($1) variants: `-\(actVariant.label!)`"})
+      let desc = "variant `-\(label)`"
+      try resolveSub(rel,
+        actExpr: actLitMembers?[ai], actType: actVariant.type, actDesc: desc,
+        expExpr: expLitMembers?[ei], expType: expVariant.type, expDesc: desc)
+      ai += 1
     }
     return true
   }
 
 
-  mutating func resolveStructToVariantMember(_ rel: RelCon, actVariants: [TypeField], expVariant: TypeField) throws -> Bool {
+  mutating func resolveStructToVariantMember(_ rel: RelCon, actVariants: [TypeVariant], expVariant: TypeVariant) throws -> Bool {
     for actVariant in actVariants {
       if actVariant.label == expVariant.label {
         try resolveSub(rel,
@@ -369,7 +412,7 @@ struct TypeCtx {
       return true
       }
     }
-    throw rel.error({"\($0) variants do not contain \($1) variant label: `-\(expVariant.label!)`"})
+    throw rel.error({"\($0) variants do not contain \($1) variant label: `-\(expVariant.label)`"})
   }
 
 

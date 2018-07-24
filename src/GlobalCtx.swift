@@ -123,19 +123,48 @@ class GlobalCtx {
 
 
   func emitStructToStruct(_ em: Emitter, castIdx: Int,
-   orig: (fields: [TypeField], variants: [TypeField]),
-   cast: (fields: [TypeField], variants: [TypeField])) {
-    assert(cast.fields.count + cast.variants.count > 0) // conversion to nil is explictly disallowed.
-    assert(orig.fields.count == cast.fields.count)
+   orig: (posFields:[Type], labFields: [TypeLabField], variants: [TypeVariant]),
+   cast: (posFields:[Type], labFields: [TypeLabField], variants: [TypeVariant])) {
+
+    assert(cast.posFields.count + cast.labFields.count + cast.variants.count > 0) // conversion to nil is explictly disallowed.
     em.str(2, "(new $C\(castIdx)(") // bling: $C: constructor.
-    for (i, (o, c)) in zip(orig.fields, cast.fields).enumerated() {
-      let oName = o.hostName(index: i)
-      if let fieldConv = conversionFor(orig: o.type, cast: c.type) {
+
+    let opc = orig.posFields.count
+    let olc = orig.labFields.count
+    var oi = 0
+
+    for cType in cast.posFields {
+      assertLT(oi, opc)
+      let oType = orig.posFields[oi]
+      let oName = posFieldHostName(index: oi)
+      oi += 1
+      if let fieldConv = conversionFor(orig: oType, cast: cType) {
         em.str(4, "\(fieldConv.hostName)($o.\(oName)),") // bling: $o: original.
       } else {
         em.str(4, "$o.\(oName),") // bling: $o: original.
       }
     }
+
+    for c in cast.labFields {
+      let oName: String
+      let oType: Type
+      if oi < opc {
+        oType = orig.posFields[oi]
+        oName = posFieldHostName(index: oi)
+      } else {
+        assert(oi < opc + olc)
+        let o = orig.labFields[oi-opc]
+        oType = o.type
+        oName = o.hostName
+      }
+      oi += 1
+      if let fieldConv = conversionFor(orig: oType, cast: c.type) {
+        em.str(4, "\(fieldConv.hostName)($o.\(oName)),") // bling: $o: original.
+      } else {
+        em.str(4, "$o.\(oName),") // bling: $o: original.
+      }
+    }
+
     if !cast.variants.isEmpty {
       assert(!orig.variants.isEmpty)
       em.str(4, "$o.$v, $o[$o.$v]") // bling: $o: original; $v: variant tag.
@@ -165,8 +194,8 @@ class GlobalCtx {
     em.str(0, "class $C\(type.globalIndex) {") // bling: $C: constructor.
     switch type.kind {
 
-    case .struct_(let fields, let variants):
-      emitStructConstructor(em, type: type, fields: fields, variants: variants)
+    case .struct_(let posFields, let labFields, let variants):
+      emitStructConstructor(em, type: type, posFields: posFields, labFields: labFields, variants: variants)
 
     case .any(let members):
       emitUnionConstructor(em, type: type, members: members)
@@ -178,14 +207,21 @@ class GlobalCtx {
   }
 
 
-  func emitStructConstructor(_ em: Emitter, type: Type, fields: [TypeField], variants: [TypeField]) {
-    assert(fields.count + variants.count > 0) // nil is not constructed; represented by JS "null".
-    let fieldParNames: [String] = fields.enumerated().map {$1.hostName(index: $0)}
+  func emitStructConstructor(_ em: Emitter, type: Type, posFields: [Type], labFields: [TypeLabField], variants: [TypeVariant]) {
+    assert(posFields.count + labFields.count + variants.count > 0) // nil is not constructed; represented by JS "null".
+
+    let fieldParNames: [String] = posFields.indices.map{posFieldHostName(index: $0)} + labFields.map {$0.hostName}
+
     let fieldPars: String = fieldParNames.joined(separator: ", ")
     let variantPars = variants.isEmpty ? "" : "$v, $vv" // bling: $v: variant tag; $vv: variant value parameter.
     em.str(2, "constructor(\(fieldPars)\(variantPars)) { // \(type)")
-    for (i, f) in fields.enumerated() {
-      let n = f.hostName(index: i)
+
+    for i in posFields.indices {
+      let n = posFieldHostName(index: i)
+      em.str(4, "this.\(n) = \(n);")
+    }
+    for f in labFields {
+      let n = f.hostName
       em.str(4, "this.\(n) = \(n);")
     }
     if !variants.isEmpty {

@@ -1,4 +1,4 @@
-test/2/type/sub/CICIII-CICII.ploy:3:26-33: type error: annotated: actual struct has extraneous positional field #2 not present in expected struct. actual type: (Int Int Int)
+test/2/type/sub/CICIII-CICII.ploy:3:26-33: type error: annotated: actual struct has extraneous positional field 2 not present in expected struct. actual type: (Int Int Int)
 |   _:(Int (Int Int)) = (0 (0 0 0))
                            ~~~~~~~
 test/2/type/sub/CICIII-CICII.ploy:3:10-19: note: expected type: (Int Int)
