@@ -8,8 +8,8 @@ _fs = host_val _Fs "$require('fs')";
 _writeSync = host_val _WriteSync "FS___fs.writeSync" _fs;
 
 extensible write; // TODO: constraints.
-write += host_val (File Bool)%Void "function($) { FS___writeSync($._0, $._1) }" _writeSync;
-write += host_val (File Int)%Void  "function($) { FS___writeSync($._0, $._1) }" _writeSync;
-write += host_val (File Str)%Void  "function($) { FS___writeSync($._0, $._1) }" _writeSync;
+write += host_val (File Bool)%Void "function($) { $assert_bool($._1); FS___writeSync($._0, $._1) }" _writeSync;
+write += host_val (File Int)%Void  "function($) { $assert_int($._1);  FS___writeSync($._0, $._1) }" _writeSync;
+write += host_val (File Str)%Void  "function($) { $assert_str($._1);  FS___writeSync($._0, $._1) }" _writeSync;
 
 ;

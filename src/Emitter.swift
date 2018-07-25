@@ -50,6 +50,9 @@ func compileProgram(mainPath: Path, includePaths: [Path], mainSpace: MainSpace, 
   ctx.writeL("const $g = global;") // bling: $g: alias that cannot be shadowed.
   ctx.writeL("const $require = require;") // bling: $require: alias that cannot be shadowed.
   ctx.writeL("const $lazy_sentinel = ()=>{ throw new Error('PLOY RUNTIME ERROR: lazy value init recursed.') };")
+  ctx.writeL("const $assert_bool = $=>{ let t = (typeof $); if (t != 'boolean') { throw new Error('expected boolean; received: ' + t)}};")
+  ctx.writeL("const $assert_int  = $=>{ let t = (typeof $); if (t != 'number')  { throw new Error('expected number;  received: ' + t)}};")
+  ctx.writeL("const $assert_str  = $=>{ let t = (typeof $); if (t != 'string')  { throw new Error('expected string;  received: ' + t)}};")
 
   for path in includePaths {
     let name = path.name
