@@ -93,6 +93,16 @@ extension Expr {
   }
 
 
+  func typeMemberForReification(_ scope: Scope) -> TypeMember {
+    switch self {
+    case .bind(let bind):
+      return .labField(TypeLabField(label: self.argLabel!, type: bind.val.type(scope, "type argument")))
+    default:
+      return .posField(self.type(scope, "type argument"))
+    }
+  }
+
+
   func reify(_ scope: Scope, type: Type, typeArgs: TypeArgs) -> Type {
     // Note: self is the "abstract" value-expr or type-expr.
     var substitutions: [String:Type] = [:]
@@ -117,16 +127,6 @@ extension Expr {
       }
     }
     return type.reify(substitutions)
-  }
-
-
-  func typeMemberForReification(_ scope: Scope) -> TypeMember {
-    switch self {
-    case .bind(let bind):
-      return .labField(TypeLabField(label: self.argLabel!, type: bind.val.type(scope, "type argument")))
-    default:
-      return .posField(self.type(scope, "type argument"))
-    }
   }
 }
 
