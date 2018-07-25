@@ -1,0 +1,56 @@
+
+CII =: (Int Int)
+cII:CII = (0 1)
+
+CIII =: (Int Int Int)
+cIII:CIII = (0 1 2)
+
+CaI =: (a:Int)
+caI:CaI = (a=0)
+
+CIaI =: (Int a:Int)
+cIaI:CIaI = (0 a=0)
+
+CaIbI =: (a:Int b:Int)
+caIbI:CaIbI = (a=0 b=1)
+
+CbIaI =: (b:Int a:Int)
+cbIaI:CbIaI = (b=1 a=0)
+
+CaIcI =: (a:Int c:Int)
+caIcI:CaIcI = (a=0 c=2)
+
+CaIbIcI =: (a:Int b:Int c:Int)
+caIbIcI:CaIbIcI = (a=0 b=1 c=2)
+
+CaCxI =: (a:(x:Int))
+caCxI:CaCxI = (a=(x=7))
+
+CaIbCxI =: (a:Int b:(x:Int))
+caIbCxI:CaIbCxI = (a=0 b=(x=7))
+
+
+main = {
+  { c:CIaI = cII // Positional to labeled field.
+    assert.eq(0@c 0)
+    assert.eq(a@c 1) }
+
+  // Narrowing.
+
+  //{ c:CII = cIII // Drop positional field.
+  //  assert.eq(0@c 0)
+  //  assert.eq(1@c 1) }
+
+  //{ c:CIaI = cIII // Positional to labeled field, and drop positional field.
+  //  assert.eq(0@c 0)
+  //  assert.eq(a@c 1) }
+
+  //{ c:CaIcI = caIbIcI // Drop middle labeled field.
+  //  assert.eq(a@c 0)
+  //  assert.eq(c@c 2) }
+
+  // Permutation.
+  //{ c:CbIaI = caIbI
+  //  assert.eq(b@c 0)
+  //  assert.eq(a@c 1) }
+}

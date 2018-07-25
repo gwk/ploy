@@ -3,13 +3,37 @@ writeup v0
 
 # Subtyping in Ploy
 
+# Background
+
 Subtyping in functional languages comes in different flavors:
 * functions: `f:Int -> Int? = fn Int? -> Int ...; # Contravariant domain, covariant return.`
-* records (width): `r:(x:Int y:Int) = (x:1 y:2 z:3) # Use wider type as narrower type by dropping extra fields.`
 * records (depth): `r:(x:Int? y:Int?) = (x:1 y:2) # Covariant field types.`
+* records (width): `r:(x:Int y:Int) = (x:1 y:2 z:3) # Use wider type as narrower type by dropping extra fields.`
 * records (permutation): `r:(y:Int x:Int) = (x:1 y:2) # Reordering of fields.`
 * enums (variant): `maybe:(-none -some:Int) = -some:1 # Use a type with fewer variants than the destination type.`
 
 Subtyping also has various meanings in object-oriented programming, which are less relevant here:
 * class hierarchies, which conflate types with taxonomy and dispatch.
 * mutable fields, which complicate variance semantics.
+
+
+# Ploy Subtypes
+
+Ploy has several subtyping rules. It supports depth subtyping and variant subtyping. It currently supports limited forms of narrowing, and will eventually support field permutation.
+
+## Positional fields for labeled fields
+
+Positional fields can be used to fill expected labeled fields.
+| _:(a:Int b:Int) = (0 1)
+
+
+## Narrowing
+
+Currently, fields cannot be dropped (width subtyping or type narrowing), because this would cause extraneous parameter fields to go unnoticed. Narrowing is somewhat more appealing for labeled fields, but misspellings would still go unnoticed when a default value is provided for the field.
+
+One option would be to disallow subtyping for struct literals (which includes function arguments). Subtyping might be further constrained by requiring that some amount of annotation be applied to a value before it could be subtyped, e.g. a binding must have been transitively annotated.
+
+
+## Permutation
+
+Field permutation is a desirable convenience but is not yet implemented for the sake of simplicity.
