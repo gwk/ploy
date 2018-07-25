@@ -1,6 +1,6 @@
-test/2/type/label-extraneous.ploy:3:14-23: type error: call argument struct has 0 positional fields; domain struct has 2. argument type: (i:Int j:Int)
-| main = exit.f(i=0 j=0)
-               ~~~~~~~~~
+test/2/type/label-extraneous.ploy:3:14-21: type error: call argument struct has 1 positional field; domain struct has 2. argument type: (Int i:Int)
+| main = exit.f(0 i=1)
+               ~~~~~~~
 test/2/type/label-extraneous.ploy:3:13-14: note: domain type: (Int Int)
-| main = exit.f(i=0 j=0)
+| main = exit.f(0 i=1)
               ~
