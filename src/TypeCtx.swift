@@ -323,19 +323,16 @@ struct TypeCtx {
 
     let actLitMembers = rel.act.litExpr?.parenMembers
     let expLitMembers = rel.exp.litExpr?.parenMembers
-    var ai = 0
-    var ei = 0
 
     let epc = exp.posFields.count
     let apc = act.posFields.count
-    let elc = exp.labFields.count
     let alc = act.labFields.count
-    let efc = epc + elc
     let afc = apc + alc
+    let efc = epc + exp.labFields.count
+    var ai = 0
 
     // Positional fields.
-    while ei < epc {
-      let expType = exp.posFields[ei]
+    for (ei, expType) in exp.posFields.enumerated() {
       if ai == apc {
         let act_pos_fields = pluralize(apc, "positional field")
         throw rel.error({"\($0) struct has \(act_pos_fields); \($1) struct has \(epc)"})
@@ -344,13 +341,11 @@ struct TypeCtx {
       try resolveSub(rel,
         actExpr: actLitMembers?[ai], actType: actType, actDesc: "field \(ai)",
         expExpr: expLitMembers?[ei], expType: expType, expDesc: "field \(ei)")
-      ei += 1
       ai += 1
     }
 
     // Labeled Fields.
-    while ei < efc {
-      let expField = exp.labFields[ei-epc]
+    for (ei, expField) in exp.labFields.enumerated() {
       let labelDesc = "field `\(expField.label)`"
       let actType: Type
       let actDesc: String
@@ -369,8 +364,7 @@ struct TypeCtx {
       }
       try resolveSub(rel,
         actExpr: actLitMembers?[ai], actType: actType, actDesc: actDesc,
-        expExpr: expLitMembers?[ei], expType: expField.type, expDesc: labelDesc)
-      ei += 1
+        expExpr: expLitMembers?[epc+ei], expType: expField.type, expDesc: labelDesc)
       ai += 1
     }
     if ai < apc {
@@ -383,7 +377,7 @@ struct TypeCtx {
 
     // Variants.
     let expVariants:[String:(Int, TypeVariant)] = Dictionary(uniqueKeysWithValues: exp.variants.enumerated().map{
-      ($0.1.label, (epc + elc + $0.0, $0.1))})
+      ($0.1.label, (efc + $0.0, $0.1))})
 
     while ai < afc + act.variants.count {
       let avi = ai - afc
