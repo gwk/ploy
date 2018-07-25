@@ -118,7 +118,7 @@ struct Side: CustomStringConvertible {
 
   var litExpr: Expr? {
     switch chain {
-    case.link: return nil
+    case .link: return nil
     case .end: return expr
     }
   }
