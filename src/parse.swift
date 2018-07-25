@@ -204,20 +204,32 @@ class Parser {
 
   func parseSym() -> Sym {
     let token = getCurrentAndAdvance()
-    var underscore = false
+    let r = token.range
+    let p0 = r.lowerBound
+    let leadUnderscore = (source.text[p0] == "_")
+    var prevUnderscore = false
+    var trailingDigits = -1
     for pos in token.range {
       let byte = source.text[pos]
       if byte == "_" {
-        if underscore {
-          errZ(source.diagnostic(pos: pos, linePos: token.linePos, lineIdx: token.lineIdx,
-            msg: "lexical error: symbols cannot contain repeated '_' characters."))
-          exit(1)
+        if prevUnderscore {
+          failLex(token: token, pos: pos, "symbols cannot contain repeated '_' characters.")
         } else {
-          underscore = true
+          prevUnderscore = true
         }
       } else {
-        underscore = false
+        prevUnderscore = false
+        if byte >= "0" && byte <= "9" {
+          if trailingDigits < 0 {
+            trailingDigits = pos
+          }
+        } else {
+          trailingDigits = -1
+        }
       }
+    }
+    if leadUnderscore && trailingDigits == p0+1 {
+      failLex(token: token, "symbols cannot consist of an underscore followed by digits.")
     }
     return Sym(Syn(source: source, token: token, end: parseSpace()), name: slice(token.pos, token.end))
   }
@@ -529,8 +541,8 @@ class Parser {
   }
 
 
-  func failLex(token: PloyToken, _ msg: String) -> Never {
-    errZ(source.diagnostic(token: token, msg: "lexical error: " + msg))
+  func failLex(token: PloyToken, pos: Int? = nil, _ msg: String) -> Never {
+    errZ(source.diagnostic(token: token, pos: pos, msg: "lexical error: " + msg))
     exit(1)
   }
 

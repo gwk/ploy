@@ -1,0 +1,3 @@
+test/2/parse/sym-underscore-digit.ploy:1:1-3: lexical error: symbols cannot consist of an underscore followed by digits.
+| _0 = 0
+  ~~
