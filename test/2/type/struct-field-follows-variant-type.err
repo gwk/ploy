@@ -1,6 +1,0 @@
-test/2/type/struct-field-follows-variant-type.ploy:2:9-12: syntax error: struct positional field cannot follow a variant.
-|   _:(-t Int) = ()
-          ~~~
-test/2/type/struct-field-follows-variant-type.ploy:2:6-8: note: first variant is here.
-|   _:(-t Int) = ()
-       ~~

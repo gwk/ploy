@@ -211,6 +211,7 @@ class GlobalCtx {
     assert(posFields.count + labFields.count + variants.count > 0) // nil is not constructed; represented by JS "null".
 
     let fieldParNames: [String] = posFields.indices.map{posFieldHostName(index: $0)} + labFields.map {$0.hostName}
+    assertEq(fieldParNames.count, Set(fieldParNames).count)
 
     let fieldPars: String = fieldParNames.joined(separator: ", ")
     let variantPars = variants.isEmpty ? "" : "$v, $vv" // bling: $v: variant tag; $vv: variant value parameter.

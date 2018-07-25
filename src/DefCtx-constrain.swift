@@ -148,32 +148,9 @@ extension DefCtx {
       if paren.isScalarValue {
         return genConstraints(scope, expr: paren.els[0])
       }
-      var posFields = [Type]()
-      var labFields = [TypeLabField]()
-      var variants = [TypeVariant]()
-      for el in paren.els {
-        switch self.typeMemberForArg(scope, arg: el) {
-        case .variant(let variant):
-          if !variants.isEmpty {
-            el.failSyntax("struct literal cannot contain multiple tagged elements.")
-          }
-          variants.append(variant)
-        case .posField(let posField):
-          if !labFields.isEmpty {
-            el.failSyntax("struct literal positional field cannot follow a labeled field.")
-          }
-          if !variants.isEmpty {
-            el.failSyntax("struct literal positional field cannot follow a variant.")
-          }
-          posFields.append(posField)
-        case .labField(let labField):
-          if !variants.isEmpty {
-            el.failSyntax("struct literal labeled field cannot follow a variant.")
-          }
-          labFields.append(labField)
-        }
+      return mkStructType(isLiteral: true, exprs: paren.els) {
+        self.typeMemberForLiteral(scope, arg: $0)
       }
-      return Type.Struct(posFields: posFields, labFields: labFields, variants: variants)
 
     case .path, .sym:
       return instantiate(genConstraintsForRef(scope, expr: expr))
@@ -230,7 +207,7 @@ extension DefCtx {
   }
 
 
-  func typeMemberForArg(_ scope: LocalScope, arg: Expr) -> TypeMember {
+  func typeMemberForLiteral(_ scope: LocalScope, arg: Expr) -> TypeMember {
     switch arg {
     case .bind(let bind):
       let label = arg.argLabel!

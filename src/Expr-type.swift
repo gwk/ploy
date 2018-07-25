@@ -17,40 +17,9 @@ extension Expr {
       if paren.isScalarType {
         return paren.els[0].type(scope, subj)
       }
-      var posFields = [Type]()
-      var labFields = [TypeLabField]()
-      var variants = [TypeVariant]()
-      var firstLabeledForm: Form? = nil
-      var firstVariantForm: Form? = nil
-      for par in paren.els {
-        switch par.getTypeMember(scope) {
-        case .variant(let variant):
-          variants.append(variant)
-          if firstVariantForm == nil {
-            firstVariantForm = par.form
-          }
-        case .posField(let posField):
-          if let first = firstVariantForm {
-            par.failSyntax("struct positional field cannot follow a variant.",
-              notes: (first, "first variant is here."))
-          }
-          if let first = firstLabeledForm {
-            par.failSyntax("struct positional field cannot follow a labeled field.",
-              notes: (first, "first labeled field is here."))
-          }
-          posFields.append(posField)
-        case .labField(let labField):
-          if let first = firstVariantForm {
-            par.failSyntax("struct labeled field cannot follow a variant.",
-              notes: (first, "first variant is here."))
-          }
-          labFields.append(labField)
-          if firstLabeledForm == nil {
-            firstLabeledForm = par.form
-          }
-        }
+      return mkStructType(isLiteral: false, exprs: paren.els) {
+        $0.typeMemberForType(scope)
       }
-      return Type.Struct(posFields: posFields, labFields: labFields, variants: variants)
 
     case .path(let path):
       return scope.typeBinding(path: path, subj: subj)
@@ -83,7 +52,7 @@ extension Expr {
   }
 
 
-  func getTypeMember(_ scope: Scope) -> TypeMember {
+  func typeMemberForType(_ scope: Scope) -> TypeMember {
     var isVariant = false
     var label: String? = nil
     var type = typeVoid
@@ -128,7 +97,7 @@ extension Expr {
     // Note: self is the "abstract" value-expr or type-expr.
     var substitutions: [String:Type] = [:]
     for arg in typeArgs.exprs {
-      switch arg.typeMemberForTypeArg(scope) {
+      switch arg.typeMemberForReification(scope) {
       case .posField:
         arg.form.failType("positional arguments for types are not yet supported.")
       case .labField(let labField):
@@ -151,7 +120,7 @@ extension Expr {
   }
 
 
-  func typeMemberForTypeArg(_ scope: Scope) -> TypeMember {
+  func typeMemberForReification(_ scope: Scope) -> TypeMember {
     switch self {
     case .bind(let bind):
       return .labField(TypeLabField(label: self.argLabel!, type: bind.val.type(scope, "type argument")))
@@ -159,4 +128,59 @@ extension Expr {
       return .posField(self.type(scope, "type argument"))
     }
   }
+}
+
+
+func mkStructType(isLiteral: Bool, exprs:[Expr], getTypeMember: (Expr)->TypeMember) -> Type {
+  let tagTerm = (isLiteral ? "morph" : "variant")
+  var posFields = [Type]()
+  var labFields = [TypeLabField]()
+  var variants = [TypeVariant]()
+  var labExprs: [String:Expr] = [:]
+  var firstLab: Expr? = nil
+  var firstTag: Expr? = nil
+  for expr in exprs {
+    switch getTypeMember(expr) {
+    case .posField(let posField):
+      if let firstTag = firstTag {
+        expr.failSyntax("positional field cannot follow a \(tagTerm) tag.",
+          notes: (firstTag.form, "first tag is here."))
+      }
+      if let firstLab = firstLab {
+        expr.failSyntax("positional field cannot follow a labeled field.",
+          notes: (firstLab.form, "first label is here."))
+      }
+      posFields.append(posField)
+    case .labField(let labField):
+      if let firstTag = firstTag {
+        expr.failSyntax("labeled field cannot follow a \(tagTerm) tag.",
+          notes: (firstTag.form, "first tag is here."))
+      }
+      if let prev = labExprs[labField.label] {
+        expr.failSyntax("label is repeated.",
+          notes: (prev.form, "label previously appeared here"))
+      }
+      labExprs[labField.label] = expr
+      labFields.append(labField)
+      if firstLab == nil {
+        firstLab = expr
+      }
+    case .variant(let variant):
+      if let firstTag = firstTag {
+        if isLiteral {
+          expr.failSyntax("struct literal cannot contain multiple morph tags.",
+            notes: (firstTag.form, "first tag is here"))
+        }
+      } else {
+        firstTag = expr
+      }
+      if let prev = labExprs[variant.label] {
+        expr.failSyntax("label is repeated.",
+          notes: (prev.form, "label previously appeared here"))
+      }
+      labExprs[variant.label] = expr
+      variants.append(variant)
+    }
+  }
+  return Type.Struct(posFields: posFields, labFields: labFields, variants: variants)
 }

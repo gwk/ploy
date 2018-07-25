@@ -1,3 +1,6 @@
-test/2/type/struct-positional-follows-label-expr.ploy:2:12-13: syntax error: struct literal positional field cannot follow a labeled field.
+test/2/type/struct-positional-follows-label-expr.ploy:2:12-13: syntax error: positional field cannot follow a labeled field.
 |   _ = (a=0 0)
              ~
+test/2/type/struct-positional-follows-label-expr.ploy:2:8-11: note: first label is here.
+|   _ = (a=0 0)
+         ~~~
