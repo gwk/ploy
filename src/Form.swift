@@ -19,6 +19,8 @@ class Form: Hashable, CustomStringConvertible, TextTreeStreamable {
 
   var syntaxName: String { return String(describing: type(of: self)) }
 
+  static var syntaxName: String { return String(describing: self) }
+
   func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) -> Never {
     syn.errDiagnostic(prefix: prefix, msg: msg)
     for (form, msg) in notes {

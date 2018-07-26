@@ -47,6 +47,34 @@ class Parser {
   }
 
 
+  func parseFormsAndFinalForm<F0: Form, F1: Form>(subj: String) -> ([F0], F1?) {
+    _ = parseSpace()
+    var prevSpace = true
+    var forms: [F0] = []
+    var finalForm: F1? = nil
+    while !atEnd {
+      if Parser.terminators.contains(current.kind) {
+        break
+      }
+      if !prevSpace {
+        failParse("adjacent forms require a separating space.")
+      }
+      let form = parsePhrase(precedence: 0)
+      if let finalForm = finalForm {
+        form.failSyntax("\(subj) expected `;`; received subsequent \(form.syntaxName)",
+          notes: (finalForm, "final \(finalForm.syntaxName) is here."))
+      }
+      if let form = form as? F0 { forms.append(form) }
+      else if let form = form as? F1 { finalForm = form }
+      else {
+        form.failSyntax("\(subj) expected \(F0.syntaxName) or final \(F1.syntaxName); received \(form.syntaxName).")
+      }
+      prevSpace = form.syn.hasEndSpace
+    }
+    return (forms, finalForm)
+  }
+
+
   func parseSubForm<T: SubForm>(subj: String, allowSpaces: Bool = true) -> T {
     let form = parsePhrase(precedence: (allowSpaces ? 0 : Parser.unspacedPrecedence))
     if let subForm = T(form: form) { return subForm }
@@ -443,20 +471,7 @@ class Parser {
 
   func parseIf() -> Form {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let clauses: [Clause] = parseSubForms(subj: "`if` form")
-    var cases: [Case] = []
-    var dflt: Default? = nil
-    for (i, clause) in clauses.enumerated() {
-      switch clause {
-      case .case_(let case_): cases.append(case_)
-      case .default_(let default_):
-        if i == clauses.lastIndex {
-          dflt = default_
-        } else {
-          default_.failSyntax("`if` form requires `?` case clauses in all but final position; received `/` default clause.")
-        }
-      }
-    }
+    let (cases, dflt): ([Case], Default?) = parseFormsAndFinalForm(subj: "`if` form")
     return If(synForSemicolon(head: head, "`if` form"), cases: cases, dflt: dflt)
   }
 
@@ -472,20 +487,7 @@ class Parser {
   func parseMatch() -> Form {
     let head = getCurrentAndAdvance(requireSpace: true)
     let expr: Expr = parseSubForm(subj: "`match` form")
-    let clauses: [Clause] = parseSubForms(subj: "`match` form")
-    var cases: [Case] = []
-    var dflt: Default? = nil
-    for (i, clause) in clauses.enumerated() {
-      switch clause {
-      case .case_(let case_): cases.append(case_)
-      case .default_(let default_):
-        if i == clauses.lastIndex {
-          dflt = default_
-        } else {
-          default_.failSyntax("`match` form requires `?` case clauses in all but final position; received `/` default clause.")
-        }
-      }
-    }
+    let (cases, dflt): ([Case], Default?) = parseFormsAndFinalForm(subj: "`if` form")
     return Match(synForSemicolon(head: head, "`match` form"), expr: expr, cases: cases, dflt: dflt)
   }
 
