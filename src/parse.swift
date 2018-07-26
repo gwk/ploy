@@ -47,6 +47,13 @@ class Parser {
   }
 
 
+  func parseSubForm<T: SubForm>(subj: String, allowSpaces: Bool = true) -> T {
+    let form = parsePhrase(precedence: (allowSpaces ? 0 : Parser.unspacedPrecedence))
+    if let subForm = T(form: form) { return subForm }
+    form.failSyntax("\(subj) expected \(T.parseExpDesc); received \(form.syntaxName).")
+  }
+
+
   func parseFormsAndFinalForm<F0: Form, F1: Form>(subj: String) -> ([F0], F1?) {
     _ = parseSpace()
     var prevSpace = true
@@ -72,13 +79,6 @@ class Parser {
       prevSpace = form.syn.hasEndSpace
     }
     return (forms, finalForm)
-  }
-
-
-  func parseSubForm<T: SubForm>(subj: String, allowSpaces: Bool = true) -> T {
-    let form = parsePhrase(precedence: (allowSpaces ? 0 : Parser.unspacedPrecedence))
-    if let subForm = T(form: form) { return subForm }
-    form.failSyntax("\(subj) expected \(T.parseExpDesc); received \(form.syntaxName).")
   }
 
 
