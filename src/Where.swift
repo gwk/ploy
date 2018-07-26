@@ -1,7 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Where: Form { // where: `x::p`.
+class Where: ActFormBase, ActForm { // where: `x::p`.
   let left: Expr
   let right: Expr
 
@@ -11,11 +11,13 @@ class Where: Form { // where: `x::p`.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return Where(Syn(l.syn, r.syn),
-      left: Expr(form: l, subj: "where operator"),
-      right: Expr(form: r, subj: "where operator"))
+      left: Expr.expect(l, subj: "where operator"),
+      right: Expr.expect(r, subj: "where operator"))
   }
 
-  override var textTreeChildren: [Any] { return [left, right] }
+  static var expDesc: String { return "`::` where clause" }
+
+  var textTreeChildren: [Any] { return [left, right] }
 }

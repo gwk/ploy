@@ -1,6 +1,6 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
-enum Expr: SubForm, Hashable, CustomStringConvertible {
+enum Expr: VaryingForm, Hashable, CustomStringConvertible {
 
   case acc(Acc)
   case and(And)
@@ -31,46 +31,39 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
   case void(ImplicitVoid)
   case where_(Where)
 
-  init(form: Form, subj: String, exp: String) {
-    guard let s = Expr(form: form) else {
-      form.failSyntax("\(subj) expected \(exp); received \(form.syntaxName).")
-    }
-    self = s
-  }
-
-  init?(form: Form) {
-    switch form {
-    case let f as Acc:        self = .acc(f)
-    case let f as And:        self = .and(f)
-    case let f as Ann:        self = .ann(f)
-    case let f as Bind:       self = .bind(f)
-    case let f as Call:       self = .call(f)
-    case let f as Do:         self = .do_(f)
-    case let f as Fn:         self = .fn(f)
-    case let f as HostVal:    self = .hostVal(f)
-    case let f as If:         self = .if_(f)
-    case let f as Intersect:  self = .intersect(f)
-    case let f as LitNum:     self = .litNum(f)
-    case let f as LitStr:     self = .litStr(f)
-    case let f as Match:      self = .match(f)
-    case let f as Or:         self = .or(f)
-    case let f as Paren:      self = .paren(f)
-    case let f as SymPath:    self = .path(f)
-    case let f as Reif:       self = .reif(f)
-    case let f as Sig:        self = .sig(f)
-    case let f as Sym:        self = .sym(f)
-    case let f as Tag:        self = .tag(f)
-    case let f as TagTest:    self = .tagTest(f)
-    case let f as TypeAlias:  self = .typeAlias(f)
-    case let f as TypeArgs:   self = .typeArgs(f)
-    case let f as TypeVar:    self = .typeVar(f)
-    case let f as Union:      self = .union(f)
-    case let f as Where:      self = .where_(f)
+  static func accept(_ actForm: ActForm) -> Expr? {
+    switch actForm {
+    case let f as Acc:        return .acc(f)
+    case let f as And:        return .and(f)
+    case let f as Ann:        return .ann(f)
+    case let f as Bind:       return .bind(f)
+    case let f as Call:       return .call(f)
+    case let f as Do:         return .do_(f)
+    case let f as Fn:         return .fn(f)
+    case let f as HostVal:    return .hostVal(f)
+    case let f as If:         return .if_(f)
+    case let f as Intersect:  return .intersect(f)
+    case let f as LitNum:     return .litNum(f)
+    case let f as LitStr:     return .litStr(f)
+    case let f as Match:      return .match(f)
+    case let f as Or:         return .or(f)
+    case let f as Paren:      return .paren(f)
+    case let f as SymPath:    return .path(f)
+    case let f as Reif:       return .reif(f)
+    case let f as Sig:        return .sig(f)
+    case let f as Sym:        return .sym(f)
+    case let f as Tag:        return .tag(f)
+    case let f as TagTest:    return .tagTest(f)
+    case let f as TypeAlias:  return .typeAlias(f)
+    case let f as TypeArgs:   return .typeArgs(f)
+    case let f as TypeVar:    return .typeVar(f)
+    case let f as Union:      return .union(f)
+    case let f as Where:      return .where_(f)
     default:  return nil
     }
   }
 
-  var form: Form {
+  var actForm: ActForm {
     switch self {
     case .acc(let acc): return acc
     case .ann(let ann): return ann
@@ -103,7 +96,7 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     }
   }
 
-  static var parseExpDesc: String { return "expression" }
+  static var expDesc: String { return "expression" }
 
   var cloned: Expr {
     switch self {
@@ -111,11 +104,9 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .litNum(let litNum): return .litNum(litNum.cloned)
     case .sym(let sym): return .sym(sym.cloned)
     case .tag(let tag): return .tag(tag.cloned)
-    default: self.form.fatal("cannot clone expr: \(self)")
+    default: self.fatal("cannot clone expr: \(self)")
     }
   }
-
-  var description: String { return form.description }
 
   var sigDom: Expr? {
     switch self {
@@ -170,10 +161,5 @@ enum Expr: SubForm, Hashable, CustomStringConvertible {
     case .sym: return nil // the symbol specifies the type, not the label.
     default: return nil
     }
-  }
-
-  func failSyntax(_ msg: String, notes: (Form?, String)...) -> Never {
-    // redundant with form.failSyntax, but convenient so we do not have to type .form everywhere.
-    form.failForm(prefix: "syntax error", msg: msg, notes: notes)
   }
 }

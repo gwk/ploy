@@ -1,7 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Union: Form { // union: `A | B`.
+class Union: ActFormBase, ActForm { // union: `A | B`.
   let left: Expr
   let right: Expr
 
@@ -11,11 +11,13 @@ class Union: Form { // union: `A | B`.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return Union(Syn(l.syn, r.syn),
-      left: Expr(form: l, subj: "union"),
-      right: Expr(form: r, subj: "union"))
+      left: Expr.expect(l, subj: "union"),
+      right: Expr.expect(r, subj: "union"))
   }
 
-  override var textTreeChildren: [Any] { return [left, right] }
+  static var expDesc: String { return "`|` type union" }
+
+  var textTreeChildren: [Any] { return [left, right] }
 }

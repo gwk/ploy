@@ -11,7 +11,7 @@ extension Expr {
       let l = intersect.left.type(scope, "intersect left operand")
       let r = intersect.right.type(scope, "intersect right operand")
       do { return try Type.All([l, r].sorted()) }
-      catch let e { form.failType((e as! String)) }
+      catch let e { failType((e as! String)) }
 
     case .paren(let paren):
       if paren.isScalarType {
@@ -44,10 +44,10 @@ extension Expr {
       let l = union.left.type(scope, "union left operand")
       let r = union.right.type(scope, "union right operand")
       do { return try Type.Any_([l, r].sorted()) }
-      catch let e { form.failType(e as! String) }
+      catch let e { failType(e as! String) }
 
     default:
-      form.failType("\(subj) expected a type; received \(form.syntaxName).")
+      failType("\(subj) expected a type; received \(actDesc).")
     }
   }
 
@@ -109,21 +109,21 @@ extension Expr {
     for arg in typeArgs.exprs {
       switch arg.typeMemberForReification(scope) {
       case .posField:
-        arg.form.failType("positional arguments for types are not yet supported.")
+        arg.failType("positional arguments for types are not yet supported.")
       case .labField(let labField):
         let label = labField.label
         substitutions.insertNewOrElse(label, value: labField.type) {
-          arg.form.failType("type argument has duplicate label: `\(label)`")
+          arg.failType("type argument has duplicate label: `\(label)`")
         }
       case .variant:
-        arg.form.failType("variant arguments for types are not supported.") // Possible?
+        arg.failType("variant arguments for types are not supported.") // Possible?
       }
     }
     // Check that substitution is possible first, because recursive substitution process cannot.
     let varNames = type.varNames
     for name in substitutions.keys {
       if !varNames.contains(name) {
-        form.failType("type does not contain specified type argument: \(name)")
+        failType("type does not contain specified type argument: \(name)")
       }
     }
     return type.reify(substitutions)
@@ -144,21 +144,21 @@ func mkStructType(isLiteral: Bool, exprs:[Expr], getTypeMember: (Expr)->TypeMemb
     case .posField(let posField):
       if let firstTag = firstTag {
         expr.failSyntax("positional field cannot follow a \(tagTerm) tag.",
-          notes: (firstTag.form, "first tag is here."))
+          notes: (firstTag, "first tag is here."))
       }
       if let firstLab = firstLab {
         expr.failSyntax("positional field cannot follow a labeled field.",
-          notes: (firstLab.form, "first label is here."))
+          notes: (firstLab, "first label is here."))
       }
       posFields.append(posField)
     case .labField(let labField):
       if let firstTag = firstTag {
         expr.failSyntax("labeled field cannot follow a \(tagTerm) tag.",
-          notes: (firstTag.form, "first tag is here."))
+          notes: (firstTag, "first tag is here."))
       }
       if let prev = labExprs[labField.label] {
         expr.failSyntax("label is repeated.",
-          notes: (prev.form, "label previously appeared here"))
+          notes: (prev, "label previously appeared here"))
       }
       labExprs[labField.label] = expr
       labFields.append(labField)
@@ -169,14 +169,14 @@ func mkStructType(isLiteral: Bool, exprs:[Expr], getTypeMember: (Expr)->TypeMemb
       if let firstTag = firstTag {
         if isLiteral {
           expr.failSyntax("struct literal cannot contain multiple morph tags.",
-            notes: (firstTag.form, "first tag is here"))
+            notes: (firstTag, "first tag is here"))
         }
       } else {
         firstTag = expr
       }
       if let prev = labExprs[variant.label] {
         expr.failSyntax("label is repeated.",
-          notes: (prev.form, "label previously appeared here"))
+          notes: (prev, "label previously appeared here"))
       }
       labExprs[variant.label] = expr
       variants.append(variant)

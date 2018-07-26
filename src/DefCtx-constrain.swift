@@ -245,7 +245,7 @@ extension DefCtx {
       sym = s
       record = scope.getRecord(sym: s)
     default:
-      expr.form.failSyntax("reification abstract expression must be a symbol or path; received \(expr.form.syntaxName)")
+      expr.failSyntax("reification abstract expression must be a symbol or path; received \(expr.actDesc)")
     }
     symRecords[sym] = record
     let type: Type

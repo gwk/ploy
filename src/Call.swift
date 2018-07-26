@@ -1,23 +1,25 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Call: Form {
+class Call: ActFormBase, ActForm {
   let callee: Expr
   let arg: Expr
 
-  required init(_ syn: Syn, callee: Expr, arg: Expr) {
+  init(_ syn: Syn, callee: Expr, arg: Expr) {
     self.callee = callee
     self.arg = arg
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return self.init(Syn(l.syn, r.syn),
-      callee: Expr(form: l, subj: "call"),
-      arg: Expr(form: r, subj: "call"))
+      callee: Expr.expect(l, subj: "call"),
+      arg: Expr.expect(r, subj: "call"))
   }
 
-  override var textTreeChildren: [Any] { return [callee, arg] }
+  static var expDesc: String { return "call" }
+
+  var textTreeChildren: [Any] { return [callee, arg] }
 }
 
 

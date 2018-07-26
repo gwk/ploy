@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Extension: Form { // extension definition.
+class Extension: ActFormBase, ActForm { // `+=` polyfunction extension definition.
   let place: Place
   let val: Expr
 
@@ -11,12 +11,13 @@ class Extension: Form { // extension definition.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
-    let place = Place(form: l, subj: "extension")
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return Extension(Syn(l.syn, r.syn),
-      place: place,
-      val: Expr(form: r, subj: "extension", exp: "value expression"))
+      place: Place.expect(l, subj: "extension"),
+      val: Expr.expect(r, subj: "extension", exp: "value expression"))
   }
 
-  override var textTreeChildren: [Any] { return [place, val] }
+  static var expDesc: String { return "`+=` extension" }
+
+  var textTreeChildren: [Any] { return [place, val] }
 }

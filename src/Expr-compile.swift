@@ -234,7 +234,7 @@ func compileBody(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, body: Body, type: 
 func compileStructPositionalField(_ ctx: DefCtx, _ em: Emitter, _ indent: Int, paren: Paren, fieldType: Type, parIndex: Int, argIndex: inout Int) {
   if argIndex < paren.els.count {
     let arg = paren.els[argIndex]
-    if case .bind = arg { arg.form.fatal("expected positional field; found bind.") }
+    if case .bind = arg { arg.fatal("expected positional field; found bind.") }
     arg.compile(ctx, em, indent + 2, exp: fieldType, isTail: false)
     em.append(",")
     argIndex += 1

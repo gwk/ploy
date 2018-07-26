@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Body: Form { // body of statements and final expression.
+class Body: ActFormBase, ActForm { // body of statements and final expression.
   let stmts: [Expr]
   let expr: Expr
 
@@ -24,5 +24,7 @@ class Body: Form { // body of statements and final expression.
     self.init(syn, stmts: _stmts, expr: _expr)
   }
 
-  override var textTreeChildren: [Any] { return stmts + [expr] }
+  static var expDesc: String { return "body" }
+
+  var textTreeChildren: [Any] { return stmts + [expr] }
 }

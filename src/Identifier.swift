@@ -1,26 +1,26 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
-enum Identifier: SubForm {
+enum Identifier: VaryingForm {
 
   case path(SymPath)
   case sym(Sym)
 
-  init?(form: Form) {
-    switch form {
-    case let f as SymPath: self = .path(f)
-    case let f as Sym:  self = .sym(f)
+  static func accept(_ actForm: ActForm) -> Identifier? {
+    switch actForm {
+    case let f as SymPath: return .path(f)
+    case let f as Sym:  return .sym(f)
     default: return nil
     }
   }
 
-  var form: Form {
+  var actForm: ActForm {
     switch self {
     case .path(let path): return path
     case .sym(let sym): return sym
     }
   }
 
-  static var parseExpDesc: String { return "identifier symbol or path" }
+  static var expDesc: String { return "identifier symbol or path" }
 
   var name: String {
     return syms.map({$0.name}).joined(separator: "/")

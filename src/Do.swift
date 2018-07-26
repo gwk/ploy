@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Do: Form { // do block: `{…}`.
+class Do: ActFormBase, ActForm { // do block: `{…}`.
   let body: Body
 
   init(_ syn: Syn, body: Body) {
@@ -13,5 +13,7 @@ class Do: Form { // do block: `{…}`.
     self.init(syn, body: Body(syn, stmts: stmts, expr: expr))
   }
 
-  override var textTreeChildren: [Any] { return [body] }
+  static var expDesc: String { return "`{…}` do form" }
+
+  var textTreeChildren: [Any] { return [body] }
 }

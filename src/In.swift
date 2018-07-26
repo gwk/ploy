@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class In: Form { // in statement: `in module-name statements…;`.
+class In: ActFormBase, ActForm { // in statement: `in module-name statements…;`.
   let identifier: Identifier? // main In does not have an identifier.
   let defs: [Def]
 
@@ -11,7 +11,9 @@ class In: Form { // in statement: `in module-name statements…;`.
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] {
+  static var expDesc: String { return "`in`" }
+
+  var textTreeChildren: [Any] {
     var children = [Any]()
     children.appendOpt(identifier)
     children.append(defs)

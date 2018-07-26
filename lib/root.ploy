@@ -88,7 +88,7 @@ outL += fn Int%Void out.$ out.'\n';
 outL += fn Str%Void out.$ out.'\n';
 
 
-exit = host_val Int%Never "function($) { HOST___process.exit($); }" HOST/_process;
+exit = host_val Int%Never HOST/_process "function($) { HOST___process.exit($); }";
 
 fail = fn Str%Never
   errL.$

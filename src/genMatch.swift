@@ -39,7 +39,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
       case .tag(let tag): // variant.
         tests.append(synthTagTest(tag: tag, val: val))
         destructure(val: subAcc(accessor: .untag(tag), val: val), pattern: bind.val)
-      default: bind.place.form.failSyntax("destructuring bind place must be a sym or tag")
+      default: bind.place.failSyntax("destructuring bind place must be a sym or tag")
       }
 
     case .litNum(let litNum):
@@ -68,7 +68,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
         if el.isTagged { // Variant.
           if let prevVariant = prevVariant {
             el.failSyntax("destructuring does not support more than one variant.",
-              notes: (prevVariant.form, "first variant is here."))
+              notes: (prevVariant, "first variant is here."))
           }
           prevVariant = el
           destructure(val: val, pattern: el)
@@ -90,7 +90,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
 
     case .where_(let where_): where_.fatal("match where clauses not implemented.")
 
-    default: pattern.failSyntax("match case expected pattern; received \(cond.form.syntaxName).")
+    default: pattern.failSyntax("match case expected pattern; received \(cond.actDesc).")
     }
   }
 

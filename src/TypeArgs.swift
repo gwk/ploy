@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class TypeArgs: Form { // type constraint: `<A B>`.
+class TypeArgs: ActFormBase, ActForm { // type constraint: `<A B>`.
   let exprs: [Expr]
 
   init(_ syn: Syn, exprs: [Expr]) {
@@ -9,5 +9,7 @@ class TypeArgs: Form { // type constraint: `<A B>`.
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] { return exprs }
+  static var expDesc: String { return "<…> type constraint" }
+
+  var textTreeChildren: [Any] { return exprs }
 }

@@ -34,24 +34,41 @@ class Parser {
 
   func parse() -> [Def] {
     if tokens.isEmpty { return [] }
-    let defs: [Def] = parseSubForms(subj: "top level")
+    let defs: [Def] = parseForms(subj: "top level")
     if !atEnd { failParse("unexpected terminator token: \(current.kind)") }
     return defs
   }
 
 
-  func parseForm<T: Form>(subj: String, exp: String) -> T {
-    let form = parsePhrase(precedence: 0)
-    if let form = form as? T { return form }
-    form.failSyntax("\(subj) expected \(exp); received \(form.syntaxName).")
+  func parseActForm(allowSpaces: Bool = true) -> ActForm {
+    return parsePhrase(precedence: (allowSpaces ? 0 : Parser.unspacedPrecedence))
   }
 
 
-  func parseSubForm<T: SubForm>(subj: String, allowSpaces: Bool = true) -> T {
-    let form = parsePhrase(precedence: (allowSpaces ? 0 : Parser.unspacedPrecedence))
-    if let subForm = T(form: form) { return subForm }
-    form.failSyntax("\(subj) expected \(T.parseExpDesc); received \(form.syntaxName).")
+  func parseForm<F: Form>(subj: String, exp: String? = nil, allowSpaces: Bool = true) -> F {
+    return F.expect(parseActForm(allowSpaces: allowSpaces), subj: subj, exp: exp)
   }
+
+
+  func parseForms<F: Form>(subj: String) -> [F] {
+    _ = parseSpace()
+    var prevSpace = true
+    var subForms: [F] = []
+    while !atEnd {
+      if Parser.terminators.contains(current.kind) {
+        break
+      }
+      if !prevSpace {
+        failParse("adjacent forms require a separating space.")
+      }
+      let form: F = parseForm(subj: subj)
+      subForms.append(form)
+      prevSpace = form.syn.hasEndSpace
+    }
+    return subForms
+  }
+
+  static let terminators: Set<TokenKind> = [.semicolon, .parenC, .braceC, .brackC, .angleC]
 
 
   func parseFormsAndFinalForm<F0: Form, F1: Form>(subj: String) -> ([F0], F1?) {
@@ -66,45 +83,24 @@ class Parser {
       if !prevSpace {
         failParse("adjacent forms require a separating space.")
       }
-      let form = parsePhrase(precedence: 0)
+      let actForm = parseActForm()
       if let finalForm = finalForm {
-        form.failSyntax("\(subj) expected `;`; received subsequent \(form.syntaxName)",
-          notes: (finalForm, "final \(finalForm.syntaxName) is here."))
+        actForm.failSyntax("\(subj) expected `;`; received subsequent \(actForm.actDesc)", // Note: assumes the expected terminator.
+          notes: (finalForm, "final \(finalForm.actDesc) is here."))
       }
-      if let form = form as? F0 { forms.append(form) }
-      else if let form = form as? F1 { finalForm = form }
+      if let form = F0.accept(actForm) { forms.append(form) }
+      else if let form = F1.accept(actForm) { finalForm = form }
       else {
-        form.failSyntax("\(subj) expected \(F0.syntaxName) or final \(F1.syntaxName); received \(form.syntaxName).")
+        actForm.failSyntax("\(subj) expected \(F0.expDesc) or final \(F1.expDesc); received \(actForm.actDesc).")
       }
-      prevSpace = form.syn.hasEndSpace
+      prevSpace = actForm.syn.hasEndSpace
     }
     return (forms, finalForm)
   }
 
 
-  func parseSubForms<T: SubForm>(subj: String) -> [T] {
-    _ = parseSpace()
-    var prevSpace = true
-    var subForms: [T] = []
-    while !atEnd {
-      if Parser.terminators.contains(current.kind) {
-        break
-      }
-      if !prevSpace {
-        failParse("adjacent forms require a separating space.")
-      }
-      let form: T = parseSubForm(subj: subj)
-      prevSpace = form.syn.hasEndSpace
-      subForms.append(form)
-    }
-    return subForms
-  }
-
-  static let terminators: Set<TokenKind> = [.semicolon, .parenC, .braceC, .brackC, .angleC]
-
-
   func parseBody(subj: String) -> Body {
-    let exprs: [Expr] = parseSubForms(subj: "body")
+    let exprs: [Expr] = parseForms(subj: "body")
     if atEnd { failEnd("\(subj) reached end of file.") }
     let syn: Syn
     if let hd = exprs.first?.syn, let tl = exprs.last?.syn {
@@ -116,7 +112,7 @@ class Parser {
   }
 
 
-  func parsePhrase(precedence: Int) -> Form {
+  func parsePhrase(precedence: Int) -> ActForm {
     if atEnd { failEnd("reached end of file.") }
     var left = parsePoly()
     outer: while !atEnd {
@@ -155,7 +151,7 @@ class Parser {
     return left
   }
 
-  static let opGroups: [[(TokenKind, (Form, Form)->Form)]] = [
+  static let opGroups: [[(TokenKind, (ActForm, ActForm)->ActForm)]] = [
     [ (.typeAlias, TypeAlias.mk),
       (.bind, Bind.mk),
       (.extension_, Extension.mk),
@@ -174,13 +170,13 @@ class Parser {
   static let opPrecedenceGroups = opGroups + opGroups
   static let unspacedPrecedence = opGroups.count
 
-  static let adjacencyOperators: [(TokenKind, (Form, Form)->Form)] = [
+  static let adjacencyOperators: [(TokenKind, (ActForm, ActForm)->ActForm)] = [
     (.parenO, CallAdj.mk),
     (.angleO, Reif.mk),
   ]
 
 
-  func parsePoly() -> Form {
+  func parsePoly() -> ActForm {
     switch current.kind {
     case .and: return parseAnd()
     case .extensible: return parseExtensible()
@@ -207,7 +203,7 @@ class Parser {
   }
 
 
-  func parseSymOrPath() -> Form {
+  func parseSymOrPath() -> ActForm {
     var sym = parseSym()
     var syms = [sym]
     while !atEnd && !sym.syn.hasEndSpace && current.kind == .slash {
@@ -337,13 +333,13 @@ class Parser {
   // MARK: compound helpers.
 
 
-  func synForTerminator(head: PloyToken, terminator: TokenKind, _ formName: String) -> Syn {
+  func synForTerminator(head: PloyToken, terminator: TokenKind, _ subj: String) -> Syn {
     if atEnd {
-      failParse(token: head, "`\(formName)` form expected \(terminator) terminator; reached end of file.")
+      failParse(token: head, "\(subj) expected \(terminator) terminator; reached end of file.")
       // TODO: report correct position.
     }
     if current.kind != terminator {
-      failParse("`\(formName)` form expected \(terminator) terminator; received '\(current.kind)'.")
+      failParse("\(subj) expected \(terminator) terminator; received `\(current.kind)`.")
     }
     let visEnd = current.end
     advance()
@@ -351,21 +347,21 @@ class Parser {
   }
 
 
-  func synForSemicolon(head: PloyToken, _ formName: String) -> Syn {
-    return synForTerminator(head: head, terminator: .semicolon, formName)
+  func synForSemicolon(head: PloyToken, _ subj: String) -> Syn {
+    return synForTerminator(head: head, terminator: .semicolon, subj)
   }
 
 
   // MARK: prefixes.
 
 
-  func parseBling() -> Form {
+  func parseBling() -> ActForm {
     let head = getCurrentAndAdvance()
     return Sym(Syn(source: source, token: head, end: parseSpace()), name: "$")
   }
 
 
-  func parseCaret() -> Form {
+  func parseCaret() -> ActForm {
     let head = getCurrentAndAdvance()
     if atEnd { failParse(token: head, "dangling caret at end of file.") }
     if current.kind != .sym {
@@ -376,7 +372,7 @@ class Parser {
   }
 
 
-  func parseDash() -> Form {
+  func parseDash() -> ActForm {
     let head = getCurrentAndAdvance()
     if atEnd { failParse(token: head, "dangling dash at end of file.") }
     if current.kind != .sym {
@@ -388,10 +384,10 @@ class Parser {
   }
 
 
-  func parseSlash() -> Form {
+  func parseSlash() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: false)
     if atEnd { failParse(token: head, "dangling slash at end of file.") }
-    let expr: Expr = parseSubForm(subj: "`/` form")
+    let expr: Expr = parseForm(subj: "`/` form")
     return Default(Syn(head, expr.syn), expr: expr)
   }
 
@@ -399,102 +395,111 @@ class Parser {
   // MARK: nesting sentences.
 
 
-  func parseParen() -> Form {
+  func parseParen() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: false)
-    let els: [Expr] = parseSubForms(subj: "parenthesized expression")
-    return Paren(synForTerminator(head: head, terminator: .parenC, "parenthesized expression"), els: els)
+    let els: [Expr] = parseForms(subj: Paren.expDesc)
+    return Paren(synForTerminator(head: head, terminator: .parenC, Paren.expDesc), els: els)
   }
 
 
-  func parseTypeArgs() -> Form {
+  func parseTypeArgs() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: false)
-    let exprs: [Expr] = parseSubForms(subj: "type constraint")
-    return TypeArgs(synForTerminator(head: head, terminator: .angleC, "type constraint"), exprs: exprs)
+    let exprs: [Expr] = parseForms(subj: TypeArgs.expDesc)
+    return TypeArgs(synForTerminator(head: head, terminator: .angleC, TypeArgs.expDesc), exprs: exprs)
   }
 
 
-  func parseDo() -> Form {
+  func parseDo() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: false)
-    let body = parseBody(subj: "`do` form")
-    return Do(synForTerminator(head: head, terminator: .braceC, "`do` form"), body: body)
+    let body = parseBody(subj: Do.expDesc)
+    return Do(synForTerminator(head: head, terminator: .braceC, Do.expDesc), body: body)
   }
 
 
   // MARK: keyword sentences.
 
 
-  func parseAnd() -> Form {
+  func parseAnd() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let terms: [Expr] = parseSubForms(subj: "`and` form")
+    let terms: [Expr] = parseForms(subj: "`and` form")
     return And(synForSemicolon(head: head, "and"), terms: terms)
   }
 
 
-  func parseOr() -> Form {
+  func parseOr() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let terms: [Expr] = parseSubForms(subj: "`or` form")
+    let terms: [Expr] = parseForms(subj: "`or` form")
     return Or(synForSemicolon(head: head, "or"), terms: terms)
   }
 
 
-  func parseExtensible() -> Form {
+  func parseExtensible() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let nameSym: Sym = parseForm(subj: "`extensible` form", exp: "name symbol")
-    let constraints: [Expr] = parseSubForms(subj: "extensible type constraints")
+    let constraints: [Expr] = parseForms(subj: "extensible type constraints")
     return Extensible(synForSemicolon(head: head, "extensible"), sym: nameSym, constraints: constraints)
   }
 
 
-  func parseFn() -> Form {
+  func parseFn() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let sig: Sig = parseForm(subj: "`fn` form", exp: "function signature")
     let body = parseBody(subj: "`fn` form")
     return Fn(synForSemicolon(head: head, "fn"), sig: sig, body: body)
   }
 
+  func parseHostFn() -> ActForm {
+    let head = getCurrentAndAdvance(requireSpace: true)
+    let sig: Sig = parseForm(subj: "`fn` form", exp: "function signature")
+    let body = parseBody(subj: "`fn` form")
+    return Fn(synForSemicolon(head: head, "fn"), sig: sig, body: body)
+  }
 
-  func parseHostType() -> Form {
+  func parseHostType() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let nameSym: Sym = parseForm(subj: "`host_type` form", exp: "name symbol")
     return HostType(synForSemicolon(head: head, "host_type"), sym: nameSym)
   }
 
 
-  func parseHostVal() -> Form {
+  func parseHostVal() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let typeExpr: Expr = parseSubForm(subj: "`host_val` form")
-    let code: LitStr = parseForm(subj: "`host_val` form", exp: "code string")
-    let deps: [Identifier] = parseSubForms(subj: "`host_val` form")
-    return HostVal(synForSemicolon(head: head, "host_val"), typeExpr: typeExpr, code: code, deps: deps)
+    let typeExpr: Expr = parseForm(subj: "`host_val` form")
+    let (deps, code): ([Identifier], LitStr?) = parseFormsAndFinalForm(subj: "`host_val` form")
+    if let code = code {
+      return HostVal(synForSemicolon(head: head, "host_val"), typeExpr: typeExpr, code: code, deps: deps)
+    } else {
+      failParse("`host_val` form expected final code string.")
+    }
   }
 
 
-  func parseIf() -> Form {
+  func parseIf() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let (cases, dflt): ([Case], Default?) = parseFormsAndFinalForm(subj: "`if` form")
     return If(synForSemicolon(head: head, "`if` form"), cases: cases, dflt: dflt)
   }
 
 
-  func parseIn() -> Form {
+  func parseIn() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let identifier: Identifier = parseSubForm(subj: "`in` form")
-    let defs: [Def] = parseSubForms(subj: "`in` form")
+    let identifier: Identifier = parseForm(subj: "`in` form")
+    let defs: [Def] = parseForms(subj: "`in` form")
     return In(synForSemicolon(head: head, "`in` form"), identifier: identifier, defs: defs)
   }
 
 
-  func parseMatch() -> Form {
+  func parseMatch() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let expr: Expr = parseSubForm(subj: "`match` form")
+    let expr: Expr = parseForm(subj: "`match` form")
     let (cases, dflt): ([Case], Default?) = parseFormsAndFinalForm(subj: "`if` form")
     return Match(synForSemicolon(head: head, "`match` form"), expr: expr, cases: cases, dflt: dflt)
   }
 
 
-  func parsePub() -> Form {
+  func parsePub() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let def: Def = parseSubForm(subj: "`pub` form")
+    let def: Def = parseForm(subj: "`pub` form")
     return Pub(Syn(head, def.syn), def: def)
   }
 

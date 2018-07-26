@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class HostType: Form { // host type declaration: `host_type sym;`.
+class HostType: ActFormBase, ActForm { // host type declaration: `host_type sym;`.
   let sym: Sym
 
   init(_ syn: Syn, sym: Sym) {
@@ -9,5 +9,7 @@ class HostType: Form { // host type declaration: `host_type sym;`.
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] { return [sym] }
+  static var expDesc: String { return "`host_type`" }
+
+  var textTreeChildren: [Any] { return [sym] }
 }

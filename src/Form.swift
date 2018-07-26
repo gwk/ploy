@@ -3,23 +3,33 @@
 import Darwin
 
 
-class Form: Hashable, CustomStringConvertible, TextTreeStreamable {
-  let syn: Syn
-  init(_ syn: Syn) { self.syn = syn }
+protocol Form: CustomStringConvertible, TextTreeStreamable {
+  // A syntactic Form, either an ActForm or else a VaryingForm enum wrapping an ActForm.
 
-  static func ==(l: Form, r: Form) -> Bool { return l === r }
+  static var expDesc: String { get } // Display description possible form contents, e.g. "case or default clause".
 
-  var hashValue: Int { return ObjectIdentifier(self).hashValue }
+  var actForm: ActForm { get } // The actual underlying ActForm.
 
-  var description: String { return "\(type(of: self)):\(syn)" }
+  var syn: Syn { get }
+
+  static func accept(_ actForm: ActForm) -> Self?
+}
+
+
+extension Form {
+
+  // TextTreeStreamable.
 
   var textTreeHead: String { return description }
 
-  var textTreeChildren: [Any] { fatalError("textTreeChildren not implemented for type: \(type(of: self))") }
+  // Form.
 
-  var syntaxName: String { return String(describing: type(of: self)) }
+  var actDesc: String { return actForm.actDesc }
 
-  static var syntaxName: String { return String(describing: self) }
+  static func expect(_ actForm: ActForm, subj: String, exp: String? = nil) -> Self {
+    if let e = Self.accept(actForm) { return e }
+    actForm.failSyntax("\(subj) expected \(exp ?? Self.expDesc); received \(actForm.actDesc).")
+  }
 
   func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) -> Never {
     syn.errDiagnostic(prefix: prefix, msg: msg)

@@ -1,26 +1,26 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-enum Place: SubForm { // left side of a binding.
+enum Place: VaryingForm { // left side of a binding.
 
   case ann(Ann)
   case sym(Sym)
   case tag(Tag)
 
-  init?(form: Form) {
-    switch form {
+  static func accept(_ actForm: ActForm) -> Place? {
+    switch actForm {
     case let ann as Ann:
       guard case .sym = ann.expr else {
-        ann.expr.failSyntax("annnoted place expected symbol; received \(ann.expr.form.syntaxName).")
+        ann.expr.failSyntax("annnoted place expected symbol; received \(ann.expr.actDesc).")
       }
-      self = .ann(ann)
-    case let sym as Sym: self = .sym(sym)
-    case let tag as Tag: self = .tag(tag)
+      return .ann(ann)
+    case let sym as Sym: return .sym(sym)
+    case let tag as Tag: return .tag(tag)
     default: return nil
     }
   }
 
-  var form: Form {
+  var actForm: ActForm {
     switch self {
     case .ann(let ann): return ann
     case .sym(let sym): return sym
@@ -28,7 +28,7 @@ enum Place: SubForm { // left side of a binding.
     }
   }
 
-  static var parseExpDesc: String { return "symbol, annotated symbol, or tag" }
+  static var expDesc: String { return "symbol, annotated symbol, or tag" }
 
   var sym: Sym {
     switch self {

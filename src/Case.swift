@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Case: Form { // conditional case: `condition ? consequence`.
+class Case: ActFormBase, ActForm { // conditional case: `condition ? consequence`.
   let condition: Expr
   let consequence: Expr
 
@@ -11,11 +11,13 @@ class Case: Form { // conditional case: `condition ? consequence`.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return Case(Syn(l.syn, r.syn),
-      condition: Expr(form: l, subj: "case", exp: "condition"),
-      consequence: Expr(form: r, subj: "case", exp: "consequence"))
+      condition: Expr.expect(l, subj: "case", exp: "condition"),
+      consequence: Expr.expect(r, subj: "case", exp: "consequence"))
   }
 
-  override var textTreeChildren: [Any] { return [condition, consequence] }
+  static var expDesc: String { return "`?` case" }
+
+  var textTreeChildren: [Any] { return [condition, consequence] }
 }

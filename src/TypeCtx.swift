@@ -527,8 +527,8 @@ struct TypeCtx {
 
   func error(_ err: PropCon.Err) -> Never {
     let accesseeType = resolved(type: err.prop.accesseeType)
-    err.prop.acc.accessee.form.failType("\(err.msg). accessee type: \(accesseeType)",
-      notes: (err.prop.acc.accessor.form, "accessor is here."))
+    err.prop.acc.accessee.failType("\(err.msg). accessee type: \(accesseeType)",
+      notes: (err.prop.acc.accessor, "accessor is here."))
   }
 
 
@@ -538,10 +538,10 @@ struct TypeCtx {
     let act = resolved(type: r.act.type)
     let exp = resolved(type: r.exp.type)
     if r.act.expr != r.exp.expr {
-      r.act.expr.form.failType("\(r.desc) \(msg). \(r.act.chainDesc)\(r.act.role.desc) type: \(act)",
-        notes: (r.exp.expr.form, "\(r.exp.chainDesc)\(r.exp.role.desc) type: \(exp)"))
+      r.act.expr.failType("\(r.desc) \(msg). \(r.act.chainDesc)\(r.act.role.desc) type: \(act)",
+        notes: (r.exp.expr, "\(r.exp.chainDesc)\(r.exp.role.desc) type: \(exp)"))
     } else {
-      r.act.expr.form.failType("\(r.desc) \(msg).\n  \(r.act.chainDesc)\(r.act.role.desc) type: \(act)" +
+      r.act.expr.failType("\(r.desc) \(msg).\n  \(r.act.chainDesc)\(r.act.role.desc) type: \(act)" +
         "\n  \(r.exp.chainDesc)\(r.exp.role.desc) type: \(exp)")
     }
   }

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class If: Form { // if statement: `if cases… default;`.
+class If: ActFormBase, ActForm { // if statement: `if cases… default;`.
   let cases: [Case]
   let dflt: Default?
 
@@ -11,7 +11,9 @@ class If: Form { // if statement: `if cases… default;`.
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] {
+  static var expDesc: String { return "`if`" }
+
+  var textTreeChildren: [Any] {
     var children: [Any] = cases
     children.appendOpt(dflt)
     return children

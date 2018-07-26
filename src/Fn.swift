@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Fn: Form { // function declaration: `fn type body…;`.
+class Fn: ActFormBase, ActForm { // function declaration: `fn type body…;`.
   let sig: Sig
   let body: Body
 
@@ -11,5 +11,7 @@ class Fn: Form { // function declaration: `fn type body…;`.
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] { return [sig, body] }
+  static var expDesc: String { return "`fn`" }
+
+  var textTreeChildren: [Any] { return [sig, body] }
 }

@@ -1,7 +1,7 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-enum Def: SubForm {
+enum Def: VaryingForm {
 
   case bind(Bind)
   case ext(Extension)
@@ -11,20 +11,20 @@ enum Def: SubForm {
   case pub(Pub)
   case typeAlias(TypeAlias)
 
-  init?(form: Form) {
-    switch form {
-    case let f as Bind:       self = .bind(f)
-    case let f as Extension:  self = .ext(f)
-    case let f as Extensible: self = .extensible(f)
-    case let f as HostType:   self = .hostType(f)
-    case let f as In:         self = .in_(f)
-    case let f as Pub:        self = .pub(f)
-    case let f as TypeAlias:  self = .typeAlias(f)
+  static func accept(_ actForm: ActForm) -> Def? {
+    switch actForm {
+    case let f as Bind:       return .bind(f)
+    case let f as Extension:  return .ext(f)
+    case let f as Extensible: return .extensible(f)
+    case let f as HostType:   return .hostType(f)
+    case let f as In:         return .in_(f)
+    case let f as Pub:        return .pub(f)
+    case let f as TypeAlias:  return .typeAlias(f)
     default: return nil
     }
   }
 
- var form: Form {
+ var actForm: ActForm {
     switch self {
     case .bind(let bind): return bind
     case .ext(let ext): return ext
@@ -36,7 +36,7 @@ enum Def: SubForm {
     }
   }
 
-  static var parseExpDesc: String { return "definition" }
+  static var expDesc: String { return "definition" }
 
   var sym: Sym {
     switch self {
@@ -73,7 +73,7 @@ enum Def: SubForm {
       var typesToMorphs: [Type:Morph] = [:]
       for ext in exts {
         let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: ext.place, val: ext.val)
-        guard case .sig = type.kind else { val.form.failType("morph must be a function; resolved type: \(type)") }
+        guard case .sig = type.kind else { val.failType("morph must be a function; resolved type: \(type)") }
         if let existing = typesToExts[type] {
           extensible.failType("extensible has duplicate type: \(type)", notes:
             (existing, "conflicting extension"),

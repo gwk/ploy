@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class SymPath: Form { // path: `LIB/name`.
+class SymPath: ActFormBase, ActForm { // path: `LIB/name`.
   let syms: [Sym]
 
   init(_ syn: Syn, syms: [Sym]) {
@@ -24,5 +24,7 @@ class SymPath: Form { // path: `LIB/name`.
     return desc
   }
 
-  override var textTreeChildren: [Any] { return [] }
+  static var expDesc: String { return "symbol path" }
+
+  var textTreeChildren: [Any] { return [] }
 }

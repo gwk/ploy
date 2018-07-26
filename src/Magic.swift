@@ -1,8 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Magic: Form { // synthesized code.
-
+class Magic: ActFormBase, ActForm { // synthesized code.
   let type: Type
   let code: String
 
@@ -16,5 +15,7 @@ class Magic: Form { // synthesized code.
     return "\(typeDescription(self)):\(syn): \(type); \(code)"
   }
 
-  override var textTreeChildren: [Any] { return [] }
+  static var expDesc: String { return "magic form" }
+
+  var textTreeChildren: [Any] { return [] }
 }

@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Acc: Form { // accessor: `field@val`.
+class Acc: ActFormBase, ActForm { // accessor: `field@val`.
   let accessor: Accessor
   let accessee: Expr
 
@@ -11,13 +11,17 @@ class Acc: Form { // accessor: `field@val`.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return Acc(Syn(l.syn, r.syn),
-      accessor: Accessor(form: l, subj: "access"),
-      accessee: Expr(form: r, subj: "access", exp: "accessee expression"))
+      accessor: Accessor.expect(l, subj: "access"),
+      accessee: Expr.expect(r, subj: "access", exp: "accessee expression"))
   }
 
-  override var textTreeChildren: [Any] { return [accessor, accessee] }
+  // Form.
+
+  static var expDesc: String { return "`@` access form" }
+
+  var textTreeChildren: [Any] { return [accessor, accessee] }
 
   var cloned: Acc {
     return Acc(syn, accessor: accessor.cloned, accessee: accessee.cloned)

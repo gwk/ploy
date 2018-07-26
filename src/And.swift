@@ -1,7 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class And: Form { // and form: `and …;`.
+class And: ActFormBase, ActForm { // and form: `and …;`.
   let terms: [Expr]
 
   init(_ syn: Syn, terms: [Expr]) {
@@ -9,5 +9,7 @@ class And: Form { // and form: `and …;`.
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] { return terms }
+  static var expDesc: String { return "`and`" }
+
+  var textTreeChildren: [Any] { return terms }
 }

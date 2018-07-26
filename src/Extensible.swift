@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Extensible: Form {
+class Extensible: ActFormBase, ActForm {
   let sym: Sym
   let constraints: [Expr]
 
@@ -11,5 +11,7 @@ class Extensible: Form {
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] { return [sym] + constraints }
+  static var expDesc: String { return "`extensible`" }
+
+  var textTreeChildren: [Any] { return [sym] + constraints }
 }

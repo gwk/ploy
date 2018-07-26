@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Ann: Form { // annotation: `expr:Type`.
+class Ann: ActFormBase, ActForm { // annotation: `expr:Type`.
   let expr: Expr
   let typeExpr: Expr
 
@@ -11,11 +11,13 @@ class Ann: Form { // annotation: `expr:Type`.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return Ann(Syn(l.syn, r.syn),
-      expr: Expr(form: l, subj: "type annotation"),
-      typeExpr: Expr(form: r, subj: "type annotation"))
+      expr: Expr.expect(l, subj: "type annotation"),
+      typeExpr: Expr.expect(r, subj: "type annotation"))
   }
 
-  override var textTreeChildren: [Any] { return [expr, typeExpr] }
+  static var expDesc: String { return "`:` type annotation" }
+
+  var textTreeChildren: [Any] { return [expr, typeExpr] }
 }

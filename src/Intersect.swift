@@ -1,7 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Intersect: Form { // intersect: `A & B`.
+class Intersect: ActFormBase, ActForm { // intersect: `A & B`.
   let left: Expr
   let right: Expr
 
@@ -11,11 +11,13 @@ class Intersect: Form { // intersect: `A & B`.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return Union(Syn(l.syn, r.syn),
-      left: Expr(form: l, subj: "intersect"),
-      right: Expr(form: r, subj: "intersect"))
+      left: Expr.expect(l, subj: "intersect"),
+      right: Expr.expect(r, subj: "intersect"))
   }
 
-  override var textTreeChildren: [Any] { return [left, right] }
+  static var expDesc: String { return "`&` type intersection" }
+
+  var textTreeChildren: [Any] { return [left, right] }
 }

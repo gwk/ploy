@@ -1,8 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Bind: Form { // value binding: `name=expr`.
-
+class Bind: ActFormBase, ActForm { // value binding: `name=expr`.
   let place: Place
   let val: Expr
 
@@ -12,12 +11,14 @@ class Bind: Form { // value binding: `name=expr`.
     super.init(syn)
   }
 
-  static func mk(l: Form, _ r: Form) -> Form {
-    let place = Place(form: l, subj: "binding")
+  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
+    let place = Place.expect(l, subj: "binding")
     return Bind(Syn(l.syn, r.syn),
       place: place,
-      val: Expr(form: r, subj: "binding", exp: "value expression"))
+      val: Expr.expect(r, subj: "binding", exp: "value expression"))
   }
 
-  override var textTreeChildren: [Any] { return [place, val] }
+  static var expDesc: String { return "`=` binding" }
+
+  var textTreeChildren: [Any] { return [place, val] }
 }

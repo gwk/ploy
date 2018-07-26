@@ -36,7 +36,7 @@ class DefCtx {
 
 
   func typeFor(expr: Expr) -> Type {
-    guard let type = exprTypes[expr] else { expr.form.fatal("untracked expression") }
+    guard let type = exprTypes[expr] else { expr.fatal("untracked expression") }
     return typeCtx.resolved(type: type)
   }
 }

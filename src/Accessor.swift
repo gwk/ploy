@@ -1,23 +1,23 @@
 // Copyright © 2016 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-enum Accessor: SubForm {
+enum Accessor: VaryingForm {
 
   case litNum(LitNum)
   case sym(Sym)
   case tag(Tag)
   case untag(Tag)
 
-  init?(form: Form) {
-    switch form {
-    case let f as LitNum: self = .litNum(f)
-    case let f as Sym:    self = .sym(f)
-    case let f as Tag:    self = .tag(f)
+  static func accept(_ actForm: ActForm) -> Accessor? {
+    switch actForm {
+    case let f as LitNum: return .litNum(f)
+    case let f as Sym:    return .sym(f)
+    case let f as Tag:    return .tag(f)
     default: return nil
     }
   }
 
-  var form: Form {
+  var actForm: ActForm {
     switch self {
     case .litNum(let litNum): return litNum
     case .sym(let sym): return sym
@@ -26,7 +26,7 @@ enum Accessor: SubForm {
     }
   }
 
-  static var parseExpDesc: String { return "index, symbol, or tag accessor" }
+  static var expDesc: String { return "index, symbol, or tag accessor" }
 
   var cloned: Accessor {
     switch self {

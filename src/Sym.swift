@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Sym: Form { // symbol: `name`.
+class Sym: ActFormBase, ActForm { // symbol: `name`.
   let name: String
 
   init(_ syn: Syn, name: String) {
@@ -13,7 +13,9 @@ class Sym: Form { // symbol: `name`.
     return "\(type(of: self)):\(syn):`\(name)`"
   }
 
-  override var textTreeChildren: [Any] { return [] }
+  static var expDesc: String { return "symbol" }
+
+  var textTreeChildren: [Any] { return [] }
 
   // MARK: Sym
 

@@ -1,10 +1,10 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Paren: Form {
+class Paren: ActFormBase, ActForm {
   // parenthesized expression: `(a)` or `(a b)`.
   // A single parenthesized expression is a purely syntactic form, with "scalar" type.
-  // Multiple expressions within parentheses create a compound (either struct or enum).
+  // Multiple expressions within parentheses signify a struct value or type.
   let els: [Expr]
 
   init(_ syn: Syn, els: [Expr]) {
@@ -12,7 +12,9 @@ class Paren: Form {
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] { return els }
+  static var expDesc: String { return "`(…)` form" }
+
+  var textTreeChildren: [Any] { return els }
 
   // MARK: Paren
 

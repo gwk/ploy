@@ -1,7 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Or: Form { // or form: `or …;`.
+class Or: ActFormBase, ActForm { // or form: `or …;`.
   let terms: [Expr]
 
   init(_ syn: Syn, terms: [Expr]) {
@@ -9,5 +9,7 @@ class Or: Form { // or form: `or …;`.
     super.init(syn)
   }
 
-  override var textTreeChildren: [Any] { return terms }
+  static var expDesc: String { return "`or`" }
+
+  var textTreeChildren: [Any] { return terms }
 }
