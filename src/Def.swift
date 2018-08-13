@@ -70,22 +70,22 @@ enum Def: VaryingForm {
     case .extensible(let extensible):
       let exts = space.exts[sym.name, default: []]
       var typesToExts: [Type:Extension] = [:]
-      var typesToMorphs: [Type:PolyRecord.Morph] = [:]
+      var typesToMethods: [Type:PolyRecord.Method] = [:]
       for ext in exts {
         let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: ext.place, val: ext.val)
-        guard case .sig = type.kind else { val.failType("morph must be a function; resolved type: \(type)") }
+        guard case .sig = type.kind else { val.failType("method must be a function; resolved type: \(type)") }
         if let existing = typesToExts[type] {
           extensible.failType("extensible has duplicate type: \(type)", notes:
             (existing, "conflicting extension"),
             (ext, "conflicting extension"))
         }
         typesToExts[type] = ext
-        // Since we do not know if any given morph will get used, save each DefCtx and emit code lazily.
-        typesToMorphs[type] = .pending(defCtx: defCtx, val: val)
+        // Since we do not know if any given method will get used, save each DefCtx and emit code lazily.
+        typesToMethods[type] = .pending(defCtx: defCtx, val: val)
       }
       // TODO: verify that types do not intersect ambiguously.
-      let type = Type.Poly(typesToMorphs.keys.sorted())
-      return .poly(PolyRecord(type: type, typesToMorphs: typesToMorphs))
+      let type = Type.Poly(typesToMethods.keys.sorted())
+      return .poly(PolyRecord(type: type, typesToMethods: typesToMethods))
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))

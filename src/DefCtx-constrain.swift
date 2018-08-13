@@ -252,8 +252,8 @@ extension DefCtx {
     switch record.kind {
     case .lazy(let t): type = t
     case .poly(let polyRec):
-      type = typeCtx.addFreeType() // morph type.
-      constrain(actRole: .polydef, actExpr: .sym(sym), actType: polyRec.type, expType: type, "polymorph alias '\(sym.name)':")
+      type = typeCtx.addFreeType() // method type.
+      constrain(actRole: .poly, actExpr: .sym(sym), actType: polyRec.type, expType: type, "method alias '\(sym.name)':")
     case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }
@@ -275,7 +275,7 @@ extension DefCtx {
     case .all(let members): return try! .All(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
     case .any(let members): return try! .Any_(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
     case .poly(let members): return .Poly(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
-    case .polymorph(let members): return .Polymorph(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
+    case .method(let members): return .Method(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
     case .sig(let dom, let ret):
       return .Sig(dom: instantiate(dom, varsToFrees: &varsToFrees), ret: instantiate(ret, varsToFrees: &varsToFrees))
     case .struct_(let posFields, let labFields, let variants):

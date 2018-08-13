@@ -69,7 +69,7 @@ struct Side: CustomStringConvertible {
     case act
     case arg
     case exp
-    case polydef
+    case poly
     case dom
     case ret
 
@@ -78,7 +78,7 @@ struct Side: CustomStringConvertible {
       case .act: return "actual"
       case .arg: return "argument"
       case .exp: return "expected"
-      case .polydef: return "polydef"
+      case .poly: return "polyfunction"
       case .dom: return "domain"
       case .ret: return "return"
       }

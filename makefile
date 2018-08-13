@@ -37,10 +37,10 @@ src/lex.swift: ploy.legs
 	legs $^ -output $@
 
 test: build
-	iotest -fail-fast
+	iotest
 
 test/%: build
-	iotest -fail-fast $@
+	iotest $@
 
 _build:
 	mkdir -p $@

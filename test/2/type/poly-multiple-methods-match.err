@@ -1,0 +1,5 @@
+test/2/type/poly-multiple-methods-match.ploy:6:7-8: type error: method alias 'f': multiple methods of polyfunction match expected: ()%Int, ()%Str.
+  polyfunction type: Poly<()%Int ()%Str>
+  expected type: ()%^2
+|   x = f()
+        ~

@@ -60,7 +60,7 @@ extension Expr {
       let calleeType = ctx.typeFor(expr: call.callee)
       // note: we rely on the actual callee type being identical to the expected callee type.
       // this works because functions are currently never convertible,
-      // implying that polymorph selection should not in the future be made to rely on this mechanism.
+      // implying that method selection should not in the future be made to rely on this mechanism.
       // from the callee we can extract the expected arg type.
       call.callee.compile(ctx, em, indent, exp: nil, isTail: false) // exp is ok for now because sigs are not convertible.
       em.append("(")
@@ -204,7 +204,7 @@ extension Expr {
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
     case .poly(let polyRec):
-      code = polyRec.lazilyEmitMorph(globalCtx: ctx.globalCtx, sym: sym, hostName: scopeRecord.hostName, type: type)
+      code = polyRec.lazilyEmitMethod(globalCtx: ctx.globalCtx, sym: sym, hostName: scopeRecord.hostName, type: type)
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:
