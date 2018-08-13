@@ -115,7 +115,7 @@ class Parser {
   func parsePhrase(precedence: Int) -> ActForm {
     if atEnd { failEnd("reached end of file.") }
     var left = parsePoly()
-    outer: while !atEnd {
+    overLeft: while !atEnd {
       let leftSpace = left.syn.hasEndSpace
       for i in precedence..<Parser.opPrecedenceGroups.count {
         let group = Parser.opPrecedenceGroups[i]
@@ -132,7 +132,7 @@ class Parser {
             }
             let right = parsePhrase(precedence: i)
             left = handler(left, right)
-            continue outer
+            continue overLeft
           }
         }
       }
@@ -142,7 +142,7 @@ class Parser {
           if current.kind == kind {
             let right = parsePhrase(precedence: Parser.opPrecedenceGroups.count) // TODO: decide if this should call parsePoly instead.
             left = handler(left, right)
-            continue outer
+            continue overLeft
           }
         }
       }

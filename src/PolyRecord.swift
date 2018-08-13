@@ -29,12 +29,12 @@ class PolyRecord {
       let em = Emitter(ctx: globalCtx)
       let tableName = "\(morphHostName)__$table" // bling: $table: dispatch table.
       em.str(0, "const \(tableName) = {")
-      domMember: for domMember in domMembers { // lazily emit all necessary concrete morphs for this synthesized morph.
+      overDoms: for domMember in domMembers { // lazily emit all necessary concrete morphs for this synthesized morph.
         for morph in typesToMorphs.keys {
           if morph.sigDom == domMember {
             let memberHostName = lazilyEmitMorph(globalCtx: globalCtx, type: morph)
             em.str(2, "'\(domMember)': \(memberHostName),")
-            continue domMember
+            continue overDoms
           }
         }
         sym.fatal("synthesizing morph \(type): no match for domain member: \(domMember); searched \(Array(typesToMorphs.keys))")
