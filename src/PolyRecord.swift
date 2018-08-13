@@ -2,19 +2,15 @@
 
 
 class PolyRecord {
-  let sym: Sym
-  let hostName: String
   let type: Type
   var typesToMorphs: [Type:Morph]
 
-  init(sym: Sym, hostName: String, type: Type, typesToMorphs: [Type:Morph]) {
-    self.sym = sym
-    self.hostName = hostName
+  init(type: Type, typesToMorphs: [Type:Morph]) {
     self.type = type
     self.typesToMorphs = typesToMorphs
   }
 
-  func lazilyEmitMorph(globalCtx: GlobalCtx, type: Type) -> String { // returns needsLazy.
+  func lazilyEmitMorph(globalCtx: GlobalCtx, sym: Sym, hostName: String, type: Type) -> String { // returns needsLazy.
     let morphHostName = "\(hostName)__\(type.globalIndex)"
     if let morph = typesToMorphs[type] {
       if let defCtx = morph.defCtx { // Non-nil defCtx implies that this morph is not yet emitted; do so now.
@@ -32,7 +28,7 @@ class PolyRecord {
       overDoms: for domMember in domMembers { // lazily emit all necessary concrete morphs for this synthesized morph.
         for morph in typesToMorphs.keys {
           if morph.sigDom == domMember {
-            let memberHostName = lazilyEmitMorph(globalCtx: globalCtx, type: morph)
+            let memberHostName = lazilyEmitMorph(globalCtx: globalCtx, sym: sym, hostName: hostName, type: morph)
             em.str(2, "'\(domMember)': \(memberHostName),")
             continue overDoms
           }

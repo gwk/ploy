@@ -84,9 +84,8 @@ enum Def: VaryingForm {
         typesToMorphs[type] = Morph(defCtx: defCtx, val: val)
       }
       // TODO: verify that types do not intersect ambiguously.
-      let hostName = "\(space.hostPrefix)\(extensible.sym.hostName)"
       let type = Type.Poly(typesToMorphs.keys.sorted())
-      return .poly(PolyRecord(sym: sym, hostName: hostName, type: type, typesToMorphs: typesToMorphs))
+      return .poly(PolyRecord(type: type, typesToMorphs: typesToMorphs))
 
     case .hostType:
       return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
