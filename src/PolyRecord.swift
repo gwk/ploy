@@ -17,14 +17,14 @@ class PolyRecord {
   func lazilyEmitMorph(globalCtx: GlobalCtx, type: Type) -> String { // returns needsLazy.
     let morphHostName = "\(hostName)__\(type.globalIndex)"
     if let morph = typesToMorphs[type] {
-      if let defCtx = morph.defCtx { // not yet emitted; do so now.
+      if let defCtx = morph.defCtx { // Non-nil defCtx implies that this morph is not yet emitted; do so now.
         morph.defCtx = nil
         let needsLazy = compileVal(defCtx: defCtx, hostName: morphHostName, val: morph.val, type: type)
         assert(!needsLazy)
       }
     } else { // synthesize morph.
-      typesToMorphs[type] = Morph(defCtx: nil, val: .sym(sym)) // fake morph with nil defCtx marks it as emitted.
-      guard case .sig(let dom, _) = type.kind else { sym.fatal("unexpected synthesized morph: \(type)") }
+      typesToMorphs[type] = Morph(defCtx: nil, val: .sym(sym)) // Fake morph with nil defCtx marks it as emitted.
+      guard case .sig(let dom, _) = type.kind else { sym.fatal("unexpected synthesized morph type: \(type)") }
       guard case .any(let domMembers) = dom.kind else { sym.fatal("unexpected synthesized morph domain: \(dom)") }
       let em = Emitter(ctx: globalCtx)
       let tableName = "\(morphHostName)__$table" // bling: $table: dispatch table.
