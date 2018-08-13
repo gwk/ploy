@@ -70,7 +70,7 @@ enum Def: VaryingForm {
     case .extensible(let extensible):
       let exts = space.exts[sym.name, default: []]
       var typesToExts: [Type:Extension] = [:]
-      var typesToMorphs: [Type:Morph] = [:]
+      var typesToMorphs: [Type:PolyRecord.Morph] = [:]
       for ext in exts {
         let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: ext.place, val: ext.val)
         guard case .sig = type.kind else { val.failType("morph must be a function; resolved type: \(type)") }
@@ -81,7 +81,7 @@ enum Def: VaryingForm {
         }
         typesToExts[type] = ext
         // Since we do not know if any given morph will get used, save each DefCtx and emit code lazily.
-        typesToMorphs[type] = Morph(defCtx: defCtx, val: val)
+        typesToMorphs[type] = .pending(defCtx: defCtx, val: val)
       }
       // TODO: verify that types do not intersect ambiguously.
       let type = Type.Poly(typesToMorphs.keys.sorted())

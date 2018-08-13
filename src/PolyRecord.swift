@@ -2,6 +2,12 @@
 
 
 class PolyRecord {
+
+  enum Morph {
+    case compiled
+    case pending(defCtx: DefCtx, val: Expr)
+  }
+
   let type: Type
   var typesToMorphs: [Type:Morph]
 
@@ -13,22 +19,22 @@ class PolyRecord {
   func lazilyEmitMorph(globalCtx: GlobalCtx, sym: Sym, hostName: String, type: Type) -> String { // returns needsLazy.
     let morphHostName = "\(hostName)__\(type.globalIndex)"
     if let morph = typesToMorphs[type] {
-      if let defCtx = morph.defCtx { // Non-nil defCtx implies that this morph is not yet emitted; do so now.
-        morph.defCtx = nil
-        let needsLazy = compileVal(defCtx: defCtx, hostName: morphHostName, val: morph.val, type: type)
+      if case .pending(let defCtx, let val) = morph { // Not yet emitted; do so now.
+        typesToMorphs[type] = .compiled
+        let needsLazy = compileVal(defCtx: defCtx, hostName: morphHostName, val: val, type: type)
         assert(!needsLazy)
       }
     } else { // synthesize morph.
-      typesToMorphs[type] = Morph(defCtx: nil, val: .sym(sym)) // Fake morph with nil defCtx marks it as emitted.
+      typesToMorphs[type] = .compiled
       guard case .sig(let dom, _) = type.kind else { sym.fatal("unexpected synthesized morph type: \(type)") }
       guard case .any(let domMembers) = dom.kind else { sym.fatal("unexpected synthesized morph domain: \(dom)") }
       let em = Emitter(ctx: globalCtx)
       let tableName = "\(morphHostName)__$table" // bling: $table: dispatch table.
       em.str(0, "const \(tableName) = {")
       overDoms: for domMember in domMembers { // lazily emit all necessary concrete morphs for this synthesized morph.
-        for morph in typesToMorphs.keys {
-          if morph.sigDom == domMember {
-            let memberHostName = lazilyEmitMorph(globalCtx: globalCtx, sym: sym, hostName: hostName, type: morph)
+        for morphType in typesToMorphs.keys {
+          if morphType.sigDom == domMember {
+            let memberHostName = lazilyEmitMorph(globalCtx: globalCtx, sym: sym, hostName: hostName, type: morphType)
             em.str(2, "'\(domMember)': \(memberHostName),")
             continue overDoms
           }
