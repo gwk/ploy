@@ -203,8 +203,8 @@ extension Expr {
       code = "\(scopeRecord.hostName)__acc()"
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
-    case .poly(let polyRec):
-      code = polyRec.lazilyEmitMethod(globalCtx: ctx.globalCtx, sym: sym, hostName: scopeRecord.hostName, type: type)
+    case .poly(let polyRecord):
+      code = polyRecord.lazilyEmitMethod(globalCtx: ctx.globalCtx, sym: sym, hostName: scopeRecord.hostName, type: type)
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:
