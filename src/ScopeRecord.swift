@@ -28,7 +28,7 @@ struct ScopeRecord {
     switch kind {
     case .fwd: return "forward declaration"
     case .lazy: return "lazy value"
-    case .poly: return "polyfunction value"
+    case .poly: return "polyfunction"
     case .space: return "namespace"
     case .type: return "type"
     case .val: return "value"
