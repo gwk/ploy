@@ -6,7 +6,7 @@ import Darwin
 protocol Form: CustomStringConvertible, TextTreeStreamable {
   // A syntactic Form, either an ActForm or else a VaryingForm enum wrapping an ActForm.
 
-  static var expDesc: String { get } // Display description possible form contents, e.g. "case or default clause".
+  static var expDesc: String { get } // Display description of possible form contents, e.g. "case or default clause".
 
   var actForm: ActForm { get } // The actual underlying ActForm.
 

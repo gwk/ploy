@@ -9,8 +9,6 @@ protocol ActForm: Form {
 
 extension ActForm {
 
-  // Form.
-
   var actForm: ActForm { return self }
 
   static func accept(_ actForm: ActForm) -> Self? { return actForm as? Self }
