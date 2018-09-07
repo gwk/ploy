@@ -24,7 +24,7 @@ extension Form {
 
   // Form.
 
-  var actDesc: String { return actForm.actDesc }
+  var actDesc: String { return type(of:actForm).expDesc }
 
   static func expect(_ actForm: ActForm, subj: String, exp: String? = nil) -> Self {
     if let e = Self.accept(actForm) { return e }
