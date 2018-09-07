@@ -422,14 +422,14 @@ class Parser {
   func parseAnd() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let terms: [Expr] = parseForms(subj: "`and` form")
-    return And(synForSemicolon(head: head, "and"), terms: terms)
+    return And(synForSemicolon(head: head, "`and` form"), terms: terms)
   }
 
 
   func parseOr() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let terms: [Expr] = parseForms(subj: "`or` form")
-    return Or(synForSemicolon(head: head, "or"), terms: terms)
+    return Or(synForSemicolon(head: head, "`or` form"), terms: terms)
   }
 
 
@@ -437,7 +437,7 @@ class Parser {
     let head = getCurrentAndAdvance(requireSpace: true)
     let nameSym: Sym = parseForm(subj: "`extensible` form", exp: "name symbol")
     let constraints: [Expr] = parseForms(subj: "extensible type constraints")
-    return Extensible(synForSemicolon(head: head, "extensible"), sym: nameSym, constraints: constraints)
+    return Extensible(synForSemicolon(head: head, "`extensible` form"), sym: nameSym, constraints: constraints)
   }
 
 
@@ -445,20 +445,21 @@ class Parser {
     let head = getCurrentAndAdvance(requireSpace: true)
     let sig: Sig = parseForm(subj: "`fn` form", exp: "function signature")
     let body = parseBody(subj: "`fn` form")
-    return Fn(synForSemicolon(head: head, "fn"), sig: sig, body: body)
+    return Fn(synForSemicolon(head: head, "`fn` form"), sig: sig, body: body)
   }
 
   func parseHostFn() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let sig: Sig = parseForm(subj: "`fn` form", exp: "function signature")
-    let body = parseBody(subj: "`fn` form")
-    return Fn(synForSemicolon(head: head, "fn"), sig: sig, body: body)
+    let sig: Sig = parseForm(subj: "`host_fn` form", exp: "function signature")
+    let body = parseBody(subj: "`host_fn` form")
+    return Fn(synForSemicolon(head: head, "`host_fn` form"), sig: sig, body: body)
   }
+
 
   func parseHostType() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let nameSym: Sym = parseForm(subj: "`host_type` form", exp: "name symbol")
-    return HostType(synForSemicolon(head: head, "host_type"), sym: nameSym)
+    return HostType(synForSemicolon(head: head, "`host_type` form"), sym: nameSym)
   }
 
 
@@ -467,7 +468,7 @@ class Parser {
     let typeExpr: Expr = parseForm(subj: "`host_val` form")
     let (deps, code): ([Identifier], LitStr?) = parseFormsAndFinalForm(subj: "`host_val` form")
     if let code = code {
-      return HostVal(synForSemicolon(head: head, "host_val"), typeExpr: typeExpr, code: code, deps: deps)
+      return HostVal(synForSemicolon(head: head, "`host_val` form"), typeExpr: typeExpr, code: code, deps: deps)
     } else {
       failParse("`host_val` form expected final code string.")
     }
@@ -492,7 +493,7 @@ class Parser {
   func parseMatch() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let expr: Expr = parseForm(subj: "`match` form")
-    let (cases, dflt): ([Case], Default?) = parseFormsAndFinalForm(subj: "`if` form")
+    let (cases, dflt): ([Case], Default?) = parseFormsAndFinalForm(subj: "`match` form")
     return Match(synForSemicolon(head: head, "`match` form"), expr: expr, cases: cases, dflt: dflt)
   }
 
