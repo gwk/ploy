@@ -435,9 +435,9 @@ class Parser {
 
   func parseExtensible() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let nameSym: Sym = parseForm(subj: "`extensible` form", exp: "name symbol")
+    let sym: Sym = parseForm(subj: "`extensible` form", exp: "name symbol")
     let constraints: [Expr] = parseForms(subj: "extensible type constraints")
-    return Extensible(synForSemicolon(head: head, "`extensible` form"), sym: nameSym, constraints: constraints)
+    return Extensible(synForSemicolon(head: head, "`extensible` form"), sym: sym, constraints: constraints)
   }
 
 
@@ -458,8 +458,8 @@ class Parser {
 
   func parseHostType() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let nameSym: Sym = parseForm(subj: "`host_type` form", exp: "name symbol")
-    return HostType(synForSemicolon(head: head, "`host_type` form"), sym: nameSym)
+    let sym: Sym = parseForm(subj: "`host_type` form", exp: "name symbol")
+    return HostType(synForSemicolon(head: head, "`host_type` form"), sym: sym)
   }
 
 
