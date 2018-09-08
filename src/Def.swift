@@ -94,7 +94,7 @@ enum Def: VaryingForm {
       in_.fatal("`in` is not an independent definition; compileDef should never be called: \(in_).")
 
     case .pub:
-      fatalError()
+      fatalError("`pub` not yet implemented.")
 
     case .typeAlias(let typeAlias):
       return .type(typeAlias.expr.type(space, "type alias"))
