@@ -141,6 +141,7 @@ func needsLazyDef(val: Expr) -> Bool {
   case .fn, .hostVal, .litNum, .litStr: return false
   case .ann(let ann): return needsLazyDef(val: ann.expr)
   case .paren(let paren): return paren.els.any { needsLazyDef(val: $0) }
+  // TODO: scope analysis of syms and paths?
   default: return true
   }
 }
