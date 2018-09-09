@@ -3,7 +3,7 @@
 import Darwin
 
 
-protocol Form: CustomStringConvertible, TextTreeStreamable {
+protocol Form: CustomStringConvertible, CustomDebugStringConvertible, TextTreeStreamable {
   // A syntactic Form, either an ActForm or else a VaryingForm enum wrapping an ActForm.
 
   static var expDesc: String { get } // Display description of possible form contents, e.g. "case or default clause".
@@ -24,7 +24,7 @@ extension Form {
 
   // Form.
 
-  var actDesc: String { return type(of:actForm).expDesc }
+  var actDesc: String { return type(of: actForm).expDesc }
 
   static func expect(_ actForm: ActForm, subj: String, exp: String? = nil) -> Self {
     if let e = Self.accept(actForm) { return e }

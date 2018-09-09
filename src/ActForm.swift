@@ -22,9 +22,11 @@ class ActFormBase: Hashable {
 
   init(_ syn: Syn) { self.syn = syn }
 
-  // CustomStringConvertible.
+  // CustomStringConvertible, CustomDebugStringConvertible.
 
   var description: String { return "\(type(of: self)):\(syn)" }
+
+  var debugDescription: String { return "\(type(of: self)):\(syn)" }
 
   // Hashable.
 

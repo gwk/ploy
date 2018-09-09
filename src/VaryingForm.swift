@@ -10,9 +10,11 @@ extension VaryingForm {
 
   var syn: Syn { return actForm.syn }
 
-  // CustomStringConvertible.
+  // CustomStringConvertible, CustomDebugStringConvertible.
 
   var description: String { return "\(type(of: self)):\(actForm.description)" }
+
+  var debugDescription: String { return "\(type(of: self)):\(actForm.debugDescription)" }
 
   var textTreeChildren: [Any] { return actForm.textTreeChildren }
 }
