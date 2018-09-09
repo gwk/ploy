@@ -1,23 +1,23 @@
 {
   "version": "0.2.0",
   "configurations": [
-    { "name": "Compiler",
+    { "name": "Debug Ploy Compiler",
       "type": "lldb",
       "request": "launch",
-      "cwd": "${workspaceRoot}/_build/test",
-      "program": "${workspaceRoot}/_build/debug/ploy",
+      "cwd": "_build",
+      "program": "_build/debug/ploy",
       "sourceLanguages": ["swift"],
       "args": [
-        "-mapper", "${workspaceRoot}/gen-source-map",
-        "${workspaceRoot}/lib",
-        "-main", "${workspaceRoot}/test/_repro.ploy",
-        "-o", "${workspaceRoot}/_build/test/_repro",
+        "-mapper", "../gen-source-map",
+        "../lib",
+        "-main", "../test/_repro.ploy",
+        "-o", "./test/_repro",
       ],
     },
-    { "name": "Compiled JS",
+    { "name": "Debug Compiled JS",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceRoot}/_build/test",
+      "cwd": "_build/test",
       "program": "${file}",
       "args": []
     }
