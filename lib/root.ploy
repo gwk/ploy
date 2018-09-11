@@ -10,57 +10,57 @@ false = host_val Bool "false";
 
 void = fn ^T%Void;
 
-not = host_val Bool%Bool "function($) { return !$; }";
+not = fn Bool%Bool host_val Bool "!$";;
 
 polyfn dec; // TODO: constraints.
-dec += host_val Int%Int "function($) { return $ - 1; }";
+dec += fn Int%Int host_val Int "$ - 1";;
 
 polyfn inc; // TODO: constraints.
-inc += host_val Int%Int "function($) { return $ + 1; }";
+inc += fn Int%Int host_val Int "$ + 1";;
 
 polyfn add; // TODO: constraints.
-add += host_val (Int Int)%Int "function($) { return $._0 + $._1; }";
+add += fn (Int Int)%Int host_val Int "$._0 + $._1";;
 
 polyfn sub; // TODO: constraints.
-sub += host_val (Int Int)%Int "function($) { return $._0 - $._1; }";
+sub += fn (Int Int)%Int host_val Int "$._0 - $._1";;
 
 polyfn mul; // TODO: constraints.
-mul += host_val (Int Int)%Int "function($) { return $._0 * $._1; }";
+mul += fn (Int Int)%Int host_val Int "$._0 * $._1";;
 
 polyfn div; // TODO: constraints.
-div += host_val (Int Int)%Int "function($) { return $._0 / $._1; }";
+div += fn (Int Int)%Int host_val Int "$._0 / $._1";;
 
 polyfn mod; // TODO: constraints.
-mod += host_val (Int Int)%Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
+mod += fn (Int Int)%Int host_val Int "(($._0 % $._1) + $._1) % $._1";;
 
 polyfn rem; // TODO: constraints.
-rem += host_val (Int Int)%Int "function($) { return $._0 % $._1; }";
+rem += fn (Int Int)%Int host_val Int "$._0 % $._1";;
 
 
 polyfn eq; // TODO: constraints.
 eq += fn (() ())%Bool true;
-eq += host_val (Int Int)%Bool "function($) { return $._0 == $._1; }";
-eq += host_val (Str Str)%Bool "function($) { return $._0 == $._1; }";
+eq += fn (Int Int)%Bool host_val Bool "$._0 == $._1";;
+eq += fn (Str Str)%Bool host_val Bool "$._0 == $._1";;
 
 polyfn ne; // TODO: constraints.
 ne += fn (() ())%Bool false;
-ne += host_val (Int Int)%Bool "function($) { return $._0 != $._1; }";
+ne += fn (Int Int)%Bool host_val Bool "$._0 != $._1";;
 
 polyfn ge; // TODO: constraints.
 ge += fn (() ())%Bool true;
-ge += host_val (Int Int)%Bool "function($) { return $._0 >= $._1; }";
+ge += fn (Int Int)%Bool host_val Bool "$._0 >= $._1";;
 
 polyfn gt; // TODO: constraints.
 gt += fn (() ())%Bool false;
-gt += host_val (Int Int)%Bool "function($) { return $._0 >  $._1; }";
+gt += fn (Int Int)%Bool host_val Bool "$._0 >  $._1";;
 
 polyfn le; // TODO: constraints.
 le += fn (() ())%Bool true;
-le += host_val (Int Int)%Bool "function($) { return $._0 <= $._1; }";
+le += fn (Int Int)%Bool host_val Bool "$._0 <= $._1";;
 
 polyfn lt; // TODO: constraints.
 lt += fn (() ())%Bool false;
-lt += host_val (Int Int)%Bool "function($) { return $._0 <  $._1; }";
+lt += fn (Int Int)%Bool host_val Bool "$._0 <  $._1";;
 
 
 std_out = host_val FS/File "$g.process.stdout.fd";
@@ -88,7 +88,7 @@ outL += fn Int%Void out.$ out.'\n';
 outL += fn Str%Void out.$ out.'\n';
 
 
-exit = host_val Int%Never HOST/_process "function($) { HOST___process.exit($); }";
+exit = fn Int%Never host_val Never HOST/_process "HOST___process.exit($)";;
 
 fail = fn Str%Never
   errL.$
