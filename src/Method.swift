@@ -1,23 +1,19 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Method: ActFormBase, ActForm { // `+=` polyfunction extension definition.
-  let place: Place
-  let val: Expr
+class Method: ActFormBase, ActForm {
+  let sym: Sym
+  let fn: Fn
 
-  init(_ syn: Syn, place: Place, val: Expr) {
-    self.place = place
-    self.val = val
+  init(_ syn: Syn, sym: Sym, sig: Sig, body: Body) {
+    self.sym = sym
+    self.fn = Fn(syn, sig: sig, body: body)
+    // Note: we synthesize a function here so it has the same lifetime as the Method.
+    // It is unknown at this time as to whether a computed `fn` var would also work.
     super.init(syn)
   }
 
-  static func mk(l: ActForm, _ r: ActForm) -> ActForm {
-    return Method(Syn(l.syn, r.syn),
-      place: Place.expect(l, subj: "extension"),
-      val: Expr.expect(r, subj: "extension", exp: "value expression"))
-  }
+  static var expDesc: String { return "`method`" }
 
-  static var expDesc: String { return "`+=` extension" }
-
-  var textTreeChildren: [Any] { return [place, val] }
+  var textTreeChildren: [Any] { return [sym, fn] }
 }

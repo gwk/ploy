@@ -154,7 +154,6 @@ class Parser {
   static let opGroups: [[(TokenKind, (ActForm, ActForm)->ActForm)]] = [
     [ (.typeAlias, TypeAlias.mk),
       (.bind, Bind.mk),
-      (.extension_, Method.mk),
       (.case_, Case.mk)],
     [ (.union, Union.mk)],
     [ (.intersect, Intersect.mk)],
@@ -179,25 +178,26 @@ class Parser {
   func parsePoly() -> ActForm {
     switch current.kind {
     case .and: return parseAnd()
-    case .polyfn: return parseExtensible()
+    case .angleO: return parseTypeArgs()
+    case .bling: return parseBling()
+    case .braceO: return parseDo()
+    case .caret: return parseCaret()
+    case .dash: return parseDash()
     case .fn: return parseFn()
     case .host_type: return parseHostType()
     case .host_val: return parseHostVal()
     case .if_: return parseIf()
     case .in_: return parseIn()
-    case .match: return parseMatch()
-    case .or: return parseOr()
-    case .pub: return parsePub()
-    case .sym: return parseSymOrPath()
     case .int, .intDec, .intBin, .intQuat, .intOct, .intHex: return parseLitNum()
-    case .stringDQ, .stringSQ: return parseLitStr()
-    case .bling: return parseBling()
-    case .caret: return parseCaret()
-    case .dash: return parseDash()
-    case .slash: return parseSlash()
+    case .match: return parseMatch()
+    case .method: return parseMethod()
+    case .or: return parseOr()
     case .parenO: return parseParen()
-    case .angleO: return parseTypeArgs()
-    case .braceO: return parseDo()
+    case .polyfn: return parsePolyfn()
+    case .pub: return parsePub()
+    case .slash: return parseSlash()
+    case .stringDQ, .stringSQ: return parseLitStr()
+    case .sym: return parseSymOrPath()
     default: failParse("unexpected token: \(current.kind).")
     }
   }
@@ -433,14 +433,6 @@ class Parser {
   }
 
 
-  func parseExtensible() -> ActForm {
-    let head = getCurrentAndAdvance(requireSpace: true)
-    let sym: Sym = parseForm(subj: "`polyfn` form", exp: "name symbol")
-    let constraints: [Expr] = parseForms(subj: "polyfn type constraints")
-    return Polyfn(synForSemicolon(head: head, "`polyfn` form"), sym: sym, constraints: constraints)
-  }
-
-
   func parseFn() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let sig: Sig = parseForm(subj: "`fn` form", exp: "function signature")
@@ -495,6 +487,23 @@ class Parser {
     let expr: Expr = parseForm(subj: "`match` form")
     let (cases, dflt): ([Case], Default?) = parseFormsAndFinalForm(subj: "`match` form")
     return Match(synForSemicolon(head: head, "`match` form"), expr: expr, cases: cases, dflt: dflt)
+  }
+
+
+  func parseMethod() -> ActForm {
+    let head = getCurrentAndAdvance(requireSpace: true)
+    let sym: Sym = parseForm(subj: "`method` form", exp: "name symbol")
+    let sig: Sig = parseForm(subj: "`method` form", exp: "method signature")
+    let body = parseBody(subj: "`method` form")
+    return Method(synForSemicolon(head: head, "`method` form"), sym: sym, sig: sig, body: body)
+  }
+
+
+  func parsePolyfn() -> ActForm {
+    let head = getCurrentAndAdvance(requireSpace: true)
+    let sym: Sym = parseForm(subj: "`polyfn` form", exp: "name symbol")
+    let constraints: [Expr] = parseForms(subj: "polyfn type constraints")
+    return Polyfn(synForSemicolon(head: head, "`polyfn` form"), sym: sym, constraints: constraints)
   }
 
 

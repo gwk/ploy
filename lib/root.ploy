@@ -13,54 +13,54 @@ void = fn ^T%Void;
 not = fn Bool%Bool host_val Bool "!$";;
 
 polyfn dec; // TODO: constraints.
-dec += fn Int%Int host_val Int "$ - 1";;
+method dec Int%Int host_val Int "$ - 1";;
 
 polyfn inc; // TODO: constraints.
-inc += fn Int%Int host_val Int "$ + 1";;
+method inc Int%Int host_val Int "$ + 1";;
 
 polyfn add; // TODO: constraints.
-add += fn (Int Int)%Int host_val Int "$._0 + $._1";;
+method add (Int Int)%Int host_val Int "$._0 + $._1";;
 
 polyfn sub; // TODO: constraints.
-sub += fn (Int Int)%Int host_val Int "$._0 - $._1";;
+method sub (Int Int)%Int host_val Int "$._0 - $._1";;
 
 polyfn mul; // TODO: constraints.
-mul += fn (Int Int)%Int host_val Int "$._0 * $._1";;
+method mul (Int Int)%Int host_val Int "$._0 * $._1";;
 
 polyfn div; // TODO: constraints.
-div += fn (Int Int)%Int host_val Int "$._0 / $._1";;
+method div (Int Int)%Int host_val Int "$._0 / $._1";;
 
 polyfn mod; // TODO: constraints.
-mod += fn (Int Int)%Int host_val Int "(($._0 % $._1) + $._1) % $._1";;
+method mod (Int Int)%Int host_val Int "(($._0 % $._1) + $._1) % $._1";;
 
 polyfn rem; // TODO: constraints.
-rem += fn (Int Int)%Int host_val Int "$._0 % $._1";;
+method rem (Int Int)%Int host_val Int "$._0 % $._1";;
 
 
 polyfn eq; // TODO: constraints.
-eq += fn (() ())%Bool true;
-eq += fn (Int Int)%Bool host_val Bool "$._0 == $._1";;
-eq += fn (Str Str)%Bool host_val Bool "$._0 == $._1";;
+method eq (() ())%Bool true;
+method eq (Int Int)%Bool host_val Bool "$._0 == $._1";;
+method eq (Str Str)%Bool host_val Bool "$._0 == $._1";;
 
 polyfn ne; // TODO: constraints.
-ne += fn (() ())%Bool false;
-ne += fn (Int Int)%Bool host_val Bool "$._0 != $._1";;
+method ne (() ())%Bool false;
+method ne (Int Int)%Bool host_val Bool "$._0 != $._1";;
 
 polyfn ge; // TODO: constraints.
-ge += fn (() ())%Bool true;
-ge += fn (Int Int)%Bool host_val Bool "$._0 >= $._1";;
+method ge (() ())%Bool true;
+method ge (Int Int)%Bool host_val Bool "$._0 >= $._1";;
 
 polyfn gt; // TODO: constraints.
-gt += fn (() ())%Bool false;
-gt += fn (Int Int)%Bool host_val Bool "$._0 >  $._1";;
+method gt (() ())%Bool false;
+method gt (Int Int)%Bool host_val Bool "$._0 >  $._1";;
 
 polyfn le; // TODO: constraints.
-le += fn (() ())%Bool true;
-le += fn (Int Int)%Bool host_val Bool "$._0 <= $._1";;
+method le (() ())%Bool true;
+method le (Int Int)%Bool host_val Bool "$._0 <= $._1";;
 
 polyfn lt; // TODO: constraints.
-lt += fn (() ())%Bool false;
-lt += fn (Int Int)%Bool host_val Bool "$._0 <  $._1";;
+method lt (() ())%Bool false;
+method lt (Int Int)%Bool host_val Bool "$._0 <  $._1";;
 
 
 std_out = host_val FS/File "$g.process.stdout.fd";
@@ -68,24 +68,24 @@ std_err = host_val FS/File "$g.process.stderr.fd";
 
 
 polyfn err; // TODO: make generic.
-err += fn ()%Void FS/write(std_err "()");
-err += fn Str%Void FS/write(std_err $);
-err += fn Int%Void FS/write(std_err $);
+method err ()%Void FS/write(std_err "()");
+method err Str%Void FS/write(std_err $);
+method err Int%Void FS/write(std_err $);
 
 polyfn out; // TODO: make generic.
-out += fn ()%Void FS/write(std_out "()");
-out += fn Str%Void FS/write(std_out $);
-out += fn Int%Void FS/write(std_out $);
+method out ()%Void FS/write(std_out "()");
+method out Str%Void FS/write(std_out $);
+method out Int%Void FS/write(std_out $);
 
 
 polyfn errL; // TODO: make generic.
-errL += fn Int%Void err.$ err.'\n';
-errL += fn Str%Void err.$ err.'\n';
+method errL Int%Void err.$ err.'\n';
+method errL Str%Void err.$ err.'\n';
 
 
 polyfn outL; // TODO: make generic.
-outL += fn Int%Void out.$ out.'\n';
-outL += fn Str%Void out.$ out.'\n';
+method outL Int%Void out.$ out.'\n';
+method outL Str%Void out.$ out.'\n';
 
 
 exit = fn Int%Never host_val Never HOST/_process "HOST___process.exit($)";;

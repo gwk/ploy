@@ -1,6 +1,0 @@
-polyfn x;
-x += 0
-
-f = fn Int%Void;
-
-main = f.x

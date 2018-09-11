@@ -1,6 +1,6 @@
 polyfn f;
-f += fn ()%Int 0;
-f += fn ()%Str 'a';
+method f ()%Int 0;
+method f ()%Str 'a';
 
 main = {
   g = f

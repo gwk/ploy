@@ -5,7 +5,7 @@ class Space: Scope {
 
   let ctx: GlobalCtx
   var defs: [String: Def] = [:]
-  var exts: [String: [Method]] = [:]
+  var methods: [String: [Method]] = [:]
 
   init(_ ctx: GlobalCtx, pathNames: [String], parent: Space?) {
     self.ctx = ctx
@@ -54,7 +54,7 @@ class Space: Scope {
         space.add(defs: in_.defs, root: root)
 
       case .method(let method):
-        exts.appendToValue(method.place.sym.name, method)
+        methods.appendToValue(method.sym.name, method)
 
       default:
         if let existing = defs[def.sym.name] {

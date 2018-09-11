@@ -1,6 +1,6 @@
 polyfn f;
-f += fn Int%Void;
-f += fn Str%Void;
+method f Int%Void;
+method f Str%Void;
 
 
 main = {

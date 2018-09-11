@@ -55,7 +55,7 @@ enum Def: VaryingForm {
     switch self {
 
     case .bind(let bind):
-      let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: bind.place, val: bind.val)
+      let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, ann: bind.place.ann, val: bind.val)
       let hostName = "\(space.hostPrefix)\(bind.place.sym.hostName)"
       let needsLazy = compileVal(defCtx: defCtx, hostName: hostName, val: val, type: type)
       if needsLazy {
@@ -74,16 +74,16 @@ enum Def: VaryingForm {
       method.fatal("Method is not an independent definition; compileDef should never be called: \(method).")
 
     case .polyfn(let polyfn):
-      let exts = space.exts[sym.name, default: []]
+      let methods = space.methods[sym.name, default: []]
       var typesToExts: [Type:Method] = [:]
       var typesToMethods: [Type:PolyRecord.Method] = [:]
-      for method in exts {
-        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: method.place, val: method.val)
+      for method in methods {
+        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, ann: nil, val: .fn(method.fn))
         guard case .sig = type.kind else { val.failType("method must be a function; resolved type: \(type)") }
         if let existing = typesToExts[type] {
           polyfn.failType("polyfn has duplicate type: \(type)", notes:
-            (existing, "conflicting extension"),
-            (method, "conflicting extension"))
+            (existing, "conflicting method"),
+            (method, "conflicting method"))
         }
         typesToExts[type] = method
         // Since we do not know if any given method will get used, save each DefCtx and emit code lazily.
@@ -103,10 +103,10 @@ enum Def: VaryingForm {
 }
 
 
-func simplifyAndTypecheckVal(space: Space, place: Place, val: Expr) -> (DefCtx, Expr, Type) {
+func simplifyAndTypecheckVal(space: Space, ann: Ann?, val: Expr) -> (DefCtx, Expr, Type) {
   let defCtx = DefCtx(globalCtx: space.ctx)
   let simplifiedVal = val.simplify(defCtx)
-  let unresolvedType = defCtx.genConstraints(LocalScope(parent: space), expr: simplifiedVal, ann: place.ann)
+  let unresolvedType = defCtx.genConstraints(LocalScope(parent: space), expr: simplifiedVal, ann: ann)
   defCtx.typecheck()
   return (defCtx, simplifiedVal, defCtx.typeCtx.resolved(type: unresolvedType))
 }

@@ -7,8 +7,8 @@ IdentI =: Ident<T=Int>
 identI:IdentI = ident<T=Int>
 
 polyfn identE;
-identE += fn Int%Int $;
-identE += fn Str%Str $;
+method identE Int%Int $;
+method identE Str%Str $;
 
 main = {
   assert.eq(1 ident.1)

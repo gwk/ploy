@@ -43,10 +43,10 @@ func main() {
   var libPaths: [Path] = []
   var incPaths: [Path] = []
 
-  let known_exts = Set([".ploy", ".js", ""])
+  let known_methods = Set([".ploy", ".js", ""])
   for path in srcPaths {
-    if !known_exts.contains(path.ext) {
-      fail("invalid extension for path: \(path)")
+    if !known_methods.contains(path.ext) {
+      fail("invalid method for path: \(path)")
     }
   }
   let allSrcPaths = guarded { try walkPaths(roots: srcPaths) }
