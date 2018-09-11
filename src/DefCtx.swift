@@ -49,16 +49,6 @@ class DefCtx {
   }
 
 
-  func genConstraints(_ scope: LocalScope, expr: Expr, ann: Ann?) -> Type {
-    // Entry point into constraint generation.
-    var type = genConstraints(scope, expr: expr)
-    if let ann = ann {
-      type = constrainAnn(scope, expr: expr, type: type, ann: ann)
-    }
-    return type
-  }
-
-
   func constrain(
    actRole: Side.Role = .act, actExpr: Expr, actType: Type,
    expRole: Side.Role = .exp, expExpr: Expr? = nil, expType: Type, _ desc: String) {
@@ -73,6 +63,16 @@ class DefCtx {
     let accType = typeCtx.addFreeType()
     typeCtx.addConstraint(.prop(PropCon(acc: acc, accesseeType: accesseeType, accType: accType)))
     return accType
+  }
+
+
+  func genConstraints(_ scope: LocalScope, expr: Expr, ann: Ann?) -> Type {
+    // Entry point into constraint generation.
+    var type = genConstraints(scope, expr: expr)
+    if let ann = ann {
+      type = constrainAnn(scope, expr: expr, type: type, ann: ann)
+    }
+    return type
   }
 
 
