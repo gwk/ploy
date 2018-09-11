@@ -1,4 +1,4 @@
-polyfn f;
+polyfn f ^T%Void;
 method f Int%Void;
 method f Str%Void;
 

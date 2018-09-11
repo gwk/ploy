@@ -12,53 +12,53 @@ void = fn ^T%Void;
 
 not = fn Bool%Bool host_val Bool "!$";;
 
-polyfn dec; // TODO: constraints.
+polyfn dec ^T%T; // TODO: make generic.
 method dec Int%Int host_val Int "$ - 1";;
 
-polyfn inc; // TODO: constraints.
+polyfn inc ^T%T; // TODO: make generic.
 method inc Int%Int host_val Int "$ + 1";;
 
-polyfn add; // TODO: constraints.
+polyfn add (^T T)%T;
 method add (Int Int)%Int host_val Int "$._0 + $._1";;
 
-polyfn sub; // TODO: constraints.
+polyfn sub (^T T)%T;
 method sub (Int Int)%Int host_val Int "$._0 - $._1";;
 
-polyfn mul; // TODO: constraints.
+polyfn mul (^T T)%T;
 method mul (Int Int)%Int host_val Int "$._0 * $._1";;
 
-polyfn div; // TODO: constraints.
+polyfn div (^T T)%T;
 method div (Int Int)%Int host_val Int "$._0 / $._1";;
 
-polyfn mod; // TODO: constraints.
+polyfn mod (^T T)%T;
 method mod (Int Int)%Int host_val Int "(($._0 % $._1) + $._1) % $._1";;
 
-polyfn rem; // TODO: constraints.
+polyfn rem (^T T)%T;
 method rem (Int Int)%Int host_val Int "$._0 % $._1";;
 
 
-polyfn eq; // TODO: constraints.
+polyfn eq (^T T)%Bool;
 method eq (() ())%Bool true;
 method eq (Int Int)%Bool host_val Bool "$._0 == $._1";;
 method eq (Str Str)%Bool host_val Bool "$._0 == $._1";;
 
-polyfn ne; // TODO: constraints.
+polyfn ne (^T T)%Bool;
 method ne (() ())%Bool false;
 method ne (Int Int)%Bool host_val Bool "$._0 != $._1";;
 
-polyfn ge; // TODO: constraints.
+polyfn ge (^T T)%Bool;
 method ge (() ())%Bool true;
 method ge (Int Int)%Bool host_val Bool "$._0 >= $._1";;
 
-polyfn gt; // TODO: constraints.
+polyfn gt (^T T)%Bool;
 method gt (() ())%Bool false;
 method gt (Int Int)%Bool host_val Bool "$._0 >  $._1";;
 
-polyfn le; // TODO: constraints.
+polyfn le (^T T)%Bool;
 method le (() ())%Bool true;
 method le (Int Int)%Bool host_val Bool "$._0 <= $._1";;
 
-polyfn lt; // TODO: constraints.
+polyfn lt (^T T)%Bool;
 method lt (() ())%Bool false;
 method lt (Int Int)%Bool host_val Bool "$._0 <  $._1";;
 
@@ -67,23 +67,23 @@ std_out = host_val FS/File "$g.process.stdout.fd";
 std_err = host_val FS/File "$g.process.stderr.fd";
 
 
-polyfn err; // TODO: make generic.
+polyfn err ^T%Void; // TODO: make generic.
 method err ()%Void FS/write(std_err "()");
 method err Str%Void FS/write(std_err $);
 method err Int%Void FS/write(std_err $);
 
-polyfn out; // TODO: make generic.
+polyfn out ^T%Void; // TODO: make generic.
 method out ()%Void FS/write(std_out "()");
 method out Str%Void FS/write(std_out $);
 method out Int%Void FS/write(std_out $);
 
 
-polyfn errL; // TODO: make generic.
+polyfn errL ^T%Void; // TODO: make generic.
 method errL Int%Void err.$ err.'\n';
 method errL Str%Void err.$ err.'\n';
 
 
-polyfn outL; // TODO: make generic.
+polyfn outL ^T%Void; // TODO: make generic.
 method outL Int%Void out.$ out.'\n';
 method outL Str%Void out.$ out.'\n';
 

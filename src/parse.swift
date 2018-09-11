@@ -502,8 +502,8 @@ class Parser {
   func parsePolyfn() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let sym: Sym = parseForm(subj: "`polyfn` form", exp: "name symbol")
-    let constraints: [Expr] = parseForms(subj: "polyfn type constraints")
-    return Polyfn(synForSemicolon(head: head, "`polyfn` form"), sym: sym, constraints: constraints)
+    let sig: Sig = parseForm(subj: "`polyfn` form", exp: "signature")
+    return Polyfn(synForSemicolon(head: head, "`polyfn` form"), sym: sym, sig: sig)
   }
 
 

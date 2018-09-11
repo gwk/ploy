@@ -3,15 +3,15 @@
 
 class Polyfn: ActFormBase, ActForm {
   let sym: Sym
-  let constraints: [Expr]
+  let sig: Sig
 
-  init(_ syn: Syn, sym: Sym, constraints: [Expr]) {
+  init(_ syn: Syn, sym: Sym, sig: Sig) {
     self.sym = sym
-    self.constraints = constraints
+    self.sig = sig
     super.init(syn)
   }
 
   static var expDesc: String { return "`polyfn`" }
 
-  var textTreeChildren: [Any] { return [sym] + constraints }
+  var textTreeChildren: [Any] { return [sym, sig] }
 }

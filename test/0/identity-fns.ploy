@@ -6,7 +6,7 @@ ident:Ident = fn ^T%T $;
 IdentI =: Ident<T=Int>
 identI:IdentI = ident<T=Int>
 
-polyfn identE;
+polyfn identE ^T%T;
 method identE Int%Int $;
 method identE Str%Str $;
 
