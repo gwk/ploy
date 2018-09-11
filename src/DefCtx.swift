@@ -190,14 +190,16 @@ class DefCtx {
       }
 
     case .path, .sym:
-      return instantiate(genConstraintsForRef(scope, expr: expr))
+      let refType = genConstraintsForRef(scope, expr: expr)
+      return instantiate(refType)
 
     case .reif(let reif):
       // note: we do not instantiate the abstract type or add it to the context until after reification.
       let abstractType = genConstraintsForRef(scope, expr: reif.abstract)
-      let type = instantiate(reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args))
-      track(expr: reif.abstract, type: type) // so that Expr.compile can just dispatch to reif.abstract.
-      return type
+      let reifiedType = reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args)
+      let monotype = instantiate(reifiedType)
+      track(expr: reif.abstract, type: monotype) // so that Expr.compile can just dispatch to reif.abstract.
+      return monotype
 
     case .sig(let sig):
       sig.failType("type signature cannot be used as a value expression.")
