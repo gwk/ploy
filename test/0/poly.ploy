@@ -1,4 +1,4 @@
-extensible f;
+polyfn f;
 f += fn Int%Void;
 f += fn Str%Void;
 

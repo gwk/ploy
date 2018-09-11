@@ -1,4 +1,4 @@
-extensible f;
+polyfn f;
 f += fn ()%Int 0;
 f += fn ()%Str 'a';
 

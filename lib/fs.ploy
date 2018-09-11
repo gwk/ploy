@@ -7,7 +7,7 @@ host_type _WriteSync; // cannot yet treat native js multiparameter functions as 
 _fs = host_val _Fs "$require('fs')";
 _writeSync = host_val _WriteSync _fs "FS___fs.writeSync";
 
-extensible write; // TODO: constraints.
+polyfn write; // TODO: constraints.
 write += host_val (File Bool)%Void _writeSync "function($) { $assert_bool($._1); FS___writeSync($._0, $._1) }";
 write += host_val (File Int)%Void  _writeSync "function($) { $assert_int($._1);  FS___writeSync($._0, $._1) }";
 write += host_val (File Str)%Void  _writeSync "function($) { $assert_str($._1);  FS___writeSync($._0, $._1) }";

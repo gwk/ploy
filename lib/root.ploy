@@ -12,53 +12,53 @@ void = fn ^T%Void;
 
 not = host_val Bool%Bool "function($) { return !$; }";
 
-extensible dec; // TODO: constraints.
+polyfn dec; // TODO: constraints.
 dec += host_val Int%Int "function($) { return $ - 1; }";
 
-extensible inc; // TODO: constraints.
+polyfn inc; // TODO: constraints.
 inc += host_val Int%Int "function($) { return $ + 1; }";
 
-extensible add; // TODO: constraints.
+polyfn add; // TODO: constraints.
 add += host_val (Int Int)%Int "function($) { return $._0 + $._1; }";
 
-extensible sub; // TODO: constraints.
+polyfn sub; // TODO: constraints.
 sub += host_val (Int Int)%Int "function($) { return $._0 - $._1; }";
 
-extensible mul; // TODO: constraints.
+polyfn mul; // TODO: constraints.
 mul += host_val (Int Int)%Int "function($) { return $._0 * $._1; }";
 
-extensible div; // TODO: constraints.
+polyfn div; // TODO: constraints.
 div += host_val (Int Int)%Int "function($) { return $._0 / $._1; }";
 
-extensible mod; // TODO: constraints.
+polyfn mod; // TODO: constraints.
 mod += host_val (Int Int)%Int "function($) { return (($._0 % $._1) + $._1) % $._1; }";
 
-extensible rem; // TODO: constraints.
+polyfn rem; // TODO: constraints.
 rem += host_val (Int Int)%Int "function($) { return $._0 % $._1; }";
 
 
-extensible eq; // TODO: constraints.
+polyfn eq; // TODO: constraints.
 eq += fn (() ())%Bool true;
 eq += host_val (Int Int)%Bool "function($) { return $._0 == $._1; }";
 eq += host_val (Str Str)%Bool "function($) { return $._0 == $._1; }";
 
-extensible ne; // TODO: constraints.
+polyfn ne; // TODO: constraints.
 ne += fn (() ())%Bool false;
 ne += host_val (Int Int)%Bool "function($) { return $._0 != $._1; }";
 
-extensible ge; // TODO: constraints.
+polyfn ge; // TODO: constraints.
 ge += fn (() ())%Bool true;
 ge += host_val (Int Int)%Bool "function($) { return $._0 >= $._1; }";
 
-extensible gt; // TODO: constraints.
+polyfn gt; // TODO: constraints.
 gt += fn (() ())%Bool false;
 gt += host_val (Int Int)%Bool "function($) { return $._0 >  $._1; }";
 
-extensible le; // TODO: constraints.
+polyfn le; // TODO: constraints.
 le += fn (() ())%Bool true;
 le += host_val (Int Int)%Bool "function($) { return $._0 <= $._1; }";
 
-extensible lt; // TODO: constraints.
+polyfn lt; // TODO: constraints.
 lt += fn (() ())%Bool false;
 lt += host_val (Int Int)%Bool "function($) { return $._0 <  $._1; }";
 
@@ -67,23 +67,23 @@ std_out = host_val FS/File "$g.process.stdout.fd";
 std_err = host_val FS/File "$g.process.stderr.fd";
 
 
-extensible err; // TODO: make generic.
+polyfn err; // TODO: make generic.
 err += fn ()%Void FS/write(std_err "()");
 err += fn Str%Void FS/write(std_err $);
 err += fn Int%Void FS/write(std_err $);
 
-extensible out; // TODO: make generic.
+polyfn out; // TODO: make generic.
 out += fn ()%Void FS/write(std_out "()");
 out += fn Str%Void FS/write(std_out $);
 out += fn Int%Void FS/write(std_out $);
 
 
-extensible errL; // TODO: make generic.
+polyfn errL; // TODO: make generic.
 errL += fn Int%Void err.$ err.'\n';
 errL += fn Str%Void err.$ err.'\n';
 
 
-extensible outL; // TODO: make generic.
+polyfn outL; // TODO: make generic.
 outL += fn Int%Void out.$ out.'\n';
 outL += fn Str%Void out.$ out.'\n';
 

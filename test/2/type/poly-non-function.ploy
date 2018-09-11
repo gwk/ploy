@@ -1,4 +1,4 @@
-extensible x;
+polyfn x;
 x += 0
 
 f = fn Int%Void;

@@ -4,20 +4,20 @@
 enum Def: VaryingForm {
 
   case bind(Bind)
-  case ext(Extension)
-  case extensible(Extensible)
   case hostType(HostType)
   case in_(In)
+  case method(Method)
+  case polyfn(Polyfn)
   case pub(Pub)
   case typeAlias(TypeAlias)
 
   static func accept(_ actForm: ActForm) -> Def? {
     switch actForm {
     case let f as Bind:       return .bind(f)
-    case let f as Extension:  return .ext(f)
-    case let f as Extensible: return .extensible(f)
     case let f as HostType:   return .hostType(f)
     case let f as In:         return .in_(f)
+    case let f as Method:     return .method(f)
+    case let f as Polyfn:     return .polyfn(f)
     case let f as Pub:        return .pub(f)
     case let f as TypeAlias:  return .typeAlias(f)
     default: return nil
@@ -27,10 +27,10 @@ enum Def: VaryingForm {
  var actForm: ActForm {
     switch self {
     case .bind(let bind): return bind
-    case .ext(let ext): return ext
-    case .extensible(let extensible): return extensible
     case .hostType(let hostType): return hostType
     case .in_(let in_): return in_
+    case .method(let method): return method
+    case .polyfn(let polyfn): return polyfn
     case .pub(let pub): return pub
     case .typeAlias(let typeAlias): return typeAlias
     }
@@ -41,10 +41,10 @@ enum Def: VaryingForm {
   var sym: Sym {
     switch self {
     case .bind(let bind): return bind.place.sym
-    case .ext(let ext): ext.fatal("Extensions are not yet referenceable; sym should never be called: \(ext).")
-    case .extensible(let extensible): return extensible.sym
     case .hostType(let hostType): return hostType.sym
     case .in_(let in_): in_.fatal("`in` is not an individual definition; sym should never be called: \(in_).")
+    case .method(let method): method.fatal("Extensions are not yet referenceable; sym should never be called: \(method).")
+    case .polyfn(let polyfn): return polyfn.sym
     case .pub(let pub): return pub.def.sym
     case .typeAlias(let typeAlias): return typeAlias.sym
     }
@@ -64,34 +64,34 @@ enum Def: VaryingForm {
         return .val(type)
       }
 
-    case .ext(let ext):
-      ext.fatal("Extension is not an independent definition; compileDef should never be called: \(ext).")
+    case .hostType:
+      return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
 
-    case .extensible(let extensible):
+    case .in_(let in_):
+      in_.fatal("`in` is not an independent definition; compileDef should never be called: \(in_).")
+
+    case .method(let method):
+      method.fatal("Method is not an independent definition; compileDef should never be called: \(method).")
+
+    case .polyfn(let polyfn):
       let exts = space.exts[sym.name, default: []]
-      var typesToExts: [Type:Extension] = [:]
+      var typesToExts: [Type:Method] = [:]
       var typesToMethods: [Type:PolyRecord.Method] = [:]
-      for ext in exts {
-        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: ext.place, val: ext.val)
+      for method in exts {
+        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, place: method.place, val: method.val)
         guard case .sig = type.kind else { val.failType("method must be a function; resolved type: \(type)") }
         if let existing = typesToExts[type] {
-          extensible.failType("extensible has duplicate type: \(type)", notes:
+          polyfn.failType("polyfn has duplicate type: \(type)", notes:
             (existing, "conflicting extension"),
-            (ext, "conflicting extension"))
+            (method, "conflicting extension"))
         }
-        typesToExts[type] = ext
+        typesToExts[type] = method
         // Since we do not know if any given method will get used, save each DefCtx and emit code lazily.
         typesToMethods[type] = .pending(defCtx: defCtx, val: val)
       }
       // TODO: verify that types do not intersect ambiguously.
       let type = Type.Poly(typesToMethods.keys.sorted())
       return .poly(PolyRecord(type: type, typesToMethods: typesToMethods))
-
-    case .hostType:
-      return .type(Type.Host(spacePathNames: space.pathNames, sym: sym))
-
-    case .in_(let in_):
-      in_.fatal("`in` is not an independent definition; compileDef should never be called: \(in_).")
 
     case .pub:
       fatalError("`pub` not yet implemented.")

@@ -154,7 +154,7 @@ class Parser {
   static let opGroups: [[(TokenKind, (ActForm, ActForm)->ActForm)]] = [
     [ (.typeAlias, TypeAlias.mk),
       (.bind, Bind.mk),
-      (.extension_, Extension.mk),
+      (.extension_, Method.mk),
       (.case_, Case.mk)],
     [ (.union, Union.mk)],
     [ (.intersect, Intersect.mk)],
@@ -179,7 +179,7 @@ class Parser {
   func parsePoly() -> ActForm {
     switch current.kind {
     case .and: return parseAnd()
-    case .extensible: return parseExtensible()
+    case .polyfn: return parseExtensible()
     case .fn: return parseFn()
     case .host_type: return parseHostType()
     case .host_val: return parseHostVal()
@@ -435,9 +435,9 @@ class Parser {
 
   func parseExtensible() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let sym: Sym = parseForm(subj: "`extensible` form", exp: "name symbol")
-    let constraints: [Expr] = parseForms(subj: "extensible type constraints")
-    return Extensible(synForSemicolon(head: head, "`extensible` form"), sym: sym, constraints: constraints)
+    let sym: Sym = parseForm(subj: "`polyfn` form", exp: "name symbol")
+    let constraints: [Expr] = parseForms(subj: "polyfn type constraints")
+    return Polyfn(synForSemicolon(head: head, "`polyfn` form"), sym: sym, constraints: constraints)
   }
 
 

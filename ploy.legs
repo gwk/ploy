@@ -51,7 +51,6 @@ angleO: <
 angleC: >
 
 and
-extensible
 fn
 host_type
 host_val
@@ -59,4 +58,5 @@ if
 in
 match
 or
+polyfn
 pub

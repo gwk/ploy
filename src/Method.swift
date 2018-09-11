@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Extension: ActFormBase, ActForm { // `+=` polyfunction extension definition.
+class Method: ActFormBase, ActForm { // `+=` polyfunction extension definition.
   let place: Place
   let val: Expr
 
@@ -12,7 +12,7 @@ class Extension: ActFormBase, ActForm { // `+=` polyfunction extension definitio
   }
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
-    return Extension(Syn(l.syn, r.syn),
+    return Method(Syn(l.syn, r.syn),
       place: Place.expect(l, subj: "extension"),
       val: Expr.expect(r, subj: "extension", exp: "value expression"))
   }

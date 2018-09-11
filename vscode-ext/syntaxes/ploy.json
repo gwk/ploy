@@ -6,7 +6,7 @@
     { "name": "comment.line.ploy",
       "match": "//[^\\n]*" },
     { "name": "keyword.control.ploy",
-      "match": "\\b(and|extensible|host_type|host_val|if|fn|in|match|or|pub)\\b" },
+      "match": "\\b(and|host_type|host_val|if|fn|in|match|or|polyfn|pub)\\b" },
     { "name": "keyword.operator.ploy",
       "match": "[@:=.?\\^%|/$\\-]|\\+=|@\\?|=:|::" },
     { "name": "punctuation.ploy",
