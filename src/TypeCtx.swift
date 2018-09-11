@@ -464,8 +464,8 @@ struct TypeCtx {
     assert(ctx.searchError == nil)
     for (childType, parentIdx) in zip(ctx.freeUnifications, ctx.freeParents) {
       // Note: freeUnifications might now be larger than freeParents, due to addType.
-      // These get ignored, because they cannot possibly be referenced by the parent context.
-      guard let childType = childType else { continue } // not resolved by child
+      // These get ignored by zip; ok because they cannot possibly be referenced by the parent context.
+      guard let childType = childType else { continue } // not resolved by child.
       let parentType = ctx.copyForParent(type: childType)
       if case .free(let i) = parentType.kind { assert(i != parentIdx) } // a free should never point to itself.
       freeUnifications[parentIdx] = parentType
