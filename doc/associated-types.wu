@@ -1,0 +1,25 @@
+writeup v0
+
+
+# Associated Types
+
+An associated type is defined inside of a polyfunction. For example:
+| polyfn add (^A ^B)%^C
+|  Addable =: A
+|  Addend<A> =: B;
+|  Sum<A B> =: C;
+
+This definition of addition is unconventional: we abandon symmetry in order to differentiate between a primary `Addable` type, and an associated `Addend`. Why? In order to enable a more general definition of addition that admits adding a float and an integer:
+| method add (Int Int)%Int ...;
+| method add (Flt Flt)%Flt ...;
+| method add (Flt Int)%Flt ...;
+
+For the sake of exposition, assume that the reverse (Int Flt) domain is intentionally not defined; we instead wish to enforce explicit lossy conversion of floats to ints.
+
+Furthermore, note how the type definitions are auxiliary to the function. We could omit them, and instead refer to `A@add` and `B@add`.
+
+Lastly, we choose to define `Addend` in terms of `Addable`.
+
+Under this scheme, we end up with `Addable =: Flt|Int`, `Addend<Flt> =: Flt|Int`, and `Addend<Int> =: Int`.
+
+NOTE: this should be changed to be AddendL, AddendR.

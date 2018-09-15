@@ -5,14 +5,14 @@ class Where: ActFormBase, ActForm { // where: `x::p`.
   let left: Expr
   let right: Expr
 
-  init(_ syn: Syn, left: Expr, right: Expr) {
+  required init(_ syn: Syn, left: Expr, right: Expr) {
     self.left = left
     self.right = right
     super.init(syn)
   }
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
-    return Where(Syn(l.syn, r.syn),
+    return self.init(Syn(l.syn, r.syn),
       left: Expr.expect(l, subj: "where operator"),
       right: Expr.expect(r, subj: "where operator"))
   }

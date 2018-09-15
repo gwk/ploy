@@ -5,7 +5,7 @@ class TagTest: ActFormBase, ActForm { // accessor: `-tag@?val`.
   let tag: Tag
   let expr: Expr
 
-  init(_ syn: Syn, tag: Tag, expr: Expr) {
+  required init(_ syn: Syn, tag: Tag, expr: Expr) {
     self.tag = tag
     self.expr = expr
     super.init(syn)
@@ -15,7 +15,7 @@ class TagTest: ActFormBase, ActForm { // accessor: `-tag@?val`.
     guard let tag = l as? Tag else {
       l.failSyntax("tag test expected tag; received \(l.actDesc).")
     }
-    return TagTest(Syn(l.syn, r.syn),
+    return self.init(Syn(l.syn, r.syn),
       tag: tag,
       expr: Expr.expect(r, subj: "tag test", exp: "tested expression"))
   }

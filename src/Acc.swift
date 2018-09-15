@@ -5,14 +5,14 @@ class Acc: ActFormBase, ActForm { // accessor: `field@val`.
   let accessor: Accessor
   let accessee: Expr
 
-  init(_ syn: Syn, accessor: Accessor, accessee: Expr) {
+  required init(_ syn: Syn, accessor: Accessor, accessee: Expr) {
     self.accessor = accessor
     self.accessee = accessee
     super.init(syn)
   }
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
-    return Acc(Syn(l.syn, r.syn),
+    return self.init(Syn(l.syn, r.syn),
       accessor: Accessor.expect(l, subj: "access"),
       accessee: Expr.expect(r, subj: "access", exp: "accessee expression"))
   }

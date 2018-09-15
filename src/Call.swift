@@ -5,7 +5,7 @@ class Call: ActFormBase, ActForm {
   let callee: Expr
   let arg: Expr
 
-  init(_ syn: Syn, callee: Expr, arg: Expr) {
+  required init(_ syn: Syn, callee: Expr, arg: Expr) {
     self.callee = callee
     self.arg = arg
     super.init(syn)

@@ -5,7 +5,7 @@ class Reif: ActFormBase, ActForm { // type reification:  `T<A>`.
   let abstract: Expr
   let args: TypeArgs
 
-  init(_ syn: Syn, abstract: Expr, args: TypeArgs) {
+  required init(_ syn: Syn, abstract: Expr, args: TypeArgs) {
     self.abstract = abstract
     self.args = args
     super.init(syn)
