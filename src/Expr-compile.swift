@@ -95,7 +95,7 @@ extension Expr {
       }
       em.append(")")
 
-    case .intersect: fatalError()
+    case .intersection: fatalError()
 
     case .litNum(let litNum):
       em.str(indent, String(litNum.val)) // TODO: preserve written format for clarity?

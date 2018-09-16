@@ -19,7 +19,7 @@ extension Expr {
 
     case .if_(let if_): return .if_(If(if_.syn, cases: if_.cases.map{simplifyIfCase(ctx, $0)}, dflt: simplifyDefault(ctx, if_.dflt)))
 
-    case .intersect: return self
+    case .intersection: return self
     case .litNum: return self
     case .litStr: return self
     case .magic: return self

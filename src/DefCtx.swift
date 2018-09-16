@@ -161,7 +161,7 @@ class DefCtx {
       }
       return type
 
-    case .intersect: fatalError()
+    case .intersection: fatalError()
 
     case .hostVal(let hostVal):
       for dep in hostVal.deps {

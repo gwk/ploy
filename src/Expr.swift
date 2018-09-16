@@ -11,7 +11,7 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
   case fn(Fn)
   case hostVal(HostVal)
   case if_(If)
-  case intersect(Intersect)
+  case intersection(Intersection)
   case litNum(LitNum)
   case litStr(LitStr)
   case magic(Magic)
@@ -42,7 +42,7 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
     case let f as Fn:         return .fn(f)
     case let f as HostVal:    return .hostVal(f)
     case let f as If:         return .if_(f)
-    case let f as Intersect:  return .intersect(f)
+    case let f as Intersection:  return .intersection(f)
     case let f as LitNum:     return .litNum(f)
     case let f as LitStr:     return .litStr(f)
     case let f as Match:      return .match(f)
@@ -74,7 +74,7 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
     case .fn(let fn): return fn
     case .hostVal(let hostVal): return hostVal
     case .if_(let if_): return if_
-    case .intersect(let intersect): return intersect
+    case .intersection(let intersection): return intersection
     case .litNum(let litNum): return litNum
     case .litStr(let litStr): return litStr
     case .magic(let magic): return magic

@@ -34,7 +34,7 @@ public enum TokenKind: CustomStringConvertible {
   case intHex
   case intOct
   case intQuat
-  case intersect
+  case intersection
   case invalid
   case match
   case method
@@ -88,7 +88,7 @@ public enum TokenKind: CustomStringConvertible {
     case .intHex: return "intHex"
     case .intOct: return "intOct"
     case .intQuat: return "intQuat"
-    case .intersect: return "`&`"
+    case .intersection: return "`&`"
     case .invalid: return "invalid"
     case .match: return "`match`"
     case .method: return "`method`"
@@ -152,7 +152,7 @@ public struct Lexer: Sequence, IteratorProtocol {
         case 0x22: state = 5
         case 0x24: state = 6; end = pos+1; kind = .bling
         case 0x25: state = 7; end = pos+1; kind = .sig
-        case 0x26: state = 8; end = pos+1; kind = .intersect
+        case 0x26: state = 8; end = pos+1; kind = .intersection
         case 0x27: state = 9
         case 0x28: state = 10; end = pos+1; kind = .parenO
         case 0x29: state = 11; end = pos+1; kind = .parenC
@@ -238,7 +238,7 @@ public struct Lexer: Sequence, IteratorProtocol {
         break loop
       case 7: // sig.
         break loop
-      case 8: // intersect.
+      case 8: // intersection.
         break loop
       case 9: // main pre-match.
         switch byte {

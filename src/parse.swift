@@ -156,7 +156,7 @@ class Parser {
       (.bind, Bind.mk),
       (.case_, Case.mk)],
     [ (.union, Union.mk)],
-    [ (.intersect, Intersect.mk)],
+    [ (.intersection, Intersection.mk)],
     [ (.where_, Where.mk),
       (.ann, Ann.mk)],
     [ (.tagTest, TagTest.mk),

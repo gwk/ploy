@@ -28,7 +28,7 @@ bind: =
 call: .
 case: \?
 caret: \^
-intersect: \&
+intersection: \&
 sig: %
 tagTest: @\?
 typeAlias: =:

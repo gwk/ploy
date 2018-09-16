@@ -1,7 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Intersect: ActFormBase, ActForm { // intersect: `A & B`.
+class Intersection: ActFormBase, ActForm { // intersection: `A & B`.
   let left: Expr
   let right: Expr
 
@@ -13,8 +13,8 @@ class Intersect: ActFormBase, ActForm { // intersect: `A & B`.
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return self.init(Syn(l.syn, r.syn),
-      left: Expr.expect(l, subj: "intersect"),
-      right: Expr.expect(r, subj: "intersect"))
+      left: Expr.expect(l, subj: "intersection"),
+      right: Expr.expect(r, subj: "intersection"))
   }
 
   static var expDesc: String { return "`&` type intersection" }

@@ -7,9 +7,9 @@ extension Expr {
     // evaluate `self` as a type expression.
     switch self {
 
-    case .intersect(let intersect):
-      let l = intersect.left.type(scope, "intersect left operand")
-      let r = intersect.right.type(scope, "intersect right operand")
+    case .intersection(let intersection):
+      let l = intersection.left.type(scope, "intersection left operand")
+      let r = intersection.right.type(scope, "intersection right operand")
       do { return try Type.All([l, r].sorted()) }
       catch let e { failType((e as! String)) }
 
