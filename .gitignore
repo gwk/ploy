@@ -19,6 +19,7 @@ project.xcworkspace
 _build/
 _misc/
 gh-pages/
+todo.wu
 
 # Ploy.
 _repro.ploy
@@ -27,5 +28,4 @@ default.profraw
 ploy.xcodeproj/project.pbxproj
 ploy.xcodeproj/project.xcworkspace
 ploy.xcodeproj/xcuserdata
-timesheet.txt
-todo.txt
+ploy.timesheet
