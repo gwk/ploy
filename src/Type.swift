@@ -8,8 +8,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case any(members: [Type])
     case free(index: Int)
     case host
-    case poly(members: [Type])
     case method(members: [Type])
+    case poly(members: [Type])
     case prim
     case sig(dom: Type, ret: Type)
     case struct_(posFields:[Type], labFields: [TypeLabField], variants: [TypeVariant])
