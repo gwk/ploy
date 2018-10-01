@@ -16,7 +16,7 @@
     "grammars": [
       { "language": "ploy",
         "scopeName": "source.ploy",
-        "path": "./syntaxes/ploy.json"
+        "path": "./grammars/ploy.json"
       }
     ],
     "problemMatchers": [

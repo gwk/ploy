@@ -30,6 +30,9 @@ cov:
 
 gen: src/Lex.swift
 
+install-vscode:
+	craft-vscode-ext -name ploy -src vscode-ext
+
 run:
 	sh/run.sh
 
