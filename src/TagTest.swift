@@ -12,11 +12,8 @@ class TagTest: ActFormBase, ActForm { // accessor: `-tag@?val`.
   }
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
-    guard let tag = l as? Tag else {
-      l.failSyntax("tag test expected tag; received \(l.actDesc).")
-    }
     return self.init(Syn(l.syn, r.syn),
-      tag: tag,
+      tag: Tag.expect(l, subj: "tag test"),
       expr: Expr.expect(r, subj: "tag test", exp: "tested expression"))
   }
 

@@ -14,7 +14,7 @@ class Reif: ActFormBase, ActForm { // type reification:  `T<A>`.
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return self.init(Syn(l.syn, r.syn),
       abstract: Expr.expect(l, subj: "type reification"),
-      args: r as! TypeArgs)
+      args: TypeArgs.expect(r, subj: "type reification"))
   }
 
   static var expDesc: String { return "type reification" }

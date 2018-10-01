@@ -12,9 +12,8 @@ class Bind: ActFormBase, ActForm { // value binding: `name=expr`.
   }
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
-    let place = Place.expect(l, subj: "binding")
     return self.init(Syn(l.syn, r.syn),
-      place: place,
+      place: Place.expect(l, subj: "binding"),
       val: Expr.expect(r, subj: "binding", exp: "value expression"))
   }
 
