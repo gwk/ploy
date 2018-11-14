@@ -5,20 +5,18 @@
   "version": "1.0.0",
   "publisher": "gwk",
   "engines": {"vscode": "^1.0.0"},
-  "categories": ["Languages"],
+  "categories": ["Programming Languages"],
   "contributes": {
     "languages": [
       { "id": "ploy",
         "extensions": [".ploy"],
         "configuration": "./ploy-configuration.json"
-      }
-    ],
+      }],
     "grammars": [
       { "language": "ploy",
         "scopeName": "source.ploy",
         "path": "./grammars/ploy.json"
-      }
-    ],
+      }],
     "problemMatchers": [
       { "name": "ploy",
         "fileLocation": "relative",
@@ -28,8 +26,7 @@
             "line": 2,
             "column": 3,
             "message": 4
-          }
-        ]
+          }]
       }
     ]
   }
