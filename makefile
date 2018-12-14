@@ -17,7 +17,7 @@ clean:
 	rm -rf _build/*
 
 clean-lex:
-	rm src/lex.swift
+	rm -f src/lex.swift
 
 clean-ploy:
 	rm -rf _build/debug/ploy*
@@ -28,7 +28,7 @@ docs:
 cov:
 	craft-swift -Xswiftc -profile-coverage-mapping -Xswiftc -profile-generate
 
-gen: src/Lex.swift
+gen: src/lex.swift
 
 install-vscode:
 	craft-vscode-ext -name ploy -src vscode-ext
