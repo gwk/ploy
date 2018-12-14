@@ -1,12 +1,12 @@
 
-Ident =: ^T%T
+Ident =: (T::Every)%T
 
-ident:Ident = fn ^T%T $;
+ident:Ident = fn (T::Every)%T $;
 
 IdentI =: Ident<T=Int>
 identI:IdentI = ident<T=Int>
 
-polyfn identE ^T%T;
+polyfn identE (T::Every)%T;
 method identE Int%Int $;
 method identE Str%Str $;
 

@@ -4,7 +4,7 @@
 extension Expr {
 
   func simplify(_ ctx: DefCtx) -> Expr {
-    // simplify `self` by converting high-level expressions like `where` into lower-level equivalents.
+    // simplify `self` by converting high-level expressions into lower-level equivalents.
 
     switch self {
 

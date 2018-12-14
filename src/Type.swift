@@ -11,9 +11,10 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case method(members: [Type])
     case poly(members: [Type])
     case prim
+    case refinement(base: Type, pred: Expr)
     case sig(dom: Type, ret: Type)
     case struct_(posFields:[Type], labFields: [TypeLabField], variants: [TypeVariant])
-    case var_(name: String)
+    case var_(name: String, requirement: Type)
     case variantMember(variant: TypeVariant)
   }
 
@@ -106,6 +107,16 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     return Type(name, kind: .prim)
   }
 
+  class func Refinement(base: Type, pred: Expr) -> Type {
+    let desc = "\(base):?\(pred)" // TODO: figure out how to represent the predicate globally.
+    let t = memoize(desc, (
+      kind: .refinement(base: base, pred: pred),
+      frees: base.frees,
+      vars: base.vars))
+    fatalError("refinement types not yet supported: \(t)")
+  }
+
+
   class func Sig(dom: Type, ret: Type) -> Type {
     let desc = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
     return memoize(desc, (
@@ -129,9 +140,13 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       vars:  Set(memberTypes.flatMap { $0.vars })))
   }
 
-  class func Var(_ name: String) -> Type {
-    let desc = "^" + name
-    return memoize(desc, (kind: .var_(name: name), frees: [], vars: []))
+  class func Var(name: String, requirement: Type) -> Type {
+    let reqDesc = String(describing: requirement)
+    let desc = "\(name)::\(reqDesc)"
+    return memoize(desc, (
+      kind: .var_(name: name, requirement: requirement),
+      frees: requirement.frees,
+      vars: requirement.vars))
   }
 
   class func Variant(label: String, type: Type) -> Type {
@@ -189,7 +204,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
   var varName: String {
-    if case .var_(let name) = kind { return name }
+    if case .var_(let name, _) = kind { return name }
     fatalError()
   }
 
@@ -253,6 +268,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     case .any(let members): return try! .Any_(members.sortedMap{$0.transformLeaves(fn)})
     case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
     case .method(let members): return .Method(members.sortedMap{$0.transformLeaves(fn)})
+    case .refinement(let base, let pred): return .Refinement(base: base.transformLeaves(fn), pred: pred)
     case .sig(let dom, let ret): return .Sig(dom: dom.transformLeaves(fn), ret: ret.transformLeaves(fn))
     case .struct_(let posFields, let labFields, let variants):
       return .Struct(
@@ -270,7 +286,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     // TODO: optimize by checking self.vars.isEmpty?
     return transformLeaves { type in
       switch type.kind {
-      case .var_(let name):
+      case .var_(let name, let requirement):
         for (n, sub) in substitutions {
           if n == name {
             return sub

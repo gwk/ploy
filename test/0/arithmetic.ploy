@@ -21,4 +21,7 @@ main = {
   assert.eq(-1 rem(-3  2))
   assert.eq( 1 rem( 3 -2))
   assert.eq(-1 rem(-3 -2))
+
+  assert.eq(1 inc.0)
+  assert.eq(0 dec.1)
 }

@@ -32,8 +32,9 @@ intersection: \&
 sig: %
 tagTest: @\?
 typeAlias: =:
+typeVar: ::
 union: \|
-where: ::
+where: :\?
 
 slash: /
 bling: \$

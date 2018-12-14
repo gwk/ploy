@@ -8,57 +8,75 @@ Null =: ()
 true  = host_val Bool "true";
 false = host_val Bool "false";
 
-void = fn ^T%Void;
+void = fn (T::Every)%Void;
+//void = fn Every%Void; // TODO.
 
 not = fn Bool%Bool host_val Bool "!$";;
 
-polyfn dec ^T%T; // TODO: make generic.
+polyfn dec (T::Every)%T; // TODO: make generic.
 method dec Int%Int host_val Int "$ - 1";;
+//dec = fn (T::Every)%T sub($ 1); // TODO.
 
-polyfn inc ^T%T; // TODO: make generic.
+
+polyfn inc (T::Every)%T; // TODO: make generic.
 method inc Int%Int host_val Int "$ + 1";;
+//inc = fn (T::Every)%T add($ 1); // TODO.
 
-polyfn add (^T T)%T;
+polyfn add (T::Every T)%T;
+Addable =: T@add
+
 method add (Int Int)%Int host_val Int "$._0 + $._1";;
 
-polyfn sub (^T T)%T;
+polyfn sub (T::Every T)%T;
+//Subtractable =: T@sub
+
 method sub (Int Int)%Int host_val Int "$._0 - $._1";;
 
-polyfn mul (^T T)%T;
+polyfn mul (T::Every T)%T;
+//Multipliable =: T@mul
+
 method mul (Int Int)%Int host_val Int "$._0 * $._1";;
 
-polyfn div (^T T)%T;
+polyfn div (T::Every T)%T;
+//Dividable =: T@div
+
 method div (Int Int)%Int host_val Int "$._0 / $._1";;
 
-polyfn mod (^T T)%T;
+polyfn mod (T::Every T)%T;
+//Moduloable =: T@mod
+
 method mod (Int Int)%Int host_val Int "(($._0 % $._1) + $._1) % $._1";;
 
-polyfn rem (^T T)%T;
+polyfn rem (T::Every T)%T;
+//Remainderable =: T@rem
+
 method rem (Int Int)%Int host_val Int "$._0 % $._1";;
 
+//Arithmetic =: Addable & Subtractable & Multipliable & Dividable & Moduloable & Remainderable // TODO.
 
-polyfn eq (^T T)%Bool;
+
+polyfn eq (T::Every T)%Bool;
 method eq (() ())%Bool true;
 method eq (Int Int)%Bool host_val Bool "$._0 == $._1";;
 method eq (Str Str)%Bool host_val Bool "$._0 == $._1";;
 
-polyfn ne (^T T)%Bool;
+polyfn ne (T::Every T)%Bool;
 method ne (() ())%Bool false;
 method ne (Int Int)%Bool host_val Bool "$._0 != $._1";;
 
-polyfn ge (^T T)%Bool;
+polyfn ge (T::Every T)%Bool;
 method ge (() ())%Bool true;
 method ge (Int Int)%Bool host_val Bool "$._0 >= $._1";;
 
-polyfn gt (^T T)%Bool;
+polyfn gt (T::Every T)%Bool;
 method gt (() ())%Bool false;
 method gt (Int Int)%Bool host_val Bool "$._0 >  $._1";;
 
-polyfn le (^T T)%Bool;
+polyfn le (T::Every T)%Bool;
 method le (() ())%Bool true;
 method le (Int Int)%Bool host_val Bool "$._0 <= $._1";;
 
-polyfn lt (^T T)%Bool;
+polyfn lt (T::Every T)%Bool;
 method lt (() ())%Bool false;
 method lt (Int Int)%Bool host_val Bool "$._0 <  $._1";;
 
@@ -67,23 +85,23 @@ std_out = host_val FS/File "$g.process.stdout.fd";
 std_err = host_val FS/File "$g.process.stderr.fd";
 
 
-polyfn err ^T%Void; // TODO: make generic.
+polyfn err (T::Every)%Void; // TODO: make generic.
 method err ()%Void FS/write(std_err "()");
 method err Str%Void FS/write(std_err $);
 method err Int%Void FS/write(std_err $);
 
-polyfn out ^T%Void; // TODO: make generic.
+polyfn out (T::Every)%Void; // TODO: make generic.
 method out ()%Void FS/write(std_out "()");
 method out Str%Void FS/write(std_out $);
 method out Int%Void FS/write(std_out $);
 
 
-polyfn errL ^T%Void; // TODO: make generic.
+polyfn errL (T::Every)%Void; // TODO: make generic.
 method errL Int%Void err.$ err.'\n';
 method errL Str%Void err.$ err.'\n';
 
 
-polyfn outL ^T%Void; // TODO: make generic.
+polyfn outL (T::Every)%Void; // TODO: make generic.
 method outL Int%Void out.$ out.'\n';
 method outL Str%Void out.$ out.'\n';
 

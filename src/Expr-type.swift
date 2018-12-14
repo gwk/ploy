@@ -36,15 +36,21 @@ extension Expr {
 
     case .typeVar(let typeVar):
       let sym = typeVar.sym
-      let type = Type.Var(sym.name)
+      let reqType = typeVar.requirement.type(scope, "type var requirement")
+      let type = Type.Var(name: sym.name, requirement: reqType)
       _ = scope.addRecord(sym: sym, kind: .type(type))
-      return Type.Var(sym.name)
+      return Type.Var(name: sym.name, requirement: reqType)
 
     case .union(let union):
       let l = union.left.type(scope, "union left operand")
       let r = union.right.type(scope, "union right operand")
       do { return try Type.Any_([l, r].sorted()) }
       catch let e { failType(e as! String) }
+
+    case .where_(let where_):
+      let base = where_.base.type(scope, "refinement base")
+      let pred = where_.pred // TODO: this needs to be a symbol resolving to a def or something.
+      return Type.Refinement(base: base, pred: pred)
 
     default:
       failType("\(subj) expected a type; received \(actDesc).")

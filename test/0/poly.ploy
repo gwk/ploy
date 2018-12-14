@@ -1,4 +1,4 @@
-polyfn f ^T%Void;
+polyfn f (T::Every)%Void;
 method f Int%Void;
 method f Str%Void;
 

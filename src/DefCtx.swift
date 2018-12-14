@@ -233,7 +233,7 @@ class DefCtx {
       return typeVoid
 
     case .where_(let where_):
-      where_.failSyntax("where phrase cannot be used as a value expression.")
+      where_.failSyntax("\"where\" clause type refinement cannot be used as a value expression.")
     }
   }
 
@@ -315,6 +315,7 @@ class DefCtx {
     case .any(let members): return try! .Any_(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
     case .poly(let members): return .Poly(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
     case .method(let members): return .Method(members.map { self.instantiate($0, varsToFrees: &varsToFrees) })
+    case .refinement(let base, let pred): return .Refinement(base: self.instantiate(base, varsToFrees: &varsToFrees), pred: pred)
     case .sig(let dom, let ret):
       return .Sig(dom: instantiate(dom, varsToFrees: &varsToFrees), ret: instantiate(ret, varsToFrees: &varsToFrees))
     case .struct_(let posFields, let labFields, let variants):
@@ -322,7 +323,7 @@ class DefCtx {
         posFields: posFields.map { self.instantiate($0, varsToFrees: &varsToFrees) },
         labFields: labFields.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) },
         variants: variants.map { $0.substitute(type: self.instantiate($0.type, varsToFrees: &varsToFrees)) })
-    case .var_(let name):
+    case .var_(let name, let requirement):
       return varsToFrees.getOrInsert(name, dflt: { () in self.typeCtx.addFreeType() })
     case .variantMember(let variant):
       return .VariantMember(variant: variant.substitute(type: instantiate(variant.type, varsToFrees: &varsToFrees)))
