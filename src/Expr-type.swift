@@ -132,7 +132,7 @@ extension Expr {
         failType("type does not contain specified type argument: \(name)")
       }
     }
-    return type.reify(substitutions)
+    return type.substitute(substitutions)
   }
 }
 

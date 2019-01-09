@@ -281,7 +281,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
 
-  func reify(_ substitutions: [String:Type]) -> Type {
+  func substitute(_ substitutions: [String:Type]) -> Type {
     // Recursive helper assumes that the substitution makes sense.
     // TODO: optimize by checking self.vars.isEmpty?
     return transformLeaves { type in
