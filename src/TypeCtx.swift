@@ -194,7 +194,8 @@ struct TypeCtx {
     case multiple(Type, Type)
   }
 
-  mutating func resolveMethodsToExp(_ rel: RelCon, act: Type, exp: Type, morphs: [Type], merge: Bool) -> MethodResult { // returns matching morh type.
+  mutating func resolveMethodsToExp(_ rel: RelCon, act: Type, exp: Type, morphs: [Type], merge: Bool) -> MethodResult {
+    // returns matching morph type.
     let (subCtx, subExp) = subCtxAndType(parentType: exp)
     var matchMethod: Type? = nil
     var matchCtx = TypeCtx() // overwritten by matching iteration.
