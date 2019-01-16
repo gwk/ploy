@@ -75,23 +75,23 @@ enum Def: VaryingForm {
 
     case .polyfn(let polyfn):
       let methods = space.methods[sym.name, default: []]
-      var typesToExts: [Type:Method] = [:]
-      var typesToMethods: [Type:PolyRecord.Method] = [:]
+      var typesToMethods: [Type:Method] = [:]
+      var typesToMethodStatuses: [Type:PolyRecord.MethodStatus] = [:]
       for method in methods {
         let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, ann: nil, val: .fn(method.fn))
         guard case .sig = type.kind else { val.failType("method must be a function; resolved type: \(type)") }
-        if let existing = typesToExts[type] {
+        if let existing = typesToMethods[type] {
           polyfn.failType("polyfn has duplicate type: \(type)", notes:
             (existing, "conflicting method"),
             (method, "conflicting method"))
         }
-        typesToExts[type] = method
+        typesToMethods[type] = method
         // Since we do not know if any given method will get used, save each DefCtx and emit code lazily.
-        typesToMethods[type] = .pending(defCtx: defCtx, val: val)
+        typesToMethodStatuses[type] = .pending(defCtx: defCtx, val: val)
       }
       // TODO: verify that types do not intersect ambiguously.
-      let type = Type.Poly(typesToMethods.keys.sorted())
-      return .poly(PolyRecord(type: type, typesToMethods: typesToMethods))
+      let type = Type.Poly(typesToMethodStatuses.keys.sorted())
+      return .poly(PolyRecord(type: type, typesToMethodStatuses: typesToMethodStatuses))
 
     case .pub:
       fatalError("`pub` not yet implemented.")
