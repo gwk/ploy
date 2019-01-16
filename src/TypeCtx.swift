@@ -209,7 +209,12 @@ struct TypeCtx {
         exp: Side(.exp, expr: rel.exp.expr, type: subExp, chain: rel.exp.chain),
         desc: rel.desc)))
       do { try childCtx.resolveAll() }
-      catch { continue } // TODO: return search error?
+      catch let e {
+        // TODO: return search error?
+        //errL("resolveMethodsToExp: \(e)")
+        let _ = e
+        continue
+      }
       if let prev = matchMethod {
         return .multiple(prev, morph)
       }
