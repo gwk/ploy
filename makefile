@@ -3,10 +3,11 @@
 # $@: The file name of the target of the rule.
 # $<: The name of the first prerequisite.
 # $^: The names of all the prerequisites, with spaces between them.
+# $*: The match for a `%` pattern rule.
 
 .PHONY: _default all build clean cov docs gen test xcode
 
-_default: test
+_default: test-fast
 
 all: clean gen build test
 
@@ -38,6 +39,9 @@ run:
 
 src/lex.swift: ploy.legs
 	legs $^ -output $@
+
+test-fast: build
+	iotest -fail-fast
 
 test: build
 	iotest
