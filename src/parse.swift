@@ -432,14 +432,14 @@ class Parser {
 
   func parseFn() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let sig: Sig = parseForm(subj: "`fn` form", exp: "function signature")
+    let sig: Sig = parseForm(subj: "`fn` form", exp: "signature")
     let body = parseBody(subj: "`fn` form")
     return Fn(synForSemicolon(head: head, "`fn` form"), sig: sig, body: body)
   }
 
   func parseHostFn() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
-    let sig: Sig = parseForm(subj: "`host_fn` form", exp: "function signature")
+    let sig: Sig = parseForm(subj: "`host_fn` form", exp: "signature")
     let body = parseBody(subj: "`host_fn` form")
     return Fn(synForSemicolon(head: head, "`host_fn` form"), sig: sig, body: body)
   }
@@ -490,7 +490,7 @@ class Parser {
   func parseMethod() -> ActForm {
     let head = getCurrentAndAdvance(requireSpace: true)
     let sym: Sym = parseForm(subj: "`method` form", exp: "name symbol")
-    let sig: Sig = parseForm(subj: "`method` form", exp: "method signature")
+    let sig: Sig = parseForm(subj: "`method` form", exp: "signature")
     let body = parseBody(subj: "`method` form")
     return Method(synForSemicolon(head: head, "`method` form"), sym: sym, sig: sig, body: body)
   }
