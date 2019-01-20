@@ -292,7 +292,7 @@ class DefCtx {
     case .lazy(let t): type = t
     case .poly(let polyRec):
       type = typeCtx.addFreeType() // method type.
-      constrain(actRole: .poly, actExpr: .sym(sym), actType: polyRec.type, expType: type, "method alias '\(sym.name)':")
+      constrain(actRole: .poly, actExpr: .sym(sym), actType: polyRec.polytype, expType: type, "method alias '\(sym.name)':")
     case .val(let t): type = t
     default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
     }

@@ -20,7 +20,7 @@ extension Expr {
       let rec = scope.getRecord(identifier: identifier)
       switch rec.kind {
       case .poly(let polyRec):
-        acc.accessee.fatal("type access not yet implemented; polyRec.type: \(polyRec.type)")
+        acc.accessee.fatal("type access not yet implemented; polyRec.polytype: \(polyRec.polytype)")
       default: acc.accessee.failType("type accessee must refer to a polyfn.")
       }
 

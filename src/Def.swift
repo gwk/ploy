@@ -97,8 +97,8 @@ enum Def: VaryingForm {
         typesToMethodStatuses[type] = .pending(defCtx: defCtx, val: val)
       }
       // TODO: verify that types do not intersect ambiguously.
-      let type = Type.Poly(typesToMethodStatuses.keys.sorted())
-      return .poly(PolyRecord(type: type, typesToMethodStatuses: typesToMethodStatuses))
+      let polytype = Type.Poly(typesToMethodStatuses.keys.sorted())
+      return .poly(PolyRecord(polytype: polytype, typesToMethodStatuses: typesToMethodStatuses))
 
     case .pub:
       fatalError("`pub` not yet implemented.")

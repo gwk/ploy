@@ -8,11 +8,11 @@ class PolyRecord {
     case pending(defCtx: DefCtx, val: Expr)
   }
 
-  let type: Type
+  let polytype: Type
   var typesToMethodStatuses: [Type:MethodStatus]
 
-  init(type: Type, typesToMethodStatuses: [Type:MethodStatus]) {
-    self.type = type
+  init(polytype: Type, typesToMethodStatuses: [Type:MethodStatus]) {
+    self.polytype = polytype
     self.typesToMethodStatuses = typesToMethodStatuses
   }
 
