@@ -7,6 +7,23 @@ extension Expr {
     // evaluate `self` as a type expression.
     switch self {
 
+    case .acc(let acc):
+      guard case .sym(let sym) = acc.accessor else {
+        acc.accessor.failSyntax("type accessor must be a symbol.")
+      }
+      let identifier:Identifier
+      switch acc.accessee {
+      case .sym(let sym): identifier = .sym(sym)
+      case .path(let path): identifier = .path(path)
+      default: acc.accessee.failType("type accessee must be either a symbol or path.")
+      }
+      let rec = scope.getRecord(identifier: identifier)
+      switch rec.kind {
+      case .poly(let polyRec):
+        acc.accessee.fatal("type access not yet implemented; polyRec.type: \(polyRec.type)")
+      default: acc.accessee.failType("type accessee must refer to a polyfn.")
+      }
+
     case .intersection(let intersection):
       let l = intersection.left.type(scope, "intersection left operand")
       let r = intersection.right.type(scope, "intersection right operand")

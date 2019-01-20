@@ -74,7 +74,14 @@ enum Def: VaryingForm {
       method.fatal("Method is not an independent definition; compileDef should never be called: \(method).")
 
     case .polyfn(let polyfn):
-      let methods = space.methods[sym.name, default: []]
+      // Synthesize the default method if it should exist, then append any additional methods.
+      var methods: Array<Method> = []
+      if polyfn.body.isSyntacticallyPresent {
+        let dfltMethod = Method(polyfn.syn, sym: polyfn.sym, sig: polyfn.sig, body: polyfn.body)
+        methods.append(dfltMethod)
+      }
+      methods.append(contentsOf: space.methods[sym.name, default: []])
+      // Typecheck each method.
       var typesToMethods: [Type:Method] = [:]
       var typesToMethodStatuses: [Type:PolyRecord.MethodStatus] = [:]
       for method in methods {

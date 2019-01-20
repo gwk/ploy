@@ -27,4 +27,9 @@ class Body: ActFormBase, ActForm { // body of statements and final expression.
   static var expDesc: String { return "body" }
 
   var textTreeChildren: [Any] { return stmts + [expr] }
+
+  var isSyntacticallyPresent: Bool {
+    if case .void = expr { return false }
+    return true
+  }
 }

@@ -500,7 +500,8 @@ class Parser {
     let head = getCurrentAndAdvance(requireSpace: true)
     let sym: Sym = parseForm(subj: "`polyfn` form", exp: "name symbol")
     let sig: Sig = parseForm(subj: "`polyfn` form", exp: "signature")
-    return Polyfn(synForSemicolon(head: head, "`polyfn` form"), sym: sym, sig: sig)
+    let body = parseBody(subj: "`polyfn` form")
+    return Polyfn(synForSemicolon(head: head, "`polyfn` form"), sym: sym, sig: sig, body: body)
   }
 
 
