@@ -238,7 +238,7 @@ class DefCtx {
   }
 
 
-  func constrainAnn(_ scope: Scope, expr: Expr, type: Type, ann: Ann) -> Type {
+  func constrainAnn(_ scope: LocalScope, expr: Expr, type: Type, ann: Ann) -> Type {
     let annType = ann.typeExpr.type(scope, "type annotation")
     track(expr: ann.typeExpr, type: annType)
     constrain(actExpr: expr, actType: type, expExpr: ann.typeExpr, expType: annType, "annotated:")

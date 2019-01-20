@@ -3,7 +3,7 @@
 
 extension Expr {
 
-  func type(_ scope: Scope, _ subj: String) -> Type {
+  func type(_ scope: LocalScope, _ subj: String) -> Type {
     // evaluate `self` as a type expression.
     switch self {
 
@@ -75,7 +75,7 @@ extension Expr {
   }
 
 
-  func typeMemberForType(_ scope: Scope) -> TypeMember {
+  func typeMemberForType(_ scope: LocalScope) -> TypeMember {
     var isVariant = false
     var label: String? = nil
     var type = typeVoid
@@ -116,7 +116,7 @@ extension Expr {
   }
 
 
-  func typeMemberForReification(_ scope: Scope) -> TypeMember {
+  func typeMemberForReification(_ scope: LocalScope) -> TypeMember {
     switch self {
     case .bind(let bind):
       return .labField(TypeLabField(label: self.argLabel!, type: bind.val.type(scope, "type argument")))
@@ -126,7 +126,7 @@ extension Expr {
   }
 
 
-  func reify(_ scope: Scope, type: Type, typeArgs: TypeArgs) -> Type {
+  func reify(_ scope: LocalScope, type: Type, typeArgs: TypeArgs) -> Type {
     // Note: self is the "abstract" value-expr or type-expr.
     var substitutions: [String:Type] = [:]
     for arg in typeArgs.exprs {

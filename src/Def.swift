@@ -104,7 +104,7 @@ enum Def: VaryingForm {
       fatalError("`pub` not yet implemented.")
 
     case .typeAlias(let typeAlias):
-      return .type(typeAlias.expr.type(space, "type alias"))
+      return .type(typeAlias.expr.type(LocalScope(parent: space), "type alias"))
     }
   }
 }

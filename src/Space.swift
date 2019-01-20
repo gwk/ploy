@@ -17,9 +17,9 @@ class Space: Scope {
       return r
     }
     if let def = defs[sym.name] {
-      _ = addRecord(sym: sym, kind: .fwd)
+      _ = addSpaceRecord(sym: sym, kind: .fwd)
       let kind = def.compileDef(self)
-      return addRecord(sym: sym, kind: kind)
+      return addSpaceRecord(sym: sym, kind: kind)
     }
     return nil
   }
@@ -43,6 +43,10 @@ class Space: Scope {
       }
     }
     return space
+  }
+
+  func addSpaceRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
+    return super._addRecord(sym: sym, kind: kind)
   }
 
   func add(defs defsList: [Def], root: Space) {
