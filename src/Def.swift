@@ -55,7 +55,8 @@ enum Def: VaryingForm {
     switch self {
 
     case .bind(let bind):
-      let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, ann: bind.place.ann, val: bind.val)
+      let localScope = LocalScope(parent: space)
+      let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, scope: localScope, ann: bind.place.ann, val: bind.val)
       let hostName = "\(space.hostPrefix)\(bind.place.sym.hostName)"
       let needsLazy = compileVal(defCtx: defCtx, hostName: hostName, val: val, type: type)
       if needsLazy {
@@ -74,6 +75,8 @@ enum Def: VaryingForm {
       method.fatal("Method is not an independent definition; compileDef should never be called: \(method).")
 
     case .polyfn(let polyfn):
+      let localScope = LocalScope(parent: space)
+      let prototype = Expr.sig(polyfn.sig).type(localScope, "polyfn signature")
       // Synthesize the default method if it should exist, then append any additional methods.
       var methods: Array<Method> = []
       if polyfn.body.isSyntacticallyPresent {
@@ -85,7 +88,7 @@ enum Def: VaryingForm {
       var typesToMethods: [Type:Method] = [:]
       var typesToMethodStatuses: [Type:PolyRecord.MethodStatus] = [:]
       for method in methods {
-        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, ann: nil, val: .fn(method.fn))
+        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, scope: localScope, ann: nil, val: .fn(method.fn))
         guard case .sig = type.kind else { val.failType("method must be a function; resolved type: \(type)") }
         if let existing = typesToMethods[type] {
           polyfn.failType("polyfn has duplicate type: \(type)", notes:
@@ -98,7 +101,7 @@ enum Def: VaryingForm {
       }
       // TODO: verify that types do not intersect ambiguously.
       let polytype = Type.Poly(typesToMethodStatuses.keys.sorted())
-      return .poly(PolyRecord(polytype: polytype, typesToMethodStatuses: typesToMethodStatuses))
+      return .poly(PolyRecord(prototype: prototype, polytype: polytype, typesToMethodStatuses: typesToMethodStatuses))
 
     case .pub:
       fatalError("`pub` not yet implemented.")
@@ -110,10 +113,11 @@ enum Def: VaryingForm {
 }
 
 
-func simplifyAndTypecheckVal(space: Space, ann: Ann?, val: Expr) -> (DefCtx, Expr, Type) {
+func simplifyAndTypecheckVal(space: Space, scope: LocalScope, ann: Ann?, val: Expr) -> (DefCtx, Expr, Type) {
+  assert(scope.parent === space)
   let defCtx = DefCtx(globalCtx: space.ctx)
   let simplifiedVal = val.simplify(defCtx)
-  let unresolvedType = defCtx.genConstraints(LocalScope(parent: space), expr: simplifiedVal, ann: ann)
+  let unresolvedType = defCtx.genConstraints(scope, expr: simplifiedVal, ann: ann)
   defCtx.typecheck()
   return (defCtx, simplifiedVal, defCtx.typeCtx.resolved(type: unresolvedType))
 }
