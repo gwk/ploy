@@ -261,7 +261,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   }
 
 
-  func  transformLeaves(_ fn: (Type)->Type) -> Type {
+  func transformLeaves(_ fn: (Type)->Type) -> Type {
     switch self.kind {
     case .free, .host, .prim, .var_: return fn(self)
     case .all(let members): return try! .All(members.sortedMap{$0.transformLeaves(fn)})
@@ -277,7 +277,6 @@ class Type: CustomStringConvertible, Hashable, Comparable {
         variants: variants.map{$0.transformType(fn)})
     case .variantMember(let variant): return .VariantMember(variant: variant.transformType(fn))
     }
-
   }
 
 
