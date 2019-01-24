@@ -15,12 +15,11 @@ not = fn Bool%Bool host_val Bool "!$";;
 
 polyfn dec (T::Every)%T; // TODO: make generic.
 method dec Int%Int host_val Int "$ - 1";;
-//dec = fn (T::Every)%T sub($ 1); // TODO.
-
+//polyfn dec (T::Subtractable)%T sub($ 1); // TODO.
 
 polyfn inc (T::Every)%T; // TODO: make generic.
 method inc Int%Int host_val Int "$ + 1";;
-//inc = fn (T::Every)%T add($ 1); // TODO.
+//polyfn inc (T::Addable)%T add($ 1); // TODO.
 
 polyfn add (T::Every T)%T;
 Addable =: T@add
@@ -28,7 +27,7 @@ Addable =: T@add
 method add (Int Int)%Int host_val Int "$._0 + $._1";;
 
 polyfn sub (T::Every T)%T;
-//Subtractable =: T@sub
+Subtractable =: T@sub
 
 method sub (Int Int)%Int host_val Int "$._0 - $._1";;
 

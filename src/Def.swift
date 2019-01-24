@@ -77,8 +77,9 @@ enum Def: VaryingForm {
 
     case .polyfn(let polyfn):
       let path = "\(space.name)/\(polyfn.sym.name)"
-      let localScope = LocalScope(parent: space)
-      let prototype = Expr.sig(polyfn.sig).type(localScope, "polyfn signature")
+      let protoSig = Expr.sig(polyfn.sig)
+      let protoScope = LocalScope(parent: space)
+      let prototype = protoSig.type(protoScope, "polyfn prototype signature")
       // Synthesize the default method if it should exist, then append any additional methods.
       var methods: Array<Method> = []
       if polyfn.body.isSyntacticallyPresent {
@@ -90,6 +91,7 @@ enum Def: VaryingForm {
       var typesToMethods: [Type:Method] = [:]
       var typesToMethodStatuses: [Type:PolyRecord.MethodStatus] = [:]
       for method in methods {
+        let localScope = LocalScope(parent: space)
         let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, scope: localScope, path: path, ann: nil, val: .fn(method.fn))
         guard case .sig = type.kind else { val.failType("method must be a function; resolved type: \(type)") }
         if let existing = typesToMethods[type] {
@@ -103,7 +105,7 @@ enum Def: VaryingForm {
       }
       // TODO: verify that types do not intersect ambiguously.
       let polytype = Type.Poly(typesToMethodStatuses.keys.sorted())
-      return .poly(PolyRecord(prototype: prototype, polytype: polytype, typesToMethodStatuses: typesToMethodStatuses))
+      return .poly(PolyRecord(protoSig: protoSig, prototype: prototype, polytype: polytype, typesToMethodStatuses: typesToMethodStatuses))
 
     case .pub:
       fatalError("`pub` not yet implemented.")

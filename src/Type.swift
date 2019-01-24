@@ -299,6 +299,17 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 }
 
 
+func mergePoly(members: [Type]) throws -> Type {
+  var doms:[Type] = []
+  var rets:[Type] = []
+  for member in members {
+    guard case .sig(let dom, let ret) = member.kind else { fatalError("non-sig poly member: \(member)") }
+    doms.append(dom)
+    rets.append(ret)
+  }
+  return .Sig(dom: try .Any_(doms), ret: try .Any_(rets)) // Note: ret is a union, not an intersection.
+}
+
 
 let typeNever = try! Type.Any_([]) // aka "Bottom type"; the type with no values.
 let typeEvery = try! Type.All([]) // aka "Top type"; the set of all objects.
