@@ -1,9 +1,13 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
+var globalDbgMethodCtxNames: Set<String> = []
+
+
 class DefCtx {
 
   let globalCtx: GlobalCtx
+  let path: String
   var typeCtx = TypeCtx()
 
   var exprTypes = [Expr:Type]() // maps expressions to their types.
@@ -11,8 +15,13 @@ class DefCtx {
 
   private var genSymCount = 0
 
-  init(globalCtx: GlobalCtx) {
+  init(globalCtx: GlobalCtx, path: String) {
     self.globalCtx = globalCtx
+    self.path = path
+    if globalDbgMethodCtxNames.contains(path) {
+      errSL("DEBUG: will dump method resolution errors for \(path)")
+      typeCtx.dumpMethodResolutionErrors = true
+    }
   }
 
 

@@ -56,7 +56,8 @@ enum Def: VaryingForm {
 
     case .bind(let bind):
       let localScope = LocalScope(parent: space)
-      let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, scope: localScope, ann: bind.place.ann, val: bind.val)
+      let path = "\(space.name)/\(bind.place.sym.name)"
+      let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, scope: localScope, path: path, ann: bind.place.ann, val: bind.val)
       let hostName = "\(space.hostPrefix)\(bind.place.sym.hostName)"
       let needsLazy = compileVal(defCtx: defCtx, hostName: hostName, val: val, type: type)
       if needsLazy {
@@ -75,6 +76,7 @@ enum Def: VaryingForm {
       method.fatal("Method is not an independent definition; compileDef should never be called: \(method).")
 
     case .polyfn(let polyfn):
+      let path = "\(space.name)/\(polyfn.sym.name)"
       let localScope = LocalScope(parent: space)
       let prototype = Expr.sig(polyfn.sig).type(localScope, "polyfn signature")
       // Synthesize the default method if it should exist, then append any additional methods.
@@ -88,7 +90,7 @@ enum Def: VaryingForm {
       var typesToMethods: [Type:Method] = [:]
       var typesToMethodStatuses: [Type:PolyRecord.MethodStatus] = [:]
       for method in methods {
-        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, scope: localScope, ann: nil, val: .fn(method.fn))
+        let (defCtx, val, type) = simplifyAndTypecheckVal(space: space, scope: localScope, path: path, ann: nil, val: .fn(method.fn))
         guard case .sig = type.kind else { val.failType("method must be a function; resolved type: \(type)") }
         if let existing = typesToMethods[type] {
           polyfn.failType("polyfn has duplicate type: \(type)", notes:
@@ -113,9 +115,9 @@ enum Def: VaryingForm {
 }
 
 
-func simplifyAndTypecheckVal(space: Space, scope: LocalScope, ann: Ann?, val: Expr) -> (DefCtx, Expr, Type) {
+func simplifyAndTypecheckVal(space: Space, scope: LocalScope, path: String, ann: Ann?, val: Expr) -> (DefCtx, Expr, Type) {
   assert(scope.parent === space)
-  let defCtx = DefCtx(globalCtx: space.ctx)
+  let defCtx = DefCtx(globalCtx: space.ctx, path: path)
   let simplifiedVal = val.simplify(defCtx)
   let unresolvedType = defCtx.genConstraints(scope, expr: simplifiedVal, ann: ann)
   defCtx.typecheck()

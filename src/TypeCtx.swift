@@ -9,7 +9,7 @@ struct TypeCtx {
   var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
 
   var searchError: RelCon.Err? = nil
-
+  var dumpMethodResolutionErrors = false
 
   mutating func addFreeType() -> Type {
     let idx = freeUnifications.count
@@ -203,16 +203,17 @@ struct TypeCtx {
       assert(morph.isResolved)
       assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles?
       var childCtx = subCtx // copy.
-      // errL(""); childCtx.describeState("MORPH: \(morph); EXP: \(subExp)")
+      //errL(""); childCtx.describeState("MORPH: \(morph); EXP: \(subExp)")
       childCtx.addConstraint(.rel(RelCon(
         act: Side(.act, expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)), // ok to pass morph directly, because it is resolved.
         exp: Side(.exp, expr: rel.exp.expr, type: subExp, chain: rel.exp.chain),
         desc: rel.desc)))
       do { try childCtx.resolveAll() }
       catch let e {
+        if childCtx.dumpMethodResolutionErrors {
+          errL("DEBUG: PLOY_DBG_METHODS: morph: \(morph); error: \(e)")
+        }
         // TODO: return search error?
-        //errL("resolveMethodsToExp: \(e)")
-        let _ = e
         continue
       }
       if let prev = matchMethod {
@@ -461,6 +462,7 @@ struct TypeCtx {
 
   func subCtxAndType(parentType: Type) -> (TypeCtx, Type) {
     var subCtx = TypeCtx()
+    subCtx.dumpMethodResolutionErrors = dumpMethodResolutionErrors
     let childType = subCtx.copy(parentType: parentType)
     return (subCtx, childType)
   }

@@ -36,6 +36,12 @@ func main() {
 
   check(opt == nil, "dangling option flag: '\(opt!)'")
 
+  for (key, val) in processEnvironment {
+    if key == "PLOY_DBG_METHODS" {
+      globalDbgMethodCtxNames = Set(val.split(" "))
+    }
+  }
+
   guard let mapperPath = Path(opts["-mapper"]) else { fail("`-mapper mapper-path` argument is required.") }
   guard let mainPath = Path(opts["-main"]) else { fail("`-main main-src-path` argument is required.") }
   guard let outPath = Path(opts["-o"]) else { fail("`-o out-path` argument is required.") }
