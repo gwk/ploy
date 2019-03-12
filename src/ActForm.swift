@@ -32,5 +32,5 @@ class ActFormBase: Hashable {
 
   static func ==(l: ActFormBase, r: ActFormBase) -> Bool { return l === r }
 
-  var hashValue: Int { return ObjectIdentifier(self).hashValue }
+  func hash(into hasher: inout Hasher) { hasher.combine(ObjectIdentifier(self)) }
 }
