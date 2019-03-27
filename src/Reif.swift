@@ -2,10 +2,10 @@
 
 
 class Reif: ActFormBase, ActForm { // type reification:  `T<A>`.
-  let abstract: Expr
+  let abstract: Identifier
   let args: TypeArgs
 
-  required init(_ syn: Syn, abstract: Expr, args: TypeArgs) {
+  required init(_ syn: Syn, abstract: Identifier, args: TypeArgs) {
     self.abstract = abstract
     self.args = args
     super.init(syn)
@@ -13,7 +13,7 @@ class Reif: ActFormBase, ActForm { // type reification:  `T<A>`.
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return self.init(Syn(l.syn, r.syn),
-      abstract: Expr.expect(l, subj: "type reification"),
+      abstract: Identifier.expect(l, subj: "type reification"),
       args: TypeArgs.expect(r, subj: "type reification"))
   }
 

@@ -43,7 +43,7 @@ extension Expr {
       return scope.typeBinding(path: path, subj: subj)
 
     case .reif(let reif):
-      let abstractType = reif.abstract.type(scope, "reification abstract type")
+      let abstractType = reif.abstract.expr.type(scope, "reification abstract type")
       return reify(scope, type: abstractType, typeArgs: reif.args)
 
     case .sig(let sig):

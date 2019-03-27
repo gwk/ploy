@@ -204,10 +204,11 @@ class DefCtx {
 
     case .reif(let reif):
       // note: we do not instantiate the abstract type or add it to the context until after reification.
-      let abstractType = genConstraintsForRef(scope, expr: reif.abstract)
-      let reifiedType = reif.abstract.reify(scope, type: abstractType, typeArgs: reif.args)
+      let abstractType = genConstraintsForRef(scope, expr: reif.abstract.expr)
+      let abstractExpr = reif.abstract.expr
+      let reifiedType = abstractExpr.reify(scope, type: abstractType, typeArgs: reif.args)
       let monotype = instantiate(type: reifiedType)
-      track(expr: reif.abstract, type: monotype) // so that Expr.compile can just dispatch to reif.abstract.
+      track(expr: abstractExpr, type: monotype) // so that Expr.compile can just dispatch to reif.abstract.
       return monotype
 
     case .sig(let sig):
@@ -298,7 +299,7 @@ class DefCtx {
       sym = s
       record = scope.getRecord(sym: s)
     default:
-      expr.failSyntax("reification abstract expression must be a symbol or path; received \(expr.actDesc)")
+      expr.fatal("reification abstract expression must be a symbol or path; received \(expr.actDesc)")
     }
     symRecords[sym] = record
     let type: Type

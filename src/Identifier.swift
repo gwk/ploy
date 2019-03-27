@@ -26,6 +26,13 @@ enum Identifier: VaryingForm {
     return syms.map({$0.name}).joined(separator: "/")
   }
 
+  var expr: Expr {
+    switch self {
+      case .path(let path): return .path(path)
+      case .sym(let sym): return .sym(sym)
+    }
+  }
+
   var syms: [Sym] {
     switch self {
     case .path(let path): return path.syms
