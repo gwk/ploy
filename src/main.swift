@@ -39,6 +39,7 @@ func main() {
   for (key, val) in processEnvironment {
     if key == "PLOY_DBG_METHODS" {
       globalDbgMethodCtxNames = Set(val.split(" "))
+      errL("PLOY_DBG_METHODS: ", globalDbgMethodCtxNames)
     }
   }
 
