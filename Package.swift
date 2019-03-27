@@ -1,4 +1,4 @@
-// swift-tools-version:4.1
+// swift-tools-version:5.0
 // © 2016 George King. Permission to use this file is granted in license-ploy.txt.
 
 
@@ -6,6 +6,7 @@ import PackageDescription
 
 let package = Package(
   name: "ploy",
+  platforms: [.macOS(.v10_14)],
   products: [
     .executable(name: "ploy", targets: ["ploy"])
   ],
@@ -81,5 +82,5 @@ let package = Package(
         "quilt/src/Quilt/func.swift",
         "quilt/src/Quilt/sys.swift",
       ])],
-  swiftLanguageVersions: [4]
+  swiftLanguageVersions: [.v5]
 )
