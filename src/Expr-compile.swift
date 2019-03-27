@@ -113,7 +113,7 @@ extension Expr {
         case "\\":    s.append("\\\\")
         default:
           if code < " " || code > "~" {
-            s.append("\\u{\(Int(code.value).hex)}")
+            s.append("\\u{\(Int(code.value).hex())}")
           } else {
             s.append(Character(code))
           }
