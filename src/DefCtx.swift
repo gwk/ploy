@@ -198,7 +198,7 @@ class DefCtx {
         self.typeMemberForLiteral(scope, arg: $0)
       }
 
-    case .path, .sym:
+    case .path:
       let refType = genConstraintsForRef(scope, expr: expr)
       return instantiate(type: refType)
 
@@ -212,6 +212,11 @@ class DefCtx {
 
     case .sig(let sig):
       sig.failType("type signature cannot be used as a value expression.")
+
+    case .sym(let sym):
+      let refType = genConstraintsForRef(scope, expr: expr)
+      if sym.name == "$" { return refType } // An abstract input/parameter type must remain abstract.
+      return instantiate(type: refType)
 
     case .tag(let tag): // bare morph constructor.
       return Type.Variant(label: tag.sym.name, type: typeNull)
