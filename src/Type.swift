@@ -142,7 +142,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
 
   class func Var(name: String, requirement: Type) -> Type {
     let reqDesc = String(describing: requirement)
-    let desc = "\(name)::\(reqDesc)"
+    let desc = "(\(name)::\(reqDesc))"
     return memoize(desc, (
       kind: .var_(name: name, requirement: requirement),
       frees: requirement.frees,
