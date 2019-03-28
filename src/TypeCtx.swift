@@ -128,6 +128,8 @@ struct TypeCtx {
 
     case (.poly, .method): throw rel.error({"\($0) to \($1) polyfunctions not yet implemented"})
 
+    case (.poly, .all): throw rel.error({"\($0) to \($1) intersection not yet implemented"})
+
     case (.poly, .any): throw rel.error({"\($0) to \($1) union not yet implemented"})
 
     case (.poly, _): throw rel.error({"\($0) cannot resolve against \($1) type"})
@@ -149,6 +151,22 @@ struct TypeCtx {
         freeNevers.insert(ie)
       } else {
         unify(freeIndex: ie, to: act)
+      }
+      return true
+
+    case (.all(let actMembers), .all(let expMembers)):
+      for expMember in expMembers {
+        if !actMembers.contains(expMember) {
+          throw rel.error({"\($0) `All` type is not superset of `Any` \($1) type; missing member: `\(expMember)`"})
+        }
+      }
+      return true
+
+    case (_, .all(let expMembers)):
+      for expMember in expMembers {
+        try resolveSub(rel,
+          actType: act, actDesc: "type",
+          expType: expMember, expDesc: "`All` member")
       }
       return true
 

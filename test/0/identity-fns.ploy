@@ -1,14 +1,12 @@
 
 Ident =: (T::Every)%T
 
-ident:Ident = fn (T::Every)%T $;
+polyfn ident (T::Every)%T; // TODO: test generic implementation.
+method ident Int%Int $;
+method ident Str%Str $;
 
-IdentI =: Ident<T=Int>
-identI:IdentI = ident<T=Int>
-
-polyfn identE (T::Every)%T;
-method identE Int%Int $;
-method identE Str%Str $;
+//IdentI =: Ident<T=Int>
+//identI:IdentI = ident<T=Int>
 
 main = {
   assert.eq(1 ident.1)
@@ -18,9 +16,7 @@ main = {
   assert.eq(1 one)
   assert.eq(ident.1 ident.1)
 
-  assert.eq(1 identI.1)
-  assert.eq(identI.1 identI.1)
-
-  assert.eq(identE.1 identE.1)
+  //assert.eq(1 identI.1)
+  //assert.eq(identI.1 identI.1)
 }
 

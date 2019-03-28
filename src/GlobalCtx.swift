@@ -100,6 +100,9 @@ class GlobalCtx {
       self.addConstructor(type: cast)
       emitConvToUnion(em, castIdx: cast.globalIndex, orig: orig, castMembers: castMembers)
 
+    case (_, .all(let castMembers)):
+      em.str(2, "$o") // For now, no real conversion.
+
     default: fatalError("impossible conversion: \(conv)")
     }
     em.flush()
