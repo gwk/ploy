@@ -169,7 +169,7 @@ class Type: CustomStringConvertible, Hashable, Comparable {
       case .all(let members): merged.insert(contentsOf: members)
       case .any: throw "type intersection contains union member: `\(type)`"
       case .poly: throw "type intersection contains poly member: `\(type)`"
-      default: throw "type intersection not yet implemented." // merged.append(type)
+      default: merged.insert(type)
       }
     }
     return merged.sorted()
