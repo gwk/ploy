@@ -184,9 +184,6 @@ struct TypeCtx {
       }
       return true
 
-    case (.prim, _) where act == typeNever: // never is compatible with any expected type.
-      return true
-
     case (.method, .sig):
       return try resolveMethodToSig(rel, act: act, exp: exp)
 
