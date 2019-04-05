@@ -423,8 +423,8 @@ struct TypeCtx {
     for actVariant in actVariants {
       if actVariant.label == expVariant.label {
         try resolveSub(rel,
-          actExpr: nil, actType: actVariant.type, actDesc: "variant",
-          expExpr: nil, expType: expVariant.type, expDesc: "variant")
+          actType: actVariant.type, actDesc: "variant",
+          expType: expVariant.type, expDesc: "variant")
       return true
       }
     }
