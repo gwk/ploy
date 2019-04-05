@@ -140,7 +140,7 @@ struct TypeCtx {
       return true
 
     case (.free(let ia), _):
-      // If expected is Never then unify; the caller expects to never return.
+      // If expected is Never then it is ok to unify; the caller expects to never return.
       unify(freeIndex: ia, to: exp);
       return true
 
