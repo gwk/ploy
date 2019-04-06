@@ -209,12 +209,12 @@ struct TypeCtx {
     case multiple(Type, Type)
   }
 
-  mutating func resolveMethodsToExp(_ rel: RelCon, act: Type, exp: Type, morphs: [Type], merge: Bool) -> MethodResult {
+  mutating func resolveMethodsToExp(_ rel: RelCon, act: Type, exp: Type, actMorphs: [Type], merge: Bool) -> MethodResult {
     // returns matching morph type.
     let (subCtx, subExp) = subCtxAndType(parentType: exp)
     var matchMethod: Type? = nil
     var matchCtx = TypeCtx() // overwritten by matching iteration.
-    for morph in morphs {
+    for morph in actMorphs {
       assert(morph.isResolved)
       assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles?
       var childCtx = subCtx // copy.
@@ -245,10 +245,10 @@ struct TypeCtx {
 
 
   mutating func resolvePolyToSig(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
-    guard case .poly(let morphs) = act.kind else { fatalError() }
+    guard case .poly(let actMorphs) = act.kind else { fatalError() }
     guard case .sig(let expDom, let expRet) = exp.kind else { fatalError() }
 
-    switch resolveMethodsToExp(rel, act: act, exp: exp, morphs: morphs, merge: true) {
+    switch resolveMethodsToExp(rel, act: act, exp: exp, actMorphs: actMorphs, merge: true) {
     case .none: break
     case .match: return true
     case .multiple(let prev, let match):
@@ -267,7 +267,7 @@ struct TypeCtx {
     var reqMethods: [Type] = [] // subset of morphs that are relevant.
     for expDomMember in expDomMembers {
       let expMemberSig = Type.Sig(dom: expDomMember, ret: expRet)
-      switch resolveMethodsToExp(rel, act: act, exp: expMemberSig, morphs: morphs, merge: false) {
+      switch resolveMethodsToExp(rel, act: act, exp: expMemberSig, actMorphs: actMorphs, merge: false) {
       case .none:
         throw rel.error({"no morphs of \($0) match \($1) domain member: \(expDomMember)"})
       case .match(let morph):
@@ -286,10 +286,10 @@ struct TypeCtx {
 
 
   mutating func resolveMethodToSig(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
-    guard case .method(let morphs) = act.kind else { fatalError() }
+    guard case .method(let actMorphs) = act.kind else { fatalError() }
     guard case .sig(let expDom, let expRet) = exp.kind else { fatalError() }
 
-    switch resolveMethodsToExp(rel, act: act, exp: exp, morphs: morphs, merge: true) {
+    switch resolveMethodsToExp(rel, act: act, exp: exp, actMorphs: actMorphs, merge: true) {
     case .none: break
     case .match: return true
     case .multiple(let m0, let m1):
@@ -308,7 +308,7 @@ struct TypeCtx {
     var reqMethods: [Type] = [] // subset of morphs that are relevant.
     for expDomMember in expDomMembers {
       let expMemberSig = Type.Sig(dom: expDomMember, ret: expRet)
-      switch resolveMethodsToExp(rel, act: act, exp: expMemberSig, morphs: morphs, merge: false) {
+      switch resolveMethodsToExp(rel, act: act, exp: expMemberSig, actMorphs: actMorphs, merge: false) {
       case .none:
         throw rel.error({"no methods of \($0) polyfunction match \($1) domain: \(expDom)"})
       case .match(let match):
