@@ -19,7 +19,7 @@ class DefCtx {
     self.globalCtx = globalCtx
     self.path = path
     if globalDbgMethodCtxNames.contains(path) {
-      errSL("DEBUG: will dump method resolution errors for `\(path)`.")
+      errSL("PLOY_DBG_METHODS: will dump method resolution errors while typechecking `\(path)`.")
       typeCtx.dumpMethodResolutionErrors = true
     }
   }

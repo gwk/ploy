@@ -31,13 +31,17 @@ extension Form {
     actForm.failSyntax("\(subj) expected \(exp ?? Self.expDesc); received \(actForm.actDesc).")
   }
 
-  func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) -> Never {
+  func diagnostic(prefix: String, msg: String, notes: [(Form?, String)] = []) {
     syn.errDiagnostic(prefix: prefix, msg: msg)
     for (form, msg) in notes {
       if let form = form {
         form.syn.errDiagnostic(prefix: "note", msg: msg)
       }
     }
+  }
+
+  func failForm(prefix: String, msg: String, notes: [(Form?, String)] = []) -> Never {
+    diagnostic(prefix: prefix, msg: msg, notes: notes)
     exit(1)
   }
 
