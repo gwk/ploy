@@ -30,14 +30,14 @@ class Scope: CustomStringConvertible {
     return scope as! Space
   }
 
-  func _addRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
+  func _addRecord(sym: Sym, isLocal: Bool, kind: ScopeRecord.Kind) -> ScopeRecord {
     if let existing = bindings[sym.name] {
       switch existing.kind {
       case .fwd: assert(existing.sym?.name == sym.name)
       default: sym.failRedef(original: existing.sym)
       }
     }
-    let r = ScopeRecord(name: sym.name, hostName: hostPrefix + sym.hostName, sym: sym, kind: kind)
+    let r = ScopeRecord(name: sym.name, hostName: hostPrefix + sym.hostName, sym: sym, isLocal: isLocal, kind: kind)
     bindings[sym.name] = r
     return r
   }

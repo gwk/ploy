@@ -152,7 +152,7 @@ extension Expr {
       }
 
     case .path(let path):
-      compileSym(ctx, em, indent, sym: path.syms.last!, type: type)
+      compileSym(ctx, em, indent, sym: path.lastSym, type: type)
 
     case .reif(let reif):
       reif.abstract.expr.compile(ctx, em, indent, exp: exp, isTail: isTail)

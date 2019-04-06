@@ -27,4 +27,6 @@ class SymPath: ActFormBase, ActForm { // path: `LIB/name`.
   static var expDesc: String { return "symbol path" }
 
   var textTreeChildren: [Any] { return [] }
+
+  var lastSym: Sym { return syms.last! }
 }

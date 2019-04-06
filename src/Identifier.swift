@@ -39,6 +39,13 @@ enum Identifier: VaryingForm {
     case .sym(let sym): return [sym]
     }
   }
+
+  var lastSym: Sym {
+    switch self {
+    case .path(let path): return path.syms.last!
+    case .sym(let sym): return sym
+    }
+  }
 }
 
 

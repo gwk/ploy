@@ -37,7 +37,7 @@ class Space: Scope {
         let name = sym.name
         let pathNames = identifierSyms[0...i].map { $0.name }
         space = Space(ctx, pathNames: pathNames, parent: self) // ROOT is always the parent of any named space.
-        let record = ScopeRecord(name: name, hostName: space.hostPrefix + sym.hostName, sym: nil, kind: .space(space))
+        let record = ScopeRecord(name: name, hostName: space.hostPrefix + sym.hostName, sym: nil, isLocal: false, kind: .space(space))
         // note: sym is nil because `in` forms can be declared in multiple locations.
         bindings.insertNew(name, value: record)
       }
@@ -46,7 +46,7 @@ class Space: Scope {
   }
 
   func addSpaceRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
-    return super._addRecord(sym: sym, kind: kind)
+    return super._addRecord(sym: sym, isLocal: false, kind: kind)
   }
 
   func add(defs defsList: [Def], root: Space) {

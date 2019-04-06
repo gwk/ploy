@@ -198,26 +198,37 @@ class DefCtx {
         self.typeMemberForLiteral(scope, arg: $0)
       }
 
-    case .path:
-      let refType = genConstraintsForRef(scope, expr: expr)
-      return instantiate(expr: expr, type: refType)
+    case .path(let path):
+      return localTypeFor(scope: scope, identifier: .path(path))
 
     case .reif(let reif):
-      // note: we do not instantiate the abstract type or add it to the context until after reification.
-      let abstractType = genConstraintsForRef(scope, expr: reif.abstract.expr)
-      let abstractExpr = reif.abstract.expr
-      let reifiedType = abstractExpr.reify(scope, type: abstractType, typeArgs: reif.args)
-      let monotype = instantiate(expr: expr, type: reifiedType)
-      track(expr: abstractExpr, type: monotype) // so that Expr.compile can just dispatch to reif.abstract.
-      return monotype
+      let record = scope.getRecord(identifier: reif.abstract)
+      symRecords[reif.abstract.lastSym] = record
+      let abstractType: Type
+      switch record.kind {
+        case .poly(let polyRec):
+          abstractType = typeCtx.addFreeType() // Method type. Any necessary instantiation happens during method resolution.
+          constrain(actRole: .poly, actExpr: reif.abstract.expr, actType: polyRec.polytype,
+            expType: abstractType, "method alias '\(reif.abstract.name)':")
+        default: reif.abstract.failScope("expected an instantiable reference; found a \(record.kindDesc)")
+      }
+      reif.failType("type reification not yet implemented")
+      // Since generics are now exclusively implemented as polyfunctions,
+      // function reification expressions no longer make sense.
+      // They might still be useful to the programmer for denoting intention,
+      // but it is not clear if that should be implemented using abstractExpr.reify() or alternatively by adding constraints.
+      // The reify() mechanism will probably still be used for generic types however.
+      //let abstractExpr = reif.abstract.expr
+      //let reifiedType = abstractExpr.reify(scope, type: abstractType, typeArgs: reif.args)
+      //let monotype = instantiate(expr: expr, type: reifiedType)
+      //track(expr: abstractExpr, type: monotype) // so that Expr.compile can just dispatch to reif.abstract.
+      //return monotype
 
     case .sig(let sig):
       sig.failType("type signature cannot be used as a value expression.")
 
     case .sym(let sym):
-      let refType = genConstraintsForRef(scope, expr: expr)
-      if sym.name == "$" { return refType } // An abstract input/parameter type must remain abstract.
-      return instantiate(expr: expr, type: refType)
+      return localTypeFor(scope: scope, identifier: .sym(sym))
 
     case .tag(let tag): // bare morph constructor.
       return Type.Variant(label: tag.sym.name, type: typeNull)
@@ -288,30 +299,19 @@ class DefCtx {
   }
 
 
-  func genConstraintsForRef(_ scope: LocalScope, expr: Expr) -> Type {
-    let sym: Sym
-    let record: ScopeRecord
-    switch expr {
-    case .path(let path):
-      sym = path.syms.last!
-      record = scope.getRecord(path: path)
-    case .sym(let s):
-      sym = s
-      record = scope.getRecord(sym: s)
-    default:
-      expr.fatal("reification abstract expression must be a symbol or path; received \(expr.actDesc)")
-    }
-    symRecords[sym] = record
-    let type: Type
+  func localTypeFor(scope: LocalScope, identifier: Identifier) -> Type {
+    let record = scope.getRecord(identifier: identifier)
+    symRecords[identifier.lastSym] = record
     switch record.kind {
-    case .lazy(let t): type = t
+    case .lazy(let type): return record.isLocal ? type : instantiate(expr: identifier.expr, type: type)
+    case .val(let type):  return record.isLocal ? type : instantiate(expr: identifier.expr, type: type)
     case .poly(let polyRec):
-      type = typeCtx.addFreeType() // method type.
-      constrain(actRole: .poly, actExpr: .sym(sym), actType: polyRec.polytype, expType: type, "method alias '\(sym.name)':")
-    case .val(let t): type = t
-    default: sym.failScope("expected a value; `\(sym.name)` refers to a \(record.kindDesc).")
+      let type = typeCtx.addFreeType() // Method type. Any necessary instantiation happens during method resolution.
+      constrain(actRole: .poly, actExpr: identifier.expr, actType: polyRec.polytype,
+        expType: type, "method alias '\(identifier.name)':")
+      return type
+    default: identifier.expr.failScope("expected a value; `\(identifier.name)` refers to a \(record.kindDesc).")
     }
-    return type
   }
 
 

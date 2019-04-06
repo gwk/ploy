@@ -13,12 +13,13 @@ class LocalScope: Scope {
 
 
   func addRecord(sym: Sym, kind: ScopeRecord.Kind) -> ScopeRecord {
-    return super._addRecord(sym: sym, kind: kind)
+    return super._addRecord(sym: sym, isLocal: true, kind: kind)
   }
 
   func addValRecord(name: String, type: Type) {
+    // Add a special value, i.e. `$` or `self`.
     assert(!bindings.contains(key: name))
-    bindings[name] = ScopeRecord(name: name, sym: nil, kind: .val(type))
+    bindings[name] = ScopeRecord(name: name, sym: nil, isLocal: true, kind: .val(type))
   }
 }
 

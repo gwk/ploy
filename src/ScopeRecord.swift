@@ -15,12 +15,14 @@ struct ScopeRecord {
   let name: String
   let hostName: String
   let sym: Sym? // bindings intrinsic to the language are not associated with any source location.
+  let isLocal: Bool
   let kind: Kind
 
-  init(name: String, hostName: String? = nil, sym: Sym?, kind: Kind) {
+  init(name: String, hostName: String? = nil, sym: Sym?, isLocal: Bool, kind: Kind) {
     self.name = name
     self.hostName = hostName ?? name
     self.sym = sym
+    self.isLocal = isLocal
     self.kind = kind
   }
 
