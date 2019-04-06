@@ -147,7 +147,7 @@ extension Expr {
     let varNames = type.varNames
     for name in substitutions.keys {
       if !varNames.contains(name) {
-        failType("type does not contain specified type argument: \(name)")
+        failType("\(type) does not contain specified type argument: \(name)")
       }
     }
     return type.substitute(substitutions)
