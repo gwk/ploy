@@ -96,7 +96,8 @@ class Type: CustomStringConvertible, Hashable, Comparable {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
     if members.count == 1 { return members[0] }
-    let desc = "(\(members.descriptions.sorted().joined(separator: " + ")))"
+    let contents = members.descriptions.sorted().joined(separator: " + ")
+    let desc = "(\(contents))"
     return memoize(desc, (
       kind: .method(members: members),
       frees: Set(members.flatMap { $0.frees }),
