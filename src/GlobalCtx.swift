@@ -12,16 +12,16 @@ typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
 class GlobalCtx {
   let mainPath: Path
-  let file: File
+  let outFile: File
   let mapSend: FileHandle
   private var outLineIdx = 0
   private var outColIdx = 0
   private var conversions: Set<Conversion> = []
   private var constructors: Set<Type> = []
 
-  init(mainPath: Path, file: File, mapSend: FileHandle) {
+  init(mainPath: Path, outFile: File, mapSend: FileHandle) {
     self.mainPath = mainPath
-    self.file = file
+    self.outFile = outFile
     self.mapSend = mapSend
   }
 
@@ -51,11 +51,11 @@ class GlobalCtx {
     let diff = l.indent - outColIdx
     if diff >= 0 { // inline.
       outColIdx += diff
-      file.write(String(char: " ", count: diff) + l.text)
+      outFile.write(String(char: " ", count: diff) + l.text)
     } else { // new line.
       outLineIdx += 1
       outColIdx = l.indent
-      file.write("\n" + String(char: " ", count: l.indent) + l.text)
+      outFile.write("\n" + String(char: " ", count: l.indent) + l.text)
     }
     if let mapping = l.mapping {
       writeMap(mapping)
@@ -67,12 +67,12 @@ class GlobalCtx {
     assert(!string.containsNewline)
     assert(outColIdx == 0)
     if let mapping = mapping { writeMap(mapping) }
-    file.write(string)
+    outFile.write(string)
     writeL()
   }
 
   func writeL() {
-    file.write("\n")
+    outFile.write("\n")
     outLineIdx += 1
     outColIdx = 0
   }

@@ -21,7 +21,7 @@ class MainSpace: Space {
 
 
 func setupRootAndMain(mainPath: Path, outFile: File, mapSend: FileHandle) -> (root: Space, main: MainSpace) {
-  let ctx = GlobalCtx(mainPath: mainPath, file: outFile, mapSend: mapSend)
+  let ctx = GlobalCtx(mainPath: mainPath, outFile: outFile, mapSend: mapSend)
   let root = Space(ctx, pathNames: ["ROOT"], parent: nil)
   root.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, isLocal: false, kind: .space(root)) // NOTE: reference cycle.
   // TODO: could fix the reference cycle by making a special case for "ROOT" just before lookup failure.
