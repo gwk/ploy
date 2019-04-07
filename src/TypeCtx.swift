@@ -257,10 +257,10 @@ struct TypeCtx {
     }
 
     guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no methods of \($0) match \($1) type"}) }
-    // no exact match, try to synthesize a method that matches the expected union dom.
+    // No exact match; try to synthesize a method that matches the expected union dom.
 
-    if !expDom.childFrees.isEmpty { // cannot synthesize with an unresolved expected domain.
-      if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polyfunction against free \($1) union domain"}) }
+    if !expDom.isResolved { // cannot synthesize with an unresolved expected domain.
+      if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polyfunction against unresolved \($1) union domain"}) }
       return false
     }
 
@@ -300,7 +300,7 @@ struct TypeCtx {
     guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no methods of \($0) polyfunction match \($1) type"}) }
     // no exact match, try to synthesize a method that matches the expected union dom.
 
-    if !expDom.childFrees.isEmpty { // cannot synthesize with an unresolved expected domain.
+    if !expDom.isResolved { // cannot synthesize with an unresolved expected domain.
       if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polyfunction against unresolved \($1) union domain"}) }
       return false
     }
@@ -626,7 +626,7 @@ struct TypeCtx {
         let never = freeNevers.contains(i) ? " (Never)" : ""
         if let origType = origType {
           let type = resolved(type: origType)
-          let frees = type.childFrees.isEmpty ? "" : " : \(type.childFrees.sorted())"
+          let frees = type.isResolved ? "" : " : \(type.childFrees.sorted())"
           errL("  \(i): \(origType)\t-- \(type)\(never)\(frees)")
         } else {
           errL("  \(i): nil\(never)")
