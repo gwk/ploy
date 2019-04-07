@@ -170,6 +170,14 @@ struct TypeCtx {
       }
       return true
 
+    case (.all(let actMembers), _): // Not sure how much sense this makes for `All` types besides `Every`.
+      for actMember in actMembers {
+        try resolveSub(rel,
+          actType: actMember, actDesc: "`All` member",
+          expType: exp, expDesc: "type")
+      }
+      return true
+
     case (.any(let actMembers), .any(let expMembers)):
       for actMember in actMembers {
         if !expMembers.contains(actMember) {
@@ -214,10 +222,9 @@ struct TypeCtx {
     let (subCtx, subExp) = subCtxAndType(parentType: exp)
     var matchMethod: Type? = nil
     var matchCtx = TypeCtx() // overwritten by matching iteration.
-    for morph in actMorphs {
-      assert(morph.isResolved)
-      assert(morph.vars.isEmpty) // TODO: support generic implementations in extensibles?
+    for actMorph in actMorphs {
       var childCtx = subCtx // copy.
+      let morph = childCtx.instantiate(expr: rel.act.expr, type: actMorph)
       childCtx.addConstraint(.rel(RelCon(
         act: Side(.act, expr: rel.act.expr, type: morph, chain: .link("morph", rel.act.chain)), // ok to pass morph directly, because it is resolved.
         exp: Side(.exp, expr: rel.exp.expr, type: subExp, chain: rel.exp.chain),
@@ -230,10 +237,11 @@ struct TypeCtx {
         // TODO: return search error?
         continue
       }
+      let resolvedMorph = childCtx.resolved(type: morph)
       if let prev = matchMethod {
-        return .multiple(prev, morph)
+        return .multiple(prev, resolvedMorph)
       }
-      matchMethod = morph
+      matchMethod = resolvedMorph
       matchCtx = childCtx
     }
     if let matchMethod = matchMethod {
@@ -256,6 +264,7 @@ struct TypeCtx {
       return false
     }
 
+    // No match; attempt to cover the union case.
     guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no methods of \($0) match \($1) type"}) }
     // No exact match; try to synthesize a method that matches the expected union dom.
 
@@ -450,8 +459,12 @@ struct TypeCtx {
 
 
   mutating func instantiate(expr: Expr, type: Type) -> Type {
+    if !type.isResolved { expr.fatal("instantiate received unresolved type: \(type)") }
+    if type.isConcrete { return type }
     var varsToFrees: [String:Type] = [:]
     let t = instantiate(expr, type, &varsToFrees)
+    assert(!t.isResolved)
+    assert(t.isConcrete)
     return t
   }
 
