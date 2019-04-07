@@ -237,7 +237,7 @@ struct TypeCtx {
       matchCtx = childCtx
     }
     if let matchMethod = matchMethod {
-      if merge { mergeSubCtx(matchCtx) } // unifies the poly ref free to the morph, plus any others, e.g. expSig.ret.
+      if merge { mergeSubCtx(matchCtx) } // Unifies the free of the poly ref to the morph, plus any others, e.g. expSig.ret.
       return .match(matchMethod)
     }
     return .none
