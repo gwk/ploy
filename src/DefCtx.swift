@@ -316,34 +316,6 @@ class DefCtx {
 
 
   func instantiate(expr: Expr, type: Type) -> Type {
-    var varsToFrees: [String:Type] = [:]
-    let t = instantiate(expr, type, &varsToFrees)
-    return t
-  }
-
-
-  func instantiate(_ expr: Expr, _ type: Type, _ varsToFrees: inout [String:Type]) -> Type {
-    if type.isConcrete { return type }
-    switch type.kind {
-    case .free, .host, .prim: return type
-    case .all(let members): return try! .All(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .any(let members): return try! .Any_(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .poly(let members): return .Poly(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .method(let members): return .Method(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .refinement(let base, let pred): return .Refinement(base: self.instantiate(expr, base, &varsToFrees), pred: pred)
-    case .sig(let dom, let ret):
-      return .Sig(dom: instantiate(expr, dom, &varsToFrees), ret: instantiate(expr, ret, &varsToFrees))
-    case .struct_(let posFields, let labFields, let variants):
-      return .Struct(
-        posFields: posFields.map { self.instantiate(expr, $0, &varsToFrees) },
-        labFields: labFields.map { $0.substitute(type: self.instantiate(expr, $0.type, &varsToFrees)) },
-        variants: variants.map { $0.substitute(type: self.instantiate(expr, $0.type, &varsToFrees)) })
-    case .var_(let name, let requirement):
-      let instance = varsToFrees.getOrInsert(name, dflt: { self.typeCtx.addFreeType() })
-      constrain(actExpr: expr, actType: instance, expType: requirement, "`::` type variable requirement")
-      return instance
-    case .variantMember(let variant):
-      return .VariantMember(variant: variant.substitute(type: instantiate(expr, variant.type, &varsToFrees)))
-    }
+    return typeCtx.instantiate(expr: expr, type: type)
   }
 }
