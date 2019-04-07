@@ -2,6 +2,8 @@
 f = fn (Int|Str)%Void;
 
 main = {
+  u:(Int|Str) = 0
+  f.u
   f.0
   f.'a'
 }
