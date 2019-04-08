@@ -6,6 +6,9 @@
 // srcName may be the empty string.
 // Input lines and columns are zero-indexed.
 
+// Depends on https://github.com/mozilla/source-map;
+// `npm install source-map`.
+
 'use strict';
 
 let fs = require('fs');
@@ -19,12 +22,14 @@ let repr = JSON.stringify;
 
 
 function main() {
+
   function checkArg(cond) {
     if (!cond) {
       errL(`argument error; usage: gen-source-map [genPath] [outPath] < [mappings]`)
       exit(1)
     }
   }
+
   let args =  process.argv; // first two arguments are 'node' and the script path.
   checkArg(args.length == 2 + 2)
   let genPath = args[2]; checkArg(genPath);
