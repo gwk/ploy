@@ -6,6 +6,7 @@ enum Constraint: CustomStringConvertible, Encodable {
   enum CodingKeys: CodingKey {
     case prop
     case rel
+    //case sel
   }
 
   // A type constraint to be resolved during type checking.
@@ -13,11 +14,13 @@ enum Constraint: CustomStringConvertible, Encodable {
 
   case prop(PropCon) // property constraint between an accessee type and an accessed type via an accessor.
   case rel(RelCon) // relation constraint between actual and expected types.
+  //case sel(SelCon) // Method selection constraint between a polyfn reference and an expected type.
 
   var description: String {
     switch self {
     case .prop(let prop): return String(describing: prop)
     case .rel(let rel): return String(describing: rel)
+    //case .sel(let sel): return String(describing: sel)
     }
   }
 
@@ -26,6 +29,7 @@ enum Constraint: CustomStringConvertible, Encodable {
     switch self {
     case .prop(let prop): try c.encode(prop, forKey: .prop)
     case .rel(let rel): try c.encode(rel, forKey: .rel)
+    //case .sel(let sel): try c.encode(sel, forKey: .sel)
     }
   }
 }
