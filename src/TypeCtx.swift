@@ -574,7 +574,7 @@ struct TypeCtx {
       searchError = nil
       let deferred = try resolveRound()
       if deferred.count == constraints.count { // no progress; error.
-        if let searchError = searchError { error(searchError) }
+        if let searchError = searchError { throw searchError }
         // If we do not have a specific error from polymorph search, just show generic error for first constraint.
         switch deferred.first! {
         case .prop(let prop): throw prop.error("cannot resolve constraint")
