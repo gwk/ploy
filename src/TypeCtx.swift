@@ -181,7 +181,7 @@ struct TypeCtx: Encodable {
       }
       return true
 
-    case (.intersect(let actMembers), _): // Not sure how much sense this makes for `All` types besides `Every`.
+    case (.intersect(let actMembers), _): // Not sure how much sense this makes.
       for actMember in actMembers {
         try resolveSub(rel,
           actType: actMember, actDesc: "intersection member",
@@ -215,6 +215,8 @@ struct TypeCtx: Encodable {
     case (.struct_(_, _, let actVariants), .variantMember(let expVariant)):
       return try resolveStructToVariantMember(rel, actVariants: actVariants, expVariant: expVariant)
 
+    case (_, .prim) where exp == typeAny:
+      return true
     default: throw rel.error({"\($0) type is not \($1) type"})
     }
   }

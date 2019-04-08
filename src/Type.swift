@@ -64,8 +64,9 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   class func Intersect(_ members: [Type]) throws -> Type {
     let merged = try computeIntersect(types: members)
+    if merged.isEmpty { fatalError("empty intersection") }
     if merged.count == 1 { return merged[0] }
-    let desc = merged.isEmpty ? "Any" : "(\(merged.descriptions.joined(separator: "&")))"
+    let desc = "(\(merged.descriptions.joined(separator: "&")))"
     return memoize(desc, (
       kind: .intersect(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -142,7 +143,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   class func Union(_ members: [Type]) throws -> Type {
     let merged = try computeUnion(types: members)
     if merged.count == 1 { return merged[0] }
-    let desc = merged.isEmpty ? "Never" : "(\(merged.descriptions.joined(separator: "|")))"
+    let desc = merged.isEmpty ? "Empty" : "(\(merged.descriptions.joined(separator: "|")))"
     return memoize(desc, (
       kind: .union(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -318,16 +319,17 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 }
 
 
-let typeNever = try! Type.Union([]) // aka "Bottom type"; the type with no values.
-let typeAny = try! Type.Intersect([]) // aka "Top type"; the set of all objects.
 let typeNull = Type.Struct(posFields: [], labFields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
+let typeEmpty = try! Type.Union([]) // AKA "Bottom type"; the type with no values.
 
+let typeAny       = Type.Prim("Any") // AKA "Top type"; the set of all values.
 let typeBool      = Type.Prim("Bool")
 let typeInt       = Type.Prim("Int")
 let typeNamespace = Type.Prim("Namespace")
+let typeNever     = Type.Prim("Never") // The type for functions that never return.
 let typeStr       = Type.Prim("Str")
 let typeType      = Type.Prim("Type")
-let typeVoid      = Type.Prim("Void") // Note: Void is distinct from Null and Never.
+let typeVoid      = Type.Prim("Void") // The quasi-value for statements and functions that return nothing.
 
 let intrinsicTypes = [
   typeAny,
