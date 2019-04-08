@@ -36,6 +36,7 @@ let package = Package(
         "quilt/src/Quilt/DuplicateElError.swift",
         "quilt/src/Quilt/DuplicateKeyError.swift",
         "quilt/src/Quilt/Err.swift",
+        "quilt/src/Quilt/Encoder.swift",
         "quilt/src/Quilt/Error.swift",
         "quilt/src/Quilt/File.swift",
         "quilt/src/Quilt/FileHandle.swift",

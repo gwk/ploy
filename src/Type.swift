@@ -1,7 +1,7 @@
 // © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Type: CustomStringConvertible, Hashable, Comparable {
+class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   enum Kind {
     case all(members: [Type])
@@ -246,6 +246,9 @@ class Type: CustomStringConvertible, Hashable, Comparable {
   static func ==(l: Type, r: Type) -> Bool { return l === r }
 
   static func <(l: Type, r: Type) -> Bool { return l.description < r.description }
+
+  func encode(to encoder: Encoder) throws { try encoder.encodeDescription(self) }
+
 
   var sigDom: Type {
     switch self.kind {

@@ -12,15 +12,18 @@ typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
 class GlobalCtx {
   let mainPath: Path
+  let outPath: Path
   let outFile: File
   let mapSend: FileHandle
   private var outLineIdx = 0
   private var outColIdx = 0
   private var conversions: Set<Conversion> = []
   private var constructors: Set<Type> = []
+  lazy private var dumpFile: File = try! File(path: self.outPath.append(".dump.jsonl"), mode: .write, create: 0o644)
 
-  init(mainPath: Path, outFile: File, mapSend: FileHandle) {
+  init(mainPath: Path, outPath: Path, outFile: File, mapSend: FileHandle) {
     self.mainPath = mainPath
+    self.outPath = outPath
     self.outFile = outFile
     self.mapSend = mapSend
   }
@@ -240,5 +243,13 @@ class GlobalCtx {
     em.str(2, "constructor($u, $m) { // \(type)") // bling: $u: union tag; $m: morph value.
     em.str(4, "this.$u = $u; this.$m = $m") // bling: $u: union tag; $m: morph value.
     em.append("}")
+  }
+
+
+  func dump<T:Encodable>(object:T) {
+    let encoder = JSONEncoder()
+    let data = try! encoder.encode(object)
+    dumpFile.write(data: data)
+    dumpFile.write("\n")
   }
 }

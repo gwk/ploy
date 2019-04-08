@@ -1,7 +1,7 @@
 // Copyright © 2015 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Syn: CustomStringConvertible {
+class Syn: CustomStringConvertible, Encodable {
 
   let source: Source
   let lineIdx: Int // 0-based index of the first line.
@@ -41,6 +41,8 @@ class Syn: CustomStringConvertible {
   var description: String {
     return "\(source.name):\(lineIdx+1):\(colIdx+1)"
   }
+
+  func encode(to encoder: Encoder) throws { try encoder.encodeDescription(self) }
 
   func errDiagnostic(prefix: String, msg: String) {
     errZ(source.diagnostic(pos: pos, end: visEnd, linePos: linePos, lineIdx: lineIdx, msg: "\(prefix): \(msg)"))

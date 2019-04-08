@@ -1,13 +1,19 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-var globalDbgMethodCtxNames: Set<String> = []
+var globalDbgDefSuffixes: Set<String> = []
 
 
-class DefCtx {
+class DefCtx: Encodable {
+
+  enum CodingKeys: CodingKey {
+    case path
+    case typeCtx
+  }
 
   let globalCtx: GlobalCtx
   let path: String
+  let dbg: Bool
   var typeCtx = TypeCtx()
 
   var exprTypes = [Expr:Type]() // maps expressions to their types.
@@ -18,21 +24,41 @@ class DefCtx {
   init(globalCtx: GlobalCtx, path: String) {
     self.globalCtx = globalCtx
     self.path = path
-    if globalDbgMethodCtxNames.contains(path) {
-      errSL("PLOY_DBG_METHODS: will dump method resolution errors while typechecking `\(path)`.")
+    self.dbg = globalDbgDefSuffixes.any { path.hasSuffix($0) }
+    if self.dbg {
+      errSL("PLOY_DBG_DEFS: will dump info for `\(path)`.")
       typeCtx.dumpMethodResolutionErrors = true
     }
   }
 
 
   func typecheck() {
-    typeCtx.resolveOrError()
+    do {
+      try typeCtx.resolveAll()
+    } catch let err as PropCon.Err {
+      dumpDbg()
+      typeCtx.error(err)
+    } catch let err as RelCon.Err {
+      dumpDbg()
+      typeCtx.error(err)
+    } catch let err { fatalError(String(describing: err)) }
+    // fill in frees that were only bound to Never.
+    typeCtx.fillFreeNevers()
     // check that resolution is complete.
     for expr in exprTypes.keys {
       let type = typeFor(expr: expr)
       if type.frees.count > 0 {
+        dumpDbg()
         fatalError("unresolved frees in type: \(type)")
       }
+    }
+    dumpDbg()
+  }
+
+
+  func dumpDbg() {
+    if self.dbg {
+      globalCtx.dump(object: self)
     }
   }
 

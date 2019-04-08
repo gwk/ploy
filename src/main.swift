@@ -37,9 +37,9 @@ func main() {
   check(opt == nil, "dangling option flag: '\(opt!)'")
 
   for (key, val) in processEnvironment {
-    if key == "PLOY_DBG_METHODS" {
-      globalDbgMethodCtxNames = Set(val.split(" "))
-      errL("PLOY_DBG_METHODS: ", globalDbgMethodCtxNames)
+    if key == "PLOY_DBG_DEFS" {
+      globalDbgDefSuffixes = Set(val.split(" "))
+      errL("PLOY_DBG_DEFS: ", globalDbgDefSuffixes)
     }
   }
 
@@ -84,7 +84,7 @@ func main() {
   mapProc.standardError = FileHandle.standardError
   mapProc.launch()
 
-  let (rootSpace, mainSpace) = setupRootAndMain(mainPath: mainPath, outFile: tmpFile, mapSend: mapSend)
+  let (rootSpace, mainSpace) = setupRootAndMain(mainPath: mainPath, outPath: outPath, outFile: tmpFile, mapSend: mapSend)
 
   mainSpace.add(defs: mainDefs, root: rootSpace)
   _ = mainSpace.getMainDef() // check that we have `main` before doing additional work.

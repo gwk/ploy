@@ -1,7 +1,15 @@
 // © 2016 George King. Permission to use this file is granted in license.txt.
 
 
-struct TypeCtx {
+struct TypeCtx: Encodable {
+
+  enum CodingKeys: CodingKey {
+    case constraints
+    case freeUnifications
+    case freeParents
+    case freeNevers
+    case searchError
+  }
 
   var constraints = [Constraint]()
   var freeUnifications = [Type?]()
@@ -232,7 +240,7 @@ struct TypeCtx {
       do { try childCtx.resolveAll() }
       catch let e {
         if childCtx.dumpMethodResolutionErrors {
-          rel.act.expr.diagnostic(prefix: "PLOY_DBG_METHODS", msg: "morph: \(morph); error: \(e)")
+          rel.act.expr.diagnostic(prefix: "PLOY_DBG_DEFS", msg: "morph: \(morph); error: \(e)")
         }
         // TODO: return search error?
         continue
@@ -586,15 +594,7 @@ struct TypeCtx {
   }
 
 
-  mutating func resolveOrError() {
-    do {
-      try resolveAll()
-    } catch let err as PropCon.Err {
-      error(err)
-    } catch let err as RelCon.Err {
-      error(err)
-    } catch { fatalError() }
-    // fill in frees that were only bound to Never.
+  mutating func fillFreeNevers() {
     for idx in freeNevers {
       if freeUnifications[idx] == nil {
         freeUnifications[idx] = typeNever
