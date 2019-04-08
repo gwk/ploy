@@ -332,6 +332,7 @@ class DefCtx: Encodable {
     case .lazy(let type): return record.isLocal ? type : instantiate(expr: identifier.expr, type: type)
     case .val(let type):  return record.isLocal ? type : instantiate(expr: identifier.expr, type: type)
     case .poly(let polyRec):
+      assert(!record.isLocal)
       let type = typeCtx.addFreeType() // Method type. Any necessary instantiation happens during method resolution.
       constrain(actRole: .poly, actExpr: identifier.expr, actType: polyRec.polytype,
         expType: type, "method alias '\(identifier.name)':")
