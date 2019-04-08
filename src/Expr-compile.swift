@@ -52,8 +52,11 @@ extension Expr {
 
     case .bind(let bind):
       em.str(indent, "const \(bind.place.sym.hostName) =")
-      let valTypeExpr = bind.place.ann?.typeExpr ?? bind.val
-      bind.val.compile(ctx, em, indent + 2, exp: ctx.typeFor(expr: valTypeExpr), isTail: false)
+      var exp: Type? = nil
+      if let annExpr = bind.place.ann?.typeExpr {
+        exp = ctx.typeFor(expr: annExpr)
+      }
+      bind.val.compile(ctx, em, indent + 2, exp: exp, isTail: false)
       em.append(";")
 
     case .call(let call):
