@@ -85,7 +85,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   class func Poly(_ members: [Type]) -> Type {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
-    let desc = "Poly<\(members.descriptions.sorted().joined(separator: " "))>"
+    let desc = "Poly<\(members.descriptions.joined(separator: " "))>"
     return memoize(desc, (
       kind: .poly(members: members),
       frees: Set(members.flatMap { $0.frees }),
@@ -96,7 +96,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
     if members.count == 1 { return members[0] }
-    let contents = members.descriptions.sorted().joined(separator: " + ")
+    let contents = members.descriptions.joined(separator: " + ")
     let desc = "(\(contents))"
     return memoize(desc, (
       kind: .method(members: members),
