@@ -202,9 +202,6 @@ struct TypeCtx: Encodable {
       }
       return true
 
-    case (.method, .sig):
-      return try resolveMethodToSig(rel, act: act, exp: exp)
-
     case (.sig(let actDR), .sig(let expDR)):
       return try resolveSigToSig(rel, act: actDR, exp: expDR)
 
@@ -276,69 +273,33 @@ struct TypeCtx: Encodable {
 
     // No match; attempt to cover the union case.
     guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no methods of \($0) match \($1) type"}) }
-    // No exact match; try to synthesize a method that matches the expected union dom.
 
     if !expDom.isResolved { // cannot synthesize with an unresolved expected domain.
       if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polyfunction against unresolved \($1) union domain"}) }
       return false
     }
 
-    var reqMethods: [Type] = [] // subset of morphs that are relevant.
+    // Synthesize a method that matches the expected union dom.
+    var reqMorphs = [Type]() // Subset of morphs that are relevant.
     for expDomMember in expDomMembers {
       let expMemberSig = Type.Sig(dom: expDomMember, ret: expRet)
       switch resolveMethodsToExp(rel, act: act, exp: expMemberSig, actMorphs: actMorphs, merge: false) {
       case .none:
         throw rel.error({"no morphs of \($0) match \($1) domain member: \(expDomMember)"})
       case .match(let morph):
-        reqMethods.append(morph)
-      case .multiple(let m0, let m1):
+        reqMorphs.append(morph)
+       case .multiple(let m0, let m1):
         if searchError == nil { searchError = rel.error({"multiple methods of \($0) match \($1): \(m0), \(m1)"}) }
         return false
       }
     }
-    let method = Type.Method(reqMethods)
-    try resolveSub(rel,
-      actType: method, actDesc: "method",
-      expType: exp, expDesc: "signature")
-    return true
-  }
+    reqMorphs.sort()
+    let method = try Type.Method(reqMorphs)
+    guard case .method(_, let actDom, let actRet) = method.kind else { fatalError() }
 
-
-  mutating func resolveMethodToSig(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
-    guard case .method(let actMorphs) = act.kind else { fatalError() }
-    guard case .sig(let expDom, let expRet) = exp.kind else { fatalError() }
-
-    switch resolveMethodsToExp(rel, act: act, exp: exp, actMorphs: actMorphs, merge: true) {
-    case .none: break
-    case .match: return true
-    case .multiple(let m0, let m1):
-      if searchError == nil { searchError = rel.error({"multiple methods of \($0) polyfunction match \($1): \(m0), \(m1)"}) }
-      return false
-    }
-
-    guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no methods of \($0) polyfunction match \($1) type"}) }
-    // no exact match, try to synthesize a method that matches the expected union dom.
-
-    if !expDom.isResolved { // cannot synthesize with an unresolved expected domain.
-      if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polyfunction against unresolved \($1) union domain"}) }
-      return false
-    }
-
-    var reqMethods: [Type] = [] // subset of morphs that are relevant.
-    for expDomMember in expDomMembers {
-      let expMemberSig = Type.Sig(dom: expDomMember, ret: expRet)
-      switch resolveMethodsToExp(rel, act: act, exp: expMemberSig, actMorphs: actMorphs, merge: false) {
-      case .none:
-        throw rel.error({"no methods of \($0) polyfunction match \($1) domain: \(expDom)"})
-      case .match(let match):
-        reqMethods.append(match)
-      case .multiple(let m0, let m1):
-        if searchError == nil { searchError = rel.error({"multiple methods of \($0) polyfunction match \($1): \(m0), \(m1)"}) }
-        return false
-      }
-    }
-    let reqRets = Set(reqMethods.map({$0.sigRet})).sorted()
-    let actRet = try Type.Any_(reqRets)
+    try resolveSub(rel, // Note: this is excessive, beceause we just constructed the domain ourselves, but it does not hurt.
+      actType: actDom, actDesc: "polyfunction domain",
+      expType: expDom, expDesc: "signature domain")
     try resolveSub(rel,
       actType: actRet, actDesc: "polyfunction return",
       expType: expRet, expDesc: "signature return")
@@ -488,7 +449,7 @@ struct TypeCtx: Encodable {
     case .all(let members): return try! .All(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .any(let members): return try! .Any_(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .poly(let members): return .Poly(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .method(let members): return .Method(members.map { self.instantiate(expr, $0, &varsToFrees) })
+    case .method(let members, _, _): return try! .Method(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .refinement(let base, let pred): return .Refinement(base: self.instantiate(expr, base, &varsToFrees), pred: pred)
     case .sig(let dom, let ret):
       return .Sig(dom: instantiate(expr, dom, &varsToFrees), ret: instantiate(expr, ret, &varsToFrees))

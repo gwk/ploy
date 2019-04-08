@@ -8,7 +8,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     case any(members: [Type])
     case free(index: Int)
     case host
-    case method(members: [Type])
+    case method(members: [Type], dom:Type, ret:Type)
     case poly(members: [Type])
     case prim
     case refinement(base: Type, pred: Expr)
@@ -82,14 +82,23 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     return Type(desc, kind: .host)
   }
 
-  class func Method(_ members: [Type]) -> Type {
+  class func Method(_ members: [Type]) throws -> Type {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
     if members.count == 1 { return members[0] }
+    var doms = [Type]()
+    var rets = [Type]()
+    for member in members {
+      guard case .sig(let dom, let ret) = member.kind else { fatalError("Method member is not a sig: \(member)") }
+      doms.append(dom)
+      rets.append(ret)
+    }
+    let dom = try Any_(doms.sorted())
+    let ret = try Any_(rets.sorted())
     let contents = members.descriptions.joined(separator: " + ")
     let desc = "(\(contents))"
     return memoize(desc, (
-      kind: .method(members: members),
+      kind: .method(members: members, dom: dom, ret: ret),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -270,7 +279,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     case .all(let members): return try! .All(members.sortedMap{$0.transformLeaves(fn)})
     case .any(let members): return try! .Any_(members.sortedMap{$0.transformLeaves(fn)})
     case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
-    case .method(let members): return .Method(members.sortedMap{$0.transformLeaves(fn)})
+    case .method(let members, _, _): return try! .Method(members.sortedMap{$0.transformLeaves(fn)})
     case .refinement(let base, let pred): return .Refinement(base: base.transformLeaves(fn), pred: pred)
     case .sig(let dom, let ret): return .Sig(dom: dom.transformLeaves(fn), ret: ret.transformLeaves(fn))
     case .struct_(let posFields, let labFields, let variants):
@@ -299,18 +308,6 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       }
     }
   }
-}
-
-
-func mergePoly(members: [Type]) throws -> Type {
-  var doms:[Type] = []
-  var rets:[Type] = []
-  for member in members {
-    guard case .sig(let dom, let ret) = member.kind else { fatalError("non-sig poly member: \(member)") }
-    doms.append(dom)
-    rets.append(ret)
-  }
-  return .Sig(dom: try .Any_(doms), ret: try .Any_(rets)) // Note: ret is a union, not an intersection.
 }
 
 
