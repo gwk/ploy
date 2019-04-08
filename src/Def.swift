@@ -127,6 +127,51 @@ func simplifyAndTypecheckVal(space: Space, scope: LocalScope, path: String, ann:
 }
 
 
+func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String) -> String {
+  let methodHostName = "\(hostName)__\(type.globalIndex)"
+  if let status = polyRecord.typesToMethodStatuses[type] { // Explicitly defined method.
+    switch status {
+    case .compiled: break
+    case .pending(let defCtx, let val):
+      polyRecord.typesToMethodStatuses[type] = .compiled
+      let needsLazy = compileVal(defCtx: defCtx, hostName: methodHostName, val: val, type: type)
+      assert(!needsLazy)
+    }
+  } else { // Synthesize method.
+    polyRecord.typesToMethodStatuses[type] = .compiled
+    guard case .sig(let dom, _) = type.kind else { sym.fatal("unexpected synthesized method type: \(type)") }
+    switch dom.kind {
+    case .any(let domMembers): synthesizeUnionDomMethod(globalCtx, sym: sym, type: type, polyRecord: polyRecord, hostName: hostName,
+      methodHostName: methodHostName, domMembers: domMembers)
+    default: sym.fatal("unexpected synthesized method domain: \(dom)")
+    }
+  }
+  return methodHostName
+}
+
+
+func synthesizeUnionDomMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String,
+ methodHostName: String, domMembers: [Type]) {
+  let em = Emitter(ctx: globalCtx)
+  let tableName = "\(methodHostName)__$table" // bling: $table: dispatch table.
+  em.str(0, "const \(tableName) = {")
+  overDoms: for domMember in domMembers { // lazily emit all necessary concrete methods for this synthesized method.
+    for methodType in polyRecord.typesToMethodStatuses.keys {
+      if methodType.sigDom == domMember {
+        let memberHostName = compileMethod(globalCtx, sym: sym, type: methodType, polyRecord: polyRecord, hostName: hostName)
+        em.str(2, "'\(domMember)': \(memberHostName),")
+        continue overDoms
+      }
+    }
+    let searched = Array(polyRecord.typesToMethodStatuses.keys)
+    sym.fatal("synthesizing method \(type): no match for domain member: \(domMember); searched \(searched)")
+  }
+  em.append("};") // close table.
+  em.str(0, "const \(methodHostName) = $=>\(tableName)[$.$u]($.$m); // \(type)")
+  em.flush()
+}
+
+
 func compileVal(defCtx: DefCtx, hostName: String, val: Expr, type: Type) -> Bool {
   let em = Emitter(ctx: defCtx.globalCtx)
   if needsLazyDef(val: val) {

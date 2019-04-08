@@ -204,7 +204,7 @@ extension Expr {
     case .fwd: // should never be reached, because type checking should notice.
       sym.fatal("`\(sym.name)` refers to a forward declaration.")
     case .poly(let polyRecord):
-      code = polyRecord.lazilyEmitMethod(globalCtx: ctx.globalCtx, sym: sym, hostName: scopeRecord.hostName, type: type)
+      code = compileMethod(ctx.globalCtx, sym: sym, type: type, polyRecord: polyRecord, hostName: scopeRecord.hostName)
     case .space:
       sym.fatal("`\(sym.name)` refers to a namespace.") // TODO: eventually this will return a runtime namespace.
     case .type:

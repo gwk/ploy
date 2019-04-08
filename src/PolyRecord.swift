@@ -26,48 +26,6 @@ class PolyRecord {
     if let type = protoVarsToMerged[sym.name] { return type }
     sym.failType("type var `\(sym.name)` not present in polyfn merged signature.")
   }
-
-  func lazilyEmitMethod(globalCtx: GlobalCtx, sym: Sym, hostName: String, type: Type) -> String {
-    let methodHostName = "\(hostName)__\(type.globalIndex)"
-    if let status = typesToMethodStatuses[type] { // Explicitly defined method.
-      switch status {
-      case .compiled: break
-      case .pending(let defCtx, let val):
-        typesToMethodStatuses[type] = .compiled
-        let needsLazy = compileVal(defCtx: defCtx, hostName: methodHostName, val: val, type: type)
-        assert(!needsLazy)
-      }
-    } else { // Synthesize method.
-      typesToMethodStatuses[type] = .compiled
-      guard case .sig(let dom, _) = type.kind else { sym.fatal("unexpected synthesized method type: \(type)") }
-      switch dom.kind {
-      case .any(let domMembers): synthesizeUnionDomMethod(globalCtx: globalCtx, sym: sym, hostName: hostName, type: type,
-        methodHostName: methodHostName, domMembers: domMembers)
-      default: sym.fatal("unexpected synthesized method domain: \(dom)")
-      }
-    }
-    return methodHostName
-  }
-
-  func synthesizeUnionDomMethod(globalCtx: GlobalCtx, sym: Sym, hostName: String, type: Type,
-   methodHostName: String, domMembers: [Type]) {
-    let em = Emitter(ctx: globalCtx)
-    let tableName = "\(methodHostName)__$table" // bling: $table: dispatch table.
-    em.str(0, "const \(tableName) = {")
-    overDoms: for domMember in domMembers { // lazily emit all necessary concrete methods for this synthesized method.
-      for methodType in typesToMethodStatuses.keys {
-        if methodType.sigDom == domMember {
-          let memberHostName = lazilyEmitMethod(globalCtx: globalCtx, sym: sym, hostName: hostName, type: methodType)
-          em.str(2, "'\(domMember)': \(memberHostName),")
-          continue overDoms
-        }
-      }
-      sym.fatal("synthesizing method \(type): no match for domain member: \(domMember); searched \(Array(typesToMethodStatuses.keys))")
-    }
-    em.append("};") // close table.
-    em.str(0, "const \(methodHostName) = $=>\(tableName)[$.$u]($.$m); // \(type)")
-    em.flush()
-  }
 }
 
 
