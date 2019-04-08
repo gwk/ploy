@@ -16,6 +16,7 @@ struct TypeCtx: Encodable {
   var freeUnifications = [Type?]()
   var freeParents: [Int] = [] // Map free indices to parent context.
   var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
+  var selectedMethods = [Sym:Type]()
 
   var searchError: RelCon.Err? = nil
   var dumpMethodResolutionErrors = false
@@ -262,10 +263,13 @@ struct TypeCtx: Encodable {
   mutating func resolvePolyToSig(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
     guard case .poly(let actMorphs) = act.kind else { fatalError() }
     let (expDom, expRet) = exp.sigDomRet
+    let sym = rel.act.expr.identifierLastSym
 
     switch resolveMethodsToExp(rel, act: act, exp: exp, actMorphs: actMorphs, merge: true) {
     case .none: break
-    case .match: return true
+    case .match(let morph):
+      selectedMethods.insertNew(sym, value: morph)
+      return true
     case .multiple(let prev, let match):
       if searchError == nil { searchError = rel.error({"multiple methods of \($0) match \($1): \(prev), \(match)"}) }
       return false
@@ -303,6 +307,8 @@ struct TypeCtx: Encodable {
     try resolveSub(rel,
       actType: actRet, actDesc: "polyfunction return",
       expType: expRet, expDesc: "signature return")
+
+    selectedMethods.insertNew(sym, value: method)
     return true
   }
 
@@ -524,6 +530,9 @@ struct TypeCtx: Encodable {
     }
     for i in ctx.freeNevers {
       freeNevers.insert(ctx.freeParents[i])
+    }
+    selectedMethods.merge(ctx.selectedMethods) {
+      fatalError("conflicting selected methods:\n  \($0)\n  \($1)")
     }
   }
 

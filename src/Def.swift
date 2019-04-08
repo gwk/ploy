@@ -127,38 +127,46 @@ func simplifyAndTypecheckVal(space: Space, scope: LocalScope, path: String, ann:
 }
 
 
-func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String) -> String {
+func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String,
+ selected: Type) -> String {
+  // `type` is the inferred type for the expression: the concrete local type of the function.
+  // `selected` is the matching method type, which might not be the same.
+  // It could be a polymorphic Method type, e.g (Int%Int + Str%Str),
+  // or it could be a generic implementation, e.g. T%T.
+
   let methodHostName = "\(hostName)__\(type.globalIndex)"
-  if let status = polyRecord.typesToMethodStatuses[type] { // Explicitly defined method.
+  if let status = polyRecord.typesToMethodStatuses[type] {
     switch status {
     case .compiled: break
-    case .pending(let defCtx, let val):
+    case .pending(let defCtx, let val): // Implemented but not yet compiled.
       polyRecord.typesToMethodStatuses[type] = .compiled
       let needsLazy = compileVal(defCtx: defCtx, hostName: methodHostName, val: val, type: type)
       assert(!needsLazy)
     }
-  } else { // Synthesize method.
+  } else { // Not explicitly implemented, but typechecker thinks it is possible to synthesize.
+    assert(type != selected)
     polyRecord.typesToMethodStatuses[type] = .compiled
-    let dom = type.sigDom
-    switch dom.kind {
-    case .any(let domMembers): synthesizeUnionDomMethod(globalCtx, sym: sym, type: type, polyRecord: polyRecord, hostName: hostName,
-      methodHostName: methodHostName, domMembers: domMembers)
-    default: sym.fatal("unexpected synthesized method domain: \(dom)")
-    }
+    synthesizeMethod(globalCtx, sym: sym, type: type, selected: selected, polyRecord: polyRecord,
+      hostName: hostName, methodHostName: methodHostName)
   }
   return methodHostName
 }
 
 
-func synthesizeUnionDomMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String,
- methodHostName: String, domMembers: [Type]) {
+func synthesizeMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, selected: Type, polyRecord: PolyRecord,
+ hostName: String, methodHostName: String) {
+
+  guard case .method(let members, let dom, let ret) = selected.kind else { fatalError("unexpected selected: \(selected)") }
+  guard case .any(let domMembers) = dom.kind else { fatalError("unexpected dom for synthesis: \(dom)") }
+
   let em = Emitter(ctx: globalCtx)
   let tableName = "\(methodHostName)__$table" // bling: $table: dispatch table.
   em.str(0, "const \(tableName) = {")
   overDoms: for domMember in domMembers { // lazily emit all necessary concrete methods for this synthesized method.
     for methodType in polyRecord.typesToMethodStatuses.keys {
       if methodType.sigDom == domMember {
-        let memberHostName = compileMethod(globalCtx, sym: sym, type: methodType, polyRecord: polyRecord, hostName: hostName)
+        let memberHostName = compileMethod(globalCtx, sym: sym, type: methodType, polyRecord: polyRecord, hostName: hostName,
+          selected: methodType)
         em.str(2, "'\(domMember)': \(memberHostName),")
         continue overDoms
       }

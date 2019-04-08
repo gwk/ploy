@@ -108,6 +108,14 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
     }
   }
 
+  var identifierLastSym: Sym {
+    switch self {
+    case .path(let path): return path.syms.last!
+    case .sym(let sym): return sym
+    default: self.fatal("not an identifier: \(self)")
+    }
+  }
+
   var sigDom: Expr? {
     switch self {
     case .fn(let fn): return fn.sig.dom
