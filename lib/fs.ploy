@@ -7,7 +7,7 @@ host_type _WriteSync; // cannot yet treat native js multiparameter functions as 
 _fs = host_val _Fs "$require('fs')";
 _writeSync = host_val _WriteSync _fs "FS___fs.writeSync";
 
-polyfn write (File Obj::Every)%Void;
+polyfn write (File Obj::Any)%Void;
 //Writable =: Obj@write
 
 method write (File Bool)%Void host_val Void _writeSync "{ $assert_bool($._1); FS___writeSync($._0, $._1) }";;

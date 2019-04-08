@@ -168,7 +168,7 @@ struct TypeCtx: Encodable {
     case (.intersect(let actMembers), .intersect(let expMembers)):
       for expMember in expMembers {
         if !actMembers.contains(expMember) {
-          throw rel.error({"\($0) `All` type is not superset of `Any` \($1) type; missing member: `\(expMember)`"})
+          throw rel.error({"\($0) intersection type is not superset of intersection \($1) type; missing member: `\(expMember)`"})
         }
       }
       return true
@@ -177,14 +177,14 @@ struct TypeCtx: Encodable {
       for expMember in expMembers {
         try resolveSub(rel,
           actType: act, actDesc: "type",
-          expType: expMember, expDesc: "`All` member")
+          expType: expMember, expDesc: "intersection member")
       }
       return true
 
     case (.intersect(let actMembers), _): // Not sure how much sense this makes for `All` types besides `Every`.
       for actMember in actMembers {
         try resolveSub(rel,
-          actType: actMember, actDesc: "`All` member",
+          actType: actMember, actDesc: "intersection member",
           expType: exp, expDesc: "type")
       }
       return true
@@ -192,14 +192,14 @@ struct TypeCtx: Encodable {
     case (.union(let actMembers), .union(let expMembers)):
       for actMember in actMembers {
         if !expMembers.contains(actMember) {
-          throw rel.error({"\($0) `Any` type is not subset of `Any` \($1) type; outstanding member: `\(actMember)`"})
+          throw rel.error({"\($0) union type is not subset of union \($1) type; outstanding member: `\(actMember)`"})
         }
       }
       return true
 
     case (_, .union(let members)):
       if !members.contains(act) {
-        throw rel.error({"\($0) type is not a member of `Any` \($1) type"})
+        throw rel.error({"\($0) type is not a member of union \($1) type"})
       }
       return true
 

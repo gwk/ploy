@@ -1,4 +1,4 @@
-polyfn f ()%(T::Every);
+polyfn f ()%(T::Any);
 method f ()%Int 0;
 method f ()%Str 'a';
 

@@ -65,7 +65,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   class func Intersect(_ members: [Type]) throws -> Type {
     let merged = try computeIntersect(types: members)
     if merged.count == 1 { return merged[0] }
-    let desc = merged.isEmpty ? "Every" : "(\(merged.descriptions.joined(separator: "&")))"
+    let desc = merged.isEmpty ? "Any" : "(\(merged.descriptions.joined(separator: "&")))"
     return memoize(desc, (
       kind: .intersect(members: merged),
       frees: Set(merged.flatMap { $0.frees }),
@@ -319,7 +319,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
 
 let typeNever = try! Type.Union([]) // aka "Bottom type"; the type with no values.
-let typeEvery = try! Type.Intersect([]) // aka "Top type"; the set of all objects.
+let typeAny = try! Type.Intersect([]) // aka "Top type"; the set of all objects.
 let typeNull = Type.Struct(posFields: [], labFields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
 
 let typeBool      = Type.Prim("Bool")
@@ -330,8 +330,8 @@ let typeType      = Type.Prim("Type")
 let typeVoid      = Type.Prim("Void") // Note: Void is distinct from Null and Never.
 
 let intrinsicTypes = [
+  typeAny,
   typeBool,
-  typeEvery,
   typeInt,
   typeNamespace,
   typeNever,
