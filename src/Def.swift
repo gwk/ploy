@@ -157,7 +157,7 @@ func synthesizeMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, selected: Ty
  hostName: String, methodHostName: String) {
 
   guard case .method(let members, let dom, let ret) = selected.kind else { fatalError("unexpected selected: \(selected)") }
-  guard case .any(let domMembers) = dom.kind else { fatalError("unexpected dom for synthesis: \(dom)") }
+  guard case .union(let domMembers) = dom.kind else { fatalError("unexpected dom for synthesis: \(dom)") }
 
   let em = Emitter(ctx: globalCtx)
   let tableName = "\(methodHostName)__$table" // bling: $table: dispatch table.

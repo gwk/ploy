@@ -99,11 +99,11 @@ class GlobalCtx {
       self.addConstructor(type: cast)
       emitStructToStruct(em, castIdx: cast.globalIndex, orig: o, cast: c)
 
-    case (_, .any(let castMembers)):
+    case (_, .union(let castMembers)):
       self.addConstructor(type: cast)
       emitConvToUnion(em, castIdx: cast.globalIndex, orig: orig, castMembers: castMembers)
 
-    case (_, .all(let castMembers)):
+    case (_, .intersect(let castMembers)):
       em.str(2, "$o") // For now, no real conversion.
 
     default: fatalError("impossible conversion: \(conv)")
@@ -184,7 +184,7 @@ class GlobalCtx {
 
     switch orig.kind {
 
-    case .any:
+    case .union:
       em.str(2, "(new $C\(castIdx)($o.$u, $o.$m));") // since tag is just the type name, no conversion between tags is necessary.
       // bling: $C: constructor; $o: original; $u: union tag; $m: morph value.
 
@@ -203,7 +203,7 @@ class GlobalCtx {
     case .struct_(let posFields, let labFields, let variants):
       emitStructConstructor(em, type: type, posFields: posFields, labFields: labFields, variants: variants)
 
-    case .any(let members):
+    case .union(let members):
       emitUnionConstructor(em, type: type, members: members)
 
     default: fatalError("impossible constructor: \(type)")

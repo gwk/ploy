@@ -28,7 +28,7 @@ extension Expr {
     case .intersection(let intersection):
       let l = intersection.left.type(scope, "intersection left operand")
       let r = intersection.right.type(scope, "intersection right operand")
-      do { return try Type.All([l, r].sorted()) }
+      do { return try Type.Intersect([l, r].sorted()) }
       catch let e { failType((e as! String)) }
 
     case .paren(let paren):
@@ -62,7 +62,7 @@ extension Expr {
     case .union(let union):
       let l = union.left.type(scope, "union left operand")
       let r = union.right.type(scope, "union right operand")
-      do { return try Type.Any_([l, r].sorted()) }
+      do { return try Type.Union([l, r].sorted()) }
       catch let e { failType(e as! String) }
 
     case .where_(let where_):

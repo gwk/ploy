@@ -38,10 +38,10 @@ struct TypeCtx: Encodable {
     // TODO: need to track types to prevent/handle recursion?
     if type.isResolved { return type }
     switch type.kind {
-    case .all(let members):
-      return try! Type.All(members.map { self.resolved(type: $0) })
-    case .any(let members):
-      return try! Type.Any_(members.map { self.resolved(type: $0) })
+    case .intersect(let members):
+      return try! Type.Intersect(members.map { self.resolved(type: $0) })
+    case .union(let members):
+      return try! Type.Union(members.map { self.resolved(type: $0) })
     case .struct_(let posFields, let labFields, let variants):
       return Type.Struct(
         posFields: posFields.map() { self.resolved(type: $0) },
@@ -139,9 +139,9 @@ struct TypeCtx: Encodable {
 
     case (.poly, .method): throw rel.error({"\($0) to \($1) polyfunctions not yet implemented"})
 
-    case (.poly, .all): throw rel.error({"\($0) to \($1) intersection not yet implemented"})
+    case (.poly, .intersect): throw rel.error({"\($0) to \($1) intersection not yet implemented"})
 
-    case (.poly, .any): throw rel.error({"\($0) to \($1) union not yet implemented"})
+    case (.poly, .union): throw rel.error({"\($0) to \($1) union not yet implemented"})
 
     case (.poly, _): throw rel.error({"\($0) cannot resolve against \($1) type"})
 
@@ -165,7 +165,7 @@ struct TypeCtx: Encodable {
       }
       return true
 
-    case (.all(let actMembers), .all(let expMembers)):
+    case (.intersect(let actMembers), .intersect(let expMembers)):
       for expMember in expMembers {
         if !actMembers.contains(expMember) {
           throw rel.error({"\($0) `All` type is not superset of `Any` \($1) type; missing member: `\(expMember)`"})
@@ -173,7 +173,7 @@ struct TypeCtx: Encodable {
       }
       return true
 
-    case (_, .all(let expMembers)):
+    case (_, .intersect(let expMembers)):
       for expMember in expMembers {
         try resolveSub(rel,
           actType: act, actDesc: "type",
@@ -181,7 +181,7 @@ struct TypeCtx: Encodable {
       }
       return true
 
-    case (.all(let actMembers), _): // Not sure how much sense this makes for `All` types besides `Every`.
+    case (.intersect(let actMembers), _): // Not sure how much sense this makes for `All` types besides `Every`.
       for actMember in actMembers {
         try resolveSub(rel,
           actType: actMember, actDesc: "`All` member",
@@ -189,7 +189,7 @@ struct TypeCtx: Encodable {
       }
       return true
 
-    case (.any(let actMembers), .any(let expMembers)):
+    case (.union(let actMembers), .union(let expMembers)):
       for actMember in actMembers {
         if !expMembers.contains(actMember) {
           throw rel.error({"\($0) `Any` type is not subset of `Any` \($1) type; outstanding member: `\(actMember)`"})
@@ -197,7 +197,7 @@ struct TypeCtx: Encodable {
       }
       return true
 
-    case (_, .any(let members)):
+    case (_, .union(let members)):
       if !members.contains(act) {
         throw rel.error({"\($0) type is not a member of `Any` \($1) type"})
       }
@@ -276,7 +276,7 @@ struct TypeCtx: Encodable {
     }
 
     // No match; attempt to cover the union case.
-    guard case .any(let expDomMembers) = expDom.kind else { throw rel.error({"no methods of \($0) match \($1) type"}) }
+    guard case .union(let expDomMembers) = expDom.kind else { throw rel.error({"no methods of \($0) match \($1) type"}) }
 
     if !expDom.isResolved { // cannot synthesize with an unresolved expected domain.
       if searchError == nil { searchError = rel.error({"cannot synthesize \($0) polyfunction against unresolved \($1) union domain"}) }
@@ -452,8 +452,7 @@ struct TypeCtx: Encodable {
     if type.isConcrete { return type }
     switch type.kind {
     case .free, .host, .prim: fatalError()
-    case .all(let members): return try! .All(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .any(let members): return try! .Any_(members.map { self.instantiate(expr, $0, &varsToFrees) })
+    case .intersect(let members): return try! .Intersect(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .poly(let members): return .Poly(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .method(let members, _, _): return try! .Method(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .refinement(let base, let pred): return .Refinement(base: self.instantiate(expr, base, &varsToFrees), pred: pred)
@@ -464,6 +463,7 @@ struct TypeCtx: Encodable {
         posFields: posFields.map { self.instantiate(expr, $0, &varsToFrees) },
         labFields: labFields.map { $0.substitute(type: self.instantiate(expr, $0.type, &varsToFrees)) },
         variants: variants.map { $0.substitute(type: self.instantiate(expr, $0.type, &varsToFrees)) })
+    case .union(let members): return try! .Union(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .var_(let name, let requirement):
       let instance = varsToFrees.getOrInsert(name, dflt: { self.addFreeType() })
       constrain(actExpr: expr, actType: instance, expType: requirement, "`::` type variable requirement")

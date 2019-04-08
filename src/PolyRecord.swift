@@ -88,5 +88,5 @@ func mapVarsToMergedTypes(protoSig: Expr, prototype: Type, members: [Type]) -> [
     _map(prototype, member)
   }
 
-  return varsToMethodTypes.mapValues { try! Type.Any_($0) }
+  return varsToMethodTypes.mapValues { try! Type.Union($0) }
 }

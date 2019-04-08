@@ -4,16 +4,16 @@
 class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   enum Kind {
-    case all(members: [Type])
-    case any(members: [Type])
     case free(index: Int)
     case host
+    case intersect(members: [Type])
     case method(members: [Type], dom:Type, ret:Type)
     case poly(members: [Type])
     case prim
     case refinement(base: Type, pred: Expr)
     case sig(dom: Type, ret: Type)
     case struct_(posFields:[Type], labFields: [TypeLabField], variants: [TypeVariant])
+    case union(members: [Type])
     case var_(name: String, requirement: Type)
     case variantMember(variant: TypeVariant)
   }
@@ -46,26 +46,6 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     return type
   }
 
-  class func All(_ members: [Type]) throws -> Type {
-    let merged = try computeIntersect(types: members)
-    if merged.count == 1 { return merged[0] }
-    let desc = merged.isEmpty ? "Every" : "(\(merged.descriptions.joined(separator: "&")))"
-    return memoize(desc, (
-      kind: .all(members: merged),
-      frees: Set(merged.flatMap { $0.frees }),
-      vars: Set(merged.flatMap { $0.vars })))
-  }
-
-  class func Any_(_ members: [Type]) throws -> Type {
-    let merged = try computeUnion(types: members)
-    if merged.count == 1 { return merged[0] }
-    let desc = merged.isEmpty ? "Never" : "(\(merged.descriptions.joined(separator: "|")))"
-    return memoize(desc, (
-      kind: .any(members: merged),
-      frees: Set(merged.flatMap { $0.frees }),
-      vars: Set(merged.flatMap { $0.vars })))
-  }
-
   class func Free(_ index: Int) -> Type { // should only be called by addFreeType and copyForParent.
     if index < allFreeTypes.count {
       return allFreeTypes[index]
@@ -82,6 +62,16 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     return Type(desc, kind: .host)
   }
 
+  class func Intersect(_ members: [Type]) throws -> Type {
+    let merged = try computeIntersect(types: members)
+    if merged.count == 1 { return merged[0] }
+    let desc = merged.isEmpty ? "Every" : "(\(merged.descriptions.joined(separator: "&")))"
+    return memoize(desc, (
+      kind: .intersect(members: merged),
+      frees: Set(merged.flatMap { $0.frees }),
+      vars: Set(merged.flatMap { $0.vars })))
+  }
+
   class func Method(_ members: [Type]) throws -> Type {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
@@ -93,8 +83,8 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       doms.append(dom)
       rets.append(ret)
     }
-    let dom = try Any_(doms.sorted())
-    let ret = try Any_(rets.sorted())
+    let dom = try Union(doms.sorted())
+    let ret = try Union(rets.sorted())
     let contents = members.descriptions.joined(separator: " + ")
     let desc = "(\(contents))"
     return memoize(desc, (
@@ -149,6 +139,16 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       vars:  Set(memberTypes.flatMap { $0.vars })))
   }
 
+  class func Union(_ members: [Type]) throws -> Type {
+    let merged = try computeUnion(types: members)
+    if merged.count == 1 { return merged[0] }
+    let desc = merged.isEmpty ? "Never" : "(\(merged.descriptions.joined(separator: "|")))"
+    return memoize(desc, (
+      kind: .union(members: merged),
+      frees: Set(merged.flatMap { $0.frees }),
+      vars: Set(merged.flatMap { $0.vars })))
+  }
+
   class func Var(name: String, requirement: Type) -> Type {
     let reqDesc = String(describing: requirement)
     let desc = "(\(name)::\(reqDesc))"
@@ -175,8 +175,8 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     var merged: Set<Type> = []
     for type in types {
       switch type.kind {
-      case .all(let members): merged.insert(contentsOf: members)
-      case .any: throw "type intersection contains union member: `\(type)`"
+      case .intersect(let members): merged.insert(contentsOf: members)
+      case .union: throw "type intersection contains union member: `\(type)`"
       case .poly: throw "type intersection contains poly member: `\(type)`"
       default: merged.insert(type)
       }
@@ -189,7 +189,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     var merged: Set<Type> = []
     for type in types {
       switch type.kind {
-      case .any(let members): merged.insert(contentsOf: members)
+      case .union(let members): merged.insert(contentsOf: members)
       case .poly: throw "type union contains poly member: `\(type)`"
       default: merged.insert(type)
       }
@@ -283,8 +283,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   func transformLeaves(_ fn: (Type)->Type) -> Type {
     switch self.kind {
     case .free, .host, .prim, .var_: return fn(self)
-    case .all(let members): return try! .All(members.sortedMap{$0.transformLeaves(fn)})
-    case .any(let members): return try! .Any_(members.sortedMap{$0.transformLeaves(fn)})
+    case .intersect(let members): return try! .Intersect(members.sortedMap{$0.transformLeaves(fn)})
     case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
     case .method(let members, _, _): return try! .Method(members.sortedMap{$0.transformLeaves(fn)})
     case .refinement(let base, let pred): return .Refinement(base: base.transformLeaves(fn), pred: pred)
@@ -294,6 +293,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
         posFields: posFields.map(fn),
         labFields: labFields.map{$0.transformType(fn)},
         variants: variants.map{$0.transformType(fn)})
+    case .union(let members): return try! .Union(members.sortedMap{$0.transformLeaves(fn)})
     case .variantMember(let variant): return .VariantMember(variant: variant.transformType(fn))
     }
   }
@@ -318,8 +318,8 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 }
 
 
-let typeNever = try! Type.Any_([]) // aka "Bottom type"; the type with no values.
-let typeEvery = try! Type.All([]) // aka "Top type"; the set of all objects.
+let typeNever = try! Type.Union([]) // aka "Bottom type"; the type with no values.
+let typeEvery = try! Type.Intersect([]) // aka "Top type"; the set of all objects.
 let typeNull = Type.Struct(posFields: [], labFields: [], variants: []) // aka "nil", "Unit type"; the empty struct.
 
 let typeBool      = Type.Prim("Bool")
