@@ -27,7 +27,7 @@ extension Expr {
         var isRight = false
         for term in and.terms {
           if isRight { em.append(" &&") }
-          term.compile(ctx, em, indent + 2, exp: nil, isTail: false)
+          term.compile(ctx, em, indent + 2, exp: typeBool, isTail: false)
           isRight = true
         }
         em.append(")")
@@ -41,7 +41,7 @@ extension Expr {
         var isRight = false
         for term in or.terms {
           if isRight { em.append(" ||") }
-          term.compile(ctx, em, indent + 2, exp: nil, isTail: false)
+          term.compile(ctx, em, indent + 2, exp: typeBool, isTail: false)
           isRight = true
         }
         em.append(")")
