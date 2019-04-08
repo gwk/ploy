@@ -168,7 +168,7 @@ class DefCtx: Encodable {
     case .fn(let fn):
       let type = Expr.sig(fn.sig).type(scope, "signature")
       track(expr: .sig(fn.sig), type: type) // track the sig so that compile can look up the expectation for body.
-      guard case .sig(let dom, let ret) = type.kind else { fatalError() }
+      let (dom, ret) = type.sigDomRet
       let fnScope = LocalScope(parent: scope)
       fnScope.addValRecord(name: "$", type: dom)
       fnScope.addValRecord(name: "self", type: type)

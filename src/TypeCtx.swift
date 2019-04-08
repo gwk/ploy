@@ -261,7 +261,7 @@ struct TypeCtx: Encodable {
 
   mutating func resolvePolyToSig(_ rel: RelCon, act: Type, exp: Type) throws -> Bool {
     guard case .poly(let actMorphs) = act.kind else { fatalError() }
-    guard case .sig(let expDom, let expRet) = exp.kind else { fatalError() }
+    let (expDom, expRet) = exp.sigDomRet
 
     switch resolveMethodsToExp(rel, act: act, exp: exp, actMorphs: actMorphs, merge: true) {
     case .none: break

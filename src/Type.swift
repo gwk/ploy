@@ -89,7 +89,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     var doms = [Type]()
     var rets = [Type]()
     for member in members {
-      guard case .sig(let dom, let ret) = member.kind else { fatalError("Method member is not a sig: \(member)") }
+      let (dom, ret) = member.sigDomRet
       doms.append(dom)
       rets.append(ret)
     }
@@ -268,6 +268,13 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   var sigRet: Type {
     switch self.kind {
     case .sig(_, let ret): return ret
+    default: fatalError()
+    }
+  }
+
+  var sigDomRet: (Type, Type) {
+    switch self.kind {
+    case .sig(let domRet): return domRet
     default: fatalError()
     }
   }

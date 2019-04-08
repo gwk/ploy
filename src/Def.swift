@@ -139,7 +139,7 @@ func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: Pol
     }
   } else { // Synthesize method.
     polyRecord.typesToMethodStatuses[type] = .compiled
-    guard case .sig(let dom, _) = type.kind else { sym.fatal("unexpected synthesized method type: \(type)") }
+    let dom = type.sigDom
     switch dom.kind {
     case .any(let domMembers): synthesizeUnionDomMethod(globalCtx, sym: sym, type: type, polyRecord: polyRecord, hostName: hostName,
       methodHostName: methodHostName, domMembers: domMembers)
