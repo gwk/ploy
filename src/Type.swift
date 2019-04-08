@@ -82,16 +82,6 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     return Type(desc, kind: .host)
   }
 
-  class func Poly(_ members: [Type]) -> Type {
-    assert(members.isSortedStrict, "members: \(members)")
-    // TODO: assert disjoint.
-    let desc = "Poly<\(members.descriptions.joined(separator: " "))>"
-    return memoize(desc, (
-      kind: .poly(members: members),
-      frees: Set(members.flatMap { $0.frees }),
-      vars: Set(members.flatMap { $0.vars })))
-  }
-
   class func Method(_ members: [Type]) -> Type {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
@@ -100,6 +90,16 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     let desc = "(\(contents))"
     return memoize(desc, (
       kind: .method(members: members),
+      frees: Set(members.flatMap { $0.frees }),
+      vars: Set(members.flatMap { $0.vars })))
+  }
+
+  class func Poly(_ members: [Type]) -> Type {
+    assert(members.isSortedStrict, "members: \(members)")
+    // TODO: assert disjoint.
+    let desc = "Poly<\(members.descriptions.joined(separator: " "))>"
+    return memoize(desc, (
+      kind: .poly(members: members),
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -116,7 +116,6 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       vars: base.vars))
     fatalError("refinement types not yet supported: \(t)")
   }
-
 
   class func Sig(dom: Type, ret: Type) -> Type {
     let desc = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
