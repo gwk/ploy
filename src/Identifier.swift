@@ -20,7 +20,7 @@ enum Identifier: VaryingForm {
     }
   }
 
-  static var expDesc: String { return "identifier symbol or path" }
+  static var expDesc: String { return "identifier" }
 
   var name: String {
     return syms.map({$0.name}).joined(separator: "/")

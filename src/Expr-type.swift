@@ -15,7 +15,7 @@ extension Expr {
       switch acc.accessee {
       case .sym(let sym): identifier = .sym(sym)
       case .path(let path): identifier = .path(path)
-      default: acc.accessee.failType("type accessee must be either a symbol or path.")
+      default: acc.accessee.failType("type accessee must be an identifier.")
       }
       let rec = scope.getRecord(identifier: identifier)
       switch rec.kind {

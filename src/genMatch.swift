@@ -39,7 +39,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
       case .tag(let tag): // variant.
         tests.append(synthTagTest(tag: tag, val: val))
         destructure(val: subAcc(accessor: .untag(tag), val: val), pattern: bind.val)
-      default: bind.place.failSyntax("destructuring bind place must be a sym or tag")
+      default: bind.place.failSyntax("destructuring bind place must be a symbol or tag")
       }
 
     case .litNum(let litNum):
