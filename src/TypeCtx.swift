@@ -12,6 +12,7 @@ struct TypeCtx: Encodable {
   }
 
   var constraints = [Constraint]()
+  var unresolvedIndices = [Int]()
   var freeUnifications = [Type?]()
   var freeParents: [Int] = [] // Map free indices to parent context.
   var freeNevers = Set<Int>() // Never types are a special case, omitted from unification.
@@ -27,6 +28,7 @@ struct TypeCtx: Encodable {
 
 
   mutating func addConstraint(_ constraint: Constraint) {
+    unresolvedIndices.append(constraints.count)
     constraints.append(constraint)
   }
 
@@ -449,9 +451,11 @@ struct TypeCtx: Encodable {
 
 
   mutating func resolveSub(constraint: Constraint) throws {
+    let index = constraints.count
+    constraints.append(constraint)
     let done = try resolve(constraint)
     if !done {
-      addConstraint(constraint)
+      unresolvedIndices.append(index)
     }
   }
 
@@ -551,6 +555,7 @@ struct TypeCtx: Encodable {
     for (childType, parentIdx) in zip(ctx.freeUnifications, ctx.freeParents) {
       // Note: freeUnifications might now be larger than freeParents, due to addType.
       // These get ignored by zip; ok because they cannot possibly be referenced by the parent context.
+      // TODO: eventually fix this for the sake of complete context dumping.
       guard let childType = childType else { continue } // not resolved by child.
       let parentType = ctx.copyForParent(type: childType)
       if case .free(let i) = parentType.kind { assert(i != parentIdx) } // a free should never point to itself.
@@ -562,34 +567,35 @@ struct TypeCtx: Encodable {
   }
 
 
-  mutating func resolveRound() throws -> [Constraint] {
-    var deferred: [Constraint] = []
+  mutating func resolveRound() throws -> [Int] {
+    var deferredIndices = [Int]()
     var i = 0
-    while i < constraints.count { // use while loop because constraints array may grow during iteration.
-      let constraint = constraints[i]
-      let done = try resolve(constraint)
-      if !done {
-        deferred.append(constraint)
+    while i < unresolvedIndices.count { // Use while loop because constraints array may grow during iteration.
+      let idx = unresolvedIndices[i]
+      let constraint = constraints[idx]
+      let resolved = try resolve(constraint)
+      if !resolved {
+        deferredIndices.append(idx)
       }
       i += 1
     }
-    return deferred
+    return deferredIndices
   }
 
 
   mutating func resolveAll() throws {
-    while !constraints.isEmpty {
+    while !unresolvedIndices.isEmpty {
       searchError = nil
-      let deferred = try resolveRound()
-      if deferred.count == constraints.count { // no progress; error.
+      let deferredIndices = try resolveRound()
+      if deferredIndices.count == unresolvedIndices.count { // No progress; error.
         if let searchError = searchError { throw searchError }
         // If we do not have a specific error from polymorph search, just show generic error for first constraint.
-        switch deferred.first! {
+        switch constraints[deferredIndices.first!] {
         case .prop(let prop): throw prop.error("cannot resolve constraint")
         case .rel(let rel): throw rel.error({(_, _) in "cannot resolve constraint"})
         }
       }
-      constraints = deferred
+      unresolvedIndices = deferredIndices
     }
   }
 
