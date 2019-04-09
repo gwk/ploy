@@ -156,23 +156,15 @@ func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: Pol
 func synthesizeMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, selected: Type, polyRecord: PolyRecord,
  hostName: String, methodHostName: String) {
 
-  guard case .method(let members, let dom, let ret) = selected.kind else { fatalError("unexpected selected: \(selected)") }
-  guard case .union(let domMembers) = dom.kind else { fatalError("unexpected dom for synthesis: \(dom)") }
+  guard case .method(let members, _, _) = selected.kind else { fatalError("unexpected selected: \(selected)") }
 
   let em = Emitter(ctx: globalCtx)
   let tableName = "\(methodHostName)__$table" // bling: $table: dispatch table.
   em.str(0, "const \(tableName) = {")
-  overDoms: for domMember in domMembers { // lazily emit all necessary concrete methods for this synthesized method.
-    for methodType in polyRecord.typesToMethodStatuses.keys {
-      if methodType.sigDom == domMember {
-        let memberHostName = compileMethod(globalCtx, sym: sym, type: methodType, polyRecord: polyRecord, hostName: hostName,
-          selected: methodType)
-        em.str(2, "'\(domMember)': \(memberHostName),")
-        continue overDoms
-      }
-    }
-    let searched = Array(polyRecord.typesToMethodStatuses.keys)
-    sym.fatal("synthesizing method \(type): no match for domain member: \(domMember); searched \(searched)")
+  for member in members {
+    let memberHostName = compileMethod(globalCtx, sym: sym, type: member, polyRecord: polyRecord, hostName: hostName,
+      selected: member)
+    em.str(2, "'\(member.sigDom)': \(memberHostName),")
   }
   em.append("};") // close table.
   em.str(0, "const \(methodHostName) = $=>\(tableName)[$.$u]($.$m); // \(type)")
