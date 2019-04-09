@@ -153,17 +153,17 @@ class Parser {
 
   static let opGroups: [[(TokenKind, (ActForm, ActForm)->ActForm)]] = [
     [ (.typeAlias, TypeAlias.mk),
-      (.bind, Bind.mk),
-      (.case_, Case.mk)],
+      (.bind, Bind.mk)],
+    [ (.ann, Ann.mk)],
     [ (.union, Union.mk)],
     [ (.intersection, Intersection.mk)],
-    [ (.ann, Ann.mk),
-      (.typeVar, TypeVar.mk),
+    [ (.sig, Sig.mk)],
+    [ (.typeVar, TypeVar.mk),
       (.where_, Where.mk)],
+    [ (.case_, Case.mk)],
     [ (.tagTest, TagTest.mk),
       (.acc, Acc.mk),
-      (.call, Call.mk),
-      (.sig, Sig.mk)]
+      (.call, Call.mk)]
     ]
 
   // precedence is repeated for spaced and unspaced operators.

@@ -3,7 +3,7 @@
 
 class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
-  enum Kind {
+  enum Kind: Equatable {
     case free(index: Int)
     case host
     case intersect(members: [Type])
@@ -16,6 +16,30 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     case union(members: [Type])
     case var_(name: String, requirement: Type)
     case variantMember(variant: TypeVariant)
+
+    var precedence: Int {
+      switch self {
+      case .method: return 0
+      case .union: return 1
+      case .intersect: return 2
+      case .sig: return 3
+      case .var_: return 4
+      //case .where: return 4 // Not yet implemented, but syntax exists.
+      default: return 5
+      }
+    }
+
+    var separator: String {
+      switch self {
+      case .method: return " + "
+      case .union: return  "|"
+      case .intersect: return "&"
+      case .sig: return "%"
+      case .var_: return "::"
+      //case .where: return ":? // Not yet implemented, but syntax exists.
+      default: fatalError()
+      }
+    }
   }
 
   static var allTypes: [String: Type] = [:]
@@ -36,14 +60,29 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     Type.allTypes.insertNew(description, value: self)
   }
 
-  class func memoize(_ description: String, _ parts: @autoclosure ()->(kind: Kind, frees: Set<Type>, vars: Set<Type>)) -> Type {
-    if let memo = allTypes[description] {
-      return memo
-    }
-    let (kind, frees, vars) = parts()
+  func parenthesizedDesc(_ precedence: Int) -> String {
+    if precedence < self.kind.precedence { return description }
+    else { return "(\(description))" }
+  }
+
+  class func memoize(_ description: String, kind: Kind, _ parts: @autoclosure ()->(frees: Set<Type>, vars: Set<Type>)) -> Type {
+    if let memo = allTypes[description] { return memo }
+    let (frees, vars) = parts()
     let type = Type(description, kind: kind, frees: frees, vars: vars)
     allTypes[description] = type
     return type
+  }
+
+  class func memoize(emptyDesc: String, kind: Kind, members: [Type]) -> Type {
+    let description = members.isEmpty ? emptyDesc : binaryDesc(kind, members)
+    return memoize(description, kind: kind, (
+      frees: Set(members.flatMap { $0.frees }),
+      vars: Set(members.flatMap { $0.vars })))
+  }
+
+  class func binaryDesc(_ kind: Kind, _ members: [Type]) -> String {
+    let elDescs = members.map { $0.parenthesizedDesc(kind.precedence) }
+    return elDescs.joined(separator: kind.separator)
   }
 
   class func Free(_ index: Int) -> Type { // should only be called by addFreeType and copyForParent.
@@ -63,14 +102,11 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   }
 
   class func Intersect(_ members: [Type]) throws -> Type {
-    let merged = try computeIntersect(types: members)
-    if merged.isEmpty { fatalError("empty intersection") }
-    if merged.count == 1 { return merged[0] }
-    let desc = "(\(merged.descriptions.joined(separator: "&")))"
-    return memoize(desc, (
-      kind: .intersect(members: merged),
-      frees: Set(merged.flatMap { $0.frees }),
-      vars: Set(merged.flatMap { $0.vars })))
+    let members = try computeIntersect(types: members)
+    if members.isEmpty { fatalError("empty intersection") }
+    if members.count == 1 { return members[0] }
+    let kind = Kind.intersect(members: members)
+    return memoize(emptyDesc: "", kind: kind, members: members)
   }
 
   class func Method(_ members: [Type]) throws -> Type {
@@ -86,20 +122,15 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     }
     let dom = try Union(doms.sorted())
     let ret = try Union(rets.sorted())
-    let contents = members.descriptions.joined(separator: " + ")
-    let desc = "(\(contents))"
-    return memoize(desc, (
-      kind: .method(members: members, dom: dom, ret: ret),
-      frees: Set(members.flatMap { $0.frees }),
-      vars: Set(members.flatMap { $0.vars })))
+    let kind = Kind.method(members: members, dom: dom, ret: ret)
+    return memoize(emptyDesc: "EmptyMethod", kind: kind, members: members)
   }
 
   class func Poly(_ members: [Type]) -> Type {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
     let desc = "Poly<\(members.descriptions.joined(separator: " "))>"
-    return memoize(desc, (
-      kind: .poly(members: members),
+    return memoize(desc, kind: .poly(members: members), (
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
   }
@@ -110,8 +141,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   class func Refinement(base: Type, pred: Expr) -> Type {
     let desc = "\(base):?\(pred)" // TODO: figure out how to represent the predicate globally.
-    let t = memoize(desc, (
-      kind: .refinement(base: base, pred: pred),
+    let t = memoize(desc, kind: .refinement(base: base, pred: pred), (
       frees: base.frees,
       vars: base.vars))
     fatalError("refinement types not yet supported: \(t)")
@@ -119,8 +149,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   class func Sig(dom: Type, ret: Type) -> Type {
     let desc = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
-    return memoize(desc, (
-      kind: .sig(dom: dom, ret: ret),
+    return memoize(desc, kind: .sig(dom: dom, ret: ret), (
       frees: dom.frees.union(ret.frees),
       vars: dom.vars.union(ret.vars)))
   }
@@ -134,27 +163,21 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     var memberTypes = posFields
     memberTypes.append(contentsOf: labFields.map{$0.type})
     memberTypes.append(contentsOf: variants.map{$0.type})
-    return memoize(desc, (
-      kind: .struct_(posFields: posFields, labFields: labFields, variants: variants),
+    return memoize(desc, kind: .struct_(posFields: posFields, labFields: labFields, variants: variants), (
       frees: Set(memberTypes.flatMap { $0.frees }),
       vars:  Set(memberTypes.flatMap { $0.vars })))
   }
 
   class func Union(_ members: [Type]) throws -> Type {
-    let merged = try computeUnion(types: members)
-    if merged.count == 1 { return merged[0] }
-    let desc = merged.isEmpty ? "Empty" : "(\(merged.descriptions.joined(separator: "|")))"
-    return memoize(desc, (
-      kind: .union(members: merged),
-      frees: Set(merged.flatMap { $0.frees }),
-      vars: Set(merged.flatMap { $0.vars })))
+    let members = try computeUnion(types: members)
+    if members.count == 1 { return members[0] }
+    return memoize(emptyDesc: "Empty", kind: .union(members: members), members: members)
   }
 
   class func Var(name: String, requirement: Type) -> Type {
     let reqDesc = String(describing: requirement)
     let desc = "(\(name)::\(reqDesc))"
-    return memoize(desc, (
-      kind: .var_(name: name, requirement: requirement),
+    return memoize(desc, kind: .var_(name: name, requirement: requirement), (
       frees: requirement.frees,
       vars: requirement.vars))
   }
@@ -165,8 +188,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   class func VariantMember(variant: TypeVariant) -> Type {
     let desc = "(\(variant)...)"
-    return memoize(desc, (
-      kind: .variantMember(variant: variant),
+    return memoize(desc, kind: .variantMember(variant: variant), (
       frees: variant.type.frees,
       vars: variant.type.vars))
   }
