@@ -82,7 +82,9 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   class func binaryDesc(_ kind: Kind, _ members: [Type]) -> String {
     let elDescs = members.map { $0.parenthesizedDesc(kind.precedence) }
-    return elDescs.joined(separator: kind.separator)
+    let separator = kind.separator
+    if elDescs.count == 1 { return separator.strip(char: " ") + elDescs[0] }
+    return elDescs.joined(separator: separator)
   }
 
   class func Free(_ index: Int) -> Type { // should only be called by addFreeType and copyForParent.
