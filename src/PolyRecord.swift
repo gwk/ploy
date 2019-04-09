@@ -18,7 +18,7 @@ class PolyRecord {
     self.polytype = polytype
     self.typesToMethodStatuses = typesToMethodStatuses
 
-    guard case .poly(let members) = polytype.kind else { fatalError() }
+    guard case .poly(let members) = polytype.kind else { fatalError("\(polytype)") }
     self.protoVarsToMerged = mapVarsToMergedTypes(protoSig: protoSig, prototype: prototype, members: members)
   }
 

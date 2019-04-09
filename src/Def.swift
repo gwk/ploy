@@ -156,7 +156,7 @@ func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: Pol
 func synthesizeMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, selected: Type, polyRecord: PolyRecord,
  hostName: String, methodHostName: String) {
 
-  guard case .method(let members, _, _) = selected.kind else { fatalError("unexpected selected: \(selected)") }
+  guard case .poly(let members) = selected.kind else { fatalError("unexpected selected: \(selected)") }
 
   let em = Emitter(ctx: globalCtx)
   let tableName = "\(methodHostName)__$table" // bling: $table: dispatch table.

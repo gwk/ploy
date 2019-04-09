@@ -1,5 +1,5 @@
 test/2/type/poly-unconstrained.ploy:6:7-8: type error: method alias 'f': polyfunction cannot resolve against expected free type.
-  polyfunction type: Poly<()%Int ()%Str>
+  polyfunction type: ()%Int + ()%Str
   expected type: ^0
 |   g = f
         ~

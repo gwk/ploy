@@ -7,7 +7,6 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     case free(index: Int)
     case host
     case intersect(members: [Type])
-    case method(members: [Type], dom:Type, ret:Type)
     case poly(members: [Type])
     case prim
     case refinement(base: Type, pred: Expr)
@@ -19,7 +18,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
     var precedence: Int {
       switch self {
-      case .method: return 0
+      case .poly: return 0
       case .union: return 1
       case .intersect: return 2
       case .sig: return 3
@@ -31,7 +30,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
     var separator: String {
       switch self {
-      case .method: return " + "
+      case .poly: return " + "
       case .union: return  "|"
       case .intersect: return "&"
       case .sig: return "%"
@@ -111,30 +110,11 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     return memoize(emptyDesc: "", kind: kind, members: members)
   }
 
-  class func Method(_ members: [Type]) throws -> Type {
-    assert(members.isSortedStrict, "members: \(members)")
-    // TODO: assert disjoint.
-    if members.count == 1 { return members[0] }
-    var doms = [Type]()
-    var rets = [Type]()
-    for member in members {
-      let (dom, ret) = member.sigDomRet
-      doms.append(dom)
-      rets.append(ret)
-    }
-    let dom = try Union(doms.sorted())
-    let ret = try Union(rets.sorted())
-    let kind = Kind.method(members: members, dom: dom, ret: ret)
-    return memoize(emptyDesc: "EmptyMethod", kind: kind, members: members)
-  }
-
   class func Poly(_ members: [Type]) -> Type {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
-    let desc = "Poly<\(members.descriptions.joined(separator: " "))>"
-    return memoize(desc, kind: .poly(members: members), (
-      frees: Set(members.flatMap { $0.frees }),
-      vars: Set(members.flatMap { $0.vars })))
+    let kind = Kind.poly(members: members)
+    return memoize(emptyDesc: "EmptyPoly", kind: kind, members: members)
   }
 
   fileprivate class func Prim(_ name: String) -> Type {
@@ -283,6 +263,21 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   func encode(to encoder: Encoder) throws { try encoder.encodeDescription(self) }
 
 
+  var polyDomRet: (Type, Type) {
+    guard case .poly(let members) = self.kind else { fatalError() }
+    var doms = [Type]()
+    var rets = [Type]()
+    for member in members {
+      let (dom, ret) = member.sigDomRet
+      doms.append(dom)
+      rets.append(ret)
+    }
+    let dom = try! Type.Union(doms.sorted())
+    let ret = try! Type.Union(rets.sorted())
+    return (dom, ret)
+  }
+
+
   var sigDom: Type {
     switch self.kind {
     case .sig(let dom, _): return dom
@@ -310,7 +305,6 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     case .free, .host, .prim, .var_: return fn(self)
     case .intersect(let members): return try! .Intersect(members.sortedMap{$0.transformLeaves(fn)})
     case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
-    case .method(let members, _, _): return try! .Method(members.sortedMap{$0.transformLeaves(fn)})
     case .refinement(let base, let pred): return .Refinement(base: base.transformLeaves(fn), pred: pred)
     case .sig(let dom, let ret): return .Sig(dom: dom.transformLeaves(fn), ret: ret.transformLeaves(fn))
     case .struct_(let posFields, let labFields, let variants):

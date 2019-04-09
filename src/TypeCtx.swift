@@ -137,8 +137,6 @@ struct TypeCtx: Encodable {
     case (.poly, .sig): // select a single morph.
       return try resolvePolyToSig(rel, act: act, exp: exp)
 
-    case (.poly, .method): throw rel.error({"\($0) to \($1) polyfunctions not yet implemented"})
-
     case (.poly, .intersect): throw rel.error({"\($0) to \($1) intersection not yet implemented"})
 
     case (.poly, .union): throw rel.error({"\($0) to \($1) union not yet implemented"})
@@ -300,9 +298,8 @@ struct TypeCtx: Encodable {
       }
     }
     reqMorphs.sort()
-    let method = try Type.Method(reqMorphs)
-    guard case .method(_, let actDom, let actRet) = method.kind else { fatalError() }
-
+    let method = Type.Poly(reqMorphs)
+    let (actDom, actRet) = method.polyDomRet
     try resolveSub(rel, // Note: this is excessive, beceause we just constructed the domain ourselves, but it does not hurt.
       actType: actDom, actDesc: "polyfunction domain",
       expType: expDom, expDesc: "signature domain")
@@ -456,7 +453,6 @@ struct TypeCtx: Encodable {
     case .free, .host, .prim: fatalError()
     case .intersect(let members): return try! .Intersect(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .poly(let members): return .Poly(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .method(let members, _, _): return try! .Method(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .refinement(let base, let pred): return .Refinement(base: self.instantiate(expr, base, &varsToFrees), pred: pred)
     case .sig(let dom, let ret):
       return .Sig(dom: instantiate(expr, dom, &varsToFrees), ret: instantiate(expr, ret, &varsToFrees))
