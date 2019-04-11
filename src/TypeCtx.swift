@@ -464,7 +464,7 @@ struct TypeCtx: Encodable {
     case .union(let members): return try! .Union(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .var_(let name, let requirement):
       let instance = varsToFrees.getOrInsert(name, dflt: { self.addFreeType() })
-      constrain(actExpr: expr, actType: instance, expType: requirement, "`::` type variable requirement")
+      constrain(actExpr: expr, actType: instance, expType: requirement, "typevar requirement")
       return instance
     case .variantMember(let variant):
       return .VariantMember(variant: variant.substitute(type: instantiate(expr, variant.type, &varsToFrees)))
