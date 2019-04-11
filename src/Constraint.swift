@@ -3,12 +3,6 @@
 
 enum Constraint: CustomStringConvertible, Encodable {
 
-  enum CodingKeys: CodingKey {
-    case prop
-    case rel
-    //case sel
-  }
-
   // A type constraint to be resolved during type checking.
   // Constraints contain types and the expressions from which they were generated for error reporting.
 
@@ -25,10 +19,10 @@ enum Constraint: CustomStringConvertible, Encodable {
   }
 
   func encode(to encoder: Encoder) throws {
-    var c = encoder.container(keyedBy: CodingKeys.self)
+    var c = encoder.singleValueContainer()
     switch self {
-    case .prop(let prop): try c.encode(prop, forKey: .prop)
-    case .rel(let rel): try c.encode(rel, forKey: .rel)
+    case .prop(let prop): try c.encode(prop)
+    case .rel(let rel): try c.encode(rel)
     //case .sel(let sel): try c.encode(sel, forKey: .sel)
     }
   }
@@ -118,7 +112,7 @@ struct Side: CustomStringConvertible, Encodable {
       }
     }
 
-    func encode(to encoder: Encoder) throws { try encoder.encodeDescription(self) }
+    func encode(to encoder: Encoder) throws { try encoder.encode(string: self.desc) }
   }
 
   enum CodingKeys: CodingKey {
