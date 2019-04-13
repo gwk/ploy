@@ -13,8 +13,8 @@ class Call: ActFormBase, ActForm {
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return self.init(Syn(l.syn, r.syn),
-      callee: Expr.expect(l, subj: "call"),
-      arg: Expr.expect(r, subj: "call"))
+      callee: Expr.expect(l, subj: "callee"),
+      arg: Expr.expect(r, subj: "call argument"))
   }
 
   static var expDesc: String { return "call" }
