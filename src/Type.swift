@@ -72,8 +72,9 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     return type
   }
 
-  class func memoize(emptyDesc: String, kind: Kind, members: [Type]) -> Type {
+  class func memoize(kind: Kind, members: [Type], emptyDesc: String = "") -> Type {
     let description = members.isEmpty ? emptyDesc : binaryDesc(kind, members)
+    if description.isEmpty { fatalError("empty type description: \(kind)") }
     return memoize(description, kind: kind, (
       frees: Set(members.flatMap { $0.frees }),
       vars: Set(members.flatMap { $0.vars })))
@@ -104,17 +105,16 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   class func Intersect(_ members: [Type]) throws -> Type {
     let members = try computeIntersect(types: members)
-    if members.isEmpty { fatalError("empty intersection") }
     if members.count == 1 { return members[0] }
     let kind = Kind.intersect(members: members)
-    return memoize(emptyDesc: "", kind: kind, members: members)
+    return memoize(kind: kind, members: members)
   }
 
   class func Poly(_ members: [Type]) -> Type {
     assert(members.isSortedStrict, "members: \(members)")
     // TODO: assert disjoint.
     let kind = Kind.poly(members: members)
-    return memoize(emptyDesc: "EmptyPoly", kind: kind, members: members)
+    return memoize(kind: kind, members: members, emptyDesc: "EmptyPoly")
   }
 
   fileprivate class func Prim(_ name: String) -> Type {
@@ -130,10 +130,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   }
 
   class func Sig(dom: Type, ret: Type) -> Type {
-    let desc = "\(dom.nestedSigDescription)%\(ret.nestedSigDescription)"
-    return memoize(desc, kind: .sig(dom: dom, ret: ret), (
-      frees: dom.frees.union(ret.frees),
-      vars: dom.vars.union(ret.vars)))
+    return memoize(kind: .sig(dom: dom, ret: ret), members: [dom, ret])
   }
 
   class func Struct(posFields: [Type], labFields: [TypeLabField], variants: [TypeVariant]) -> Type {
@@ -153,7 +150,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   class func Union(_ members: [Type]) throws -> Type {
     let members = try computeUnion(types: members)
     if members.count == 1 { return members[0] }
-    return memoize(emptyDesc: "Empty", kind: .union(members: members), members: members)
+    return memoize(kind: .union(members: members), members: members, emptyDesc: "Empty")
   }
 
   class func Var(name: String, requirement: Type) -> Type {
