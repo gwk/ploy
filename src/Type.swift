@@ -23,8 +23,8 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       case .union: return 1
       case .intersect: return 2
       case .sig: return 3
+      case .refinement: return 4
       case .req: return 4
-      //case .where: return 4 // Not yet implemented, but syntax exists.
       default: return 5
       }
     }
@@ -35,8 +35,8 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       case .union: return  "|"
       case .intersect: return "&"
       case .sig: return "%"
+      case .refinement: return ":?"
       case .req: return "::"
-      //case .where: return ":? // Not yet implemented, but syntax exists.
       default: fatalError()
       }
     }

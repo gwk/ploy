@@ -276,6 +276,9 @@ class DefCtx: Encodable {
     case .typeArgs(let typeArgs): // TODO: impossible? fatalError?
       typeArgs.failType("type args cannot be used as a value expression.")
 
+    case .typeRefine(let typeRefine):
+      typeRefine.failSyntax("type refinement cannot be used as a value expression.")
+
     case .typeReq(let typeReq):
       typeReq.failType("type requirement cannot be used as a value expression.")
 
@@ -286,9 +289,6 @@ class DefCtx: Encodable {
 
     case .void:
       return typeVoid
-
-    case .where_(let where_):
-      where_.failSyntax("\"where\" clause type refinement cannot be used as a value expression.")
     }
   }
 

@@ -88,7 +88,7 @@ func genMatchCase(matchValSym: Sym, case_: Case) -> Case {
     case .tag(let tag):
       tests.append(synthTagTest(tag: tag, val: val))
 
-    case .where_(let where_): where_.fatal("match where clauses not implemented.")
+    case .typeRefine(let typeRefine): typeRefine.fatal("match type refinement clauses not implemented.")
 
     default: pattern.failSyntax("match case expected pattern; received \(cond.actDesc).")
     }

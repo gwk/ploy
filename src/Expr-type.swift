@@ -52,6 +52,11 @@ extension Expr {
     case .sym(let sym):
       return scope.typeBinding(sym: sym, subj: subj)
 
+    case .typeRefine(let typeRefine):
+      let base = typeRefine.base.type(scope, "refinement base")
+      let pred = typeRefine.pred // TODO: this needs to be a symbol resolving to a def or something.
+      return Type.Refinement(base: base, pred: pred)
+
     case .typeReq(let typeReq):
       let base = typeReq.base.type(scope, "type requirement base")
       let req = typeReq.requirement.type(scope, "type requirement constraint")
@@ -68,11 +73,6 @@ extension Expr {
       let r = union.right.type(scope, "union right operand")
       do { return try Type.Union([l, r].sorted()) }
       catch let e { failType(e as! String) }
-
-    case .where_(let where_):
-      let base = where_.base.type(scope, "refinement base")
-      let pred = where_.pred // TODO: this needs to be a symbol resolving to a def or something.
-      return Type.Refinement(base: base, pred: pred)
 
     default:
       failType("\(subj) expected a type; received \(actDesc).")

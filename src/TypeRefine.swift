@@ -1,7 +1,7 @@
 // Copyright © 2017 George King. Permission to use this file is granted in ploy/license.txt.
 
 
-class Where: ActFormBase, ActForm { // where: `T:?pred`.
+class TypeRefine: ActFormBase, ActForm { // where: `T:?pred`.
   let base: Expr
   let pred: Expr
 
@@ -13,11 +13,11 @@ class Where: ActFormBase, ActForm { // where: `T:?pred`.
 
   static func mk(l: ActForm, _ r: ActForm) -> ActForm {
     return self.init(Syn(l.syn, r.syn),
-      base: Expr.expect(l, subj: "where operator", exp: "base"),
-      pred: Expr.expect(r, subj: "where operator", exp: "predicate"))
+      base: Expr.expect(l, subj: "type refinement operator", exp: "base"),
+      pred: Expr.expect(r, subj: "type refinement operator", exp: "predicate"))
   }
 
-  static var expDesc: String { return "`:?` where operator" }
+  static var expDesc: String { return "`:?` type refinement" }
 
   var textTreeChildren: [Any] { return [base, pred] }
 }

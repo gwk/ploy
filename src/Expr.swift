@@ -26,11 +26,11 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
   case tagTest(TagTest)
   case typeAlias(TypeAlias)
   case typeArgs(TypeArgs)
+  case typeRefine(TypeRefine)
   case typeReq(TypeReq)
   case typeVarDecl(TypeVarDecl)
   case union(Union)
   case void(ImplicitVoid)
-  case where_(Where)
 
   static func accept(_ actForm: ActForm) -> Expr? {
     switch actForm {
@@ -57,10 +57,10 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
     case let f as TagTest:      return .tagTest(f)
     case let f as TypeAlias:    return .typeAlias(f)
     case let f as TypeArgs:     return .typeArgs(f)
+    case let f as TypeRefine:   return .typeRefine(f)
     case let f as TypeReq:      return .typeReq(f)
     case let f as TypeVarDecl:  return .typeVarDecl(f)
     case let f as Union:        return .union(f)
-    case let f as Where:        return .where_(f)
     default:  return nil
     }
   }
@@ -91,11 +91,11 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
     case .tagTest(let tagTest): return tagTest
     case .typeAlias(let typeAlias): return typeAlias
     case .typeArgs(let typeArgs): return typeArgs
+    case .typeRefine(let typeRefine): return typeRefine
     case .typeReq(let typeReq): return typeReq
     case .typeVarDecl(let typeVarDecl): return typeVarDecl
     case .union(let union): return union
     case .void(let void): return void
-    case .where_(let where_): return where_
     }
   }
 

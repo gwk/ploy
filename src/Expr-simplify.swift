@@ -40,11 +40,11 @@ extension Expr {
     case .tagTest(let tagTest): return .tagTest(TagTest(tagTest.syn, tag: tagTest.tag, expr: tagTest.expr.simplify(ctx)))
     case .typeAlias: return self
     case .typeArgs: return self
+    case .typeRefine: return self
     case .typeReq: return self
     case .typeVarDecl: return self
     case .union: return self
     case .void: return self
-    case .where_: return self
     }
   }
 }

@@ -181,6 +181,8 @@ extension Expr {
 
     case .typeArgs: fatalError()
 
+    case .typeRefine: fatalError()
+
     case .typeReq: fatalError()
 
     case .typeVarDecl: fatalError()
@@ -189,8 +191,6 @@ extension Expr {
 
     case .void:
       em.str(indent, "undefined")
-
-    case .where_: fatalError()
     }
 
     if conv != nil {
