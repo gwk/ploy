@@ -12,4 +12,4 @@ outPath="_build/$stem.js"
 outDir=$(dirname "$outPath")
 
 mkdir -p "$outDir"
-PATH=/usr/bin lldb --file _build/debug/ploy -- lib -mapper ./gen-source-map -main "$mainPath" -o "$outPath"
+PATH=/usr/bin lldb --file _build/debug/ploy -- build lib -mapper ./gen-source-map -main "$mainPath" -o "$outPath"

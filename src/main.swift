@@ -3,9 +3,16 @@
 import Foundation
 
 
-let usageMsg = "usage: lib-src-paths… -mapper mapper-path -main main-src-path -o out-path."
+let usageMsg = """
+Ploy compiler usage:
 
-let validOpts = Set([
+ploy build lib-src-paths… -mapper mapper-path -main main-src-path -o out-path.
+
+ploy test-types src-type dst-type
+"""
+
+
+let validBuildOpts = Set([
   "-mapper",
   "-main",
   "-o",
@@ -13,18 +20,30 @@ let validOpts = Set([
 
 
 func main() {
-  var ployPath: Path! = nil
+
+  if processArguments.count < 2 { fail(usageMsg) }
+
+  //let ployPath = Path(processArguments[0])
+  let args = Array(processArguments[2...])
+
+  switch processArguments[1] {
+  case "build": ploy_build(args: args)
+  case "test-types": ploy_test_types(args: args)
+  default: fail(usageMsg)
+  }
+}
+
+
+func ploy_build(args:[String]) {
   var srcPaths: [Path] = []
   var opts: [String: String] = [:]
 
   var opt: String? = nil
-  for (i, arg) in processArguments.enumerated() {
-    if i == 0 {
-      ployPath = Path(arg)
-    } else if let o = opt {
+  for arg in args {
+    if let o = opt {
       opts[o] = arg
       opt = nil
-    } else if validOpts.contains(arg) {
+    } else if validBuildOpts.contains(arg) {
       opt = arg
     } else if arg.hasPrefix("-") {
       fail("unrecognized option: '\(arg)'")
@@ -32,7 +51,6 @@ func main() {
       srcPaths.append(Path(arg))
     }
   }
-  _ = ployPath
 
   check(opt == nil, "dangling option flag: '\(opt!)'")
 
@@ -113,5 +131,11 @@ func main() {
     fail("gen-source-map subprocess failed.")
   }
 }
+
+
+func ploy_test_types(args:[String]) {
+  fail("not implemented.")
+}
+
 
 main()

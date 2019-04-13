@@ -1,5 +1,5 @@
 {
-  'env': { 'PLOY': '$PROJ/_build/debug/ploy' },
+  'env': { 'PLOY': '$PROJ/_build/debug/ploy build' },
   'compile': ['$PLOY -mapper $PROJ/gen-source-map lib -main $SRC -o $NAME'],
   'links': { 'lib', 'test' }
 }

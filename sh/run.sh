@@ -23,7 +23,7 @@ outDir=$(dirname "$outPath")
 mkdir -p "$outDir"
 make build
 set -x
-_build/debug/ploy lib -mapper ./gen-source-map -main "$mainPath" -o "$outPath"
+_build/debug/ploy build lib -mapper ./gen-source-map -main "$mainPath" -o "$outPath"
 "$outPath" "$@"
 
 # TODO: move the profile dump.
