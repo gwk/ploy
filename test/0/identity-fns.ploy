@@ -1,7 +1,7 @@
 
-Ident =: (T::Any)%T
+Ident =: (^T)%T
 
-polyfn ident (T::Any)%T; // TODO: test generic implementation.
+polyfn ident (^T)%T; // TODO: test generic implementation.
 method ident Int%Int $;
 method ident Str%Str $;
 

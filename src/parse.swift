@@ -158,7 +158,7 @@ class Parser {
     [ (.union, Union.mk)],
     [ (.intersection, Intersection.mk)],
     [ (.sig, Sig.mk)],
-    [ (.typeVar, TypeVar.mk),
+    [ (.typeReq, TypeReq.mk),
       (.where_, Where.mk)],
     [ (.case_, Case.mk)],
     [ (.tagTest, TagTest.mk),
@@ -365,7 +365,11 @@ class Parser {
   func parseCaret() -> ActForm {
     let head = getCurrentAndAdvance()
     if atEnd { failParse(token: head, "dangling caret at end of file.") }
-    failParse("caret syntax is currently unassigned")
+    if current.kind != .sym {
+      failParse("caret must be followed by type symbol.")
+    }
+    let sym = parseSym()
+    return TypeVarDecl(Syn(head, sym.syn), sym: sym)
   }
 
 

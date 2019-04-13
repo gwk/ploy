@@ -276,8 +276,11 @@ class DefCtx: Encodable {
     case .typeArgs(let typeArgs): // TODO: impossible? fatalError?
       typeArgs.failType("type args cannot be used as a value expression.")
 
-    case .typeVar(let typeVar):
-      typeVar.failType("type variable declaration cannot be used as a value expression.")
+    case .typeReq(let typeReq):
+      typeReq.failType("type requirement cannot be used as a value expression.")
+
+    case .typeVarDecl(let typeVarDecl):
+      typeVarDecl.failType("type variable declaration cannot be used as a value expression.")
 
     case .union: fatalError()
 

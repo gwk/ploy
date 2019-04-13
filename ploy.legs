@@ -32,7 +32,7 @@ intersection: \&
 sig: %
 tagTest: @\?
 typeAlias: =:
-typeVar: ::
+typeReq: ::
 union: \|
 where: :\?
 

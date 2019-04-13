@@ -63,7 +63,7 @@ public enum TokenKind: Int, Comparable, CustomStringConvertible {
   case tabs
   case tagTest
   case typeAlias
-  case typeVar
+  case typeReq
   case union
   case where_
 
@@ -120,7 +120,7 @@ public enum TokenKind: Int, Comparable, CustomStringConvertible {
     case .tabs: return "tabs"
     case .tagTest: return "`@?`"
     case .typeAlias: return "`=:`"
-    case .typeVar: return "`::`"
+    case .typeReq: return "`::`"
     case .union: return "`|`"
     case .where_: return "`:?`"
     }
@@ -262,16 +262,34 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 9: // main pre-match.
         switch byte {
         case 0x20...0x26, 0x28...0x5b, 0x5d...0x7e: state = 9
-        case 0x27: state = 194; last = pos; kind = .stringSQ
-        case 0x5c: state = 195
-        case 0xc2...0xdf: state = 196
-        case 0xe0: state = 197
-        case 0xe1: state = 198
-        case 0xe2...0xec: state = 199
-        case 0xed: state = 200
-        case 0xef: state = 201
-        case 0xf0: state = 202
-        case 0xf3: state = 203
+        case 0x27: state = 237; last = pos; kind = .stringSQ
+        case 0x5c: state = 238
+        case 0xc2: state = 239
+        case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 240
+        case 0xcd: state = 241
+        case 0xce: state = 242
+        case 0xd4: state = 243
+        case 0xd5: state = 244
+        case 0xd6: state = 245
+        case 0xd7: state = 246
+        case 0xd8: state = 247
+        case 0xdb: state = 248
+        case 0xdc: state = 249
+        case 0xdd: state = 250
+        case 0xde: state = 251
+        case 0xdf: state = 252
+        case 0xe0: state = 253
+        case 0xe1: state = 254
+        case 0xe2: state = 255
+        case 0xe3: state = 256
+        case 0xe4: state = 257
+        case 0xe5...0xe8, 0xeb, 0xec: state = 258
+        case 0xe9: state = 259
+        case 0xea: state = 260
+        case 0xed: state = 261
+        case 0xef: state = 262
+        case 0xf0: state = 263
+        case 0xf3: state = 264
         default: break loop
         }
       case 10: // parenO.
@@ -312,7 +330,7 @@ public struct Lexer: Sequence, IteratorProtocol {
         }
       case 17: // ann.
         switch byte {
-        case 0x3a: state = 141; last = pos; kind = .typeVar
+        case 0x3a: state = 141; last = pos; kind = .typeReq
         case 0x3f: state = 142; last = pos; kind = .where_
         default: break loop
         }
@@ -322,7 +340,7 @@ public struct Lexer: Sequence, IteratorProtocol {
         break loop
       case 20: // bind.
         switch byte {
-        case 0x3a: state = 355; last = pos; kind = .typeAlias
+        case 0x3a: state = 393; last = pos; kind = .typeAlias
         default: break loop
         }
       case 21: // angleC.
@@ -331,7 +349,7 @@ public struct Lexer: Sequence, IteratorProtocol {
         break loop
       case 23: // acc.
         switch byte {
-        case 0x3f: state = 193; last = pos; kind = .tagTest
+        case 0x3f: state = 222; last = pos; kind = .tagTest
         default: break loop
         }
       case 24: // sym.
@@ -348,7 +366,7 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 28: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 39; last = pos; kind = .sym
-        case 0x6e: state = 272; last = pos; kind = .sym
+        case 0x6e: state = 380; last = pos; kind = .sym
         default: break loop
         }
       case 29: // sym.
@@ -360,7 +378,7 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 30: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6e, 0x70...0x7a: state = 39; last = pos; kind = .sym
-        case 0x6f: state = 175; last = pos; kind = .sym
+        case 0x6f: state = 204; last = pos; kind = .sym
         default: break loop
         }
       case 31: // sym.
@@ -380,14 +398,14 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 33: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x71, 0x73...0x7a: state = 39; last = pos; kind = .sym
-        case 0x72: state = 205; last = pos; kind = .or
+        case 0x72: state = 295; last = pos; kind = .or
         default: break loop
         }
       case 34: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6e, 0x70...0x74, 0x76...0x7a: state = 39; last = pos; kind = .sym
-        case 0x6f: state = 235; last = pos; kind = .sym
-        case 0x75: state = 236; last = pos; kind = .sym
+        case 0x6f: state = 325; last = pos; kind = .sym
+        case 0x75: state = 326; last = pos; kind = .sym
         default: break loop
         }
       case 35: // braceO.
@@ -545,36 +563,36 @@ public struct Lexer: Sequence, IteratorProtocol {
         }
       case 57: // main post-match.
         switch byte {
-        case 0xa0: state = 206
-        case 0xa1: state = 207
-        case 0xa2: state = 208
-        case 0xa3: state = 209
+        case 0xa0: state = 296
+        case 0xa1: state = 297
+        case 0xa2: state = 298
+        case 0xa3: state = 299
         case 0xa4, 0xa5, 0xbc: state = 44
-        case 0xa6: state = 210
-        case 0xa7: state = 211
-        case 0xa8: state = 212
-        case 0xa9: state = 213
-        case 0xaa: state = 214
-        case 0xab: state = 215
-        case 0xac: state = 216
-        case 0xad: state = 217
-        case 0xae: state = 218
-        case 0xaf: state = 219
-        case 0xb0: state = 220
-        case 0xb1: state = 221
-        case 0xb2: state = 222
-        case 0xb3: state = 223
-        case 0xb4: state = 224
-        case 0xb5: state = 225
-        case 0xb6: state = 226
-        case 0xb7: state = 227
-        case 0xb8: state = 228
-        case 0xb9: state = 229
-        case 0xba: state = 230
-        case 0xbb: state = 231
-        case 0xbd: state = 232
-        case 0xbe: state = 233
-        case 0xbf: state = 234
+        case 0xa6: state = 300
+        case 0xa7: state = 301
+        case 0xa8: state = 302
+        case 0xa9: state = 303
+        case 0xaa: state = 304
+        case 0xab: state = 305
+        case 0xac: state = 306
+        case 0xad: state = 307
+        case 0xae: state = 308
+        case 0xaf: state = 309
+        case 0xb0: state = 310
+        case 0xb1: state = 311
+        case 0xb2: state = 312
+        case 0xb3: state = 313
+        case 0xb4: state = 314
+        case 0xb5: state = 315
+        case 0xb6: state = 316
+        case 0xb7: state = 317
+        case 0xb8: state = 318
+        case 0xb9: state = 319
+        case 0xba: state = 320
+        case 0xbb: state = 321
+        case 0xbd: state = 322
+        case 0xbe: state = 323
+        case 0xbf: state = 324
         default: break loop
         }
       case 58: // main post-match.
@@ -668,28 +686,28 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 63: // main post-match.
         switch byte {
         case 0x80...0xbe: state = 44
-        case 0xbf: state = 204
+        case 0xbf: state = 294
         default: break loop
         }
       case 64: // main post-match.
         switch byte {
         case 0x80...0x91, 0x94...0x97, 0x99, 0x9a, 0x9c, 0x9d, 0xa2, 0xa4, 0xa6, 0xaa, 0xae, 0xb0...0xbf: state = 44
-        case 0x92: state = 177
-        case 0x93: state = 178
-        case 0x98: state = 179
-        case 0x9b, 0xa1: state = 180
-        case 0x9e: state = 181
-        case 0x9f: state = 182
-        case 0xa0: state = 183
-        case 0xa3: state = 184
-        case 0xa5: state = 185
-        case 0xa7: state = 186
-        case 0xa8: state = 187
-        case 0xa9: state = 188
-        case 0xab: state = 189
-        case 0xac: state = 190
-        case 0xad: state = 191
-        case 0xaf: state = 192
+        case 0x92: state = 206
+        case 0x93: state = 207
+        case 0x98: state = 208
+        case 0x9b, 0xa1: state = 209
+        case 0x9e: state = 210
+        case 0x9f: state = 211
+        case 0xa0: state = 212
+        case 0xa3: state = 213
+        case 0xa5: state = 214
+        case 0xa7: state = 215
+        case 0xa8: state = 216
+        case 0xa9: state = 217
+        case 0xab: state = 218
+        case 0xac: state = 219
+        case 0xad: state = 220
+        case 0xaf: state = 221
         default: break loop
         }
       case 65: // main post-match.
@@ -702,41 +720,41 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 66: // main post-match.
         switch byte {
         case 0xa4...0xa8, 0xaa, 0xae, 0xb0...0xb4, 0xba, 0xbd: state = 44
-        case 0xa9: state = 344
-        case 0xab: state = 345
-        case 0xac: state = 346
-        case 0xad: state = 347
-        case 0xaf: state = 348
-        case 0xb5: state = 349
-        case 0xb6: state = 350
-        case 0xb7: state = 351
+        case 0xa9: state = 382
+        case 0xab: state = 383
+        case 0xac: state = 384
+        case 0xad: state = 385
+        case 0xaf: state = 386
+        case 0xb5: state = 387
+        case 0xb6: state = 388
+        case 0xb7: state = 389
         case 0xb8: state = 113
-        case 0xb9: state = 352
-        case 0xbb: state = 353
+        case 0xb9: state = 390
+        case 0xbb: state = 391
         case 0xbc: state = 102
         case 0xbe: state = 106
-        case 0xbf: state = 354
+        case 0xbf: state = 392
         default: break loop
         }
       case 67: // main post-match.
         switch byte {
-        case 0x90: state = 404
-        case 0x91: state = 405
-        case 0x92: state = 406
-        case 0x93: state = 407
-        case 0x94: state = 408
-        case 0x96: state = 409
+        case 0x90: state = 638
+        case 0x91: state = 639
+        case 0x92: state = 640
+        case 0x93: state = 641
+        case 0x94: state = 642
+        case 0x96: state = 643
         case 0x97, 0xa0...0xa9, 0xad: state = 62
-        case 0x98: state = 410
-        case 0x9b: state = 411
-        case 0x9d: state = 412
-        case 0x9e: state = 413
-        case 0x9f: state = 414
-        case 0xaa: state = 415
-        case 0xab: state = 416
-        case 0xac: state = 417
-        case 0xae: state = 418
-        case 0xaf: state = 419
+        case 0x98: state = 644
+        case 0x9b: state = 645
+        case 0x9d: state = 646
+        case 0x9e: state = 647
+        case 0x9f: state = 648
+        case 0xaa: state = 649
+        case 0xab: state = 650
+        case 0xac: state = 651
+        case 0xae: state = 652
+        case 0xaf: state = 653
         default: break loop
         }
       case 68: // main post-match.
@@ -851,12 +869,12 @@ public struct Lexer: Sequence, IteratorProtocol {
         }
       case 90: // flt.
         switch byte {
-        case 0x30...0x39: state = 238; last = pos; kind = .flt
+        case 0x30...0x39: state = 328; last = pos; kind = .flt
         default: break loop
         }
       case 91: // main post-match.
         switch byte {
-        case 0x30...0x39: state = 521; last = pos; kind = .int
+        case 0x30...0x39: state = 551; last = pos; kind = .int
         default: break loop
         }
       case 92: // sym.
@@ -868,22 +886,22 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 93: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 39; last = pos; kind = .sym
-        case 0x74: state = 665; last = pos; kind = .sym
+        case 0x74: state = 863; last = pos; kind = .sym
         default: break loop
         }
       case 94: // main post-match.
         switch byte {
-        case 0x30, 0x31: state = 394; last = pos; kind = .intBin
+        case 0x30, 0x31: state = 395; last = pos; kind = .intBin
         default: break loop
         }
       case 95: // main post-match.
         switch byte {
-        case 0x30...0x39: state = 481; last = pos; kind = .intDec
+        case 0x30...0x39: state = 499; last = pos; kind = .intDec
         default: break loop
         }
       case 96: // main post-match.
         switch byte {
-        case 0x30...0x37: state = 377; last = pos; kind = .intOct
+        case 0x30...0x37: state = 618; last = pos; kind = .intOct
         default: break loop
         }
       case 97: // main post-match.
@@ -893,7 +911,7 @@ public struct Lexer: Sequence, IteratorProtocol {
         }
       case 98: // main post-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 656; last = pos; kind = .intHex
+        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 786; last = pos; kind = .intHex
         default: break loop
         }
       case 99: // intQuat.
@@ -1108,25 +1126,25 @@ public struct Lexer: Sequence, IteratorProtocol {
         case 0x80...0x84, 0x86...0x93, 0x96...0x9b, 0x9d...0xaf, 0xb2...0xb4, 0xb6...0xbe: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 141: // typeVar.
+      case 141: // typeReq.
         break loop
       case 142: // where.
         break loop
       case 143: // main post-match.
         switch byte {
         case 0x84...0x86: state = 44
-        case 0x87: state = 204
+        case 0x87: state = 294
         default: break loop
         }
       case 144: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x67, 0x69...0x7a: state = 39; last = pos; kind = .sym
-        case 0x68: state = 237; last = pos; kind = .match
+        case 0x68: state = 327; last = pos; kind = .match
         default: break loop
         }
       case 145: // main post-match.
         switch byte {
-        case 0x30...0x33: state = 255; last = pos; kind = .intQuat
+        case 0x30...0x33: state = 740; last = pos; kind = .intQuat
         default: break loop
         }
       case 146: // main post-match.
@@ -1239,119 +1257,119 @@ public struct Lexer: Sequence, IteratorProtocol {
         }
       case 163: // main pre-match.
         switch byte {
-        case 0xa0: state = 482
-        case 0xa1: state = 483
-        case 0xa2: state = 484
-        case 0xa3: state = 485
+        case 0xa0: state = 175
+        case 0xa1: state = 176
+        case 0xa2: state = 177
+        case 0xa3: state = 178
         case 0xa4, 0xa5, 0xbc: state = 150
-        case 0xa6: state = 486
-        case 0xa7: state = 487
-        case 0xa8: state = 488
-        case 0xa9: state = 489
-        case 0xaa: state = 490
-        case 0xab: state = 491
-        case 0xac: state = 492
-        case 0xad: state = 493
-        case 0xae: state = 494
-        case 0xaf: state = 495
-        case 0xb0: state = 496
-        case 0xb1: state = 497
-        case 0xb2: state = 498
-        case 0xb3: state = 499
-        case 0xb4: state = 500
-        case 0xb5: state = 501
-        case 0xb6: state = 502
-        case 0xb7: state = 503
-        case 0xb8: state = 504
-        case 0xb9: state = 505
-        case 0xba: state = 506
-        case 0xbb: state = 507
-        case 0xbd: state = 508
-        case 0xbe: state = 509
-        case 0xbf: state = 510
+        case 0xa6: state = 179
+        case 0xa7: state = 180
+        case 0xa8: state = 181
+        case 0xa9: state = 182
+        case 0xaa: state = 183
+        case 0xab: state = 184
+        case 0xac: state = 185
+        case 0xad: state = 186
+        case 0xae: state = 187
+        case 0xaf: state = 188
+        case 0xb0: state = 189
+        case 0xb1: state = 190
+        case 0xb2: state = 191
+        case 0xb3: state = 192
+        case 0xb4: state = 193
+        case 0xb5: state = 194
+        case 0xb6: state = 195
+        case 0xb7: state = 196
+        case 0xb8: state = 197
+        case 0xb9: state = 198
+        case 0xba: state = 199
+        case 0xbb: state = 200
+        case 0xbd: state = 201
+        case 0xbe: state = 202
+        case 0xbf: state = 203
         default: break loop
         }
       case 164: // main pre-match.
         switch byte {
         case 0x80...0x82, 0x84...0x88, 0x90...0x99, 0x9e, 0xac, 0xae, 0xb4...0xb6, 0xb8...0xbb: state = 150
-        case 0x83: state = 451
-        case 0x89: state = 452
-        case 0x8a: state = 453
-        case 0x8b: state = 454
-        case 0x8c: state = 455
-        case 0x8d: state = 456
-        case 0x8e: state = 426
-        case 0x8f: state = 457
-        case 0x9a: state = 297
-        case 0x9b, 0xa1: state = 395
-        case 0x9c: state = 458
-        case 0x9d: state = 459
-        case 0x9f: state = 460
-        case 0xa0: state = 461
-        case 0xa2: state = 462
-        case 0xa3: state = 276
-        case 0xa4: state = 463
-        case 0xa5: state = 464
-        case 0xa6: state = 434
-        case 0xa7: state = 465
-        case 0xa8: state = 466
-        case 0xa9: state = 467
-        case 0xaa: state = 468
-        case 0xad: state = 469
-        case 0xaf: state = 470
-        case 0xb0: state = 471
-        case 0xb1: state = 472
-        case 0xb2: state = 473
-        case 0xb3: state = 474
-        case 0xb7: state = 475
-        case 0xbc: state = 476
-        case 0xbd: state = 477
-        case 0xbe: state = 478
-        case 0xbf: state = 479
+        case 0x83: state = 503
+        case 0x89: state = 504
+        case 0x8a: state = 505
+        case 0x8b: state = 506
+        case 0x8c: state = 507
+        case 0x8d: state = 508
+        case 0x8e: state = 231
+        case 0x8f: state = 509
+        case 0x9a: state = 510
+        case 0x9b, 0xa1: state = 511
+        case 0x9c: state = 512
+        case 0x9d: state = 513
+        case 0x9f: state = 514
+        case 0xa0: state = 515
+        case 0xa2: state = 516
+        case 0xa3: state = 517
+        case 0xa4: state = 518
+        case 0xa5: state = 519
+        case 0xa6: state = 520
+        case 0xa7: state = 521
+        case 0xa8: state = 522
+        case 0xa9: state = 523
+        case 0xaa: state = 524
+        case 0xad: state = 525
+        case 0xaf: state = 526
+        case 0xb0: state = 527
+        case 0xb1: state = 528
+        case 0xb2: state = 529
+        case 0xb3: state = 530
+        case 0xb7: state = 531
+        case 0xbc: state = 532
+        case 0xbd: state = 533
+        case 0xbe: state = 534
+        case 0xbf: state = 535
         default: break loop
         }
       case 165: // main pre-match.
         switch byte {
-        case 0x80: state = 356
-        case 0x81: state = 357
-        case 0x82: state = 358
-        case 0x83: state = 359
+        case 0x80: state = 598
+        case 0x81: state = 599
+        case 0x82: state = 600
+        case 0x83: state = 601
         case 0x84, 0x85, 0x87...0x8f, 0x92...0xac, 0xb2, 0xb8, 0xbc...0xbe: state = 150
-        case 0x86: state = 360
-        case 0x90: state = 361
-        case 0x91: state = 362
-        case 0xad: state = 363
-        case 0xae: state = 364
-        case 0xaf: state = 365
-        case 0xb0: state = 366
-        case 0xb1: state = 367
-        case 0xb3: state = 368
-        case 0xb4: state = 369
-        case 0xb5: state = 370
-        case 0xb6: state = 371
-        case 0xb7: state = 372
-        case 0xb9: state = 373
-        case 0xba: state = 374
-        case 0xbb: state = 375
-        case 0xbf: state = 376
+        case 0x86: state = 602
+        case 0x90: state = 603
+        case 0x91: state = 604
+        case 0xad: state = 605
+        case 0xae: state = 606
+        case 0xaf: state = 607
+        case 0xb0: state = 608
+        case 0xb1: state = 443
+        case 0xb3: state = 609
+        case 0xb4: state = 610
+        case 0xb5: state = 611
+        case 0xb6: state = 612
+        case 0xb7: state = 613
+        case 0xb9: state = 614
+        case 0xba: state = 615
+        case 0xbb: state = 616
+        case 0xbf: state = 617
         default: break loop
         }
       case 166: // main pre-match.
         switch byte {
         case 0x80, 0x83, 0x85, 0x89, 0x8a, 0x8c...0xbf: state = 150
-        case 0x81: state = 429
+        case 0x81: state = 234
         case 0x82: state = 154
-        case 0x84: state = 557
-        case 0x86: state = 558
-        case 0x87: state = 273
-        case 0x88: state = 367
-        case 0x8b: state = 430
+        case 0x84: state = 440
+        case 0x86: state = 441
+        case 0x87: state = 442
+        case 0x88: state = 443
+        case 0x8b: state = 235
         default: break loop
         }
       case 167: // main pre-match.
         switch byte {
         case 0x80...0xb5, 0xb7...0xbf: state = 150
-        case 0xb6: state = 276
+        case 0xb6: state = 517
         default: break loop
         }
       case 168: // main pre-match.
@@ -1362,2985 +1380,4572 @@ public struct Lexer: Sequence, IteratorProtocol {
       case 169: // main pre-match.
         switch byte {
         case 0x80...0xbe: state = 150
-        case 0xbf: state = 275
+        case 0xbf: state = 381
         default: break loop
         }
       case 170: // main pre-match.
         switch byte {
         case 0x80...0x91, 0x94...0x97, 0x99, 0x9a, 0x9c, 0x9d, 0xa2, 0xa4, 0xa6, 0xaa, 0xae, 0xb0...0xbf: state = 150
-        case 0x92: state = 239
-        case 0x93: state = 240
-        case 0x98: state = 241
-        case 0x9b, 0xa1: state = 242
-        case 0x9e: state = 243
-        case 0x9f: state = 244
-        case 0xa0: state = 245
-        case 0xa3: state = 246
-        case 0xa5: state = 247
-        case 0xa7: state = 248
-        case 0xa8: state = 249
-        case 0xa9: state = 250
-        case 0xab: state = 251
-        case 0xac: state = 252
-        case 0xad: state = 253
-        case 0xaf: state = 254
+        case 0x92: state = 329
+        case 0x93: state = 330
+        case 0x98: state = 331
+        case 0x9b, 0xa1: state = 332
+        case 0x9e: state = 333
+        case 0x9f: state = 334
+        case 0xa0: state = 335
+        case 0xa3: state = 336
+        case 0xa5: state = 337
+        case 0xa7: state = 338
+        case 0xa8: state = 339
+        case 0xa9: state = 340
+        case 0xab: state = 341
+        case 0xac: state = 342
+        case 0xad: state = 343
+        case 0xaf: state = 344
         default: break loop
         }
       case 171: // main pre-match.
         switch byte {
         case 0x80...0x9d: state = 150
-        case 0x9e: state = 273
-        case 0x9f: state = 274
+        case 0x9e: state = 442
+        case 0x9f: state = 462
         default: break loop
         }
       case 172: // main pre-match.
         switch byte {
         case 0xa4...0xa8, 0xaa, 0xae, 0xb0...0xb4, 0xba, 0xbd: state = 150
-        case 0xa9: state = 420
-        case 0xab: state = 327
-        case 0xac: state = 421
-        case 0xad: state = 422
-        case 0xaf: state = 423
-        case 0xb5: state = 424
-        case 0xb6: state = 314
-        case 0xb7: state = 425
-        case 0xb8: state = 426
-        case 0xb9: state = 427
-        case 0xbb: state = 428
-        case 0xbc: state = 429
-        case 0xbe: state = 430
-        case 0xbf: state = 431
+        case 0xa9: state = 223
+        case 0xab: state = 224
+        case 0xac: state = 225
+        case 0xad: state = 226
+        case 0xaf: state = 227
+        case 0xb5: state = 228
+        case 0xb6: state = 229
+        case 0xb7: state = 230
+        case 0xb8: state = 231
+        case 0xb9: state = 232
+        case 0xbb: state = 233
+        case 0xbc: state = 234
+        case 0xbe: state = 235
+        case 0xbf: state = 236
         default: break loop
         }
       case 173: // main pre-match.
         switch byte {
-        case 0x90: state = 256
-        case 0x91: state = 257
-        case 0x92: state = 258
-        case 0x93: state = 259
-        case 0x94: state = 260
-        case 0x96: state = 261
+        case 0x90: state = 444
+        case 0x91: state = 445
+        case 0x92: state = 446
+        case 0x93: state = 447
+        case 0x94: state = 448
+        case 0x96: state = 449
         case 0x97, 0xa0...0xa9, 0xad: state = 168
-        case 0x98: state = 262
-        case 0x9b: state = 263
-        case 0x9d: state = 264
-        case 0x9e: state = 265
-        case 0x9f: state = 266
-        case 0xaa: state = 267
-        case 0xab: state = 268
-        case 0xac: state = 269
-        case 0xae: state = 270
-        case 0xaf: state = 271
+        case 0x98: state = 450
+        case 0x9b: state = 451
+        case 0x9d: state = 452
+        case 0x9e: state = 453
+        case 0x9f: state = 454
+        case 0xaa: state = 455
+        case 0xab: state = 456
+        case 0xac: state = 457
+        case 0xae: state = 458
+        case 0xaf: state = 459
         default: break loop
         }
       case 174: // main pre-match.
         switch byte {
-        case 0xa0: state = 176
+        case 0xa0: state = 205
         default: break loop
         }
-      case 175: // sym.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x72, 0x74...0x7a: state = 39; last = pos; kind = .sym
-        case 0x73: state = 450; last = pos; kind = .sym
-        default: break loop
-        }
-      case 176: // main pre-match.
-        switch byte {
-        case 0x84...0x86: state = 150
-        case 0x87: state = 275
-        default: break loop
-        }
-      case 177: // main post-match.
-        switch byte {
-        case 0x80...0x8c, 0x90...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 178: // main post-match.
-        switch byte {
-        case 0x80...0x86, 0x90...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 179: // main post-match.
-        switch byte {
-        case 0x80...0xab: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 180: // main post-match.
-        switch byte {
-        case 0x80...0xb7: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 181: // main post-match.
-        switch byte {
-        case 0x80...0xb9: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 182: // main post-match.
-        switch byte {
-        case 0xb7...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 183: // main post-match.
-        switch byte {
-        case 0x80...0xab, 0xb0...0xb9: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 184: // main post-match.
-        switch byte {
-        case 0x80...0x85, 0x8e...0x99, 0xa0...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 185: // main post-match.
-        switch byte {
-        case 0x80...0x93, 0x9f...0xbc: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 186: // main post-match.
-        switch byte {
-        case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 187: // main post-match.
-        switch byte {
-        case 0x80...0xb6: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 188: // main post-match.
-        switch byte {
-        case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 189: // main post-match.
-        switch byte {
-        case 0x80...0x82, 0x9b...0xb6: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 190: // main post-match.
-        switch byte {
-        case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 191: // main post-match.
-        switch byte {
-        case 0x80...0xa5, 0xb0...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 192: // main post-match.
-        switch byte {
-        case 0x80...0xad, 0xb0...0xb9: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 193: // tagTest.
-        break loop
-      case 194: // stringSQ.
-        break loop
-      case 195: // main pre-match.
-        switch byte {
-        case 0x20...0x7e: state = 9
-        case 0xc2...0xdf: state = 196
-        case 0xe0: state = 197
-        case 0xe1: state = 198
-        case 0xe2...0xec: state = 199
-        case 0xed: state = 200
-        case 0xef: state = 201
-        case 0xf0: state = 202
-        case 0xf3: state = 203
-        default: break loop
-        }
-      case 196: // main pre-match.
-        switch byte {
-        case 0x80...0xbf: state = 9
-        default: break loop
-        }
-      case 197: // main pre-match.
-        switch byte {
-        case 0xa0...0xbf: state = 196
-        default: break loop
-        }
-      case 198: // main pre-match.
-        switch byte {
-        case 0x80...0xaa, 0xac...0xbf: state = 196
-        default: break loop
-        }
-      case 199: // main pre-match.
-        switch byte {
-        case 0x80...0xbf: state = 196
-        default: break loop
-        }
-      case 200: // main pre-match.
-        switch byte {
-        case 0x80...0x9f: state = 196
-        default: break loop
-        }
-      case 201: // main pre-match.
-        switch byte {
-        case 0xa4...0xbf: state = 196
-        default: break loop
-        }
-      case 202: // main pre-match.
-        switch byte {
-        case 0x90: state = 379
-        case 0x91: state = 380
-        case 0x92: state = 381
-        case 0x93: state = 382
-        case 0x94: state = 383
-        case 0x96: state = 384
-        case 0x97, 0xa0...0xad: state = 199
-        case 0x98: state = 385
-        case 0x9b: state = 386
-        case 0x9d: state = 387
-        case 0x9e: state = 388
-        case 0x9f: state = 389
-        case 0xae: state = 390
-        case 0xaf: state = 391
-        default: break loop
-        }
-      case 203: // main pre-match.
-        switch byte {
-        case 0xa0: state = 433
-        default: break loop
-        }
-      case 204: // main post-match.
-        switch byte {
-        case 0x80...0xaf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 205: // or.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
-        default: break loop
-        }
-      case 206: // main post-match.
-        switch byte {
-        case 0x80...0xad, 0xb0...0xbe: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 207: // main post-match.
-        switch byte {
-        case 0x80...0x9b, 0x9e, 0xa0...0xaa: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 208: // main post-match.
-        switch byte {
-        case 0xa0...0xb4, 0xb6...0xbd: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 209: // main post-match.
-        switch byte {
-        case 0x93...0xa1, 0xa3...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 210: // main post-match.
-        switch byte {
-        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 211: // main post-match.
-        switch byte {
-        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbe: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 212: // main post-match.
-        switch byte {
-        case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 213: // main post-match.
-        switch byte {
-        case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb6: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 214: // main post-match.
-        switch byte {
-        case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 215: // main post-match.
-        switch byte {
-        case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 216: // main post-match.
-        switch byte {
-        case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 217: // main post-match.
-        switch byte {
-        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 218: // main post-match.
-        switch byte {
-        case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 219: // main post-match.
-        switch byte {
-        case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 220: // main post-match.
-        switch byte {
-        case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 221: // main post-match.
-        switch byte {
-        case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 222: // main post-match.
-        switch byte {
-        case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 223: // main post-match.
-        switch byte {
-        case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 224: // main post-match.
-        switch byte {
-        case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 225: // main post-match.
-        switch byte {
-        case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 226: // main post-match.
-        switch byte {
-        case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 227: // main post-match.
-        switch byte {
-        case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 228: // main post-match.
-        switch byte {
-        case 0x81...0xba, 0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 229: // main post-match.
-        switch byte {
-        case 0x80...0x9b: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 230: // main post-match.
-        switch byte {
-        case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 231: // main post-match.
-        switch byte {
-        case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 232: // main post-match.
-        switch byte {
-        case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 233: // main post-match.
-        switch byte {
-        case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 234: // main post-match.
-        switch byte {
-        case 0x80...0x8c, 0x8e...0x9a: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 235: // sym.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6b, 0x6d...0x7a: state = 39; last = pos; kind = .sym
-        case 0x6c: state = 328; last = pos; kind = .sym
-        default: break loop
-        }
-      case 236: // sym.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x63...0x7a: state = 39; last = pos; kind = .sym
-        case 0x62: state = 538; last = pos; kind = .pub
-        default: break loop
-        }
-      case 237: // match.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
-        default: break loop
-        }
-      case 238: // flt.
-        switch byte {
-        case 0x30...0x39: state = 238; last = pos; kind = .flt
-        default: break loop
-        }
-      case 239: // main pre-match.
-        switch byte {
-        case 0x80...0x8c, 0x90...0xbf: state = 5
-        default: break loop
-        }
-      case 240: // main pre-match.
-        switch byte {
-        case 0x80...0x86, 0x90...0xbf: state = 5
-        default: break loop
-        }
-      case 241: // main pre-match.
-        switch byte {
-        case 0x80...0xab: state = 5
-        default: break loop
-        }
-      case 242: // main pre-match.
-        switch byte {
-        case 0x80...0xb7: state = 5
-        default: break loop
-        }
-      case 243: // main pre-match.
-        switch byte {
-        case 0x80...0xb9: state = 5
-        default: break loop
-        }
-      case 244: // main pre-match.
-        switch byte {
-        case 0xb7...0xbf: state = 5
-        default: break loop
-        }
-      case 245: // main pre-match.
-        switch byte {
-        case 0x80...0xab, 0xb0...0xb9: state = 5
-        default: break loop
-        }
-      case 246: // main pre-match.
-        switch byte {
-        case 0x80...0x85, 0x8e...0x99, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 247: // main pre-match.
-        switch byte {
-        case 0x80...0x93, 0x9f...0xbc: state = 5
-        default: break loop
-        }
-      case 248: // main pre-match.
-        switch byte {
-        case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 5
-        default: break loop
-        }
-      case 249: // main pre-match.
-        switch byte {
-        case 0x80...0xb6: state = 5
-        default: break loop
-        }
-      case 250: // main pre-match.
-        switch byte {
-        case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 5
-        default: break loop
-        }
-      case 251: // main pre-match.
-        switch byte {
-        case 0x80...0x82, 0x9b...0xb6: state = 5
-        default: break loop
-        }
-      case 252: // main pre-match.
-        switch byte {
-        case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 253: // main pre-match.
-        switch byte {
-        case 0x80...0xa5, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 254: // main pre-match.
-        switch byte {
-        case 0x80...0xad, 0xb0...0xb9: state = 5
-        default: break loop
-        }
-      case 255: // intQuat.
-        switch byte {
-        case 0x30...0x33: state = 255; last = pos; kind = .intQuat
-        case 0x5f: state = 145
-        default: break loop
-        }
-      case 256: // main pre-match.
-        switch byte {
-        case 0x80: state = 291
-        case 0x81: state = 292
-        case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 150
-        case 0x83: state = 293
-        case 0x84: state = 294
-        case 0x86: state = 295
-        case 0x87: state = 296
-        case 0x8a: state = 297
-        case 0x8b: state = 298
-        case 0x8c: state = 299
-        case 0x8d: state = 300
-        case 0x8e: state = 301
-        case 0x8f: state = 302
-        case 0x92: state = 303
-        case 0x93: state = 304
-        case 0x94, 0xbc: state = 305
-        case 0x95: state = 306
-        case 0x9c: state = 249
-        case 0x9d: state = 307
-        case 0xa0: state = 308
-        case 0xa1: state = 309
-        case 0xa2: state = 310
-        case 0xa3: state = 311
-        case 0xa4: state = 312
-        case 0xa6: state = 313
-        case 0xa7: state = 314
-        case 0xa8: state = 315
-        case 0xa9: state = 316
-        case 0xaa: state = 317
-        case 0xab: state = 318
-        case 0xac: state = 319
-        case 0xad: state = 320
-        case 0xae: state = 321
-        case 0xb1: state = 322
-        case 0xb2: state = 323
-        case 0xb3: state = 324
-        case 0xb4: state = 325
-        case 0xb9: state = 326
-        case 0xbd: state = 327
-        default: break loop
-        }
-      case 257: // main pre-match.
-        switch byte {
-        case 0x80, 0x86, 0x90, 0x92, 0x98, 0xa8: state = 150
-        case 0x81: state = 598
-        case 0x82: state = 599
-        case 0x83: state = 600
-        case 0x84: state = 478
-        case 0x85: state = 601
-        case 0x87: state = 602
-        case 0x88: state = 603
-        case 0x8a: state = 604
-        case 0x8b: state = 605
-        case 0x8c: state = 606
-        case 0x8d: state = 607
-        case 0x91: state = 608
-        case 0x93: state = 609
-        case 0x96: state = 610
-        case 0x97: state = 595
-        case 0x99: state = 611
-        case 0x9a: state = 242
-        case 0x9b: state = 612
-        case 0x9c: state = 613
-        case 0xa0: state = 341
-        case 0xa2: state = 614
-        case 0xa3: state = 615
-        case 0xa9: state = 616
-        case 0xaa: state = 617
-        case 0xab: state = 395
-        case 0xb0: state = 618
-        case 0xb1: state = 619
-        case 0xb2: state = 620
-        case 0xb4: state = 621
-        case 0xb5: state = 622
-        case 0xb6: state = 623
-        case 0xbb: state = 624
-        default: break loop
-        }
-      case 258: // main pre-match.
-        switch byte {
-        case 0x80...0x8d, 0x90, 0x92...0x94: state = 150
-        case 0x8e: state = 327
-        case 0x91: state = 559
-        case 0x95: state = 560
-        default: break loop
-        }
-      case 259: // main pre-match.
-        switch byte {
-        case 0x80...0x8f: state = 150
-        case 0x90: state = 378
-        default: break loop
-        }
-      case 260: // main pre-match.
-        switch byte {
-        case 0x90...0x98: state = 150
-        case 0x99: state = 392
-        default: break loop
-        }
-      case 261: // main pre-match.
-        switch byte {
-        case 0xa0...0xa7, 0xac, 0xb9, 0xbc: state = 150
-        case 0xa8: state = 395
-        case 0xa9: state = 396
-        case 0xab: state = 397
-        case 0xad: state = 398
-        case 0xae: state = 399
-        case 0xba: state = 400
-        case 0xbd: state = 401
-        case 0xbe: state = 402
-        case 0xbf: state = 403
-        default: break loop
-        }
-      case 262: // main pre-match.
-        switch byte {
-        case 0x80...0x9e, 0xa0...0xaa: state = 150
-        case 0x9f: state = 161
-        case 0xab: state = 323
-        default: break loop
-        }
-      case 263: // main pre-match.
-        switch byte {
-        case 0x80...0x83, 0x86...0x8a, 0xb0: state = 150
-        case 0x84: state = 339
-        case 0x85: state = 340
-        case 0x8b: state = 341
-        case 0xb1: state = 342
-        case 0xb2: state = 343
-        default: break loop
-        }
-      case 264: // main pre-match.
-        switch byte {
-        case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 150
-        case 0x83: state = 276
-        case 0x84: state = 277
-        case 0x85: state = 278
-        case 0x87: state = 279
-        case 0x89: state = 280
-        case 0x8b: state = 281
-        case 0x8d: state = 282
-        case 0x91: state = 283
-        case 0x92: state = 284
-        case 0x93: state = 285
-        case 0x94: state = 286
-        case 0x95: state = 287
-        case 0x9a: state = 288
-        case 0x9f: state = 289
-        case 0xaa: state = 290
-        default: break loop
-        }
-      case 265: // main pre-match.
-        switch byte {
-        case 0x80: state = 330
-        case 0xa0...0xa2, 0xa4: state = 150
-        case 0xa3: state = 331
-        case 0xa5: state = 332
-        case 0xb1: state = 333
-        case 0xb2: state = 334
-        case 0xb8: state = 335
-        case 0xb9: state = 336
-        case 0xba: state = 337
-        case 0xbb: state = 338
-        default: break loop
-        }
-      case 266: // main pre-match.
-        switch byte {
-        case 0x80, 0x85: state = 434
-        case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 150
-        case 0x82: state = 435
-        case 0x83: state = 436
-        case 0x84: state = 239
-        case 0x86: state = 437
-        case 0x87: state = 438
-        case 0x88: state = 439
-        case 0x89: state = 440
-        case 0x9b: state = 441
-        case 0x9d: state = 375
-        case 0x9f: state = 442
-        case 0xa0: state = 360
-        case 0xa1: state = 443
-        case 0xa2: state = 444
-        case 0xa4: state = 445
-        case 0xa5: state = 446
-        case 0xa6: state = 447
-        case 0xa7: state = 448
-        case 0xa9: state = 449
-        default: break loop
-        }
-      case 267: // main pre-match.
-        switch byte {
-        case 0x80...0x9a, 0x9c...0xbf: state = 150
-        case 0x9b: state = 329
-        default: break loop
-        }
-      case 268: // main pre-match.
-        switch byte {
-        case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 150
-        case 0x9c: state = 334
-        case 0xa0: state = 673
-        default: break loop
-        }
-      case 269: // main pre-match.
-        switch byte {
-        case 0x80...0xb9, 0xbb...0xbf: state = 150
-        case 0xba: state = 511
-        default: break loop
-        }
-      case 270: // main pre-match.
-        switch byte {
-        case 0x80...0xae: state = 150
-        case 0xaf: state = 522
-        default: break loop
-        }
-      case 271: // main pre-match.
-        switch byte {
-        case 0xa0...0xa7: state = 150
-        case 0xa8: state = 595
-        default: break loop
-        }
-      case 272: // sym.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x63, 0x65...0x7a: state = 39; last = pos; kind = .sym
-        case 0x64: state = 393; last = pos; kind = .and
-        default: break loop
-        }
-      case 273: // main pre-match.
-        switch byte {
-        case 0x80...0xa3, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 274: // main pre-match.
-        switch byte {
-        case 0x80...0x86, 0x8b...0xbb: state = 5
-        default: break loop
-        }
-      case 275: // main pre-match.
-        switch byte {
-        case 0x80...0xaf: state = 5
-        default: break loop
-        }
-      case 276: // main pre-match.
-        switch byte {
-        case 0x80...0xb5: state = 5
-        default: break loop
-        }
-      case 277: // main pre-match.
-        switch byte {
-        case 0x80...0xa6, 0xa9...0xbf: state = 5
-        default: break loop
-        }
-      case 278: // main pre-match.
-        switch byte {
-        case 0x80...0xb2, 0xbb...0xbf: state = 5
-        default: break loop
-        }
-      case 279: // main pre-match.
-        switch byte {
-        case 0x80...0xa8: state = 5
-        default: break loop
-        }
-      case 280: // main pre-match.
-        switch byte {
-        case 0x80...0x85: state = 5
-        default: break loop
-        }
-      case 281: // main pre-match.
-        switch byte {
-        case 0xa0...0xb3: state = 5
-        default: break loop
-        }
-      case 282: // main pre-match.
-        switch byte {
-        case 0x80...0x96, 0xa0...0xb8: state = 5
-        default: break loop
-        }
-      case 283: // main pre-match.
-        switch byte {
-        case 0x80...0x94, 0x96...0xbf: state = 5
-        default: break loop
-        }
-      case 284: // main pre-match.
-        switch byte {
-        case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 5
-        default: break loop
-        }
-      case 285: // main pre-match.
-        switch byte {
-        case 0x80...0x83, 0x85...0xbf: state = 5
-        default: break loop
-        }
-      case 286: // main pre-match.
-        switch byte {
-        case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 5
-        default: break loop
-        }
-      case 287: // main pre-match.
-        switch byte {
-        case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 5
-        default: break loop
-        }
-      case 288: // main pre-match.
-        switch byte {
-        case 0x80...0xa5, 0xa8...0xbf: state = 5
-        default: break loop
-        }
-      case 289: // main pre-match.
-        switch byte {
-        case 0x80...0x8b, 0x8e...0xbf: state = 5
-        default: break loop
-        }
-      case 290: // main pre-match.
-        switch byte {
-        case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 5
-        default: break loop
-        }
-      case 291: // main pre-match.
-        switch byte {
-        case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 5
-        default: break loop
-        }
-      case 292: // main pre-match.
-        switch byte {
-        case 0x80...0x8d, 0x90...0x9d: state = 5
-        default: break loop
-        }
-      case 293: // main pre-match.
-        switch byte {
-        case 0x80...0xba: state = 5
-        default: break loop
-        }
-      case 294: // main pre-match.
-        switch byte {
-        case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 5
-        default: break loop
-        }
-      case 295: // main pre-match.
-        switch byte {
-        case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 5
-        default: break loop
-        }
-      case 296: // main pre-match.
-        switch byte {
-        case 0x90...0xbd: state = 5
-        default: break loop
-        }
-      case 297: // main pre-match.
-        switch byte {
-        case 0x80...0x9c, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 298: // main pre-match.
-        switch byte {
-        case 0x80...0x90, 0xa0...0xbb: state = 5
-        default: break loop
-        }
-      case 299: // main pre-match.
-        switch byte {
-        case 0x80...0xa3, 0xad...0xbf: state = 5
-        default: break loop
-        }
-      case 300: // main pre-match.
-        switch byte {
-        case 0x80...0x8a, 0x90...0xba: state = 5
-        default: break loop
-        }
-      case 301: // main pre-match.
-        switch byte {
-        case 0x80...0x9d, 0x9f...0xbf: state = 5
-        default: break loop
-        }
-      case 302: // main pre-match.
-        switch byte {
-        case 0x80...0x83, 0x88...0x95: state = 5
-        default: break loop
-        }
-      case 303: // main pre-match.
-        switch byte {
-        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 304: // main pre-match.
-        switch byte {
-        case 0x80...0x93, 0x98...0xbb: state = 5
-        default: break loop
-        }
-      case 305: // main pre-match.
-        switch byte {
-        case 0x80...0xa7, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 306: // main pre-match.
-        switch byte {
-        case 0x80...0xa3, 0xaf: state = 5
-        default: break loop
-        }
-      case 307: // main pre-match.
-        switch byte {
-        case 0x80...0x95, 0xa0...0xa7: state = 5
-        default: break loop
-        }
-      case 308: // main pre-match.
-        switch byte {
-        case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 5
-        default: break loop
-        }
-      case 309: // main pre-match.
-        switch byte {
-        case 0x80...0x95, 0x97...0xbf: state = 5
-        default: break loop
-        }
-      case 310: // main pre-match.
-        switch byte {
-        case 0x80...0x9e, 0xa7...0xaf: state = 5
-        default: break loop
-        }
-      case 311: // main pre-match.
-        switch byte {
-        case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 5
-        default: break loop
-        }
-      case 312: // main pre-match.
-        switch byte {
-        case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 5
-        default: break loop
-        }
-      case 313: // main pre-match.
-        switch byte {
-        case 0x80...0xb7, 0xbc...0xbf: state = 5
-        default: break loop
-        }
-      case 314: // main pre-match.
-        switch byte {
-        case 0x80...0x8f, 0x92...0xbf: state = 5
-        default: break loop
-        }
-      case 315: // main pre-match.
-        switch byte {
-        case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb5, 0xb8...0xba, 0xbf: state = 5
-        default: break loop
-        }
-      case 316: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x90...0x98, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 317: // main pre-match.
-        switch byte {
-        case 0x80...0x9f: state = 5
-        default: break loop
-        }
-      case 318: // main pre-match.
-        switch byte {
-        case 0x80...0xa6, 0xab...0xb6: state = 5
-        default: break loop
-        }
-      case 319: // main pre-match.
-        switch byte {
-        case 0x80...0xb5, 0xb9...0xbf: state = 5
-        default: break loop
-        }
-      case 320: // main pre-match.
-        switch byte {
-        case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 5
-        default: break loop
-        }
-      case 321: // main pre-match.
-        switch byte {
-        case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 5
-        default: break loop
-        }
-      case 322: // main pre-match.
-        switch byte {
-        case 0x80...0x88: state = 5
-        default: break loop
-        }
-      case 323: // main pre-match.
-        switch byte {
-        case 0x80...0xb2: state = 5
-        default: break loop
-        }
-      case 324: // main pre-match.
-        switch byte {
-        case 0x80...0xb2, 0xba...0xbf: state = 5
-        default: break loop
-        }
-      case 325: // main pre-match.
-        switch byte {
-        case 0x80...0xa7, 0xb0...0xb9: state = 5
-        default: break loop
-        }
-      case 326: // main pre-match.
-        switch byte {
-        case 0xa0...0xbe: state = 5
-        default: break loop
-        }
-      case 327: // main pre-match.
-        switch byte {
-        case 0x80...0x99: state = 5
-        default: break loop
-        }
-      case 328: // sym.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x78, 0x7a: state = 39; last = pos; kind = .sym
-        case 0x79: state = 625; last = pos; kind = .sym
-        default: break loop
-        }
-      case 329: // main pre-match.
-        switch byte {
-        case 0x80...0x96: state = 5
-        default: break loop
-        }
-      case 330: // main pre-match.
-        switch byte {
-        case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 5
-        default: break loop
-        }
-      case 331: // main pre-match.
-        switch byte {
-        case 0x80...0x84, 0x87...0x96: state = 5
-        default: break loop
-        }
-      case 332: // main pre-match.
-        switch byte {
-        case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 5
-        default: break loop
-        }
-      case 333: // main pre-match.
-        switch byte {
-        case 0xb1...0xbf: state = 5
-        default: break loop
-        }
-      case 334: // main pre-match.
-        switch byte {
-        case 0x80...0xb4: state = 5
-        default: break loop
-        }
-      case 335: // main pre-match.
-        switch byte {
-        case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 5
-        default: break loop
-        }
-      case 336: // main pre-match.
-        switch byte {
-        case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 5
-        default: break loop
-        }
-      case 337: // main pre-match.
-        switch byte {
-        case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 5
-        default: break loop
-        }
-      case 338: // main pre-match.
-        switch byte {
-        case 0xb0, 0xb1: state = 5
-        default: break loop
-        }
-      case 339: // main pre-match.
-        switch byte {
-        case 0x80...0x9e: state = 5
-        default: break loop
-        }
-      case 340: // main pre-match.
-        switch byte {
-        case 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 341: // main pre-match.
-        switch byte {
-        case 0x80...0xbb: state = 5
-        default: break loop
-        }
-      case 342: // main pre-match.
-        switch byte {
-        case 0x80...0xaa, 0xb0...0xbc: state = 5
-        default: break loop
-        }
-      case 343: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 5
-        default: break loop
-        }
-      case 344: // main post-match.
-        switch byte {
-        case 0x80...0xad, 0xb0...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 345: // main post-match.
-        switch byte {
-        case 0x80...0x99: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 346: // main post-match.
-        switch byte {
-        case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 347: // main post-match.
-        switch byte {
-        case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 348: // main post-match.
-        switch byte {
-        case 0x80, 0x81, 0x93...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 349: // main post-match.
-        switch byte {
-        case 0x90...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 350: // main post-match.
-        switch byte {
-        case 0x80...0x8f, 0x92...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 351: // main post-match.
-        switch byte {
-        case 0x80...0x87, 0xb0...0xbd: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 352: // main post-match.
-        switch byte {
-        case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 353: // main post-match.
-        switch byte {
-        case 0x80...0xbc: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 354: // main post-match.
-        switch byte {
-        case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 355: // typeAlias.
-        break loop
-      case 356: // main pre-match.
-        switch byte {
-        case 0x80...0x8a, 0x90...0xa9, 0xaf...0xbf: state = 5
-        default: break loop
-        }
-      case 357: // main pre-match.
-        switch byte {
-        case 0x80...0x9f, 0xb0, 0xb1, 0xb4...0xbf: state = 5
-        default: break loop
-        }
-      case 358: // main pre-match.
-        switch byte {
-        case 0x80...0x8e, 0x90...0x9c, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 359: // main pre-match.
-        switch byte {
-        case 0x90...0xb0: state = 5
-        default: break loop
-        }
-      case 360: // main pre-match.
-        switch byte {
-        case 0x80...0x8b, 0x90...0xbf: state = 5
-        default: break loop
-        }
-      case 361: // main pre-match.
-        switch byte {
-        case 0x80...0xa6: state = 5
-        default: break loop
-        }
-      case 362: // main pre-match.
-        switch byte {
-        case 0x80...0x8a, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 363: // main pre-match.
-        switch byte {
-        case 0x80...0xb3, 0xb6...0xbf: state = 5
-        default: break loop
-        }
-      case 364: // main pre-match.
-        switch byte {
-        case 0x80...0x95, 0x98...0xbf: state = 5
-        default: break loop
-        }
-      case 365: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x8a...0xbe: state = 5
-        default: break loop
-        }
-      case 366: // main pre-match.
-        switch byte {
-        case 0x80...0xae, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 367: // main pre-match.
-        switch byte {
-        case 0x80...0x9e, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 368: // main pre-match.
-        switch byte {
-        case 0x80...0xb3, 0xb9...0xbf: state = 5
-        default: break loop
-        }
-      case 369: // main pre-match.
-        switch byte {
-        case 0x80...0xa5, 0xa7, 0xad, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 370: // main pre-match.
-        switch byte {
-        case 0x80...0xa7, 0xaf, 0xb0, 0xbf: state = 5
-        default: break loop
-        }
-      case 371: // main pre-match.
-        switch byte {
-        case 0x80...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xb6, 0xb8...0xbe: state = 5
-        default: break loop
-        }
-      case 372: // main pre-match.
-        switch byte {
-        case 0x80...0x86, 0x88...0x8e, 0x90...0x96, 0x98...0x9e, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 373: // main pre-match.
-        switch byte {
-        case 0x80...0x8e: state = 5
-        default: break loop
-        }
-      case 374: // main pre-match.
-        switch byte {
-        case 0x80...0x99, 0x9b...0xbf: state = 5
-        default: break loop
-        }
-      case 375: // main pre-match.
-        switch byte {
-        case 0x80...0xb3: state = 5
-        default: break loop
-        }
-      case 376: // main pre-match.
-        switch byte {
-        case 0x80...0x95, 0xb0...0xbb: state = 5
-        default: break loop
-        }
-      case 377: // intOct.
-        switch byte {
-        case 0x30...0x37: state = 377; last = pos; kind = .intOct
-        case 0x5f: state = 672
-        default: break loop
-        }
-      case 378: // main pre-match.
-        switch byte {
-        case 0x80...0xae: state = 5
-        default: break loop
-        }
-      case 379: // main pre-match.
-        switch byte {
-        case 0x80...0x87, 0x8a...0x95, 0x98...0x9d, 0xa0...0xa4, 0xa6...0xae, 0xb0...0xb4, 0xb9, 0xbc, 0xbd: state = 196
-        default: break loop
-        }
-      case 380: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x8a...0x8d, 0x90...0x93, 0x96...0x9c, 0xa0, 0xa2, 0xa3, 0xa8...0xab, 0xb0...0xb2, 0xb4...0xb6, 0xbb: state = 196
-        default: break loop
-        }
-      case 381: // main pre-match.
-        switch byte {
-        case 0x80...0x8e, 0x90...0x95: state = 196
-        default: break loop
-        }
-      case 382: // main pre-match.
-        switch byte {
-        case 0x80...0x90: state = 196
-        default: break loop
-        }
-      case 383: // main pre-match.
-        switch byte {
-        case 0x90...0x99: state = 196
-        default: break loop
-        }
-      case 384: // main pre-match.
-        switch byte {
-        case 0xa0...0xa9, 0xab...0xae, 0xb9, 0xba, 0xbc...0xbf: state = 196
-        default: break loop
-        }
-      case 385: // main pre-match.
-        switch byte {
-        case 0x80...0xab: state = 196
-        default: break loop
-        }
-      case 386: // main pre-match.
-        switch byte {
-        case 0x80...0x8b, 0xb0...0xb2: state = 196
-        default: break loop
-        }
-      case 387: // main pre-match.
-        switch byte {
-        case 0x80...0x89, 0x8b...0x8d, 0x90...0xaa: state = 196
-        default: break loop
-        }
-      case 388: // main pre-match.
-        switch byte {
-        case 0x80, 0xa0...0xa5, 0xb1, 0xb2, 0xb8...0xbb: state = 196
-        default: break loop
-        }
-      case 389: // main pre-match.
-        switch byte {
-        case 0x80...0x89, 0x8c...0xa2, 0xa4...0xa7, 0xa9: state = 196
-        default: break loop
-        }
-      case 390: // main pre-match.
-        switch byte {
-        case 0x80...0xaf: state = 196
-        default: break loop
-        }
-      case 391: // main pre-match.
-        switch byte {
-        case 0xa0...0xa8: state = 196
-        default: break loop
-        }
-      case 392: // main pre-match.
-        switch byte {
-        case 0x80...0x86: state = 5
-        default: break loop
-        }
-      case 393: // and.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
-        default: break loop
-        }
-      case 394: // intBin.
-        switch byte {
-        case 0x30, 0x31: state = 394; last = pos; kind = .intBin
-        case 0x5f: state = 432
-        default: break loop
-        }
-      case 395: // main pre-match.
-        switch byte {
-        case 0x80...0xb8: state = 5
-        default: break loop
-        }
-      case 396: // main pre-match.
-        switch byte {
-        case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 5
-        default: break loop
-        }
-      case 397: // main pre-match.
-        switch byte {
-        case 0x90...0xad, 0xb0...0xb5: state = 5
-        default: break loop
-        }
-      case 398: // main pre-match.
-        switch byte {
-        case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 5
-        default: break loop
-        }
-      case 399: // main pre-match.
-        switch byte {
-        case 0x80...0x8f: state = 5
-        default: break loop
-        }
-      case 400: // main pre-match.
-        switch byte {
-        case 0x80...0x9a: state = 5
-        default: break loop
-        }
-      case 401: // main pre-match.
-        switch byte {
-        case 0x80...0x84, 0x90...0xbe: state = 5
-        default: break loop
-        }
-      case 402: // main pre-match.
-        switch byte {
-        case 0x8f...0x9f: state = 5
-        default: break loop
-        }
-      case 403: // main pre-match.
-        switch byte {
-        case 0xa0, 0xa1: state = 5
-        default: break loop
-        }
-      case 404: // main post-match.
-        switch byte {
-        case 0x80: state = 561
-        case 0x81: state = 562
-        case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 44
-        case 0x83: state = 563
-        case 0x84: state = 564
-        case 0x86: state = 565
-        case 0x87: state = 566
-        case 0x8a: state = 115
-        case 0x8b: state = 567
-        case 0x8c: state = 568
-        case 0x8d: state = 569
-        case 0x8e: state = 570
-        case 0x8f: state = 571
-        case 0x92: state = 572
-        case 0x93: state = 573
-        case 0x94, 0xbc: state = 574
-        case 0x95: state = 575
-        case 0x9c: state = 187
-        case 0x9d: state = 576
-        case 0xa0: state = 577
-        case 0xa1: state = 578
-        case 0xa2: state = 579
-        case 0xa3: state = 580
-        case 0xa4: state = 581
-        case 0xa6: state = 582
-        case 0xa7: state = 350
-        case 0xa8: state = 583
-        case 0xa9: state = 584
-        case 0xaa: state = 585
-        case 0xab: state = 586
-        case 0xac: state = 587
-        case 0xad: state = 588
-        case 0xae: state = 589
-        case 0xb1: state = 590
-        case 0xb2: state = 591
-        case 0xb3: state = 592
-        case 0xb4: state = 593
-        case 0xb9: state = 594
-        case 0xbd: state = 345
-        default: break loop
-        }
-      case 405: // main post-match.
-        switch byte {
-        case 0x80, 0x86, 0x90, 0x92, 0x98, 0xa8: state = 44
-        case 0x81: state = 626
-        case 0x82: state = 627
-        case 0x83: state = 628
-        case 0x84: state = 139
-        case 0x85: state = 629
-        case 0x87: state = 630
-        case 0x88: state = 631
-        case 0x8a: state = 632
-        case 0x8b: state = 633
-        case 0x8c: state = 634
-        case 0x8d: state = 635
-        case 0x91: state = 636
-        case 0x93: state = 637
-        case 0x96: state = 638
-        case 0x97: state = 596
-        case 0x99: state = 639
-        case 0x9a: state = 180
-        case 0x9b: state = 640
-        case 0x9c: state = 641
-        case 0xa0: state = 642
-        case 0xa2: state = 643
-        case 0xa3: state = 644
-        case 0xa9: state = 645
-        case 0xaa: state = 646
-        case 0xab: state = 116
-        case 0xb0: state = 647
-        case 0xb1: state = 648
-        case 0xb2: state = 649
-        case 0xb4: state = 650
-        case 0xb5: state = 651
-        case 0xb6: state = 652
-        case 0xbb: state = 653
-        default: break loop
-        }
-      case 406: // main post-match.
-        switch byte {
-        case 0x80...0x8d, 0x90, 0x92...0x94: state = 44
-        case 0x8e: state = 345
-        case 0x91: state = 555
-        case 0x95: state = 556
-        default: break loop
-        }
-      case 407: // main post-match.
-        switch byte {
-        case 0x80...0x8f: state = 44
-        case 0x90: state = 540
-        default: break loop
-        }
-      case 408: // main post-match.
-        switch byte {
-        case 0x90...0x98: state = 44
-        case 0x99: state = 671
-        default: break loop
-        }
-      case 409: // main post-match.
-        switch byte {
-        case 0xa0...0xa7, 0xac, 0xb9, 0xbc: state = 44
-        case 0xa8: state = 116
-        case 0xa9: state = 512
-        case 0xab: state = 513
-        case 0xad: state = 514
-        case 0xae: state = 515
-        case 0xba: state = 516
-        case 0xbd: state = 517
-        case 0xbe: state = 518
-        case 0xbf: state = 519
-        default: break loop
-        }
-      case 410: // main post-match.
-        switch byte {
-        case 0x80...0x9e, 0xa0...0xaa: state = 44
-        case 0x9f: state = 55
-        case 0xab: state = 591
-        default: break loop
-        }
-      case 411: // main post-match.
-        switch byte {
-        case 0x80...0x83, 0x86...0x8a, 0xb0: state = 44
-        case 0x84: state = 667
-        case 0x85: state = 668
-        case 0x8b: state = 642
-        case 0xb1: state = 669
-        case 0xb2: state = 670
-        default: break loop
-        }
-      case 412: // main post-match.
-        switch byte {
-        case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 44
-        case 0x83: state = 122
-        case 0x84: state = 541
-        case 0x85: state = 542
-        case 0x87: state = 543
-        case 0x89: state = 544
-        case 0x8b: state = 545
-        case 0x8d: state = 546
-        case 0x91: state = 547
-        case 0x92: state = 548
-        case 0x93: state = 549
-        case 0x94: state = 550
-        case 0x95: state = 551
-        case 0x9a: state = 552
-        case 0x9f: state = 553
-        case 0xaa: state = 554
-        default: break loop
-        }
-      case 413: // main post-match.
-        switch byte {
-        case 0x80: state = 657
-        case 0xa0...0xa2, 0xa4: state = 44
-        case 0xa3: state = 658
-        case 0xa5: state = 659
-        case 0xb1: state = 660
-        case 0xb2: state = 654
-        case 0xb8: state = 661
-        case 0xb9: state = 662
-        case 0xba: state = 663
-        case 0xbb: state = 664
-        default: break loop
-        }
-      case 414: // main post-match.
-        switch byte {
-        case 0x80, 0x85: state = 125
-        case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 44
-        case 0x82: state = 523
-        case 0x83: state = 524
-        case 0x84: state = 177
-        case 0x86: state = 525
-        case 0x87: state = 526
-        case 0x88: state = 527
-        case 0x89: state = 528
-        case 0x9b: state = 529
-        case 0x9d: state = 88
-        case 0x9f: state = 530
-        case 0xa0: state = 73
-        case 0xa1: state = 531
-        case 0xa2: state = 532
-        case 0xa4: state = 533
-        case 0xa5: state = 534
-        case 0xa6: state = 535
-        case 0xa7: state = 536
-        case 0xa9: state = 537
-        default: break loop
-        }
-      case 415: // main post-match.
-        switch byte {
-        case 0x80...0x9a, 0x9c...0xbf: state = 44
-        case 0x9b: state = 666
-        default: break loop
-        }
-      case 416: // main post-match.
-        switch byte {
-        case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 44
-        case 0x9c: state = 654
-        case 0xa0: state = 655
-        default: break loop
-        }
-      case 417: // main post-match.
-        switch byte {
-        case 0x80...0xb9, 0xbb...0xbf: state = 44
-        case 0xba: state = 677
-        default: break loop
-        }
-      case 418: // main post-match.
-        switch byte {
-        case 0x80...0xae: state = 44
-        case 0xaf: state = 480
-        default: break loop
-        }
-      case 419: // main post-match.
-        switch byte {
-        case 0xa0...0xa7: state = 44
-        case 0xa8: state = 596
-        default: break loop
-        }
-      case 420: // main pre-match.
-        switch byte {
-        case 0x80...0xad, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 421: // main pre-match.
-        switch byte {
-        case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 5
-        default: break loop
-        }
-      case 422: // main pre-match.
-        switch byte {
-        case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 5
-        default: break loop
-        }
-      case 423: // main pre-match.
-        switch byte {
-        case 0x80, 0x81, 0x93...0xbf: state = 5
-        default: break loop
-        }
-      case 424: // main pre-match.
-        switch byte {
-        case 0x90...0xbf: state = 5
-        default: break loop
-        }
-      case 425: // main pre-match.
-        switch byte {
-        case 0x80...0x87, 0xb0...0xbd: state = 5
-        default: break loop
-        }
-      case 426: // main pre-match.
-        switch byte {
-        case 0x80...0x99, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 427: // main pre-match.
-        switch byte {
-        case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 5
-        default: break loop
-        }
-      case 428: // main pre-match.
-        switch byte {
-        case 0x80...0xbc: state = 5
-        default: break loop
-        }
-      case 429: // main pre-match.
-        switch byte {
-        case 0x81...0xbf: state = 5
-        default: break loop
-        }
-      case 430: // main pre-match.
-        switch byte {
-        case 0x80...0xbe: state = 5
-        default: break loop
-        }
-      case 431: // main pre-match.
-        switch byte {
-        case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 5
-        default: break loop
-        }
-      case 432: // main post-match.
-        switch byte {
-        case 0x30, 0x31: state = 597; last = pos; kind = .intBin
-        default: break loop
-        }
-      case 433: // main pre-match.
-        switch byte {
-        case 0x84...0x87: state = 196
-        default: break loop
-        }
-      case 434: // main pre-match.
-        switch byte {
-        case 0x80...0xab, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 435: // main pre-match.
-        switch byte {
-        case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 5
-        default: break loop
-        }
-      case 436: // main pre-match.
-        switch byte {
-        case 0x81...0x8f, 0x91...0xb5: state = 5
-        default: break loop
-        }
-      case 437: // main pre-match.
-        switch byte {
-        case 0x80...0xac: state = 5
-        default: break loop
-        }
-      case 438: // main pre-match.
-        switch byte {
-        case 0xa6...0xbf: state = 5
-        default: break loop
-        }
-      case 439: // main pre-match.
-        switch byte {
-        case 0x80...0x82, 0x90...0xbb: state = 5
-        default: break loop
-        }
-      case 440: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x90, 0x91, 0xa0...0xa5: state = 5
-        default: break loop
-        }
-      case 441: // main pre-match.
-        switch byte {
-        case 0x80...0x94, 0xa0...0xac, 0xb0...0xb9: state = 5
-        default: break loop
-        }
-      case 442: // main pre-match.
-        switch byte {
-        case 0x80...0x98: state = 5
-        default: break loop
-        }
-      case 443: // main pre-match.
-        switch byte {
-        case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 444: // main pre-match.
-        switch byte {
-        case 0x80...0x87, 0x90...0xad: state = 5
-        default: break loop
-        }
-      case 445: // main pre-match.
-        switch byte {
-        case 0x80...0x8b, 0x90...0xbe: state = 5
-        default: break loop
-        }
-      case 446: // main pre-match.
-        switch byte {
-        case 0x80...0xb0, 0xb3...0xb6, 0xba, 0xbc...0xbf: state = 5
-        default: break loop
-        }
-      case 447: // main pre-match.
-        switch byte {
-        case 0x80...0xa2, 0xb0...0xb9: state = 5
-        default: break loop
-        }
-      case 448: // main pre-match.
-        switch byte {
-        case 0x80...0x82, 0x90...0xbf: state = 5
-        default: break loop
-        }
-      case 449: // main pre-match.
-        switch byte {
-        case 0xa0...0xad: state = 5
-        default: break loop
-        }
-      case 450: // sym.
-        switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 39; last = pos; kind = .sym
-        case 0x74: state = 539; last = pos; kind = .sym
-        default: break loop
-        }
-      case 451: // main pre-match.
-        switch byte {
-        case 0x80...0x85, 0x87, 0x8d, 0x90...0xbf: state = 5
-        default: break loop
-        }
-      case 452: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x8a...0x8d, 0x90...0x96, 0x98, 0x9a...0x9d, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 453: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x8a...0x8d, 0x90...0xb0, 0xb2...0xb5, 0xb8...0xbe: state = 5
-        default: break loop
-        }
-      case 454: // main pre-match.
-        switch byte {
-        case 0x80, 0x82...0x85, 0x88...0x96, 0x98...0xbf: state = 5
-        default: break loop
-        }
-      case 455: // main pre-match.
-        switch byte {
-        case 0x80...0x90, 0x92...0x95, 0x98...0xbf: state = 5
-        default: break loop
-        }
-      case 456: // main pre-match.
-        switch byte {
-        case 0x80...0x9a, 0x9d...0xbc: state = 5
-        default: break loop
-        }
-      case 457: // main pre-match.
-        switch byte {
-        case 0x80...0xb5, 0xb8...0xbd: state = 5
-        default: break loop
-        }
-      case 458: // main pre-match.
-        switch byte {
-        case 0x80...0x8c, 0x8e...0x94, 0xa0...0xb6: state = 5
-        default: break loop
-        }
-      case 459: // main pre-match.
-        switch byte {
-        case 0x80...0x93, 0xa0...0xac, 0xae...0xb0, 0xb2, 0xb3: state = 5
-        default: break loop
-        }
-      case 460: // main pre-match.
-        switch byte {
-        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xb9: state = 5
-        default: break loop
-        }
-      case 461: // main pre-match.
-        switch byte {
-        case 0x80...0x8d, 0x90...0x99, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 462: // main pre-match.
-        switch byte {
-        case 0x80...0xaa, 0xb0...0xbf: state = 5
-        default: break loop
-        }
-      case 463: // main pre-match.
-        switch byte {
-        case 0x80...0x9e, 0xa0...0xab, 0xb0...0xbb: state = 5
-        default: break loop
-        }
-      case 464: // main pre-match.
-        switch byte {
-        case 0x80, 0x84...0xad, 0xb0...0xb4: state = 5
-        default: break loop
-        }
-      case 465: // main pre-match.
-        switch byte {
-        case 0x80...0x89, 0x90...0x9a, 0x9e...0xbf: state = 5
-        default: break loop
-        }
-      case 466: // main pre-match.
-        switch byte {
-        case 0x80...0x9b, 0x9e...0xbf: state = 5
-        default: break loop
-        }
-      case 467: // main pre-match.
-        switch byte {
-        case 0x80...0x9e, 0xa0...0xbc, 0xbf: state = 5
-        default: break loop
-        }
-      case 468: // main pre-match.
-        switch byte {
-        case 0x80...0x89, 0x90...0x99, 0xa0...0xad, 0xb0...0xbe: state = 5
-        default: break loop
-        }
-      case 469: // main pre-match.
-        switch byte {
-        case 0x80...0x8b, 0x90...0xbc: state = 5
-        default: break loop
-        }
-      case 470: // main pre-match.
-        switch byte {
-        case 0x80...0xb3, 0xbc...0xbf: state = 5
-        default: break loop
-        }
-      case 471: // main pre-match.
-        switch byte {
-        case 0x80...0xb7, 0xbb...0xbf: state = 5
-        default: break loop
-        }
-      case 472: // main pre-match.
-        switch byte {
-        case 0x80...0x89, 0x8d...0xbf: state = 5
-        default: break loop
-        }
-      case 473: // main pre-match.
-        switch byte {
-        case 0x80...0x88, 0x90...0xba, 0xbd...0xbf: state = 5
-        default: break loop
-        }
-      case 474: // main pre-match.
-        switch byte {
-        case 0x80...0x87, 0x90...0xb9: state = 5
-        default: break loop
-        }
-      case 475: // main pre-match.
-        switch byte {
-        case 0x80...0xb9, 0xbb...0xbf: state = 5
-        default: break loop
-        }
-      case 476: // main pre-match.
-        switch byte {
-        case 0x80...0x95, 0x98...0x9d, 0xa0...0xbf: state = 5
-        default: break loop
-        }
-      case 477: // main pre-match.
-        switch byte {
-        case 0x80...0x85, 0x88...0x8d, 0x90...0x97, 0x99, 0x9b, 0x9d, 0x9f...0xbd: state = 5
-        default: break loop
-        }
-      case 478: // main pre-match.
-        switch byte {
-        case 0x80...0xb4, 0xb6...0xbf: state = 5
-        default: break loop
-        }
-      case 479: // main pre-match.
-        switch byte {
-        case 0x80...0x84, 0x86...0x93, 0x96...0x9b, 0x9d...0xaf, 0xb2...0xb4, 0xb6...0xbe: state = 5
-        default: break loop
-        }
-      case 480: // main post-match.
-        switch byte {
-        case 0x80...0xa0: state = 42; last = pos; kind = .comment
-        default: break loop
-        }
-      case 481: // intDec.
-        switch byte {
-        case 0x30...0x39: state = 481; last = pos; kind = .intDec
-        case 0x5f: state = 520
-        default: break loop
-        }
-      case 482: // main pre-match.
+      case 175: // main pre-match.
         switch byte {
         case 0x80...0xad, 0xb0...0xbe: state = 5
         default: break loop
         }
-      case 483: // main pre-match.
+      case 176: // main pre-match.
         switch byte {
         case 0x80...0x9b, 0x9e, 0xa0...0xaa: state = 5
         default: break loop
         }
-      case 484: // main pre-match.
+      case 177: // main pre-match.
         switch byte {
         case 0xa0...0xb4, 0xb6...0xbd: state = 5
         default: break loop
         }
-      case 485: // main pre-match.
+      case 178: // main pre-match.
         switch byte {
         case 0x93...0xa1, 0xa3...0xbf: state = 5
         default: break loop
         }
-      case 486: // main pre-match.
+      case 179: // main pre-match.
         switch byte {
         case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 5
         default: break loop
         }
-      case 487: // main pre-match.
+      case 180: // main pre-match.
         switch byte {
         case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbe: state = 5
         default: break loop
         }
-      case 488: // main pre-match.
+      case 181: // main pre-match.
         switch byte {
         case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 5
         default: break loop
         }
-      case 489: // main pre-match.
+      case 182: // main pre-match.
         switch byte {
         case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb6: state = 5
         default: break loop
         }
-      case 490: // main pre-match.
+      case 183: // main pre-match.
         switch byte {
         case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5
         default: break loop
         }
-      case 491: // main pre-match.
+      case 184: // main pre-match.
         switch byte {
         case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9...0xbf: state = 5
         default: break loop
         }
-      case 492: // main pre-match.
+      case 185: // main pre-match.
         switch byte {
         case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5
         default: break loop
         }
-      case 493: // main pre-match.
+      case 186: // main pre-match.
         switch byte {
         case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 5
         default: break loop
         }
-      case 494: // main pre-match.
+      case 187: // main pre-match.
         switch byte {
         case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 5
         default: break loop
         }
-      case 495: // main pre-match.
+      case 188: // main pre-match.
         switch byte {
         case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 5
         default: break loop
         }
-      case 496: // main pre-match.
+      case 189: // main pre-match.
         switch byte {
         case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 5
         default: break loop
         }
-      case 497: // main pre-match.
+      case 190: // main pre-match.
         switch byte {
         case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 5
         default: break loop
         }
-      case 498: // main pre-match.
+      case 191: // main pre-match.
         switch byte {
         case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 5
         default: break loop
         }
-      case 499: // main pre-match.
+      case 192: // main pre-match.
         switch byte {
         case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 5
         default: break loop
         }
-      case 500: // main pre-match.
+      case 193: // main pre-match.
         switch byte {
         case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xbf: state = 5
         default: break loop
         }
-      case 501: // main pre-match.
+      case 194: // main pre-match.
         switch byte {
         case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 5
         default: break loop
         }
-      case 502: // main pre-match.
+      case 195: // main pre-match.
         switch byte {
         case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 5
         default: break loop
         }
-      case 503: // main pre-match.
+      case 196: // main pre-match.
         switch byte {
         case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 5
         default: break loop
         }
-      case 504: // main pre-match.
+      case 197: // main pre-match.
         switch byte {
         case 0x81...0xba, 0xbf: state = 5
         default: break loop
         }
-      case 505: // main pre-match.
+      case 198: // main pre-match.
         switch byte {
         case 0x80...0x9b: state = 5
         default: break loop
         }
-      case 506: // main pre-match.
+      case 199: // main pre-match.
         switch byte {
         case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 5
         default: break loop
         }
-      case 507: // main pre-match.
+      case 200: // main pre-match.
         switch byte {
         case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 5
         default: break loop
         }
-      case 508: // main pre-match.
+      case 201: // main pre-match.
         switch byte {
         case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 5
         default: break loop
         }
-      case 509: // main pre-match.
+      case 202: // main pre-match.
         switch byte {
         case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 5
         default: break loop
         }
-      case 510: // main pre-match.
+      case 203: // main pre-match.
         switch byte {
         case 0x80...0x8c, 0x8e...0x9a: state = 5
         default: break loop
         }
-      case 511: // main pre-match.
+      case 204: // sym.
         switch byte {
-        case 0x80...0xa1, 0xb0...0xbf: state = 5
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x72, 0x74...0x7a: state = 39; last = pos; kind = .sym
+        case 0x73: state = 658; last = pos; kind = .sym
         default: break loop
         }
-      case 512: // main post-match.
+      case 205: // main pre-match.
         switch byte {
-        case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 42; last = pos; kind = .comment
+        case 0x84...0x86: state = 150
+        case 0x87: state = 381
         default: break loop
         }
-      case 513: // main post-match.
+      case 206: // main post-match.
         switch byte {
-        case 0x90...0xad, 0xb0...0xb5: state = 42; last = pos; kind = .comment
+        case 0x80...0x8c, 0x90...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 514: // main post-match.
+      case 207: // main post-match.
         switch byte {
-        case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x86, 0x90...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 515: // main post-match.
+      case 208: // main post-match.
         switch byte {
-        case 0x80...0x8f: state = 42; last = pos; kind = .comment
+        case 0x80...0xab: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 516: // main post-match.
+      case 209: // main post-match.
         switch byte {
-        case 0x80...0x9a: state = 42; last = pos; kind = .comment
+        case 0x80...0xb7: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 517: // main post-match.
+      case 210: // main post-match.
         switch byte {
-        case 0x80...0x84, 0x90...0xbe: state = 42; last = pos; kind = .comment
+        case 0x80...0xb9: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 518: // main post-match.
+      case 211: // main post-match.
         switch byte {
-        case 0x8f...0x9f: state = 42; last = pos; kind = .comment
+        case 0xb7...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 519: // main post-match.
+      case 212: // main post-match.
         switch byte {
-        case 0xa0, 0xa1: state = 42; last = pos; kind = .comment
+        case 0x80...0xab, 0xb0...0xb9: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 520: // main post-match.
+      case 213: // main post-match.
         switch byte {
-        case 0x30...0x39: state = 675; last = pos; kind = .intDec
+        case 0x80...0x85, 0x8e...0x99, 0xa0...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 521: // int.
+      case 214: // main post-match.
         switch byte {
-        case 0x30...0x39: state = 521; last = pos; kind = .int
-        case 0x5f: state = 91
+        case 0x80...0x93, 0x9f...0xbc: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 522: // main pre-match.
+      case 215: // main post-match.
         switch byte {
-        case 0x80...0xa0: state = 5
+        case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 523: // main post-match.
+      case 216: // main post-match.
         switch byte {
-        case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xb6: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 524: // main post-match.
+      case 217: // main post-match.
         switch byte {
-        case 0x81...0x8f, 0x91...0xb5: state = 42; last = pos; kind = .comment
+        case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 525: // main post-match.
+      case 218: // main post-match.
         switch byte {
-        case 0x80...0xac: state = 42; last = pos; kind = .comment
+        case 0x80...0x82, 0x9b...0xb6: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 526: // main post-match.
+      case 219: // main post-match.
         switch byte {
-        case 0xa6...0xbf: state = 42; last = pos; kind = .comment
+        case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 527: // main post-match.
+      case 220: // main post-match.
         switch byte {
-        case 0x80...0x82, 0x90...0xbb: state = 42; last = pos; kind = .comment
+        case 0x80...0xa5, 0xb0...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 528: // main post-match.
+      case 221: // main post-match.
         switch byte {
-        case 0x80...0x88, 0x90, 0x91, 0xa0...0xa5: state = 42; last = pos; kind = .comment
+        case 0x80...0xad, 0xb0...0xb9: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 529: // main post-match.
+      case 222: // tagTest.
+        break loop
+      case 223: // main pre-match.
         switch byte {
-        case 0x80...0x94, 0xa0...0xac, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        case 0x80...0xad, 0xb0...0xbf: state = 5
         default: break loop
         }
-      case 530: // main post-match.
+      case 224: // main pre-match.
         switch byte {
-        case 0x80...0x98: state = 42; last = pos; kind = .comment
+        case 0x80...0x99: state = 5
         default: break loop
         }
-      case 531: // main post-match.
+      case 225: // main pre-match.
         switch byte {
-        case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 5
         default: break loop
         }
-      case 532: // main post-match.
+      case 226: // main pre-match.
         switch byte {
-        case 0x80...0x87, 0x90...0xad: state = 42; last = pos; kind = .comment
+        case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 5
         default: break loop
         }
-      case 533: // main post-match.
+      case 227: // main pre-match.
         switch byte {
-        case 0x80...0x8b, 0x90...0xbe: state = 42; last = pos; kind = .comment
+        case 0x80, 0x81, 0x93...0xbf: state = 5
         default: break loop
         }
-      case 534: // main post-match.
+      case 228: // main pre-match.
         switch byte {
-        case 0x80...0xb0, 0xb3...0xb6, 0xba, 0xbc...0xbf: state = 42; last = pos; kind = .comment
+        case 0x90...0xbf: state = 5
         default: break loop
         }
-      case 535: // main post-match.
+      case 229: // main pre-match.
         switch byte {
-        case 0x80...0xa2, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        case 0x80...0x8f, 0x92...0xbf: state = 5
         default: break loop
         }
-      case 536: // main post-match.
+      case 230: // main pre-match.
         switch byte {
-        case 0x80...0x82, 0x90...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x87, 0xb0...0xbd: state = 5
         default: break loop
         }
-      case 537: // main post-match.
+      case 231: // main pre-match.
         switch byte {
-        case 0xa0...0xad: state = 42; last = pos; kind = .comment
+        case 0x80...0x99, 0xa0...0xbf: state = 5
         default: break loop
         }
-      case 538: // pub.
+      case 232: // main pre-match.
+        switch byte {
+        case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 5
+        default: break loop
+        }
+      case 233: // main pre-match.
+        switch byte {
+        case 0x80...0xbc: state = 5
+        default: break loop
+        }
+      case 234: // main pre-match.
+        switch byte {
+        case 0x81...0xbf: state = 5
+        default: break loop
+        }
+      case 235: // main pre-match.
+        switch byte {
+        case 0x80...0xbe: state = 5
+        default: break loop
+        }
+      case 236: // main pre-match.
+        switch byte {
+        case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 5
+        default: break loop
+        }
+      case 237: // stringSQ.
+        break loop
+      case 238: // main pre-match.
+        switch byte {
+        case 0x20...0x7e: state = 9
+        case 0xc2: state = 239
+        case 0xc3...0xcc, 0xcf...0xd3, 0xd9, 0xda: state = 240
+        case 0xcd: state = 241
+        case 0xce: state = 242
+        case 0xd4: state = 243
+        case 0xd5: state = 244
+        case 0xd6: state = 245
+        case 0xd7: state = 246
+        case 0xd8: state = 247
+        case 0xdb: state = 248
+        case 0xdc: state = 249
+        case 0xdd: state = 250
+        case 0xde: state = 251
+        case 0xdf: state = 252
+        case 0xe0: state = 253
+        case 0xe1: state = 254
+        case 0xe2: state = 255
+        case 0xe3: state = 256
+        case 0xe4: state = 257
+        case 0xe5...0xe8, 0xeb, 0xec: state = 258
+        case 0xe9: state = 259
+        case 0xea: state = 260
+        case 0xed: state = 261
+        case 0xef: state = 262
+        case 0xf0: state = 263
+        case 0xf3: state = 264
+        default: break loop
+        }
+      case 239: // main pre-match.
+        switch byte {
+        case 0xa0...0xac, 0xae...0xbf: state = 9
+        default: break loop
+        }
+      case 240: // main pre-match.
+        switch byte {
+        case 0x80...0xbf: state = 9
+        default: break loop
+        }
+      case 241: // main pre-match.
+        switch byte {
+        case 0x80...0xb7, 0xba...0xbf: state = 9
+        default: break loop
+        }
+      case 242: // main pre-match.
+        switch byte {
+        case 0x84...0x8a, 0x8c, 0x8e...0xa1, 0xa3...0xbf: state = 9
+        default: break loop
+        }
+      case 243: // main pre-match.
+        switch byte {
+        case 0x80...0xaf, 0xb1...0xbf: state = 9
+        default: break loop
+        }
+      case 244: // main pre-match.
+        switch byte {
+        case 0x80...0x96, 0x99...0xbf: state = 9
+        default: break loop
+        }
+      case 245: // main pre-match.
+        switch byte {
+        case 0x80...0x8a, 0x8d...0x8f, 0x91...0xbf: state = 9
+        default: break loop
+        }
+      case 246: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xaa, 0xaf...0xb4: state = 9
+        default: break loop
+        }
+      case 247: // main pre-match.
+        switch byte {
+        case 0x86...0x9b, 0x9e...0xbf: state = 9
+        default: break loop
+        }
+      case 248: // main pre-match.
+        switch byte {
+        case 0x80...0x9c, 0x9e...0xbf: state = 9
+        default: break loop
+        }
+      case 249: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 250: // main pre-match.
+        switch byte {
+        case 0x80...0x8a, 0x8d...0xbf: state = 9
+        default: break loop
+        }
+      case 251: // main pre-match.
+        switch byte {
+        case 0x80...0xb1: state = 9
+        default: break loop
+        }
+      case 252: // main pre-match.
+        switch byte {
+        case 0x80...0xba, 0xbd...0xbf: state = 9
+        default: break loop
+        }
+      case 253: // main pre-match.
+        switch byte {
+        case 0xa0: state = 265
+        case 0xa1: state = 266
+        case 0xa2: state = 267
+        case 0xa3: state = 268
+        case 0xa4, 0xa5, 0xbc: state = 240
+        case 0xa6: state = 269
+        case 0xa7: state = 270
+        case 0xa8: state = 271
+        case 0xa9: state = 272
+        case 0xaa: state = 273
+        case 0xab: state = 274
+        case 0xac: state = 275
+        case 0xad: state = 276
+        case 0xae: state = 277
+        case 0xaf: state = 278
+        case 0xb0: state = 279
+        case 0xb1: state = 280
+        case 0xb2: state = 281
+        case 0xb3: state = 282
+        case 0xb4: state = 283
+        case 0xb5: state = 284
+        case 0xb6: state = 285
+        case 0xb7: state = 286
+        case 0xb8: state = 287
+        case 0xb9: state = 288
+        case 0xba: state = 289
+        case 0xbb: state = 290
+        case 0xbd: state = 291
+        case 0xbe: state = 292
+        case 0xbf: state = 293
+        default: break loop
+        }
+      case 254: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x84...0x88, 0x90...0x99, 0x9e, 0xac, 0xae, 0xb4...0xb6, 0xb8...0xbb: state = 240
+        case 0x83: state = 557
+        case 0x89: state = 558
+        case 0x8a: state = 559
+        case 0x8b: state = 560
+        case 0x8c: state = 561
+        case 0x8d: state = 562
+        case 0x8e: state = 374
+        case 0x8f: state = 563
+        case 0x9a: state = 469
+        case 0x9b, 0xa1: state = 412
+        case 0x9c: state = 564
+        case 0x9d: state = 565
+        case 0x9f: state = 566
+        case 0xa0: state = 567
+        case 0xa2: state = 568
+        case 0xa3: state = 569
+        case 0xa4: state = 570
+        case 0xa5: state = 571
+        case 0xa6: state = 422
+        case 0xa7: state = 572
+        case 0xa8: state = 573
+        case 0xa9: state = 574
+        case 0xaa: state = 575
+        case 0xad: state = 576
+        case 0xaf: state = 577
+        case 0xb0: state = 578
+        case 0xb1: state = 579
+        case 0xb2: state = 580
+        case 0xb3: state = 581
+        case 0xb7: state = 582
+        case 0xbc: state = 583
+        case 0xbd: state = 584
+        case 0xbe: state = 585
+        case 0xbf: state = 586
+        default: break loop
+        }
+      case 255: // main pre-match.
+        switch byte {
+        case 0x80: state = 345
+        case 0x81: state = 346
+        case 0x82: state = 347
+        case 0x83: state = 348
+        case 0x84, 0x85, 0x87...0x8f, 0x92...0xac, 0xb2, 0xb8, 0xbc...0xbe: state = 240
+        case 0x86: state = 349
+        case 0x90: state = 350
+        case 0x91: state = 351
+        case 0xad: state = 352
+        case 0xae: state = 353
+        case 0xaf: state = 354
+        case 0xb0: state = 355
+        case 0xb1: state = 356
+        case 0xb3: state = 357
+        case 0xb4: state = 358
+        case 0xb5: state = 359
+        case 0xb6: state = 360
+        case 0xb7: state = 361
+        case 0xb9: state = 362
+        case 0xba: state = 363
+        case 0xbb: state = 364
+        case 0xbf: state = 365
+        default: break loop
+        }
+      case 256: // main pre-match.
+        switch byte {
+        case 0x80, 0x83, 0x85, 0x89, 0x8a, 0x8c...0xbf: state = 240
+        case 0x81: state = 377
+        case 0x82: state = 244
+        case 0x84: state = 864
+        case 0x86: state = 865
+        case 0x87: state = 554
+        case 0x88: state = 356
+        case 0x8b: state = 378
+        default: break loop
+        }
+      case 257: // main pre-match.
+        switch byte {
+        case 0x80...0xb5, 0xb7...0xbf: state = 240
+        case 0xb6: state = 569
+        default: break loop
+        }
+      case 258: // main pre-match.
+        switch byte {
+        case 0x80...0xbf: state = 240
+        default: break loop
+        }
+      case 259: // main pre-match.
+        switch byte {
+        case 0x80...0xbe: state = 240
+        case 0xbf: state = 439
+        default: break loop
+        }
+      case 260: // main pre-match.
+        switch byte {
+        case 0x80...0x91, 0x94...0x97, 0x99, 0x9a, 0x9c, 0x9d, 0xa2, 0xa4, 0xa6, 0xaa, 0xae, 0xb0...0xbf: state = 240
+        case 0x92: state = 425
+        case 0x93: state = 536
+        case 0x98: state = 537
+        case 0x9b, 0xa1: state = 538
+        case 0x9e: state = 539
+        case 0x9f: state = 540
+        case 0xa0: state = 541
+        case 0xa3: state = 542
+        case 0xa5: state = 543
+        case 0xa7: state = 544
+        case 0xa8: state = 479
+        case 0xa9: state = 545
+        case 0xab: state = 546
+        case 0xac: state = 547
+        case 0xad: state = 548
+        case 0xaf: state = 549
+        default: break loop
+        }
+      case 261: // main pre-match.
+        switch byte {
+        case 0x80...0x9d: state = 240
+        case 0x9e: state = 554
+        case 0x9f: state = 555
+        default: break loop
+        }
+      case 262: // main pre-match.
+        switch byte {
+        case 0xa4...0xa8, 0xaa, 0xae, 0xb0...0xb4, 0xba, 0xbd: state = 240
+        case 0xa9: state = 366
+        case 0xab: state = 367
+        case 0xac: state = 368
+        case 0xad: state = 369
+        case 0xaf: state = 370
+        case 0xb5: state = 371
+        case 0xb6: state = 372
+        case 0xb7: state = 373
+        case 0xb8: state = 374
+        case 0xb9: state = 375
+        case 0xbb: state = 376
+        case 0xbc: state = 377
+        case 0xbe: state = 378
+        case 0xbf: state = 379
+        default: break loop
+        }
+      case 263: // main pre-match.
+        switch byte {
+        case 0x90: state = 396
+        case 0x91: state = 397
+        case 0x92: state = 398
+        case 0x93: state = 399
+        case 0x94: state = 400
+        case 0x96: state = 401
+        case 0x97, 0xa0...0xa9, 0xad: state = 258
+        case 0x98: state = 402
+        case 0x9b: state = 403
+        case 0x9d: state = 404
+        case 0x9e: state = 405
+        case 0x9f: state = 406
+        case 0xaa: state = 407
+        case 0xab: state = 408
+        case 0xac: state = 409
+        case 0xae: state = 410
+        case 0xaf: state = 411
+        default: break loop
+        }
+      case 264: // main pre-match.
+        switch byte {
+        case 0xa0: state = 552
+        default: break loop
+        }
+      case 265: // main pre-match.
+        switch byte {
+        case 0x80...0xad, 0xb0...0xbe: state = 9
+        default: break loop
+        }
+      case 266: // main pre-match.
+        switch byte {
+        case 0x80...0x9b, 0x9e, 0xa0...0xaa: state = 9
+        default: break loop
+        }
+      case 267: // main pre-match.
+        switch byte {
+        case 0xa0...0xb4, 0xb6...0xbd: state = 9
+        default: break loop
+        }
+      case 268: // main pre-match.
+        switch byte {
+        case 0x93...0xa1, 0xa3...0xbf: state = 9
+        default: break loop
+        }
+      case 269: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 9
+        default: break loop
+        }
+      case 270: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbe: state = 9
+        default: break loop
+        }
+      case 271: // main pre-match.
+        switch byte {
+        case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 9
+        default: break loop
+        }
+      case 272: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb6: state = 9
+        default: break loop
+        }
+      case 273: // main pre-match.
+        switch byte {
+        case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 9
+        default: break loop
+        }
+      case 274: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9...0xbf: state = 9
+        default: break loop
+        }
+      case 275: // main pre-match.
+        switch byte {
+        case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 9
+        default: break loop
+        }
+      case 276: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 9
+        default: break loop
+        }
+      case 277: // main pre-match.
+        switch byte {
+        case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 9
+        default: break loop
+        }
+      case 278: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 9
+        default: break loop
+        }
+      case 279: // main pre-match.
+        switch byte {
+        case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 9
+        default: break loop
+        }
+      case 280: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 9
+        default: break loop
+        }
+      case 281: // main pre-match.
+        switch byte {
+        case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 9
+        default: break loop
+        }
+      case 282: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 9
+        default: break loop
+        }
+      case 283: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xbf: state = 9
+        default: break loop
+        }
+      case 284: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 9
+        default: break loop
+        }
+      case 285: // main pre-match.
+        switch byte {
+        case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 9
+        default: break loop
+        }
+      case 286: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 9
+        default: break loop
+        }
+      case 287: // main pre-match.
+        switch byte {
+        case 0x81...0xba, 0xbf: state = 9
+        default: break loop
+        }
+      case 288: // main pre-match.
+        switch byte {
+        case 0x80...0x9b: state = 9
+        default: break loop
+        }
+      case 289: // main pre-match.
+        switch byte {
+        case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 9
+        default: break loop
+        }
+      case 290: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 9
+        default: break loop
+        }
+      case 291: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 9
+        default: break loop
+        }
+      case 292: // main pre-match.
+        switch byte {
+        case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 9
+        default: break loop
+        }
+      case 293: // main pre-match.
+        switch byte {
+        case 0x80...0x8c, 0x8e...0x9a: state = 9
+        default: break loop
+        }
+      case 294: // main post-match.
+        switch byte {
+        case 0x80...0xaf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 295: // or.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
         default: break loop
         }
-      case 539: // sym.
+      case 296: // main post-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x61...0x7a: state = 39; last = pos; kind = .sym
-        case 0x5f: state = 679; last = pos; kind = .sym
+        case 0x80...0xad, 0xb0...0xbe: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 540: // main post-match.
+      case 297: // main post-match.
         switch byte {
-        case 0x80...0xae: state = 42; last = pos; kind = .comment
+        case 0x80...0x9b, 0x9e, 0xa0...0xaa: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 541: // main post-match.
+      case 298: // main post-match.
         switch byte {
-        case 0x80...0xa6, 0xa9...0xbf: state = 42; last = pos; kind = .comment
+        case 0xa0...0xb4, 0xb6...0xbd: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 542: // main post-match.
+      case 299: // main post-match.
         switch byte {
-        case 0x80...0xb2, 0xbb...0xbf: state = 42; last = pos; kind = .comment
+        case 0x93...0xa1, 0xa3...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 543: // main post-match.
+      case 300: // main post-match.
         switch byte {
-        case 0x80...0xa8: state = 42; last = pos; kind = .comment
+        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb6...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 544: // main post-match.
+      case 301: // main post-match.
         switch byte {
-        case 0x80...0x85: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8e, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xbe: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 545: // main post-match.
+      case 302: // main post-match.
         switch byte {
-        case 0xa0...0xb3: state = 42; last = pos; kind = .comment
+        case 0x81...0x83, 0x85...0x8a, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5, 0xb6, 0xb8, 0xb9, 0xbc, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 546: // main post-match.
+      case 303: // main post-match.
         switch byte {
-        case 0x80...0x96, 0xa0...0xb8: state = 42; last = pos; kind = .comment
+        case 0x80...0x82, 0x87, 0x88, 0x8b...0x8d, 0x91, 0x99...0x9c, 0x9e, 0xa6...0xb6: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 547: // main post-match.
+      case 304: // main post-match.
         switch byte {
-        case 0x80...0x94, 0x96...0xbf: state = 42; last = pos; kind = .comment
+        case 0x81...0x83, 0x85...0x8d, 0x8f...0x91, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 548: // main post-match.
+      case 305: // main post-match.
         switch byte {
-        case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x85, 0x87...0x89, 0x8b...0x8d, 0x90, 0xa0...0xa3, 0xa6...0xb1, 0xb9...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 549: // main post-match.
+      case 306: // main post-match.
         switch byte {
-        case 0x80...0x83, 0x85...0xbf: state = 42; last = pos; kind = .comment
+        case 0x81...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 550: // main post-match.
+      case 307: // main post-match.
         switch byte {
-        case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x96, 0x97, 0x9c, 0x9d, 0x9f...0xa3, 0xa6...0xb7: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 551: // main post-match.
+      case 308: // main post-match.
         switch byte {
-        case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 42; last = pos; kind = .comment
+        case 0x82, 0x83, 0x85...0x8a, 0x8e...0x90, 0x92...0x95, 0x99, 0x9a, 0x9c, 0x9e, 0x9f, 0xa3, 0xa4, 0xa8...0xaa, 0xae...0xb9, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 552: // main post-match.
+      case 309: // main post-match.
         switch byte {
-        case 0x80...0xa5, 0xa8...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x82, 0x86...0x88, 0x8a...0x8d, 0x90, 0x97, 0xa6...0xba: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 553: // main post-match.
+      case 310: // main post-match.
         switch byte {
-        case 0x80...0x8b, 0x8e...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb9, 0xbd...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 554: // main post-match.
+      case 311: // main post-match.
         switch byte {
-        case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x98...0x9a, 0xa0...0xa3, 0xa6...0xaf, 0xb8...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 555: // main post-match.
+      case 312: // main post-match.
         switch byte {
-        case 0x80...0xae, 0xb0...0xb4: state = 42; last = pos; kind = .comment
+        case 0x80...0x8c, 0x8e...0x90, 0x92...0xa8, 0xaa...0xb3, 0xb5...0xb9, 0xbc...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 556: // main post-match.
+      case 313: // main post-match.
         switch byte {
-        case 0x80...0x83: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x86...0x88, 0x8a...0x8d, 0x95, 0x96, 0x9e, 0xa0...0xa3, 0xa6...0xaf, 0xb1, 0xb2: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 557: // main pre-match.
+      case 314: // main post-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0x8c, 0x8e...0x90, 0x92...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 315: // main post-match.
+        switch byte {
+        case 0x80...0x84, 0x86...0x88, 0x8a...0x8f, 0x94...0xa3, 0xa6...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 316: // main post-match.
+        switch byte {
+        case 0x82, 0x83, 0x85...0x96, 0x9a...0xb1, 0xb3...0xbb, 0xbd: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 317: // main post-match.
+        switch byte {
+        case 0x80...0x86, 0x8a, 0x8f...0x94, 0x96, 0x98...0x9f, 0xa6...0xaf, 0xb2...0xb4: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 318: // main post-match.
+        switch byte {
+        case 0x81...0xba, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 319: // main post-match.
+        switch byte {
+        case 0x80...0x9b: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 320: // main post-match.
+        switch byte {
+        case 0x81, 0x82, 0x84, 0x87, 0x88, 0x8a, 0x8d, 0x94...0x97, 0x99...0x9f, 0xa1...0xa3, 0xa5, 0xa7, 0xaa, 0xab, 0xad...0xb9, 0xbb...0xbd: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 321: // main post-match.
+        switch byte {
+        case 0x80...0x84, 0x86, 0x88...0x8d, 0x90...0x99, 0x9c...0x9f: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 322: // main post-match.
+        switch byte {
+        case 0x80...0x87, 0x89...0xac, 0xb1...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 323: // main post-match.
+        switch byte {
+        case 0x80...0x97, 0x99...0xbc, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 324: // main post-match.
+        switch byte {
+        case 0x80...0x8c, 0x8e...0x9a: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 325: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6b, 0x6d...0x7a: state = 39; last = pos; kind = .sym
+        case 0x6c: state = 588; last = pos; kind = .sym
+        default: break loop
+        }
+      case 326: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61, 0x63...0x7a: state = 39; last = pos; kind = .sym
+        case 0x62: state = 587; last = pos; kind = .pub
+        default: break loop
+        }
+      case 327: // match.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
+        default: break loop
+        }
+      case 328: // flt.
+        switch byte {
+        case 0x30...0x39: state = 328; last = pos; kind = .flt
+        default: break loop
+        }
+      case 329: // main pre-match.
+        switch byte {
+        case 0x80...0x8c, 0x90...0xbf: state = 5
+        default: break loop
+        }
+      case 330: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x90...0xbf: state = 5
+        default: break loop
+        }
+      case 331: // main pre-match.
+        switch byte {
+        case 0x80...0xab: state = 5
+        default: break loop
+        }
+      case 332: // main pre-match.
+        switch byte {
+        case 0x80...0xb7: state = 5
+        default: break loop
+        }
+      case 333: // main pre-match.
+        switch byte {
+        case 0x80...0xb9: state = 5
+        default: break loop
+        }
+      case 334: // main pre-match.
+        switch byte {
+        case 0xb7...0xbf: state = 5
+        default: break loop
+        }
+      case 335: // main pre-match.
+        switch byte {
+        case 0x80...0xab, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 336: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x8e...0x99, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 337: // main pre-match.
+        switch byte {
+        case 0x80...0x93, 0x9f...0xbc: state = 5
+        default: break loop
+        }
+      case 338: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 5
+        default: break loop
+        }
+      case 339: // main pre-match.
+        switch byte {
+        case 0x80...0xb6: state = 5
+        default: break loop
+        }
+      case 340: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 5
+        default: break loop
+        }
+      case 341: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x9b...0xb6: state = 5
+        default: break loop
+        }
+      case 342: // main pre-match.
+        switch byte {
+        case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 343: // main pre-match.
+        switch byte {
+        case 0x80...0xa5, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 344: // main pre-match.
+        switch byte {
+        case 0x80...0xad, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 345: // main pre-match.
+        switch byte {
+        case 0x80...0x8a, 0x90...0xa9, 0xaf...0xbf: state = 9
+        default: break loop
+        }
+      case 346: // main pre-match.
+        switch byte {
+        case 0x80...0x9f, 0xb0, 0xb1, 0xb4...0xbf: state = 9
+        default: break loop
+        }
+      case 347: // main pre-match.
+        switch byte {
+        case 0x80...0x8e, 0x90...0x9c, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 348: // main pre-match.
+        switch byte {
+        case 0x90...0xb0: state = 9
+        default: break loop
+        }
+      case 349: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 350: // main pre-match.
+        switch byte {
+        case 0x80...0xa6: state = 9
+        default: break loop
+        }
+      case 351: // main pre-match.
+        switch byte {
+        case 0x80...0x8a, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 352: // main pre-match.
+        switch byte {
+        case 0x80...0xb3, 0xb6...0xbf: state = 9
+        default: break loop
+        }
+      case 353: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0x98...0xbf: state = 9
+        default: break loop
+        }
+      case 354: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x8a...0xbe: state = 9
+        default: break loop
+        }
+      case 355: // main pre-match.
+        switch byte {
+        case 0x80...0xae, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 356: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 357: // main pre-match.
+        switch byte {
+        case 0x80...0xb3, 0xb9...0xbf: state = 9
+        default: break loop
+        }
+      case 358: // main pre-match.
+        switch byte {
+        case 0x80...0xa5, 0xa7, 0xad, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 359: // main pre-match.
+        switch byte {
+        case 0x80...0xa7, 0xaf, 0xb0, 0xbf: state = 9
+        default: break loop
+        }
+      case 360: // main pre-match.
+        switch byte {
+        case 0x80...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xb6, 0xb8...0xbe: state = 9
+        default: break loop
+        }
+      case 361: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x88...0x8e, 0x90...0x96, 0x98...0x9e, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 362: // main pre-match.
+        switch byte {
+        case 0x80...0x8e: state = 9
+        default: break loop
+        }
+      case 363: // main pre-match.
+        switch byte {
+        case 0x80...0x99, 0x9b...0xbf: state = 9
+        default: break loop
+        }
+      case 364: // main pre-match.
+        switch byte {
+        case 0x80...0xb3: state = 9
+        default: break loop
+        }
+      case 365: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0xb0...0xbb: state = 9
+        default: break loop
+        }
+      case 366: // main pre-match.
+        switch byte {
+        case 0x80...0xad, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 367: // main pre-match.
+        switch byte {
+        case 0x80...0x99: state = 9
+        default: break loop
+        }
+      case 368: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 9
+        default: break loop
+        }
+      case 369: // main pre-match.
+        switch byte {
+        case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 9
+        default: break loop
+        }
+      case 370: // main pre-match.
+        switch byte {
+        case 0x80, 0x81, 0x93...0xbf: state = 9
+        default: break loop
+        }
+      case 371: // main pre-match.
+        switch byte {
+        case 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 372: // main pre-match.
+        switch byte {
+        case 0x80...0x8f, 0x92...0xbf: state = 9
+        default: break loop
+        }
+      case 373: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0xb0...0xbd: state = 9
+        default: break loop
+        }
+      case 374: // main pre-match.
+        switch byte {
+        case 0x80...0x99, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 375: // main pre-match.
+        switch byte {
+        case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 9
+        default: break loop
+        }
+      case 376: // main pre-match.
+        switch byte {
+        case 0x80...0xbc: state = 9
+        default: break loop
+        }
+      case 377: // main pre-match.
+        switch byte {
+        case 0x81...0xbf: state = 9
+        default: break loop
+        }
+      case 378: // main pre-match.
+        switch byte {
+        case 0x80...0xbe: state = 9
+        default: break loop
+        }
+      case 379: // main pre-match.
+        switch byte {
+        case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 9
+        default: break loop
+        }
+      case 380: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x63, 0x65...0x7a: state = 39; last = pos; kind = .sym
+        case 0x64: state = 394; last = pos; kind = .and
+        default: break loop
+        }
+      case 381: // main pre-match.
+        switch byte {
+        case 0x80...0xaf: state = 5
+        default: break loop
+        }
+      case 382: // main post-match.
+        switch byte {
+        case 0x80...0xad, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 383: // main post-match.
+        switch byte {
+        case 0x80...0x99: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 384: // main post-match.
+        switch byte {
+        case 0x80...0x86, 0x93...0x97, 0x9d...0xb6, 0xb8...0xbc, 0xbe: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 385: // main post-match.
+        switch byte {
+        case 0x80, 0x81, 0x83, 0x84, 0x86...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 386: // main post-match.
+        switch byte {
+        case 0x80, 0x81, 0x93...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 387: // main post-match.
+        switch byte {
+        case 0x90...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 388: // main post-match.
+        switch byte {
+        case 0x80...0x8f, 0x92...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 389: // main post-match.
+        switch byte {
+        case 0x80...0x87, 0xb0...0xbd: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 390: // main post-match.
+        switch byte {
+        case 0x80...0x92, 0x94...0xa6, 0xa8...0xab, 0xb0...0xb4, 0xb6...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 391: // main post-match.
+        switch byte {
+        case 0x80...0xbc: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 392: // main post-match.
+        switch byte {
+        case 0x82...0x87, 0x8a...0x8f, 0x92...0x97, 0x9a...0x9c, 0xa0...0xa6, 0xa8...0xae, 0xbc, 0xbd: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 393: // typeAlias.
+        break loop
+      case 394: // and.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
+        default: break loop
+        }
+      case 395: // intBin.
+        switch byte {
+        case 0x30, 0x31: state = 395; last = pos; kind = .intBin
+        case 0x5f: state = 654
+        default: break loop
+        }
+      case 396: // main pre-match.
+        switch byte {
+        case 0x80: state = 463
+        case 0x81: state = 464
+        case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 240
+        case 0x83: state = 465
+        case 0x84: state = 466
+        case 0x86: state = 467
+        case 0x87: state = 468
+        case 0x8a: state = 469
+        case 0x8b: state = 470
+        case 0x8c: state = 471
+        case 0x8d: state = 472
+        case 0x8e: state = 473
+        case 0x8f: state = 474
+        case 0x92: state = 475
+        case 0x93: state = 476
+        case 0x94, 0xbc: state = 477
+        case 0x95: state = 478
+        case 0x9c: state = 479
+        case 0x9d: state = 480
+        case 0xa0: state = 481
+        case 0xa1: state = 482
+        case 0xa2: state = 483
+        case 0xa3: state = 484
+        case 0xa4: state = 485
+        case 0xa6: state = 486
+        case 0xa7: state = 372
+        case 0xa8: state = 487
+        case 0xa9: state = 488
+        case 0xaa: state = 489
+        case 0xab: state = 490
+        case 0xac: state = 491
+        case 0xad: state = 492
+        case 0xae: state = 493
+        case 0xb1: state = 494
+        case 0xb2: state = 495
+        case 0xb3: state = 496
+        case 0xb4: state = 497
+        case 0xb9: state = 498
+        case 0xbd: state = 367
+        default: break loop
+        }
+      case 397: // main pre-match.
+        switch byte {
+        case 0x80, 0x86, 0x90, 0x92, 0x98, 0xa8: state = 240
+        case 0x81: state = 787
+        case 0x82: state = 788
+        case 0x83: state = 789
+        case 0x84: state = 585
+        case 0x85: state = 790
+        case 0x87: state = 791
+        case 0x88: state = 792
+        case 0x8a: state = 793
+        case 0x8b: state = 794
+        case 0x8c: state = 795
+        case 0x8d: state = 796
+        case 0x91: state = 797
+        case 0x93: state = 798
+        case 0x96: state = 799
+        case 0x97: state = 556
+        case 0x99: state = 800
+        case 0x9a: state = 538
+        case 0x9b: state = 801
+        case 0x9c: state = 802
+        case 0xa0: state = 803
+        case 0xa2: state = 804
+        case 0xa3: state = 805
+        case 0xa9: state = 806
+        case 0xaa: state = 807
+        case 0xab: state = 412
+        case 0xb0: state = 808
+        case 0xb1: state = 809
+        case 0xb2: state = 810
+        case 0xb4: state = 811
+        case 0xb5: state = 812
+        case 0xb6: state = 813
+        case 0xbb: state = 814
+        default: break loop
+        }
+      case 398: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90, 0x92...0x94: state = 240
+        case 0x8e: state = 367
+        case 0x91: state = 656
+        case 0x95: state = 657
+        default: break loop
+        }
+      case 399: // main pre-match.
+        switch byte {
+        case 0x80...0x8f: state = 240
+        case 0x90: state = 421
+        default: break loop
+        }
+      case 400: // main pre-match.
+        switch byte {
+        case 0x90...0x98: state = 240
+        case 0x99: state = 501
+        default: break loop
+        }
+      case 401: // main pre-match.
+        switch byte {
+        case 0xa0...0xa7, 0xac, 0xb9, 0xbc: state = 240
+        case 0xa8: state = 412
+        case 0xa9: state = 413
+        case 0xab: state = 414
+        case 0xad: state = 415
+        case 0xae: state = 416
+        case 0xba: state = 417
+        case 0xbd: state = 418
+        case 0xbe: state = 419
+        case 0xbf: state = 420
+        default: break loop
+        }
+      case 402: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xaa: state = 240
+        case 0x9f: state = 251
+        case 0xab: state = 495
+        default: break loop
+        }
+      case 403: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x86...0x8a, 0xb0: state = 240
+        case 0x84: state = 821
+        case 0x85: state = 822
+        case 0x8b: state = 803
+        case 0xb1: state = 823
+        case 0xb2: state = 824
+        default: break loop
+        }
+      case 404: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 240
+        case 0x83: state = 569
+        case 0x84: state = 661
+        case 0x85: state = 662
+        case 0x87: state = 663
+        case 0x89: state = 664
+        case 0x8b: state = 665
+        case 0x8d: state = 666
+        case 0x91: state = 667
+        case 0x92: state = 668
+        case 0x93: state = 669
+        case 0x94: state = 670
+        case 0x95: state = 671
+        case 0x9a: state = 672
+        case 0x9f: state = 673
+        case 0xaa: state = 674
+        default: break loop
+        }
+      case 405: // main pre-match.
+        switch byte {
+        case 0x80: state = 630
+        case 0xa0...0xa2, 0xa4: state = 240
+        case 0xa3: state = 631
+        case 0xa5: state = 632
+        case 0xb1: state = 633
+        case 0xb2: state = 460
+        case 0xb8: state = 634
+        case 0xb9: state = 635
+        case 0xba: state = 636
+        case 0xbb: state = 637
+        default: break loop
+        }
+      case 406: // main pre-match.
+        switch byte {
+        case 0x80, 0x85: state = 422
+        case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 240
+        case 0x82: state = 423
+        case 0x83: state = 424
+        case 0x84: state = 425
+        case 0x86: state = 426
+        case 0x87: state = 427
+        case 0x88: state = 428
+        case 0x89: state = 429
+        case 0x9b: state = 430
+        case 0x9d: state = 364
+        case 0x9f: state = 431
+        case 0xa0: state = 349
+        case 0xa1: state = 432
+        case 0xa2: state = 433
+        case 0xa4: state = 434
+        case 0xa5: state = 435
+        case 0xa6: state = 436
+        case 0xa7: state = 437
+        case 0xa9: state = 438
+        default: break loop
+        }
+      case 407: // main pre-match.
+        switch byte {
+        case 0x80...0x9a, 0x9c...0xbf: state = 240
+        case 0x9b: state = 500
+        default: break loop
+        }
+      case 408: // main pre-match.
+        switch byte {
+        case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 240
+        case 0x9c: state = 460
+        case 0xa0: state = 461
+        default: break loop
+        }
+      case 409: // main pre-match.
+        switch byte {
+        case 0x80...0xb9, 0xbb...0xbf: state = 240
+        case 0xba: state = 854
+        default: break loop
+        }
+      case 410: // main pre-match.
+        switch byte {
+        case 0x80...0xae: state = 240
+        case 0xaf: state = 655
+        default: break loop
+        }
+      case 411: // main pre-match.
+        switch byte {
+        case 0xa0...0xa7: state = 240
+        case 0xa8: state = 556
+        default: break loop
+        }
+      case 412: // main pre-match.
+        switch byte {
+        case 0x80...0xb8: state = 9
+        default: break loop
+        }
+      case 413: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 9
+        default: break loop
+        }
+      case 414: // main pre-match.
+        switch byte {
+        case 0x90...0xad, 0xb0...0xb5: state = 9
+        default: break loop
+        }
+      case 415: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 9
+        default: break loop
+        }
+      case 416: // main pre-match.
+        switch byte {
+        case 0x80...0x8f: state = 9
+        default: break loop
+        }
+      case 417: // main pre-match.
+        switch byte {
+        case 0x80...0x9a: state = 9
+        default: break loop
+        }
+      case 418: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x90...0xbe: state = 9
+        default: break loop
+        }
+      case 419: // main pre-match.
+        switch byte {
+        case 0x8f...0x9f: state = 9
+        default: break loop
+        }
+      case 420: // main pre-match.
+        switch byte {
+        case 0xa0, 0xa1: state = 9
+        default: break loop
+        }
+      case 421: // main pre-match.
+        switch byte {
+        case 0x80...0xae: state = 9
+        default: break loop
+        }
+      case 422: // main pre-match.
+        switch byte {
+        case 0x80...0xab, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 423: // main pre-match.
+        switch byte {
+        case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 9
+        default: break loop
+        }
+      case 424: // main pre-match.
+        switch byte {
+        case 0x81...0x8f, 0x91...0xb5: state = 9
+        default: break loop
+        }
+      case 425: // main pre-match.
+        switch byte {
+        case 0x80...0x8c, 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 426: // main pre-match.
+        switch byte {
+        case 0x80...0xac: state = 9
+        default: break loop
+        }
+      case 427: // main pre-match.
+        switch byte {
+        case 0xa6...0xbf: state = 9
+        default: break loop
+        }
+      case 428: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x90...0xbb: state = 9
+        default: break loop
+        }
+      case 429: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x90, 0x91, 0xa0...0xa5: state = 9
+        default: break loop
+        }
+      case 430: // main pre-match.
+        switch byte {
+        case 0x80...0x94, 0xa0...0xac, 0xb0...0xb9: state = 9
+        default: break loop
+        }
+      case 431: // main pre-match.
+        switch byte {
+        case 0x80...0x98: state = 9
+        default: break loop
+        }
+      case 432: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 433: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xad: state = 9
+        default: break loop
+        }
+      case 434: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x90...0xbe: state = 9
+        default: break loop
+        }
+      case 435: // main pre-match.
+        switch byte {
+        case 0x80...0xb0, 0xb3...0xb6, 0xba, 0xbc...0xbf: state = 9
+        default: break loop
+        }
+      case 436: // main pre-match.
+        switch byte {
+        case 0x80...0xa2, 0xb0...0xb9: state = 9
+        default: break loop
+        }
+      case 437: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 438: // main pre-match.
+        switch byte {
+        case 0xa0...0xad: state = 9
+        default: break loop
+        }
+      case 439: // main pre-match.
+        switch byte {
+        case 0x80...0xaf: state = 9
+        default: break loop
+        }
+      case 440: // main pre-match.
         switch byte {
         case 0x85...0xaf, 0xb1...0xbf: state = 5
         default: break loop
         }
-      case 558: // main pre-match.
+      case 441: // main pre-match.
         switch byte {
         case 0x80...0x8e, 0x90...0xba: state = 5
         default: break loop
         }
+      case 442: // main pre-match.
+        switch byte {
+        case 0x80...0xa3, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 443: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 444: // main pre-match.
+        switch byte {
+        case 0x80: state = 867
+        case 0x81: state = 868
+        case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 150
+        case 0x83: state = 869
+        case 0x84: state = 870
+        case 0x86: state = 871
+        case 0x87: state = 872
+        case 0x8a: state = 510
+        case 0x8b: state = 873
+        case 0x8c: state = 874
+        case 0x8d: state = 875
+        case 0x8e: state = 876
+        case 0x8f: state = 877
+        case 0x92: state = 878
+        case 0x93: state = 879
+        case 0x94, 0xbc: state = 880
+        case 0x95: state = 881
+        case 0x9c: state = 339
+        case 0x9d: state = 882
+        case 0xa0: state = 883
+        case 0xa1: state = 884
+        case 0xa2: state = 885
+        case 0xa3: state = 886
+        case 0xa4: state = 887
+        case 0xa6: state = 888
+        case 0xa7: state = 229
+        case 0xa8: state = 889
+        case 0xa9: state = 890
+        case 0xaa: state = 891
+        case 0xab: state = 892
+        case 0xac: state = 893
+        case 0xad: state = 894
+        case 0xae: state = 895
+        case 0xb1: state = 896
+        case 0xb2: state = 620
+        case 0xb3: state = 897
+        case 0xb4: state = 898
+        case 0xb9: state = 899
+        case 0xbd: state = 224
+        default: break loop
+        }
+      case 445: // main pre-match.
+        switch byte {
+        case 0x80, 0x86, 0x90, 0x92, 0x98, 0xa8: state = 150
+        case 0x81: state = 712
+        case 0x82: state = 713
+        case 0x83: state = 714
+        case 0x84: state = 534
+        case 0x85: state = 715
+        case 0x87: state = 716
+        case 0x88: state = 717
+        case 0x8a: state = 718
+        case 0x8b: state = 719
+        case 0x8c: state = 720
+        case 0x8d: state = 721
+        case 0x91: state = 722
+        case 0x93: state = 723
+        case 0x96: state = 724
+        case 0x97: state = 709
+        case 0x99: state = 725
+        case 0x9a: state = 332
+        case 0x9b: state = 726
+        case 0x9c: state = 727
+        case 0xa0: state = 728
+        case 0xa2: state = 729
+        case 0xa3: state = 730
+        case 0xa9: state = 731
+        case 0xaa: state = 732
+        case 0xab: state = 511
+        case 0xb0: state = 733
+        case 0xb1: state = 734
+        case 0xb2: state = 735
+        case 0xb4: state = 736
+        case 0xb5: state = 737
+        case 0xb6: state = 738
+        case 0xbb: state = 739
+        default: break loop
+        }
+      case 446: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90, 0x92...0x94: state = 150
+        case 0x8e: state = 224
+        case 0x91: state = 659
+        case 0x95: state = 660
+        default: break loop
+        }
+      case 447: // main pre-match.
+        switch byte {
+        case 0x80...0x8f: state = 150
+        case 0x90: state = 619
+        default: break loop
+        }
+      case 448: // main pre-match.
+        switch byte {
+        case 0x90...0x98: state = 150
+        case 0x99: state = 621
+        default: break loop
+        }
+      case 449: // main pre-match.
+        switch byte {
+        case 0xa0...0xa7, 0xac, 0xb9, 0xbc: state = 150
+        case 0xa8: state = 511
+        case 0xa9: state = 622
+        case 0xab: state = 623
+        case 0xad: state = 624
+        case 0xae: state = 625
+        case 0xba: state = 626
+        case 0xbd: state = 627
+        case 0xbe: state = 628
+        case 0xbf: state = 629
+        default: break loop
+        }
+      case 450: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xaa: state = 150
+        case 0x9f: state = 161
+        case 0xab: state = 620
+        default: break loop
+        }
+      case 451: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x86...0x8a, 0xb0: state = 150
+        case 0x84: state = 901
+        case 0x85: state = 902
+        case 0x8b: state = 728
+        case 0xb1: state = 903
+        case 0xb2: state = 904
+        default: break loop
+        }
+      case 452: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 150
+        case 0x83: state = 517
+        case 0x84: state = 741
+        case 0x85: state = 742
+        case 0x87: state = 743
+        case 0x89: state = 744
+        case 0x8b: state = 745
+        case 0x8d: state = 746
+        case 0x91: state = 747
+        case 0x92: state = 748
+        case 0x93: state = 749
+        case 0x94: state = 750
+        case 0x95: state = 751
+        case 0x9a: state = 752
+        case 0x9f: state = 753
+        case 0xaa: state = 754
+        default: break loop
+        }
+      case 453: // main pre-match.
+        switch byte {
+        case 0x80: state = 589
+        case 0xa0...0xa2, 0xa4: state = 150
+        case 0xa3: state = 590
+        case 0xa5: state = 591
+        case 0xb1: state = 592
+        case 0xb2: state = 593
+        case 0xb8: state = 594
+        case 0xb9: state = 595
+        case 0xba: state = 596
+        case 0xbb: state = 597
+        default: break loop
+        }
+      case 454: // main pre-match.
+        switch byte {
+        case 0x80, 0x85: state = 520
+        case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 150
+        case 0x82: state = 905
+        case 0x83: state = 906
+        case 0x84: state = 329
+        case 0x86: state = 907
+        case 0x87: state = 908
+        case 0x88: state = 909
+        case 0x89: state = 910
+        case 0x9b: state = 911
+        case 0x9d: state = 616
+        case 0x9f: state = 912
+        case 0xa0: state = 602
+        case 0xa1: state = 913
+        case 0xa2: state = 914
+        case 0xa4: state = 915
+        case 0xa5: state = 916
+        case 0xa6: state = 917
+        case 0xa7: state = 918
+        case 0xa9: state = 919
+        default: break loop
+        }
+      case 455: // main pre-match.
+        switch byte {
+        case 0x80...0x9a, 0x9c...0xbf: state = 150
+        case 0x9b: state = 900
+        default: break loop
+        }
+      case 456: // main pre-match.
+        switch byte {
+        case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 150
+        case 0x9c: state = 593
+        case 0xa0: state = 826
+        default: break loop
+        }
+      case 457: // main pre-match.
+        switch byte {
+        case 0x80...0xb9, 0xbb...0xbf: state = 150
+        case 0xba: state = 502
+        default: break loop
+        }
+      case 458: // main pre-match.
+        switch byte {
+        case 0x80...0xae: state = 150
+        case 0xaf: state = 553
+        default: break loop
+        }
+      case 459: // main pre-match.
+        switch byte {
+        case 0xa0...0xa7: state = 150
+        case 0xa8: state = 709
+        default: break loop
+        }
+      case 460: // main pre-match.
+        switch byte {
+        case 0x80...0xb4: state = 9
+        default: break loop
+        }
+      case 461: // main pre-match.
+        switch byte {
+        case 0x80...0x9d, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 462: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x8b...0xbb: state = 5
+        default: break loop
+        }
+      case 463: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 9
+        default: break loop
+        }
+      case 464: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x9d: state = 9
+        default: break loop
+        }
+      case 465: // main pre-match.
+        switch byte {
+        case 0x80...0xba: state = 9
+        default: break loop
+        }
+      case 466: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 9
+        default: break loop
+        }
+      case 467: // main pre-match.
+        switch byte {
+        case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 9
+        default: break loop
+        }
+      case 468: // main pre-match.
+        switch byte {
+        case 0x90...0xbd: state = 9
+        default: break loop
+        }
+      case 469: // main pre-match.
+        switch byte {
+        case 0x80...0x9c, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 470: // main pre-match.
+        switch byte {
+        case 0x80...0x90, 0xa0...0xbb: state = 9
+        default: break loop
+        }
+      case 471: // main pre-match.
+        switch byte {
+        case 0x80...0xa3, 0xad...0xbf: state = 9
+        default: break loop
+        }
+      case 472: // main pre-match.
+        switch byte {
+        case 0x80...0x8a, 0x90...0xba: state = 9
+        default: break loop
+        }
+      case 473: // main pre-match.
+        switch byte {
+        case 0x80...0x9d, 0x9f...0xbf: state = 9
+        default: break loop
+        }
+      case 474: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x88...0x95: state = 9
+        default: break loop
+        }
+      case 475: // main pre-match.
+        switch byte {
+        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 476: // main pre-match.
+        switch byte {
+        case 0x80...0x93, 0x98...0xbb: state = 9
+        default: break loop
+        }
+      case 477: // main pre-match.
+        switch byte {
+        case 0x80...0xa7, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 478: // main pre-match.
+        switch byte {
+        case 0x80...0xa3, 0xaf: state = 9
+        default: break loop
+        }
+      case 479: // main pre-match.
+        switch byte {
+        case 0x80...0xb6: state = 9
+        default: break loop
+        }
+      case 480: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0xa0...0xa7: state = 9
+        default: break loop
+        }
+      case 481: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 9
+        default: break loop
+        }
+      case 482: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0x97...0xbf: state = 9
+        default: break loop
+        }
+      case 483: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa7...0xaf: state = 9
+        default: break loop
+        }
+      case 484: // main pre-match.
+        switch byte {
+        case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 9
+        default: break loop
+        }
+      case 485: // main pre-match.
+        switch byte {
+        case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 9
+        default: break loop
+        }
+      case 486: // main pre-match.
+        switch byte {
+        case 0x80...0xb7, 0xbc...0xbf: state = 9
+        default: break loop
+        }
+      case 487: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb5, 0xb8...0xba, 0xbf: state = 9
+        default: break loop
+        }
+      case 488: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x90...0x98, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 489: // main pre-match.
+        switch byte {
+        case 0x80...0x9f: state = 9
+        default: break loop
+        }
+      case 490: // main pre-match.
+        switch byte {
+        case 0x80...0xa6, 0xab...0xb6: state = 9
+        default: break loop
+        }
+      case 491: // main pre-match.
+        switch byte {
+        case 0x80...0xb5, 0xb9...0xbf: state = 9
+        default: break loop
+        }
+      case 492: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 9
+        default: break loop
+        }
+      case 493: // main pre-match.
+        switch byte {
+        case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 9
+        default: break loop
+        }
+      case 494: // main pre-match.
+        switch byte {
+        case 0x80...0x88: state = 9
+        default: break loop
+        }
+      case 495: // main pre-match.
+        switch byte {
+        case 0x80...0xb2: state = 9
+        default: break loop
+        }
+      case 496: // main pre-match.
+        switch byte {
+        case 0x80...0xb2, 0xba...0xbf: state = 9
+        default: break loop
+        }
+      case 497: // main pre-match.
+        switch byte {
+        case 0x80...0xa7, 0xb0...0xb9: state = 9
+        default: break loop
+        }
+      case 498: // main pre-match.
+        switch byte {
+        case 0xa0...0xbe: state = 9
+        default: break loop
+        }
+      case 499: // intDec.
+        switch byte {
+        case 0x30...0x39: state = 499; last = pos; kind = .intDec
+        case 0x5f: state = 550
+        default: break loop
+        }
+      case 500: // main pre-match.
+        switch byte {
+        case 0x80...0x96: state = 9
+        default: break loop
+        }
+      case 501: // main pre-match.
+        switch byte {
+        case 0x80...0x86: state = 9
+        default: break loop
+        }
+      case 502: // main pre-match.
+        switch byte {
+        case 0x80...0xa1, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 503: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x87, 0x8d, 0x90...0xbf: state = 5
+        default: break loop
+        }
+      case 504: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x8a...0x8d, 0x90...0x96, 0x98, 0x9a...0x9d, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 505: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x8a...0x8d, 0x90...0xb0, 0xb2...0xb5, 0xb8...0xbe: state = 5
+        default: break loop
+        }
+      case 506: // main pre-match.
+        switch byte {
+        case 0x80, 0x82...0x85, 0x88...0x96, 0x98...0xbf: state = 5
+        default: break loop
+        }
+      case 507: // main pre-match.
+        switch byte {
+        case 0x80...0x90, 0x92...0x95, 0x98...0xbf: state = 5
+        default: break loop
+        }
+      case 508: // main pre-match.
+        switch byte {
+        case 0x80...0x9a, 0x9d...0xbc: state = 5
+        default: break loop
+        }
+      case 509: // main pre-match.
+        switch byte {
+        case 0x80...0xb5, 0xb8...0xbd: state = 5
+        default: break loop
+        }
+      case 510: // main pre-match.
+        switch byte {
+        case 0x80...0x9c, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 511: // main pre-match.
+        switch byte {
+        case 0x80...0xb8: state = 5
+        default: break loop
+        }
+      case 512: // main pre-match.
+        switch byte {
+        case 0x80...0x8c, 0x8e...0x94, 0xa0...0xb6: state = 5
+        default: break loop
+        }
+      case 513: // main pre-match.
+        switch byte {
+        case 0x80...0x93, 0xa0...0xac, 0xae...0xb0, 0xb2, 0xb3: state = 5
+        default: break loop
+        }
+      case 514: // main pre-match.
+        switch byte {
+        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 515: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x99, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 516: // main pre-match.
+        switch byte {
+        case 0x80...0xaa, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 517: // main pre-match.
+        switch byte {
+        case 0x80...0xb5: state = 5
+        default: break loop
+        }
+      case 518: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xab, 0xb0...0xbb: state = 5
+        default: break loop
+        }
+      case 519: // main pre-match.
+        switch byte {
+        case 0x80, 0x84...0xad, 0xb0...0xb4: state = 5
+        default: break loop
+        }
+      case 520: // main pre-match.
+        switch byte {
+        case 0x80...0xab, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 521: // main pre-match.
+        switch byte {
+        case 0x80...0x89, 0x90...0x9a, 0x9e...0xbf: state = 5
+        default: break loop
+        }
+      case 522: // main pre-match.
+        switch byte {
+        case 0x80...0x9b, 0x9e...0xbf: state = 5
+        default: break loop
+        }
+      case 523: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xbc, 0xbf: state = 5
+        default: break loop
+        }
+      case 524: // main pre-match.
+        switch byte {
+        case 0x80...0x89, 0x90...0x99, 0xa0...0xad, 0xb0...0xbe: state = 5
+        default: break loop
+        }
+      case 525: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x90...0xbc: state = 5
+        default: break loop
+        }
+      case 526: // main pre-match.
+        switch byte {
+        case 0x80...0xb3, 0xbc...0xbf: state = 5
+        default: break loop
+        }
+      case 527: // main pre-match.
+        switch byte {
+        case 0x80...0xb7, 0xbb...0xbf: state = 5
+        default: break loop
+        }
+      case 528: // main pre-match.
+        switch byte {
+        case 0x80...0x89, 0x8d...0xbf: state = 5
+        default: break loop
+        }
+      case 529: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x90...0xba, 0xbd...0xbf: state = 5
+        default: break loop
+        }
+      case 530: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xb9: state = 5
+        default: break loop
+        }
+      case 531: // main pre-match.
+        switch byte {
+        case 0x80...0xb9, 0xbb...0xbf: state = 5
+        default: break loop
+        }
+      case 532: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0x98...0x9d, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 533: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x88...0x8d, 0x90...0x97, 0x99, 0x9b, 0x9d, 0x9f...0xbd: state = 5
+        default: break loop
+        }
+      case 534: // main pre-match.
+        switch byte {
+        case 0x80...0xb4, 0xb6...0xbf: state = 5
+        default: break loop
+        }
+      case 535: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x86...0x93, 0x96...0x9b, 0x9d...0xaf, 0xb2...0xb4, 0xb6...0xbe: state = 5
+        default: break loop
+        }
+      case 536: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 537: // main pre-match.
+        switch byte {
+        case 0x80...0xab: state = 9
+        default: break loop
+        }
+      case 538: // main pre-match.
+        switch byte {
+        case 0x80...0xb7: state = 9
+        default: break loop
+        }
+      case 539: // main pre-match.
+        switch byte {
+        case 0x80...0xb9: state = 9
+        default: break loop
+        }
+      case 540: // main pre-match.
+        switch byte {
+        case 0xb7...0xbf: state = 9
+        default: break loop
+        }
+      case 541: // main pre-match.
+        switch byte {
+        case 0x80...0xab, 0xb0...0xb9: state = 9
+        default: break loop
+        }
+      case 542: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x8e...0x99, 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 543: // main pre-match.
+        switch byte {
+        case 0x80...0x93, 0x9f...0xbc: state = 9
+        default: break loop
+        }
+      case 544: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x8f...0x99, 0x9e...0xbe: state = 9
+        default: break loop
+        }
+      case 545: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x99, 0x9c...0xbf: state = 9
+        default: break loop
+        }
+      case 546: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x9b...0xb6: state = 9
+        default: break loop
+        }
+      case 547: // main pre-match.
+        switch byte {
+        case 0x81...0x86, 0x89...0x8e, 0x91...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 548: // main pre-match.
+        switch byte {
+        case 0x80...0xa5, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 549: // main pre-match.
+        switch byte {
+        case 0x80...0xad, 0xb0...0xb9: state = 9
+        default: break loop
+        }
+      case 550: // main post-match.
+        switch byte {
+        case 0x30...0x39: state = 827; last = pos; kind = .intDec
+        default: break loop
+        }
+      case 551: // int.
+        switch byte {
+        case 0x30...0x39: state = 551; last = pos; kind = .int
+        case 0x5f: state = 91
+        default: break loop
+        }
+      case 552: // main pre-match.
+        switch byte {
+        case 0x84...0x86: state = 240
+        case 0x87: state = 439
+        default: break loop
+        }
+      case 553: // main pre-match.
+        switch byte {
+        case 0x80...0xa0: state = 5
+        default: break loop
+        }
+      case 554: // main pre-match.
+        switch byte {
+        case 0x80...0xa3, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 555: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x8b...0xbb: state = 9
+        default: break loop
+        }
+      case 556: // main pre-match.
+        switch byte {
+        case 0x80...0x9d: state = 9
+        default: break loop
+        }
+      case 557: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x87, 0x8d, 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 558: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x8a...0x8d, 0x90...0x96, 0x98, 0x9a...0x9d, 0xa0...0xbf: state = 9
+        default: break loop
+        }
       case 559: // main pre-match.
         switch byte {
-        case 0x80...0xae, 0xb0...0xb4: state = 5
+        case 0x80...0x88, 0x8a...0x8d, 0x90...0xb0, 0xb2...0xb5, 0xb8...0xbe: state = 9
         default: break loop
         }
       case 560: // main pre-match.
         switch byte {
-        case 0x80...0x83: state = 5
+        case 0x80, 0x82...0x85, 0x88...0x96, 0x98...0xbf: state = 9
         default: break loop
         }
-      case 561: // main post-match.
+      case 561: // main pre-match.
         switch byte {
-        case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x90, 0x92...0x95, 0x98...0xbf: state = 9
         default: break loop
         }
-      case 562: // main post-match.
+      case 562: // main pre-match.
         switch byte {
-        case 0x80...0x8d, 0x90...0x9d: state = 42; last = pos; kind = .comment
+        case 0x80...0x9a, 0x9d...0xbc: state = 9
         default: break loop
         }
-      case 563: // main post-match.
+      case 563: // main pre-match.
         switch byte {
-        case 0x80...0xba: state = 42; last = pos; kind = .comment
+        case 0x80...0xb5, 0xb8...0xbd: state = 9
         default: break loop
         }
-      case 564: // main post-match.
+      case 564: // main pre-match.
         switch byte {
-        case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x8c, 0x8e...0x94, 0xa0...0xb6: state = 9
         default: break loop
         }
-      case 565: // main post-match.
+      case 565: // main pre-match.
         switch byte {
-        case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 42; last = pos; kind = .comment
+        case 0x80...0x93, 0xa0...0xac, 0xae...0xb0, 0xb2, 0xb3: state = 9
         default: break loop
         }
-      case 566: // main post-match.
+      case 566: // main pre-match.
         switch byte {
-        case 0x90...0xbd: state = 42; last = pos; kind = .comment
+        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xb9: state = 9
         default: break loop
         }
-      case 567: // main post-match.
+      case 567: // main pre-match.
         switch byte {
-        case 0x80...0x90, 0xa0...0xbb: state = 42; last = pos; kind = .comment
+        case 0x80...0x8d, 0x90...0x99, 0xa0...0xbf: state = 9
         default: break loop
         }
-      case 568: // main post-match.
+      case 568: // main pre-match.
         switch byte {
-        case 0x80...0xa3, 0xad...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xaa, 0xb0...0xbf: state = 9
         default: break loop
         }
-      case 569: // main post-match.
+      case 569: // main pre-match.
         switch byte {
-        case 0x80...0x8a, 0x90...0xba: state = 42; last = pos; kind = .comment
+        case 0x80...0xb5: state = 9
         default: break loop
         }
-      case 570: // main post-match.
+      case 570: // main pre-match.
         switch byte {
-        case 0x80...0x9d, 0x9f...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x9e, 0xa0...0xab, 0xb0...0xbb: state = 9
         default: break loop
         }
-      case 571: // main post-match.
+      case 571: // main pre-match.
         switch byte {
-        case 0x80...0x83, 0x88...0x95: state = 42; last = pos; kind = .comment
+        case 0x80, 0x84...0xad, 0xb0...0xb4: state = 9
         default: break loop
         }
-      case 572: // main post-match.
+      case 572: // main pre-match.
         switch byte {
-        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x89, 0x90...0x9a, 0x9e...0xbf: state = 9
         default: break loop
         }
-      case 573: // main post-match.
+      case 573: // main pre-match.
         switch byte {
-        case 0x80...0x93, 0x98...0xbb: state = 42; last = pos; kind = .comment
+        case 0x80...0x9b, 0x9e...0xbf: state = 9
         default: break loop
         }
-      case 574: // main post-match.
+      case 574: // main pre-match.
         switch byte {
-        case 0x80...0xa7, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x9e, 0xa0...0xbc, 0xbf: state = 9
         default: break loop
         }
-      case 575: // main post-match.
+      case 575: // main pre-match.
         switch byte {
-        case 0x80...0xa3, 0xaf: state = 42; last = pos; kind = .comment
+        case 0x80...0x89, 0x90...0x99, 0xa0...0xad, 0xb0...0xbe: state = 9
         default: break loop
         }
-      case 576: // main post-match.
+      case 576: // main pre-match.
         switch byte {
-        case 0x80...0x95, 0xa0...0xa7: state = 42; last = pos; kind = .comment
+        case 0x80...0x8b, 0x90...0xbc: state = 9
         default: break loop
         }
-      case 577: // main post-match.
+      case 577: // main pre-match.
         switch byte {
-        case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xb3, 0xbc...0xbf: state = 9
         default: break loop
         }
-      case 578: // main post-match.
+      case 578: // main pre-match.
         switch byte {
-        case 0x80...0x95, 0x97...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xb7, 0xbb...0xbf: state = 9
         default: break loop
         }
-      case 579: // main post-match.
+      case 579: // main pre-match.
         switch byte {
-        case 0x80...0x9e, 0xa7...0xaf: state = 42; last = pos; kind = .comment
+        case 0x80...0x89, 0x8d...0xbf: state = 9
         default: break loop
         }
-      case 580: // main post-match.
+      case 580: // main pre-match.
         switch byte {
-        case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x88, 0x90...0xba, 0xbd...0xbf: state = 9
         default: break loop
         }
-      case 581: // main post-match.
+      case 581: // main pre-match.
         switch byte {
-        case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x87, 0x90...0xb9: state = 9
         default: break loop
         }
-      case 582: // main post-match.
+      case 582: // main pre-match.
         switch byte {
-        case 0x80...0xb7, 0xbc...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xb9, 0xbb...0xbf: state = 9
         default: break loop
         }
-      case 583: // main post-match.
+      case 583: // main pre-match.
         switch byte {
-        case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb5, 0xb8...0xba, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x95, 0x98...0x9d, 0xa0...0xbf: state = 9
         default: break loop
         }
-      case 584: // main post-match.
+      case 584: // main pre-match.
         switch byte {
-        case 0x80...0x88, 0x90...0x98, 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x85, 0x88...0x8d, 0x90...0x97, 0x99, 0x9b, 0x9d, 0x9f...0xbd: state = 9
         default: break loop
         }
-      case 585: // main post-match.
+      case 585: // main pre-match.
         switch byte {
-        case 0x80...0x9f: state = 42; last = pos; kind = .comment
+        case 0x80...0xb4, 0xb6...0xbf: state = 9
         default: break loop
         }
-      case 586: // main post-match.
+      case 586: // main pre-match.
         switch byte {
-        case 0x80...0xa6, 0xab...0xb6: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x86...0x93, 0x96...0x9b, 0x9d...0xaf, 0xb2...0xb4, 0xb6...0xbe: state = 9
         default: break loop
         }
-      case 587: // main post-match.
+      case 587: // pub.
         switch byte {
-        case 0x80...0xb5, 0xb9...0xbf: state = 42; last = pos; kind = .comment
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
         default: break loop
         }
-      case 588: // main post-match.
+      case 588: // sym.
         switch byte {
-        case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 42; last = pos; kind = .comment
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x78, 0x7a: state = 39; last = pos; kind = .sym
+        case 0x79: state = 755; last = pos; kind = .sym
         default: break loop
         }
-      case 589: // main post-match.
+      case 589: // main pre-match.
         switch byte {
-        case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 42; last = pos; kind = .comment
+        case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 5
         default: break loop
         }
-      case 590: // main post-match.
+      case 590: // main pre-match.
         switch byte {
-        case 0x80...0x88: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x87...0x96: state = 5
         default: break loop
         }
-      case 591: // main post-match.
+      case 591: // main pre-match.
         switch byte {
-        case 0x80...0xb2: state = 42; last = pos; kind = .comment
+        case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 5
         default: break loop
         }
-      case 592: // main post-match.
+      case 592: // main pre-match.
         switch byte {
-        case 0x80...0xb2, 0xba...0xbf: state = 42; last = pos; kind = .comment
+        case 0xb1...0xbf: state = 5
         default: break loop
         }
-      case 593: // main post-match.
+      case 593: // main pre-match.
         switch byte {
-        case 0x80...0xa7, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        case 0x80...0xb4: state = 5
         default: break loop
         }
-      case 594: // main post-match.
+      case 594: // main pre-match.
         switch byte {
-        case 0xa0...0xbe: state = 42; last = pos; kind = .comment
+        case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 5
         default: break loop
         }
       case 595: // main pre-match.
         switch byte {
-        case 0x80...0x9d: state = 5
+        case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 5
         default: break loop
         }
-      case 596: // main post-match.
+      case 596: // main pre-match.
         switch byte {
-        case 0x80...0x9d: state = 42; last = pos; kind = .comment
+        case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 5
         default: break loop
         }
-      case 597: // intBin.
+      case 597: // main pre-match.
         switch byte {
-        case 0x30, 0x31: state = 597; last = pos; kind = .intBin
-        case 0x5f: state = 432
+        case 0xb0, 0xb1: state = 5
         default: break loop
         }
       case 598: // main pre-match.
         switch byte {
-        case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 5
+        case 0x80...0x8a, 0x90...0xa9, 0xaf...0xbf: state = 5
         default: break loop
         }
       case 599: // main pre-match.
         switch byte {
-        case 0x80...0xbc, 0xbe, 0xbf: state = 5
+        case 0x80...0x9f, 0xb0, 0xb1, 0xb4...0xbf: state = 5
         default: break loop
         }
       case 600: // main pre-match.
         switch byte {
-        case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 5
+        case 0x80...0x8e, 0x90...0x9c, 0xa0...0xbf: state = 5
         default: break loop
         }
       case 601: // main pre-match.
         switch byte {
-        case 0x80...0x86, 0x90...0xb6: state = 5
+        case 0x90...0xb0: state = 5
         default: break loop
         }
       case 602: // main pre-match.
         switch byte {
-        case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 5
+        case 0x80...0x8b, 0x90...0xbf: state = 5
         default: break loop
         }
       case 603: // main pre-match.
         switch byte {
-        case 0x80...0x91, 0x93...0xbe: state = 5
+        case 0x80...0xa6: state = 5
         default: break loop
         }
       case 604: // main pre-match.
         switch byte {
-        case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 5
+        case 0x80...0x8a, 0xa0...0xbf: state = 5
         default: break loop
         }
       case 605: // main pre-match.
         switch byte {
-        case 0x80...0xaa, 0xb0...0xb9: state = 5
+        case 0x80...0xb3, 0xb6...0xbf: state = 5
         default: break loop
         }
       case 606: // main pre-match.
         switch byte {
-        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbb...0xbf: state = 5
+        case 0x80...0x95, 0x98...0xbf: state = 5
         default: break loop
         }
       case 607: // main pre-match.
         switch byte {
-        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 5
+        case 0x80...0x88, 0x8a...0xbe: state = 5
         default: break loop
         }
       case 608: // main pre-match.
         switch byte {
-        case 0x80...0x99, 0x9b, 0x9d, 0x9e: state = 5
+        case 0x80...0xae, 0xb0...0xbf: state = 5
         default: break loop
         }
       case 609: // main pre-match.
         switch byte {
-        case 0x80...0x87, 0x90...0x99: state = 5
+        case 0x80...0xb3, 0xb9...0xbf: state = 5
         default: break loop
         }
       case 610: // main pre-match.
         switch byte {
-        case 0x80...0xb5, 0xb8...0xbf: state = 5
+        case 0x80...0xa5, 0xa7, 0xad, 0xb0...0xbf: state = 5
         default: break loop
         }
       case 611: // main pre-match.
         switch byte {
-        case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 5
+        case 0x80...0xa7, 0xaf, 0xb0, 0xbf: state = 5
         default: break loop
         }
       case 612: // main pre-match.
         switch byte {
-        case 0x80...0x89: state = 5
+        case 0x80...0x96, 0xa0...0xa6, 0xa8...0xae, 0xb0...0xb6, 0xb8...0xbe: state = 5
         default: break loop
         }
       case 613: // main pre-match.
         switch byte {
-        case 0x80...0x9a, 0x9d...0xab, 0xb0...0xbf: state = 5
+        case 0x80...0x86, 0x88...0x8e, 0x90...0x96, 0x98...0x9e, 0xa0...0xbf: state = 5
         default: break loop
         }
       case 614: // main pre-match.
         switch byte {
-        case 0xa0...0xbf: state = 5
+        case 0x80...0x8e: state = 5
         default: break loop
         }
       case 615: // main pre-match.
         switch byte {
-        case 0x80...0xb2, 0xbf: state = 5
+        case 0x80...0x99, 0x9b...0xbf: state = 5
         default: break loop
         }
       case 616: // main pre-match.
         switch byte {
-        case 0x80...0x87, 0x90...0xbf: state = 5
+        case 0x80...0xb3: state = 5
         default: break loop
         }
       case 617: // main pre-match.
         switch byte {
-        case 0x80...0x83, 0x86...0xa2: state = 5
+        case 0x80...0x95, 0xb0...0xbb: state = 5
         default: break loop
         }
-      case 618: // main pre-match.
+      case 618: // intOct.
         switch byte {
-        case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 5
+        case 0x30...0x37: state = 618; last = pos; kind = .intOct
+        case 0x5f: state = 825
         default: break loop
         }
       case 619: // main pre-match.
         switch byte {
-        case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 5
+        case 0x80...0xae: state = 5
         default: break loop
         }
       case 620: // main pre-match.
         switch byte {
-        case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 5
+        case 0x80...0xb2: state = 5
         default: break loop
         }
       case 621: // main pre-match.
         switch byte {
-        case 0x80...0x86, 0x88, 0x89, 0x8b...0xb6, 0xba, 0xbc, 0xbd, 0xbf: state = 5
+        case 0x80...0x86: state = 5
         default: break loop
         }
       case 622: // main pre-match.
         switch byte {
-        case 0x80...0x87, 0x90...0x99, 0xa0...0xa5, 0xa7, 0xa8, 0xaa...0xbf: state = 5
+        case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 5
         default: break loop
         }
       case 623: // main pre-match.
         switch byte {
-        case 0x80...0x8e, 0x90, 0x91, 0x93...0x98, 0xa0...0xa9: state = 5
+        case 0x90...0xad, 0xb0...0xb5: state = 5
         default: break loop
         }
       case 624: // main pre-match.
         switch byte {
-        case 0xa0...0xb8: state = 5
+        case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 5
         default: break loop
         }
-      case 625: // sym.
+      case 625: // main pre-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x65, 0x67...0x7a: state = 39; last = pos; kind = .sym
-        case 0x66: state = 678; last = pos; kind = .sym
+        case 0x80...0x8f: state = 5
         default: break loop
         }
-      case 626: // main post-match.
+      case 626: // main pre-match.
         switch byte {
-        case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x9a: state = 5
         default: break loop
         }
-      case 627: // main post-match.
+      case 627: // main pre-match.
         switch byte {
-        case 0x80...0xbc, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x90...0xbe: state = 5
         default: break loop
         }
-      case 628: // main post-match.
+      case 628: // main pre-match.
         switch byte {
-        case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        case 0x8f...0x9f: state = 5
         default: break loop
         }
-      case 629: // main post-match.
+      case 629: // main pre-match.
         switch byte {
-        case 0x80...0x86, 0x90...0xb6: state = 42; last = pos; kind = .comment
+        case 0xa0, 0xa1: state = 5
         default: break loop
         }
-      case 630: // main post-match.
+      case 630: // main pre-match.
         switch byte {
-        case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 42; last = pos; kind = .comment
+        case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 9
         default: break loop
         }
-      case 631: // main post-match.
+      case 631: // main pre-match.
         switch byte {
-        case 0x80...0x91, 0x93...0xbe: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x87...0x96: state = 9
         default: break loop
         }
-      case 632: // main post-match.
+      case 632: // main pre-match.
         switch byte {
-        case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 9
         default: break loop
         }
-      case 633: // main post-match.
+      case 633: // main pre-match.
         switch byte {
-        case 0x80...0xaa, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        case 0xb1...0xbf: state = 9
         default: break loop
         }
-      case 634: // main post-match.
+      case 634: // main pre-match.
         switch byte {
-        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbb...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 9
         default: break loop
         }
-      case 635: // main post-match.
+      case 635: // main pre-match.
         switch byte {
-        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 42; last = pos; kind = .comment
+        case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 9
         default: break loop
         }
-      case 636: // main post-match.
+      case 636: // main pre-match.
         switch byte {
-        case 0x80...0x99, 0x9b, 0x9d, 0x9e: state = 42; last = pos; kind = .comment
+        case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 9
         default: break loop
         }
-      case 637: // main post-match.
+      case 637: // main pre-match.
         switch byte {
-        case 0x80...0x87, 0x90...0x99: state = 42; last = pos; kind = .comment
+        case 0xb0, 0xb1: state = 9
         default: break loop
         }
       case 638: // main post-match.
         switch byte {
-        case 0x80...0xb5, 0xb8...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80: state = 675
+        case 0x81: state = 676
+        case 0x82, 0x85, 0x90, 0x91, 0x98...0x9b, 0xb0: state = 44
+        case 0x83: state = 677
+        case 0x84: state = 678
+        case 0x86: state = 679
+        case 0x87: state = 680
+        case 0x8a: state = 115
+        case 0x8b: state = 681
+        case 0x8c: state = 682
+        case 0x8d: state = 683
+        case 0x8e: state = 684
+        case 0x8f: state = 685
+        case 0x92: state = 686
+        case 0x93: state = 687
+        case 0x94, 0xbc: state = 688
+        case 0x95: state = 689
+        case 0x9c: state = 216
+        case 0x9d: state = 690
+        case 0xa0: state = 691
+        case 0xa1: state = 692
+        case 0xa2: state = 693
+        case 0xa3: state = 694
+        case 0xa4: state = 695
+        case 0xa6: state = 696
+        case 0xa7: state = 388
+        case 0xa8: state = 697
+        case 0xa9: state = 698
+        case 0xaa: state = 699
+        case 0xab: state = 700
+        case 0xac: state = 701
+        case 0xad: state = 702
+        case 0xae: state = 703
+        case 0xb1: state = 704
+        case 0xb2: state = 705
+        case 0xb3: state = 706
+        case 0xb4: state = 707
+        case 0xb9: state = 708
+        case 0xbd: state = 383
         default: break loop
         }
       case 639: // main post-match.
         switch byte {
-        case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 42; last = pos; kind = .comment
+        case 0x80, 0x86, 0x90, 0x92, 0x98, 0xa8: state = 44
+        case 0x81: state = 756
+        case 0x82: state = 757
+        case 0x83: state = 758
+        case 0x84: state = 139
+        case 0x85: state = 759
+        case 0x87: state = 760
+        case 0x88: state = 761
+        case 0x8a: state = 762
+        case 0x8b: state = 763
+        case 0x8c: state = 764
+        case 0x8d: state = 765
+        case 0x91: state = 766
+        case 0x93: state = 767
+        case 0x96: state = 768
+        case 0x97: state = 710
+        case 0x99: state = 769
+        case 0x9a: state = 209
+        case 0x9b: state = 770
+        case 0x9c: state = 771
+        case 0xa0: state = 772
+        case 0xa2: state = 773
+        case 0xa3: state = 774
+        case 0xa9: state = 775
+        case 0xaa: state = 776
+        case 0xab: state = 116
+        case 0xb0: state = 777
+        case 0xb1: state = 778
+        case 0xb2: state = 779
+        case 0xb4: state = 780
+        case 0xb5: state = 781
+        case 0xb6: state = 782
+        case 0xbb: state = 783
         default: break loop
         }
       case 640: // main post-match.
         switch byte {
-        case 0x80...0x89: state = 42; last = pos; kind = .comment
+        case 0x80...0x8d, 0x90, 0x92...0x94: state = 44
+        case 0x8e: state = 383
+        case 0x91: state = 852
+        case 0x95: state = 853
         default: break loop
         }
       case 641: // main post-match.
         switch byte {
-        case 0x80...0x9a, 0x9d...0xab, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x8f: state = 44
+        case 0x90: state = 923
         default: break loop
         }
       case 642: // main post-match.
         switch byte {
-        case 0x80...0xbb: state = 42; last = pos; kind = .comment
+        case 0x90...0x98: state = 44
+        case 0x99: state = 820
         default: break loop
         }
       case 643: // main post-match.
         switch byte {
-        case 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        case 0xa0...0xa7, 0xac, 0xb9, 0xbc: state = 44
+        case 0xa8: state = 116
+        case 0xa9: state = 828
+        case 0xab: state = 829
+        case 0xad: state = 830
+        case 0xae: state = 831
+        case 0xba: state = 832
+        case 0xbd: state = 833
+        case 0xbe: state = 834
+        case 0xbf: state = 835
         default: break loop
         }
       case 644: // main post-match.
         switch byte {
-        case 0x80...0xb2, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x9e, 0xa0...0xaa: state = 44
+        case 0x9f: state = 55
+        case 0xab: state = 705
         default: break loop
         }
       case 645: // main post-match.
         switch byte {
-        case 0x80...0x87, 0x90...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x83, 0x86...0x8a, 0xb0: state = 44
+        case 0x84: state = 816
+        case 0x85: state = 817
+        case 0x8b: state = 772
+        case 0xb1: state = 818
+        case 0xb2: state = 819
         default: break loop
         }
       case 646: // main post-match.
         switch byte {
-        case 0x80...0x83, 0x86...0xa2: state = 42; last = pos; kind = .comment
+        case 0x80...0x82, 0x86, 0x88, 0x8c, 0x90, 0x96...0x99, 0x9b...0x9e, 0xa0...0xa9: state = 44
+        case 0x83: state = 122
+        case 0x84: state = 924
+        case 0x85: state = 925
+        case 0x87: state = 926
+        case 0x89: state = 927
+        case 0x8b: state = 928
+        case 0x8d: state = 929
+        case 0x91: state = 930
+        case 0x92: state = 931
+        case 0x93: state = 932
+        case 0x94: state = 933
+        case 0x95: state = 934
+        case 0x9a: state = 935
+        case 0x9f: state = 936
+        case 0xaa: state = 937
         default: break loop
         }
       case 647: // main post-match.
         switch byte {
-        case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80: state = 855
+        case 0xa0...0xa2, 0xa4: state = 44
+        case 0xa3: state = 856
+        case 0xa5: state = 857
+        case 0xb1: state = 858
+        case 0xb2: state = 784
+        case 0xb8: state = 859
+        case 0xb9: state = 860
+        case 0xba: state = 861
+        case 0xbb: state = 862
         default: break loop
         }
       case 648: // main post-match.
         switch byte {
-        case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80, 0x85: state = 125
+        case 0x81, 0x8c...0x9a, 0x9c, 0x9e: state = 44
+        case 0x82: state = 836
+        case 0x83: state = 837
+        case 0x84: state = 206
+        case 0x86: state = 838
+        case 0x87: state = 839
+        case 0x88: state = 840
+        case 0x89: state = 841
+        case 0x9b: state = 842
+        case 0x9d: state = 88
+        case 0x9f: state = 843
+        case 0xa0: state = 73
+        case 0xa1: state = 844
+        case 0xa2: state = 845
+        case 0xa4: state = 846
+        case 0xa5: state = 847
+        case 0xa6: state = 848
+        case 0xa7: state = 849
+        case 0xa9: state = 850
         default: break loop
         }
       case 649: // main post-match.
         switch byte {
-        case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 42; last = pos; kind = .comment
+        case 0x80...0x9a, 0x9c...0xbf: state = 44
+        case 0x9b: state = 815
         default: break loop
         }
       case 650: // main post-match.
         switch byte {
-        case 0x80...0x86, 0x88, 0x89, 0x8b...0xb6, 0xba, 0xbc, 0xbd, 0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x9b, 0x9d...0x9f, 0xa1...0xbf: state = 44
+        case 0x9c: state = 784
+        case 0xa0: state = 785
         default: break loop
         }
       case 651: // main post-match.
         switch byte {
-        case 0x80...0x87, 0x90...0x99, 0xa0...0xa5, 0xa7, 0xa8, 0xaa...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xb9, 0xbb...0xbf: state = 44
+        case 0xba: state = 866
         default: break loop
         }
       case 652: // main post-match.
         switch byte {
-        case 0x80...0x8e, 0x90, 0x91, 0x93...0x98, 0xa0...0xa9: state = 42; last = pos; kind = .comment
+        case 0x80...0xae: state = 44
+        case 0xaf: state = 921
         default: break loop
         }
       case 653: // main post-match.
         switch byte {
-        case 0xa0...0xb8: state = 42; last = pos; kind = .comment
+        case 0xa0...0xa7: state = 44
+        case 0xa8: state = 710
         default: break loop
         }
       case 654: // main post-match.
         switch byte {
-        case 0x80...0xb4: state = 42; last = pos; kind = .comment
+        case 0x30, 0x31: state = 711; last = pos; kind = .intBin
         default: break loop
         }
-      case 655: // main post-match.
+      case 655: // main pre-match.
         switch byte {
-        case 0x80...0x9d, 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xa0: state = 9
         default: break loop
         }
-      case 656: // intHex.
+      case 656: // main pre-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 656; last = pos; kind = .intHex
-        case 0x5f: state = 681
+        case 0x80...0xae, 0xb0...0xb4: state = 9
         default: break loop
         }
-      case 657: // main post-match.
+      case 657: // main pre-match.
         switch byte {
-        case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 42; last = pos; kind = .comment
+        case 0x80...0x83: state = 9
         default: break loop
         }
-      case 658: // main post-match.
+      case 658: // sym.
         switch byte {
-        case 0x80...0x84, 0x87...0x96: state = 42; last = pos; kind = .comment
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75...0x7a: state = 39; last = pos; kind = .sym
+        case 0x74: state = 922; last = pos; kind = .sym
         default: break loop
         }
-      case 659: // main post-match.
+      case 659: // main pre-match.
         switch byte {
-        case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 42; last = pos; kind = .comment
+        case 0x80...0xae, 0xb0...0xb4: state = 5
         default: break loop
         }
-      case 660: // main post-match.
+      case 660: // main pre-match.
         switch byte {
-        case 0xb1...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x83: state = 5
         default: break loop
         }
-      case 661: // main post-match.
+      case 661: // main pre-match.
         switch byte {
-        case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 42; last = pos; kind = .comment
+        case 0x80...0xa6, 0xa9...0xbf: state = 9
         default: break loop
         }
-      case 662: // main post-match.
+      case 662: // main pre-match.
         switch byte {
-        case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 42; last = pos; kind = .comment
+        case 0x80...0xb2, 0xbb...0xbf: state = 9
         default: break loop
         }
-      case 663: // main post-match.
+      case 663: // main pre-match.
         switch byte {
-        case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 42; last = pos; kind = .comment
+        case 0x80...0xa8: state = 9
         default: break loop
         }
-      case 664: // main post-match.
+      case 664: // main pre-match.
         switch byte {
-        case 0xb0, 0xb1: state = 42; last = pos; kind = .comment
+        case 0x80...0x85: state = 9
         default: break loop
         }
-      case 665: // sym.
+      case 665: // main pre-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x67, 0x69...0x7a: state = 39; last = pos; kind = .sym
-        case 0x68: state = 674; last = pos; kind = .sym
+        case 0xa0...0xb3: state = 9
         default: break loop
         }
-      case 666: // main post-match.
+      case 666: // main pre-match.
         switch byte {
-        case 0x80...0x96: state = 42; last = pos; kind = .comment
+        case 0x80...0x96, 0xa0...0xb8: state = 9
         default: break loop
         }
-      case 667: // main post-match.
+      case 667: // main pre-match.
         switch byte {
-        case 0x80...0x9e: state = 42; last = pos; kind = .comment
+        case 0x80...0x94, 0x96...0xbf: state = 9
         default: break loop
         }
-      case 668: // main post-match.
+      case 668: // main pre-match.
         switch byte {
-        case 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 9
         default: break loop
         }
-      case 669: // main post-match.
+      case 669: // main pre-match.
         switch byte {
-        case 0x80...0xaa, 0xb0...0xbc: state = 42; last = pos; kind = .comment
+        case 0x80...0x83, 0x85...0xbf: state = 9
         default: break loop
         }
-      case 670: // main post-match.
+      case 670: // main pre-match.
         switch byte {
-        case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 42; last = pos; kind = .comment
+        case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 9
         default: break loop
         }
-      case 671: // main post-match.
+      case 671: // main pre-match.
         switch byte {
-        case 0x80...0x86: state = 42; last = pos; kind = .comment
+        case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 9
         default: break loop
         }
-      case 672: // main post-match.
+      case 672: // main pre-match.
         switch byte {
-        case 0x30...0x37: state = 676; last = pos; kind = .intOct
+        case 0x80...0xa5, 0xa8...0xbf: state = 9
         default: break loop
         }
       case 673: // main pre-match.
         switch byte {
-        case 0x80...0x9d, 0xa0...0xbf: state = 5
+        case 0x80...0x8b, 0x8e...0xbf: state = 9
         default: break loop
         }
-      case 674: // sym.
+      case 674: // main pre-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6e, 0x70...0x7a: state = 39; last = pos; kind = .sym
-        case 0x6f: state = 680; last = pos; kind = .sym
+        case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 9
         default: break loop
         }
-      case 675: // intDec.
+      case 675: // main post-match.
         switch byte {
-        case 0x30...0x39: state = 675; last = pos; kind = .intDec
-        case 0x5f: state = 520
+        case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 676: // intOct.
+      case 676: // main post-match.
         switch byte {
-        case 0x30...0x37: state = 676; last = pos; kind = .intOct
-        case 0x5f: state = 672
+        case 0x80...0x8d, 0x90...0x9d: state = 42; last = pos; kind = .comment
         default: break loop
         }
       case 677: // main post-match.
         switch byte {
-        case 0x80...0xa1, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        case 0x80...0xba: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 678: // sym.
+      case 678: // main post-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 39; last = pos; kind = .sym
-        case 0x6e: state = 682; last = pos; kind = .polyfn
+        case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 679: // sym.
+      case 679: // main post-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75, 0x77...0x7a: state = 39; last = pos; kind = .sym
-        case 0x74: state = 684; last = pos; kind = .sym
-        case 0x76: state = 685; last = pos; kind = .sym
+        case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 680: // sym.
+      case 680: // main post-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x63, 0x65...0x7a: state = 39; last = pos; kind = .sym
-        case 0x64: state = 683; last = pos; kind = .method
+        case 0x90...0xbd: state = 42; last = pos; kind = .comment
         default: break loop
         }
       case 681: // main post-match.
         switch byte {
-        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 686; last = pos; kind = .intHex
+        case 0x80...0x90, 0xa0...0xbb: state = 42; last = pos; kind = .comment
         default: break loop
         }
-      case 682: // polyfn.
+      case 682: // main post-match.
+        switch byte {
+        case 0x80...0xa3, 0xad...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 683: // main post-match.
+        switch byte {
+        case 0x80...0x8a, 0x90...0xba: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 684: // main post-match.
+        switch byte {
+        case 0x80...0x9d, 0x9f...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 685: // main post-match.
+        switch byte {
+        case 0x80...0x83, 0x88...0x95: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 686: // main post-match.
+        switch byte {
+        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 687: // main post-match.
+        switch byte {
+        case 0x80...0x93, 0x98...0xbb: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 688: // main post-match.
+        switch byte {
+        case 0x80...0xa7, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 689: // main post-match.
+        switch byte {
+        case 0x80...0xa3, 0xaf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 690: // main post-match.
+        switch byte {
+        case 0x80...0x95, 0xa0...0xa7: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 691: // main post-match.
+        switch byte {
+        case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 692: // main post-match.
+        switch byte {
+        case 0x80...0x95, 0x97...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 693: // main post-match.
+        switch byte {
+        case 0x80...0x9e, 0xa7...0xaf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 694: // main post-match.
+        switch byte {
+        case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 695: // main post-match.
+        switch byte {
+        case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 696: // main post-match.
+        switch byte {
+        case 0x80...0xb7, 0xbc...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 697: // main post-match.
+        switch byte {
+        case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb5, 0xb8...0xba, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 698: // main post-match.
+        switch byte {
+        case 0x80...0x88, 0x90...0x98, 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 699: // main post-match.
+        switch byte {
+        case 0x80...0x9f: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 700: // main post-match.
+        switch byte {
+        case 0x80...0xa6, 0xab...0xb6: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 701: // main post-match.
+        switch byte {
+        case 0x80...0xb5, 0xb9...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 702: // main post-match.
+        switch byte {
+        case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 703: // main post-match.
+        switch byte {
+        case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 704: // main post-match.
+        switch byte {
+        case 0x80...0x88: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 705: // main post-match.
+        switch byte {
+        case 0x80...0xb2: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 706: // main post-match.
+        switch byte {
+        case 0x80...0xb2, 0xba...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 707: // main post-match.
+        switch byte {
+        case 0x80...0xa7, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 708: // main post-match.
+        switch byte {
+        case 0xa0...0xbe: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 709: // main pre-match.
+        switch byte {
+        case 0x80...0x9d: state = 5
+        default: break loop
+        }
+      case 710: // main post-match.
+        switch byte {
+        case 0x80...0x9d: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 711: // intBin.
+        switch byte {
+        case 0x30, 0x31: state = 711; last = pos; kind = .intBin
+        case 0x5f: state = 654
+        default: break loop
+        }
+      case 712: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 5
+        default: break loop
+        }
+      case 713: // main pre-match.
+        switch byte {
+        case 0x80...0xbc, 0xbe, 0xbf: state = 5
+        default: break loop
+        }
+      case 714: // main pre-match.
+        switch byte {
+        case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 715: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x90...0xb6: state = 5
+        default: break loop
+        }
+      case 716: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 5
+        default: break loop
+        }
+      case 717: // main pre-match.
+        switch byte {
+        case 0x80...0x91, 0x93...0xbe: state = 5
+        default: break loop
+        }
+      case 718: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 719: // main pre-match.
+        switch byte {
+        case 0x80...0xaa, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 720: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbb...0xbf: state = 5
+        default: break loop
+        }
+      case 721: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 5
+        default: break loop
+        }
+      case 722: // main pre-match.
+        switch byte {
+        case 0x80...0x99, 0x9b, 0x9d, 0x9e: state = 5
+        default: break loop
+        }
+      case 723: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99: state = 5
+        default: break loop
+        }
+      case 724: // main pre-match.
+        switch byte {
+        case 0x80...0xb5, 0xb8...0xbf: state = 5
+        default: break loop
+        }
+      case 725: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 5
+        default: break loop
+        }
+      case 726: // main pre-match.
+        switch byte {
+        case 0x80...0x89: state = 5
+        default: break loop
+        }
+      case 727: // main pre-match.
+        switch byte {
+        case 0x80...0x9a, 0x9d...0xab, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 728: // main pre-match.
+        switch byte {
+        case 0x80...0xbb: state = 5
+        default: break loop
+        }
+      case 729: // main pre-match.
+        switch byte {
+        case 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 730: // main pre-match.
+        switch byte {
+        case 0x80...0xb2, 0xbf: state = 5
+        default: break loop
+        }
+      case 731: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xbf: state = 5
+        default: break loop
+        }
+      case 732: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x86...0xa2: state = 5
+        default: break loop
+        }
+      case 733: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 5
+        default: break loop
+        }
+      case 734: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 735: // main pre-match.
+        switch byte {
+        case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 5
+        default: break loop
+        }
+      case 736: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x88, 0x89, 0x8b...0xb6, 0xba, 0xbc, 0xbd, 0xbf: state = 5
+        default: break loop
+        }
+      case 737: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99, 0xa0...0xa5, 0xa7, 0xa8, 0xaa...0xbf: state = 5
+        default: break loop
+        }
+      case 738: // main pre-match.
+        switch byte {
+        case 0x80...0x8e, 0x90, 0x91, 0x93...0x98, 0xa0...0xa9: state = 5
+        default: break loop
+        }
+      case 739: // main pre-match.
+        switch byte {
+        case 0xa0...0xb8: state = 5
+        default: break loop
+        }
+      case 740: // intQuat.
+        switch byte {
+        case 0x30...0x33: state = 740; last = pos; kind = .intQuat
+        case 0x5f: state = 145
+        default: break loop
+        }
+      case 741: // main pre-match.
+        switch byte {
+        case 0x80...0xa6, 0xa9...0xbf: state = 5
+        default: break loop
+        }
+      case 742: // main pre-match.
+        switch byte {
+        case 0x80...0xb2, 0xbb...0xbf: state = 5
+        default: break loop
+        }
+      case 743: // main pre-match.
+        switch byte {
+        case 0x80...0xa8: state = 5
+        default: break loop
+        }
+      case 744: // main pre-match.
+        switch byte {
+        case 0x80...0x85: state = 5
+        default: break loop
+        }
+      case 745: // main pre-match.
+        switch byte {
+        case 0xa0...0xb3: state = 5
+        default: break loop
+        }
+      case 746: // main pre-match.
+        switch byte {
+        case 0x80...0x96, 0xa0...0xb8: state = 5
+        default: break loop
+        }
+      case 747: // main pre-match.
+        switch byte {
+        case 0x80...0x94, 0x96...0xbf: state = 5
+        default: break loop
+        }
+      case 748: // main pre-match.
+        switch byte {
+        case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 5
+        default: break loop
+        }
+      case 749: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0xbf: state = 5
+        default: break loop
+        }
+      case 750: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 5
+        default: break loop
+        }
+      case 751: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 5
+        default: break loop
+        }
+      case 752: // main pre-match.
+        switch byte {
+        case 0x80...0xa5, 0xa8...0xbf: state = 5
+        default: break loop
+        }
+      case 753: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x8e...0xbf: state = 5
+        default: break loop
+        }
+      case 754: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 5
+        default: break loop
+        }
+      case 755: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x65, 0x67...0x7a: state = 39; last = pos; kind = .sym
+        case 0x66: state = 920; last = pos; kind = .sym
+        default: break loop
+        }
+      case 756: // main post-match.
+        switch byte {
+        case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 757: // main post-match.
+        switch byte {
+        case 0x80...0xbc, 0xbe, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 758: // main post-match.
+        switch byte {
+        case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 759: // main post-match.
+        switch byte {
+        case 0x80...0x86, 0x90...0xb6: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 760: // main post-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 761: // main post-match.
+        switch byte {
+        case 0x80...0x91, 0x93...0xbe: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 762: // main post-match.
+        switch byte {
+        case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 763: // main post-match.
+        switch byte {
+        case 0x80...0xaa, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 764: // main post-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbb...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 765: // main post-match.
+        switch byte {
+        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 766: // main post-match.
+        switch byte {
+        case 0x80...0x99, 0x9b, 0x9d, 0x9e: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 767: // main post-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 768: // main post-match.
+        switch byte {
+        case 0x80...0xb5, 0xb8...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 769: // main post-match.
+        switch byte {
+        case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 770: // main post-match.
+        switch byte {
+        case 0x80...0x89: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 771: // main post-match.
+        switch byte {
+        case 0x80...0x9a, 0x9d...0xab, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 772: // main post-match.
+        switch byte {
+        case 0x80...0xbb: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 773: // main post-match.
+        switch byte {
+        case 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 774: // main post-match.
+        switch byte {
+        case 0x80...0xb2, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 775: // main post-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 776: // main post-match.
+        switch byte {
+        case 0x80...0x83, 0x86...0xa2: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 777: // main post-match.
+        switch byte {
+        case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 778: // main post-match.
+        switch byte {
+        case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 779: // main post-match.
+        switch byte {
+        case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 780: // main post-match.
+        switch byte {
+        case 0x80...0x86, 0x88, 0x89, 0x8b...0xb6, 0xba, 0xbc, 0xbd, 0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 781: // main post-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99, 0xa0...0xa5, 0xa7, 0xa8, 0xaa...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 782: // main post-match.
+        switch byte {
+        case 0x80...0x8e, 0x90, 0x91, 0x93...0x98, 0xa0...0xa9: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 783: // main post-match.
+        switch byte {
+        case 0xa0...0xb8: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 784: // main post-match.
+        switch byte {
+        case 0x80...0xb4: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 785: // main post-match.
+        switch byte {
+        case 0x80...0x9d, 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 786: // intHex.
+        switch byte {
+        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 786; last = pos; kind = .intHex
+        case 0x5f: state = 938
+        default: break loop
+        }
+      case 787: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x92...0xaf, 0xbf: state = 9
+        default: break loop
+        }
+      case 788: // main pre-match.
+        switch byte {
+        case 0x80...0xbc, 0xbe, 0xbf: state = 9
+        default: break loop
+        }
+      case 789: // main pre-match.
+        switch byte {
+        case 0x80, 0x81, 0x90...0xa8, 0xb0...0xb9: state = 9
+        default: break loop
+        }
+      case 790: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x90...0xb6: state = 9
+        default: break loop
+        }
+      case 791: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x9f, 0xa1...0xb4: state = 9
+        default: break loop
+        }
+      case 792: // main pre-match.
+        switch byte {
+        case 0x80...0x91, 0x93...0xbe: state = 9
+        default: break loop
+        }
+      case 793: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x88, 0x8a...0x8d, 0x8f...0x9d, 0x9f...0xa9, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 794: // main pre-match.
+        switch byte {
+        case 0x80...0xaa, 0xb0...0xb9: state = 9
+        default: break loop
+        }
+      case 795: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0x8c, 0x8f, 0x90, 0x93...0xa8, 0xaa...0xb0, 0xb2, 0xb3, 0xb5...0xb9, 0xbb...0xbf: state = 9
+        default: break loop
+        }
+      case 796: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x87, 0x88, 0x8b...0x8d, 0x90, 0x97, 0x9d...0xa3, 0xa6...0xac, 0xb0...0xb4: state = 9
+        default: break loop
+        }
+      case 797: // main pre-match.
+        switch byte {
+        case 0x80...0x99, 0x9b, 0x9d, 0x9e: state = 9
+        default: break loop
+        }
+      case 798: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99: state = 9
+        default: break loop
+        }
+      case 799: // main pre-match.
+        switch byte {
+        case 0x80...0xb5, 0xb8...0xbf: state = 9
+        default: break loop
+        }
+      case 800: // main pre-match.
+        switch byte {
+        case 0x80...0x84, 0x90...0x99, 0xa0...0xac: state = 9
+        default: break loop
+        }
+      case 801: // main pre-match.
+        switch byte {
+        case 0x80...0x89: state = 9
+        default: break loop
+        }
+      case 802: // main pre-match.
+        switch byte {
+        case 0x80...0x9a, 0x9d...0xab, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 803: // main pre-match.
+        switch byte {
+        case 0x80...0xbb: state = 9
+        default: break loop
+        }
+      case 804: // main pre-match.
+        switch byte {
+        case 0xa0...0xbf: state = 9
+        default: break loop
+        }
+      case 805: // main pre-match.
+        switch byte {
+        case 0x80...0xb2, 0xbf: state = 9
+        default: break loop
+        }
+      case 806: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xbf: state = 9
+        default: break loop
+        }
+      case 807: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x86...0xa2: state = 9
+        default: break loop
+        }
+      case 808: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x8a...0xb6, 0xb8...0xbf: state = 9
+        default: break loop
+        }
+      case 809: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x90...0xac, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 810: // main pre-match.
+        switch byte {
+        case 0x80...0x8f, 0x92...0xa7, 0xa9...0xb6: state = 9
+        default: break loop
+        }
+      case 811: // main pre-match.
+        switch byte {
+        case 0x80...0x86, 0x88, 0x89, 0x8b...0xb6, 0xba, 0xbc, 0xbd, 0xbf: state = 9
+        default: break loop
+        }
+      case 812: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99, 0xa0...0xa5, 0xa7, 0xa8, 0xaa...0xbf: state = 9
+        default: break loop
+        }
+      case 813: // main pre-match.
+        switch byte {
+        case 0x80...0x8e, 0x90, 0x91, 0x93...0x98, 0xa0...0xa9: state = 9
+        default: break loop
+        }
+      case 814: // main pre-match.
+        switch byte {
+        case 0xa0...0xb8: state = 9
+        default: break loop
+        }
+      case 815: // main post-match.
+        switch byte {
+        case 0x80...0x96: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 816: // main post-match.
+        switch byte {
+        case 0x80...0x9e: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 817: // main post-match.
+        switch byte {
+        case 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 818: // main post-match.
+        switch byte {
+        case 0x80...0xaa, 0xb0...0xbc: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 819: // main post-match.
+        switch byte {
+        case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 820: // main post-match.
+        switch byte {
+        case 0x80...0x86: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 821: // main pre-match.
+        switch byte {
+        case 0x80...0x9e: state = 9
+        default: break loop
+        }
+      case 822: // main pre-match.
+        switch byte {
+        case 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 823: // main pre-match.
+        switch byte {
+        case 0x80...0xaa, 0xb0...0xbc: state = 9
+        default: break loop
+        }
+      case 824: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 9
+        default: break loop
+        }
+      case 825: // main post-match.
+        switch byte {
+        case 0x30...0x37: state = 851; last = pos; kind = .intOct
+        default: break loop
+        }
+      case 826: // main pre-match.
+        switch byte {
+        case 0x80...0x9d, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 827: // intDec.
+        switch byte {
+        case 0x30...0x39: state = 827; last = pos; kind = .intDec
+        case 0x5f: state = 550
+        default: break loop
+        }
+      case 828: // main post-match.
+        switch byte {
+        case 0x80...0x9e, 0xa0...0xa9, 0xae, 0xaf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 829: // main post-match.
+        switch byte {
+        case 0x90...0xad, 0xb0...0xb5: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 830: // main post-match.
+        switch byte {
+        case 0x80...0x85, 0x90...0x99, 0x9b...0xa1, 0xa3...0xb7, 0xbd...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 831: // main post-match.
+        switch byte {
+        case 0x80...0x8f: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 832: // main post-match.
+        switch byte {
+        case 0x80...0x9a: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 833: // main post-match.
+        switch byte {
+        case 0x80...0x84, 0x90...0xbe: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 834: // main post-match.
+        switch byte {
+        case 0x8f...0x9f: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 835: // main post-match.
+        switch byte {
+        case 0xa0, 0xa1: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 836: // main post-match.
+        switch byte {
+        case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 837: // main post-match.
+        switch byte {
+        case 0x81...0x8f, 0x91...0xb5: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 838: // main post-match.
+        switch byte {
+        case 0x80...0xac: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 839: // main post-match.
+        switch byte {
+        case 0xa6...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 840: // main post-match.
+        switch byte {
+        case 0x80...0x82, 0x90...0xbb: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 841: // main post-match.
+        switch byte {
+        case 0x80...0x88, 0x90, 0x91, 0xa0...0xa5: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 842: // main post-match.
+        switch byte {
+        case 0x80...0x94, 0xa0...0xac, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 843: // main post-match.
+        switch byte {
+        case 0x80...0x98: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 844: // main post-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 845: // main post-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xad: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 846: // main post-match.
+        switch byte {
+        case 0x80...0x8b, 0x90...0xbe: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 847: // main post-match.
+        switch byte {
+        case 0x80...0xb0, 0xb3...0xb6, 0xba, 0xbc...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 848: // main post-match.
+        switch byte {
+        case 0x80...0xa2, 0xb0...0xb9: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 849: // main post-match.
+        switch byte {
+        case 0x80...0x82, 0x90...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 850: // main post-match.
+        switch byte {
+        case 0xa0...0xad: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 851: // intOct.
+        switch byte {
+        case 0x30...0x37: state = 851; last = pos; kind = .intOct
+        case 0x5f: state = 825
+        default: break loop
+        }
+      case 852: // main post-match.
+        switch byte {
+        case 0x80...0xae, 0xb0...0xb4: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 853: // main post-match.
+        switch byte {
+        case 0x80...0x83: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 854: // main pre-match.
+        switch byte {
+        case 0x80...0xa1, 0xb0...0xbf: state = 9
+        default: break loop
+        }
+      case 855: // main post-match.
+        switch byte {
+        case 0x80...0x86, 0x88...0x98, 0x9b...0xa1, 0xa3, 0xa4, 0xa6...0xaa: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 856: // main post-match.
+        switch byte {
+        case 0x80...0x84, 0x87...0x96: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 857: // main post-match.
+        switch byte {
+        case 0x80...0x8a, 0x90...0x99, 0x9e, 0x9f: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 858: // main post-match.
+        switch byte {
+        case 0xb1...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 859: // main post-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0x9f, 0xa1, 0xa2, 0xa4, 0xa7, 0xa9...0xb2, 0xb4...0xb7, 0xb9, 0xbb: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 860: // main post-match.
+        switch byte {
+        case 0x82, 0x87, 0x89, 0x8b, 0x8d...0x8f, 0x91, 0x92, 0x94, 0x97, 0x99, 0x9b, 0x9d, 0x9f, 0xa1, 0xa2, 0xa4, 0xa7...0xaa, 0xac...0xb2, 0xb4...0xb7, 0xb9...0xbc, 0xbe: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 861: // main post-match.
+        switch byte {
+        case 0x80...0x89, 0x8b...0x9b, 0xa1...0xa3, 0xa5...0xa9, 0xab...0xbb: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 862: // main post-match.
+        switch byte {
+        case 0xb0, 0xb1: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 863: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x67, 0x69...0x7a: state = 39; last = pos; kind = .sym
+        case 0x68: state = 940; last = pos; kind = .sym
+        default: break loop
+        }
+      case 864: // main pre-match.
+        switch byte {
+        case 0x85...0xaf, 0xb1...0xbf: state = 9
+        default: break loop
+        }
+      case 865: // main pre-match.
+        switch byte {
+        case 0x80...0x8e, 0x90...0xba: state = 9
+        default: break loop
+        }
+      case 866: // main post-match.
+        switch byte {
+        case 0x80...0xa1, 0xb0...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 867: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x8d...0xa6, 0xa8...0xba, 0xbc, 0xbd, 0xbf: state = 5
+        default: break loop
+        }
+      case 868: // main pre-match.
+        switch byte {
+        case 0x80...0x8d, 0x90...0x9d: state = 5
+        default: break loop
+        }
+      case 869: // main pre-match.
+        switch byte {
+        case 0x80...0xba: state = 5
+        default: break loop
+        }
+      case 870: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x87...0xb3, 0xb7...0xbf: state = 5
+        default: break loop
+        }
+      case 871: // main pre-match.
+        switch byte {
+        case 0x80...0x8e, 0x90...0x9b, 0xa0: state = 5
+        default: break loop
+        }
+      case 872: // main pre-match.
+        switch byte {
+        case 0x90...0xbd: state = 5
+        default: break loop
+        }
+      case 873: // main pre-match.
+        switch byte {
+        case 0x80...0x90, 0xa0...0xbb: state = 5
+        default: break loop
+        }
+      case 874: // main pre-match.
+        switch byte {
+        case 0x80...0xa3, 0xad...0xbf: state = 5
+        default: break loop
+        }
+      case 875: // main pre-match.
+        switch byte {
+        case 0x80...0x8a, 0x90...0xba: state = 5
+        default: break loop
+        }
+      case 876: // main pre-match.
+        switch byte {
+        case 0x80...0x9d, 0x9f...0xbf: state = 5
+        default: break loop
+        }
+      case 877: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x88...0x95: state = 5
+        default: break loop
+        }
+      case 878: // main pre-match.
+        switch byte {
+        case 0x80...0x9d, 0xa0...0xa9, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 879: // main pre-match.
+        switch byte {
+        case 0x80...0x93, 0x98...0xbb: state = 5
+        default: break loop
+        }
+      case 880: // main pre-match.
+        switch byte {
+        case 0x80...0xa7, 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 881: // main pre-match.
+        switch byte {
+        case 0x80...0xa3, 0xaf: state = 5
+        default: break loop
+        }
+      case 882: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0xa0...0xa7: state = 5
+        default: break loop
+        }
+      case 883: // main pre-match.
+        switch byte {
+        case 0x80...0x85, 0x88, 0x8a...0xb5, 0xb7, 0xb8, 0xbc, 0xbf: state = 5
+        default: break loop
+        }
+      case 884: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0x97...0xbf: state = 5
+        default: break loop
+        }
+      case 885: // main pre-match.
+        switch byte {
+        case 0x80...0x9e, 0xa7...0xaf: state = 5
+        default: break loop
+        }
+      case 886: // main pre-match.
+        switch byte {
+        case 0xa0...0xb2, 0xb4, 0xb5, 0xbb...0xbf: state = 5
+        default: break loop
+        }
+      case 887: // main pre-match.
+        switch byte {
+        case 0x80...0x9b, 0x9f...0xb9, 0xbf: state = 5
+        default: break loop
+        }
+      case 888: // main pre-match.
+        switch byte {
+        case 0x80...0xb7, 0xbc...0xbf: state = 5
+        default: break loop
+        }
+      case 889: // main pre-match.
+        switch byte {
+        case 0x80...0x83, 0x85, 0x86, 0x8c...0x93, 0x95...0x97, 0x99...0xb5, 0xb8...0xba, 0xbf: state = 5
+        default: break loop
+        }
+      case 890: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x90...0x98, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 891: // main pre-match.
+        switch byte {
+        case 0x80...0x9f: state = 5
+        default: break loop
+        }
+      case 892: // main pre-match.
+        switch byte {
+        case 0x80...0xa6, 0xab...0xb6: state = 5
+        default: break loop
+        }
+      case 893: // main pre-match.
+        switch byte {
+        case 0x80...0xb5, 0xb9...0xbf: state = 5
+        default: break loop
+        }
+      case 894: // main pre-match.
+        switch byte {
+        case 0x80...0x95, 0x98...0xb2, 0xb8...0xbf: state = 5
+        default: break loop
+        }
+      case 895: // main pre-match.
+        switch byte {
+        case 0x80...0x91, 0x99...0x9c, 0xa9...0xaf: state = 5
+        default: break loop
+        }
+      case 896: // main pre-match.
+        switch byte {
+        case 0x80...0x88: state = 5
+        default: break loop
+        }
+      case 897: // main pre-match.
+        switch byte {
+        case 0x80...0xb2, 0xba...0xbf: state = 5
+        default: break loop
+        }
+      case 898: // main pre-match.
+        switch byte {
+        case 0x80...0xa7, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 899: // main pre-match.
+        switch byte {
+        case 0xa0...0xbe: state = 5
+        default: break loop
+        }
+      case 900: // main pre-match.
+        switch byte {
+        case 0x80...0x96: state = 5
+        default: break loop
+        }
+      case 901: // main pre-match.
+        switch byte {
+        case 0x80...0x9e: state = 5
+        default: break loop
+        }
+      case 902: // main pre-match.
+        switch byte {
+        case 0xb0...0xbf: state = 5
+        default: break loop
+        }
+      case 903: // main pre-match.
+        switch byte {
+        case 0x80...0xaa, 0xb0...0xbc: state = 5
+        default: break loop
+        }
+      case 904: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x90...0x99, 0x9c...0x9f: state = 5
+        default: break loop
+        }
+      case 905: // main pre-match.
+        switch byte {
+        case 0x80...0x93, 0xa0...0xae, 0xb1...0xbf: state = 5
+        default: break loop
+        }
+      case 906: // main pre-match.
+        switch byte {
+        case 0x81...0x8f, 0x91...0xb5: state = 5
+        default: break loop
+        }
+      case 907: // main pre-match.
+        switch byte {
+        case 0x80...0xac: state = 5
+        default: break loop
+        }
+      case 908: // main pre-match.
+        switch byte {
+        case 0xa6...0xbf: state = 5
+        default: break loop
+        }
+      case 909: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x90...0xbb: state = 5
+        default: break loop
+        }
+      case 910: // main pre-match.
+        switch byte {
+        case 0x80...0x88, 0x90, 0x91, 0xa0...0xa5: state = 5
+        default: break loop
+        }
+      case 911: // main pre-match.
+        switch byte {
+        case 0x80...0x94, 0xa0...0xac, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 912: // main pre-match.
+        switch byte {
+        case 0x80...0x98: state = 5
+        default: break loop
+        }
+      case 913: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0x99, 0xa0...0xbf: state = 5
+        default: break loop
+        }
+      case 914: // main pre-match.
+        switch byte {
+        case 0x80...0x87, 0x90...0xad: state = 5
+        default: break loop
+        }
+      case 915: // main pre-match.
+        switch byte {
+        case 0x80...0x8b, 0x90...0xbe: state = 5
+        default: break loop
+        }
+      case 916: // main pre-match.
+        switch byte {
+        case 0x80...0xb0, 0xb3...0xb6, 0xba, 0xbc...0xbf: state = 5
+        default: break loop
+        }
+      case 917: // main pre-match.
+        switch byte {
+        case 0x80...0xa2, 0xb0...0xb9: state = 5
+        default: break loop
+        }
+      case 918: // main pre-match.
+        switch byte {
+        case 0x80...0x82, 0x90...0xbf: state = 5
+        default: break loop
+        }
+      case 919: // main pre-match.
+        switch byte {
+        case 0xa0...0xad: state = 5
+        default: break loop
+        }
+      case 920: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6d, 0x6f...0x7a: state = 39; last = pos; kind = .sym
+        case 0x6e: state = 939; last = pos; kind = .polyfn
+        default: break loop
+        }
+      case 921: // main post-match.
+        switch byte {
+        case 0x80...0xa0: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 922: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x61...0x7a: state = 39; last = pos; kind = .sym
+        case 0x5f: state = 941; last = pos; kind = .sym
+        default: break loop
+        }
+      case 923: // main post-match.
+        switch byte {
+        case 0x80...0xae: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 924: // main post-match.
+        switch byte {
+        case 0x80...0xa6, 0xa9...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 925: // main post-match.
+        switch byte {
+        case 0x80...0xb2, 0xbb...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 926: // main post-match.
+        switch byte {
+        case 0x80...0xa8: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 927: // main post-match.
+        switch byte {
+        case 0x80...0x85: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 928: // main post-match.
+        switch byte {
+        case 0xa0...0xb3: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 929: // main post-match.
+        switch byte {
+        case 0x80...0x96, 0xa0...0xb8: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 930: // main post-match.
+        switch byte {
+        case 0x80...0x94, 0x96...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 931: // main post-match.
+        switch byte {
+        case 0x80...0x9c, 0x9e, 0x9f, 0xa2, 0xa5, 0xa6, 0xa9...0xac, 0xae...0xb9, 0xbb, 0xbd...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 932: // main post-match.
+        switch byte {
+        case 0x80...0x83, 0x85...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 933: // main post-match.
+        switch byte {
+        case 0x80...0x85, 0x87...0x8a, 0x8d...0x94, 0x96...0x9c, 0x9e...0xb9, 0xbb...0xbe: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 934: // main post-match.
+        switch byte {
+        case 0x80...0x84, 0x86, 0x8a...0x90, 0x92...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 935: // main post-match.
+        switch byte {
+        case 0x80...0xa5, 0xa8...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 936: // main post-match.
+        switch byte {
+        case 0x80...0x8b, 0x8e...0xbf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 937: // main post-match.
+        switch byte {
+        case 0x80...0x8b, 0x9b...0x9f, 0xa1...0xaf: state = 42; last = pos; kind = .comment
+        default: break loop
+        }
+      case 938: // main post-match.
+        switch byte {
+        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 942; last = pos; kind = .intHex
+        default: break loop
+        }
+      case 939: // polyfn.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
         default: break loop
         }
-      case 683: // method.
+      case 940: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6e, 0x70...0x7a: state = 39; last = pos; kind = .sym
+        case 0x6f: state = 943; last = pos; kind = .sym
+        default: break loop
+        }
+      case 941: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x73, 0x75, 0x77...0x7a: state = 39; last = pos; kind = .sym
+        case 0x74: state = 945; last = pos; kind = .sym
+        case 0x76: state = 946; last = pos; kind = .sym
+        default: break loop
+        }
+      case 942: // intHex.
+        switch byte {
+        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 942; last = pos; kind = .intHex
+        case 0x5f: state = 938
+        default: break loop
+        }
+      case 943: // sym.
+        switch byte {
+        case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x63, 0x65...0x7a: state = 39; last = pos; kind = .sym
+        case 0x64: state = 944; last = pos; kind = .method
+        default: break loop
+        }
+      case 944: // method.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
         default: break loop
         }
-      case 684: // sym.
+      case 945: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x78, 0x7a: state = 39; last = pos; kind = .sym
-        case 0x79: state = 688; last = pos; kind = .sym
+        case 0x79: state = 948; last = pos; kind = .sym
         default: break loop
         }
-      case 685: // sym.
+      case 946: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x62...0x7a: state = 39; last = pos; kind = .sym
-        case 0x61: state = 687; last = pos; kind = .sym
+        case 0x61: state = 947; last = pos; kind = .sym
         default: break loop
         }
-      case 686: // intHex.
-        switch byte {
-        case 0x30...0x39, 0x41...0x46, 0x61...0x66: state = 686; last = pos; kind = .intHex
-        case 0x5f: state = 681
-        default: break loop
-        }
-      case 687: // sym.
+      case 947: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6b, 0x6d...0x7a: state = 39; last = pos; kind = .sym
-        case 0x6c: state = 689; last = pos; kind = .host_val
+        case 0x6c: state = 949; last = pos; kind = .host_val
         default: break loop
         }
-      case 688: // sym.
+      case 948: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x6f, 0x71...0x7a: state = 39; last = pos; kind = .sym
-        case 0x70: state = 690; last = pos; kind = .sym
+        case 0x70: state = 950; last = pos; kind = .sym
         default: break loop
         }
-      case 689: // host_val.
+      case 949: // host_val.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
         default: break loop
         }
-      case 690: // sym.
+      case 950: // sym.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x64, 0x66...0x7a: state = 39; last = pos; kind = .sym
-        case 0x65: state = 691; last = pos; kind = .host_type
+        case 0x65: state = 951; last = pos; kind = .host_type
         default: break loop
         }
-      case 691: // host_type.
+      case 951: // host_type.
         switch byte {
         case 0x30...0x39, 0x41...0x5a, 0x5f, 0x61...0x7a: state = 39; last = pos; kind = .sym
         default: break loop

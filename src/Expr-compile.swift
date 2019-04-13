@@ -181,7 +181,9 @@ extension Expr {
 
     case .typeArgs: fatalError()
 
-    case .typeVar: fatalError()
+    case .typeReq: fatalError()
+
+    case .typeVarDecl: fatalError()
 
     case .union: fatalError()
 

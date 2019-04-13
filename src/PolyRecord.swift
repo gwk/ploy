@@ -43,7 +43,7 @@ func mapVarsToMergedTypes(protoSig: Expr, prototype: Type, members: [Type]) -> [
     case (.host, .host): precondition(a == b, "mapVarsToMergedTypes: failure for host type: \(a) => \(b)")
     case (.prim, .prim): precondition(a == b, "mapVarsToMergedTypes: failure for prim type: \(a) => \(b)")
 
-    case (.var_(let name, _), _):
+    case (.var_(let name), _):
       if let existing = varsToTypes[name] {
         if existing != b {
           protoSig.failType("polyfn prototype \(protoSig) has conflicting var mappings:\n  \(existing)\n  \(b)")
@@ -52,7 +52,7 @@ func mapVarsToMergedTypes(protoSig: Expr, prototype: Type, members: [Type]) -> [
         varsToTypes[name] = b
       }
 
-    case (_, .var_(let name, _)):
+    case (_, .var_(let name)):
       fatalError("mapVarsToMethodTypes failure for var \(name): \(a) => \(b)")
 
     case (.sig(let domA, let retA), .sig(let domB, let retB)):

@@ -454,6 +454,10 @@ struct TypeCtx: Encodable {
     case .intersect(let members): return try! .Intersect(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .poly(let members): return .Poly(members.map { self.instantiate(expr, $0, &varsToFrees) })
     case .refinement(let base, let pred): return .Refinement(base: self.instantiate(expr, base, &varsToFrees), pred: pred)
+    case .req(let base, let requirement):
+      let type = self.instantiate(expr, base, &varsToFrees)
+      constrain(actExpr: expr, actType: type, expType: requirement, "type requirement")
+      return type
     case .sig(let dom, let ret):
       return .Sig(dom: instantiate(expr, dom, &varsToFrees), ret: instantiate(expr, ret, &varsToFrees))
     case .struct_(let posFields, let labFields, let variants):
@@ -462,10 +466,8 @@ struct TypeCtx: Encodable {
         labFields: labFields.map { $0.substitute(type: self.instantiate(expr, $0.type, &varsToFrees)) },
         variants: variants.map { $0.substitute(type: self.instantiate(expr, $0.type, &varsToFrees)) })
     case .union(let members): return try! .Union(members.map { self.instantiate(expr, $0, &varsToFrees) })
-    case .var_(let name, let requirement):
-      let instance = varsToFrees.getOrInsert(name, dflt: { self.addFreeType() })
-      constrain(actExpr: expr, actType: instance, expType: requirement, "typevar requirement")
-      return instance
+    case .var_(let name):
+      return varsToFrees.getOrInsert(name, dflt: { self.addFreeType() })
     case .variantMember(let variant):
       return .VariantMember(variant: variant.substitute(type: instantiate(expr, variant.type, &varsToFrees)))
     }

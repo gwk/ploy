@@ -26,39 +26,41 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
   case tagTest(TagTest)
   case typeAlias(TypeAlias)
   case typeArgs(TypeArgs)
-  case typeVar(TypeVar)
+  case typeReq(TypeReq)
+  case typeVarDecl(TypeVarDecl)
   case union(Union)
   case void(ImplicitVoid)
   case where_(Where)
 
   static func accept(_ actForm: ActForm) -> Expr? {
     switch actForm {
-    case let f as Acc:        return .acc(f)
-    case let f as And:        return .and(f)
-    case let f as Ann:        return .ann(f)
-    case let f as Bind:       return .bind(f)
-    case let f as Call:       return .call(f)
-    case let f as Do:         return .do_(f)
-    case let f as Fn:         return .fn(f)
-    case let f as HostVal:    return .hostVal(f)
-    case let f as If:         return .if_(f)
-    case let f as Intersection:  return .intersection(f)
-    case let f as LitNum:     return .litNum(f)
-    case let f as LitStr:     return .litStr(f)
-    case let f as Match:      return .match(f)
-    case let f as Or:         return .or(f)
-    case let f as Paren:      return .paren(f)
-    case let f as SymPath:    return .path(f)
-    case let f as Reif:       return .reif(f)
-    case let f as Sig:        return .sig(f)
-    case let f as Sym:        return .sym(f)
-    case let f as Tag:        return .tag(f)
-    case let f as TagTest:    return .tagTest(f)
-    case let f as TypeAlias:  return .typeAlias(f)
-    case let f as TypeArgs:   return .typeArgs(f)
-    case let f as TypeVar:    return .typeVar(f)
-    case let f as Union:      return .union(f)
-    case let f as Where:      return .where_(f)
+    case let f as Acc:          return .acc(f)
+    case let f as And:          return .and(f)
+    case let f as Ann:          return .ann(f)
+    case let f as Bind:         return .bind(f)
+    case let f as Call:         return .call(f)
+    case let f as Do:           return .do_(f)
+    case let f as Fn:           return .fn(f)
+    case let f as HostVal:      return .hostVal(f)
+    case let f as If:           return .if_(f)
+    case let f as Intersection: return .intersection(f)
+    case let f as LitNum:       return .litNum(f)
+    case let f as LitStr:       return .litStr(f)
+    case let f as Match:        return .match(f)
+    case let f as Or:           return .or(f)
+    case let f as Paren:        return .paren(f)
+    case let f as SymPath:      return .path(f)
+    case let f as Reif:         return .reif(f)
+    case let f as Sig:          return .sig(f)
+    case let f as Sym:          return .sym(f)
+    case let f as Tag:          return .tag(f)
+    case let f as TagTest:      return .tagTest(f)
+    case let f as TypeAlias:    return .typeAlias(f)
+    case let f as TypeArgs:     return .typeArgs(f)
+    case let f as TypeReq:      return .typeReq(f)
+    case let f as TypeVarDecl:  return .typeVarDecl(f)
+    case let f as Union:        return .union(f)
+    case let f as Where:        return .where_(f)
     default:  return nil
     }
   }
@@ -89,7 +91,8 @@ enum Expr: VaryingForm, Hashable, CustomStringConvertible {
     case .tagTest(let tagTest): return tagTest
     case .typeAlias(let typeAlias): return typeAlias
     case .typeArgs(let typeArgs): return typeArgs
-    case .typeVar(let typeVar): return typeVar
+    case .typeReq(let typeReq): return typeReq
+    case .typeVarDecl(let typeVarDecl): return typeVarDecl
     case .union(let union): return union
     case .void(let void): return void
     case .where_(let where_): return where_

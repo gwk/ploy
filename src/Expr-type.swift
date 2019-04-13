@@ -52,12 +52,16 @@ extension Expr {
     case .sym(let sym):
       return scope.typeBinding(sym: sym, subj: subj)
 
-    case .typeVar(let typeVar):
-      let sym = typeVar.sym
-      let reqType = typeVar.requirement.type(scope, "type var requirement")
-      let type = Type.Var(name: sym.name, requirement: reqType)
+    case .typeReq(let typeReq):
+      let base = typeReq.base.type(scope, "type requirement base")
+      let req = typeReq.requirement.type(scope, "type requirement constraint")
+      return Type.Req(base: base, requirement: req)
+
+    case .typeVarDecl(let typeVarDecl):
+      let sym = typeVarDecl.sym
+      let type = Type.Var(name: sym.name)
       _ = scope.addRecord(sym: sym, kind: .type(type))
-      return Type.Var(name: sym.name, requirement: reqType)
+      return type
 
     case .union(let union):
       let l = union.left.type(scope, "union left operand")

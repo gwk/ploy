@@ -13,7 +13,8 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     case sig(dom: Type, ret: Type)
     case struct_(posFields:[Type], labFields: [TypeLabField], variants: [TypeVariant])
     case union(members: [Type])
-    case var_(name: String, requirement: Type)
+    case req(base: Type, requirement: Type)
+    case var_(name: String)
     case variantMember(variant: TypeVariant)
 
     var precedence: Int {
@@ -22,7 +23,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       case .union: return 1
       case .intersect: return 2
       case .sig: return 3
-      case .var_: return 4
+      case .req: return 4
       //case .where: return 4 // Not yet implemented, but syntax exists.
       default: return 5
       }
@@ -34,7 +35,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       case .union: return  "|"
       case .intersect: return "&"
       case .sig: return "%"
-      case .var_: return "::"
+      case .req: return "::"
       //case .where: return ":? // Not yet implemented, but syntax exists.
       default: fatalError()
       }
@@ -129,6 +130,10 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     fatalError("refinement types not yet supported: \(t)")
   }
 
+  class func Req(base: Type, requirement: Type) -> Type {
+    return memoize(kind: .req(base: base, requirement: requirement), members: [base, requirement])
+  }
+
   class func Sig(dom: Type, ret: Type) -> Type {
     return memoize(kind: .sig(dom: dom, ret: ret), members: [dom, ret])
   }
@@ -153,12 +158,11 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     return memoize(kind: .union(members: members), members: members, emptyDesc: "Empty")
   }
 
-  class func Var(name: String, requirement: Type) -> Type {
-    let reqDesc = String(describing: requirement)
-    let desc = "(\(name)::\(reqDesc))"
-    return memoize(desc, kind: .var_(name: name, requirement: requirement), (
-      frees: requirement.frees,
-      vars: requirement.vars))
+  class func Var(name: String) -> Type {
+    let desc = "^\(name)"
+    return memoize(desc, kind: .var_(name: name), (
+      frees: [],
+      vars: []))
   }
 
   class func Variant(label: String, type: Type) -> Type {
@@ -215,7 +219,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   }
 
   var varName: String {
-    if case .var_(let name, _) = kind { return name }
+    if case .var_(let name) = kind { return name }
     fatalError()
   }
 
@@ -303,6 +307,8 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     case .intersect(let members): return try! .Intersect(members.sortedMap{$0.transformLeaves(fn)})
     case .poly(let members): return .Poly(members.sortedMap{$0.transformLeaves(fn)})
     case .refinement(let base, let pred): return .Refinement(base: base.transformLeaves(fn), pred: pred)
+    case .req(let base, let requirement):
+      return .Req(base: base.transformLeaves(fn), requirement: requirement.transformLeaves(fn))
     case .sig(let dom, let ret): return .Sig(dom: dom.transformLeaves(fn), ret: ret.transformLeaves(fn))
     case .struct_(let posFields, let labFields, let variants):
       return .Struct(
@@ -320,7 +326,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
     // TODO: optimize by checking self.vars.isEmpty?
     return transformLeaves { type in
       switch type.kind {
-      case .var_(let name, let requirement):
+      case .var_(let name):
         for (n, sub) in substitutions {
           if n == name {
             return sub
