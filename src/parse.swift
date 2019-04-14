@@ -18,6 +18,14 @@ func parsePloy(path: Path) -> [Def] {
 }
 
 
+func parsePloyForm<F:Form>(string: String, name: String) -> F {
+  let source = Source(name: name, text: [U8](string.utf8))
+  let parser = Parser(source: source)
+  _ = parser.parseSpace()
+  return parser.parseForm(subj: F.expDesc)
+}
+
+
 class Parser {
   let source: Source
   let tokens: [PloyToken]

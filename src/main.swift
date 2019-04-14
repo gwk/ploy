@@ -129,7 +129,21 @@ func ploy_build(args:[String]) {
 
 
 func ploy_test_types(args:[String]) {
-  fail("not implemented.")
+  if args.count != 2 { fail("test-types expects two type strings.") }
+  let src_str = args[0] + "\n"
+  let dst_str = args[1] + "\n"
+  let src_expr:Expr = parsePloyForm(string: src_str, name: "src")
+  let dst_expr:Expr = parsePloyForm(string: dst_str, name: "dst")
+
+  let rootSpace = setupRootSpace(nullGlobalCtx())
+  let srcScope = LocalScope(parent: rootSpace)
+  let dstScope = LocalScope(parent: rootSpace)
+
+  let src_type = src_expr.type(srcScope, "src")
+  let dst_type = dst_expr.type(dstScope, "dst")
+
+  outL(src_type)
+  outL(dst_type)
 }
 
 
