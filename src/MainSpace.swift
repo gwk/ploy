@@ -18,18 +18,3 @@ class MainSpace: Space {
     return def.sym.syn
   }
 }
-
-
-func setupRootAndMain(mainPath: Path, outPath: Path, outFile: File, mapSend: FileHandle) -> (root: Space, main: MainSpace) {
-  let ctx = GlobalCtx(mainPath: mainPath, outPath: outPath, outFile: outFile, mapSend: mapSend)
-  let root = Space(ctx, pathNames: ["ROOT"], parent: nil)
-  root.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, isLocal: false, kind: .space(root)) // NOTE: reference cycle.
-  // TODO: could fix the reference cycle by making a special case for "ROOT" just before lookup failure.
-  for t in intrinsicTypes {
-    let rec = ScopeRecord(name: t.description, sym: nil, isLocal: false, kind: .type(t))
-    root.bindings[t.description] = rec
-  }
-  let mainSpace = MainSpace(ctx, pathNames: ["MAIN"], parent: root)
-  root.bindings["MAIN"] = ScopeRecord(name: "MAIN", sym: nil, isLocal: false, kind: .space(mainSpace))
-  return (root, mainSpace)
-}

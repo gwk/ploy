@@ -84,7 +84,16 @@ func main() {
   mapProc.standardError = FileHandle.standardError
   mapProc.launch()
 
-  let (rootSpace, mainSpace) = setupRootAndMain(mainPath: mainPath, outPath: outPath, outFile: tmpFile, mapSend: mapSend)
+  let ctx = GlobalCtx(mainPath: mainPath, outPath: outPath, outFile: tmpFile, mapSend: mapSend)
+  let rootSpace = Space(ctx, pathNames: ["ROOT"], parent: nil)
+  rootSpace.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, isLocal: false, kind: .space(rootSpace))
+  // NOTE: reference cycle; could fix it by making a special case for "ROOT" just before lookup failure.
+  for t in intrinsicTypes {
+    let rec = ScopeRecord(name: t.description, sym: nil, isLocal: false, kind: .type(t))
+    rootSpace.bindings[t.description] = rec
+  }
+  let mainSpace = MainSpace(ctx, pathNames: ["MAIN"], parent: rootSpace)
+  rootSpace.bindings["MAIN"] = ScopeRecord(name: "MAIN", sym: nil, isLocal: false, kind: .space(mainSpace))
 
   mainSpace.add(defs: mainDefs, root: rootSpace)
   _ = mainSpace.getMainDef() // check that we have `main` before doing additional work.
