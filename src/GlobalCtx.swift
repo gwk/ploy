@@ -11,17 +11,17 @@ typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
 
 class GlobalCtx {
-  let outPath: Path
+  let dumpPath: Path
   let outFile: File
   let mapSend: FileHandle
   private var outLineIdx = 0
   private var outColIdx = 0
   private var conversions: Set<Conversion> = []
   private var constructors: Set<Type> = []
-  lazy private var dumpFile: File = try! File(path: self.outPath.append(".dump.jsonl"), mode: .write, create: 0o644)
+  lazy private var dumpFile: File = try! File(path: self.dumpPath, mode: .write, create: 0o644)
 
-  init(outPath: Path, outFile: File, mapSend: FileHandle) {
-    self.outPath = outPath
+  init(dumpPath: Path, outFile: File, mapSend: FileHandle) {
+    self.dumpPath = dumpPath
     self.outFile = outFile
     self.mapSend = mapSend
   }

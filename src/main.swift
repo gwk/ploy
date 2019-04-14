@@ -23,7 +23,6 @@ func main() {
 
   if processArguments.count < 2 { fail(usageMsg) }
 
-  //let ployPath = Path(processArguments[0])
   let args = Array(processArguments[2...])
 
   switch processArguments[1] {
@@ -87,6 +86,7 @@ func ploy_build(args:[String]) {
   let mainDefs = parsePloy(path: mainPath)
   let libDefs = libPaths.flatMap { parsePloy(path: $0) }
 
+  let dumpPath = outPath.append(".dump.jsonl")
   let tmpPath = outPath.append(".tmp")
   let mapPath = outPath.append(".srcmap")
 
@@ -102,14 +102,9 @@ func ploy_build(args:[String]) {
   mapProc.standardError = FileHandle.standardError
   mapProc.launch()
 
-  let ctx = GlobalCtx(outPath: outPath, outFile: tmpFile, mapSend: mapSend)
-  let rootSpace = Space(ctx, pathNames: ["ROOT"], parent: nil)
-  rootSpace.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, isLocal: false, kind: .space(rootSpace))
-  // NOTE: reference cycle; could fix it by making a special case for "ROOT" just before lookup failure.
-  for t in intrinsicTypes {
-    let rec = ScopeRecord(name: t.description, sym: nil, isLocal: false, kind: .type(t))
-    rootSpace.bindings[t.description] = rec
-  }
+  let ctx = GlobalCtx(dumpPath: dumpPath, outFile: tmpFile, mapSend: mapSend)
+  let rootSpace = setupRootSpace(ctx)
+
   let mainSpace = MainSpace(ctx, mainPath: mainPath, parent: rootSpace)
   rootSpace.bindings["MAIN"] = ScopeRecord(name: "MAIN", sym: nil, isLocal: false, kind: .space(mainSpace))
 
@@ -137,5 +132,24 @@ func ploy_test_types(args:[String]) {
   fail("not implemented.")
 }
 
+
+func setupRootSpace(_ ctx: GlobalCtx) -> Space {
+  let rootSpace = Space(ctx, pathNames: ["ROOT"], parent: nil)
+  rootSpace.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, isLocal: false, kind: .space(rootSpace))
+  // NOTE: reference cycle; could fix it by making a special case for "ROOT" just before lookup failure.
+  for t in intrinsicTypes {
+    let rec = ScopeRecord(name: t.description, sym: nil, isLocal: false, kind: .type(t))
+    rootSpace.bindings[t.description] = rec
+  }
+  return rootSpace
+}
+
+
+func nullGlobalCtx() -> GlobalCtx {
+  return GlobalCtx(
+    dumpPath: "/dev/null",
+    outFile: try! File(path: "/dev/null", mode: .write),
+    mapSend: FileHandle.nullDevice)
+}
 
 main()
