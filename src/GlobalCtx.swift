@@ -11,7 +11,6 @@ typealias Line = (indent: Int, text:String, mapping: SrcMapping?)
 
 
 class GlobalCtx {
-  let mainPath: Path
   let outPath: Path
   let outFile: File
   let mapSend: FileHandle
@@ -21,8 +20,7 @@ class GlobalCtx {
   private var constructors: Set<Type> = []
   lazy private var dumpFile: File = try! File(path: self.outPath.append(".dump.jsonl"), mode: .write, create: 0o644)
 
-  init(mainPath: Path, outPath: Path, outFile: File, mapSend: FileHandle) {
-    self.mainPath = mainPath
+  init(outPath: Path, outFile: File, mapSend: FileHandle) {
     self.outPath = outPath
     self.outFile = outFile
     self.mapSend = mapSend

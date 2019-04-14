@@ -84,7 +84,7 @@ func main() {
   mapProc.standardError = FileHandle.standardError
   mapProc.launch()
 
-  let ctx = GlobalCtx(mainPath: mainPath, outPath: outPath, outFile: tmpFile, mapSend: mapSend)
+  let ctx = GlobalCtx(outPath: outPath, outFile: tmpFile, mapSend: mapSend)
   let rootSpace = Space(ctx, pathNames: ["ROOT"], parent: nil)
   rootSpace.bindings["ROOT"] = ScopeRecord(name: "ROOT", sym: nil, isLocal: false, kind: .space(rootSpace))
   // NOTE: reference cycle; could fix it by making a special case for "ROOT" just before lookup failure.
@@ -92,14 +92,14 @@ func main() {
     let rec = ScopeRecord(name: t.description, sym: nil, isLocal: false, kind: .type(t))
     rootSpace.bindings[t.description] = rec
   }
-  let mainSpace = MainSpace(ctx, pathNames: ["MAIN"], parent: rootSpace)
+  let mainSpace = MainSpace(ctx, mainPath: mainPath, parent: rootSpace)
   rootSpace.bindings["MAIN"] = ScopeRecord(name: "MAIN", sym: nil, isLocal: false, kind: .space(mainSpace))
 
   mainSpace.add(defs: mainDefs, root: rootSpace)
   _ = mainSpace.getMainDef() // check that we have `main` before doing additional work.
   mainSpace.add(defs: libDefs, root: rootSpace)
 
-  compileProgram(mainPath: mainPath, includePaths: incPaths, mainSpace: mainSpace, mapPath: mapPath)
+  compileProgram(includePaths: incPaths, mainSpace: mainSpace, mapPath: mapPath)
 
   renameFile(from: tmpPath, to: outPath)
   do {

@@ -4,10 +4,16 @@ import Foundation
 
 
 class MainSpace: Space {
+  let mainPath: Path
+
+  init(_ ctx: GlobalCtx, mainPath: Path, parent: Space?) {
+    self.mainPath = mainPath
+    super.init(ctx, pathNames: ["MAIN"], parent: parent)
+  }
 
   func getMainDef() -> Def {
     guard let def = defs["main"] else {
-      fail(label: "\(ctx.mainPath): error", "`main` is not defined in MAIN (toplevel namespace).")
+      fail(label: "\(mainPath): error", "`main` is not defined in MAIN (toplevel namespace).")
     }
     return def
   }

@@ -40,7 +40,7 @@ class Emitter {
 }
 
 
-func compileProgram(mainPath: Path, includePaths: [Path], mainSpace: MainSpace, mapPath: Path) {
+func compileProgram(includePaths: [Path], mainSpace: MainSpace, mapPath: Path) {
   let ctx = mainSpace.ctx
   ctx.writeL("#!/usr/bin/env node")
 
