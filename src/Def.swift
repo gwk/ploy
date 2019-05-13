@@ -127,47 +127,48 @@ func simplifyAndTypecheckVal(space: Space, scope: LocalScope, path: String, ann:
 }
 
 
-func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String, selected: Type
+func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, inferred: Type, polyRecord: PolyRecord, hostName: String, selected: Type
  ) -> String {
-  // `type` is the inferred type for the expression: the concrete local type of the function.
+  // `inferred` is the inferred type for the expression: the concrete local type of the function.
   // `selected` is the matching method type, which might not be the same.
-  // It could be a polymorphic Method type, e.g (Int%Int + Str%Str),
-  // or it could be a generic implementation, e.g. T%T.
+  // It could polymorphic, e.g `(Int%Int + Str%Str)`, or it could be generic implementation, e.g. `T%T`.
 
-  let methodHostName = "\(hostName)__\(type.globalIndex)"
-  if let status = polyRecord.typesToMethodStatuses[type] {
+  let methodHostName = "\(hostName)__\(inferred.globalIndex)"
+  if let status = polyRecord.typesToMethodStatuses[inferred] {
     switch status {
     case .compiled: break
     case .pending(let defCtx, let val): // Implemented but not yet compiled.
-      polyRecord.typesToMethodStatuses[type] = .compiled
-      let needsLazy = compileVal(defCtx: defCtx, hostName: methodHostName, val: val, type: type)
+      polyRecord.typesToMethodStatuses[inferred] = .compiled
+      let needsLazy = compileVal(defCtx: defCtx, hostName: methodHostName, val: val, type: inferred)
       assert(!needsLazy)
     }
   } else { // This method type is not directly implemented, but the typechecker thinks it is possible to synthesize.
-    assert(type != selected)
-    polyRecord.typesToMethodStatuses[type] = .compiled
-    synthesizeMethod(globalCtx, sym: sym, type: type, selected: selected, polyRecord: polyRecord,
+    assert(inferred != selected)
+    polyRecord.typesToMethodStatuses[inferred] = .compiled
+    synthesizeMethod(globalCtx, sym: sym, inferred: inferred, selected: selected, polyRecord: polyRecord,
       hostName: hostName, methodHostName: methodHostName)
   }
   return methodHostName
 }
 
 
-func synthesizeMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, selected: Type, polyRecord: PolyRecord,
+func synthesizeMethod(_ globalCtx: GlobalCtx, sym: Sym, inferred: Type, selected: Type, polyRecord: PolyRecord,
  hostName: String, methodHostName: String) {
 
-  guard case .poly(let members) = selected.kind else { fatalError("unexpected selected: \(selected)") }
+  guard case .poly(let members) = selected.kind else {
+    fatalError("inferred: \(inferred); unexpected selected type: \(selected)")
+  }
 
   let em = Emitter(ctx: globalCtx)
   let tableName = "\(methodHostName)__$table" // bling: $table: dispatch table.
   em.str(0, "const \(tableName) = {")
   for member in members {
-    let memberHostName = compileMethod(globalCtx, sym: sym, type: member, polyRecord: polyRecord, hostName: hostName,
+    let memberHostName = compileMethod(globalCtx, sym: sym, inferred: member, polyRecord: polyRecord, hostName: hostName,
       selected: member)
     em.str(2, "'\(member.sigDom)': \(memberHostName),")
   }
   em.append("};") // close table.
-  em.str(0, "const \(methodHostName) = $=>\(tableName)[$.$u]($.$m); // \(type)")
+  em.str(0, "const \(methodHostName) = $=>\(tableName)[$.$u]($.$m); // \(inferred)")
   em.flush()
 }
 

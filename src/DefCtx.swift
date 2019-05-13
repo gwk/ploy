@@ -336,7 +336,11 @@ class DefCtx: Encodable {
     case .val(let type):  return record.isLocal ? type : instantiate(expr: identifier.expr, type: type)
     case .poly(let polyRec):
       assert(!record.isLocal)
-      let type = typeCtx.addFreeType() // Method type. Any necessary instantiation happens during method resolution.
+      let type = typeCtx.addFreeType() // Method type.
+      // Currently, w have to create this free variable and the following relationship,
+      // so that method selection can happen by resolving the relationship.
+      // Otherwise the method synthesizer gets confused. TODO: remove this.
+      // Any necessary instantiation happens during method resolution.
       constrain(actRole: .poly, actExpr: identifier.expr, actType: polyRec.polytype,
         expType: type, "method alias '\(identifier.name)':")
       return type
