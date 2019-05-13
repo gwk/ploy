@@ -127,8 +127,8 @@ func simplifyAndTypecheckVal(space: Space, scope: LocalScope, path: String, ann:
 }
 
 
-func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String,
- selected: Type) -> String {
+func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: PolyRecord, hostName: String, selected: Type
+ ) -> String {
   // `type` is the inferred type for the expression: the concrete local type of the function.
   // `selected` is the matching method type, which might not be the same.
   // It could be a polymorphic Method type, e.g (Int%Int + Str%Str),
@@ -143,7 +143,7 @@ func compileMethod(_ globalCtx: GlobalCtx, sym: Sym, type: Type, polyRecord: Pol
       let needsLazy = compileVal(defCtx: defCtx, hostName: methodHostName, val: val, type: type)
       assert(!needsLazy)
     }
-  } else { // Not explicitly implemented, but typechecker thinks it is possible to synthesize.
+  } else { // This method type is not directly implemented, but the typechecker thinks it is possible to synthesize.
     assert(type != selected)
     polyRecord.typesToMethodStatuses[type] = .compiled
     synthesizeMethod(globalCtx, sym: sym, type: type, selected: selected, polyRecord: polyRecord,
