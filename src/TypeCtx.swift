@@ -21,6 +21,7 @@ struct TypeCtx: Encodable {
   var searchError: RelCon.Err? = nil
   var dumpMethodResolutionErrors = false
 
+
   mutating func addFreeType() -> Type {
     let idx = freeUnifications.count
     freeUnifications.append(nil)
@@ -218,6 +219,7 @@ struct TypeCtx: Encodable {
     default: throw rel.error({"\($0) type is not \($1) type"})
     }
   }
+
 
   enum MethodResult {
     case none
