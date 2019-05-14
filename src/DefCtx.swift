@@ -330,12 +330,14 @@ class DefCtx: Encodable {
 
   func localTypeFor(scope: LocalScope, identifier: Identifier) -> Type {
     let record = scope.getRecord(identifier: identifier)
+    let isLocal = record.isLocal // If a refrence is local, then do not want to turn typevars into frees.
+    //^ If we do, then those frees may go unresolved.
     symRecords[identifier.lastSym] = record
     switch record.kind {
-    case .lazy(let type): return record.isLocal ? type : instantiate(expr: identifier.expr, type: type)
-    case .val(let type):  return record.isLocal ? type : instantiate(expr: identifier.expr, type: type)
+    case .lazy(let type): return isLocal ? type : instantiate(expr: identifier.expr, type: type)
+    case .val(let type):  return isLocal ? type : instantiate(expr: identifier.expr, type: type)
     case .poly(let polyRec):
-      assert(!record.isLocal)
+      assert(!isLocal)
       let type = typeCtx.addFreeType() // Method type.
       // Currently, w have to create this free variable and the following relationship,
       // so that method selection can happen by resolving the relationship.
