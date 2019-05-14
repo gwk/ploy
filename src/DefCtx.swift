@@ -41,7 +41,7 @@ class DefCtx: Encodable {
     } catch let err as RelCon.Err {
       dumpDbg()
       typeCtx.error(err)
-    } catch let err { fatalError(String(describing: err)) }
+    } catch let err { fatal(label: "typecheck: unknown error", err) }
     // fill in frees that were only bound to Never.
     typeCtx.fillFreeNevers()
     // check that resolution is complete.

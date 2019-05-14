@@ -37,7 +37,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
       case .sig: return "%"
       case .refinement: return ":?"
       case .req: return "::"
-      default: fatalError()
+      default: fatal(self)
       }
     }
   }
@@ -215,12 +215,12 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
   var freeIndex: Int {
     if case .free(let index) = kind { return index }
-    fatalError()
+    fatal(self)
   }
 
   var varName: String {
     if case .var_(let name) = kind { return name }
-    fatalError()
+    fatal(self)
   }
 
   var frees: Set<Type> {
@@ -265,7 +265,7 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
 
 
   var polyDomRet: (Type, Type) {
-    guard case .poly(let members) = self.kind else { fatalError() }
+    guard case .poly(let members) = self.kind else { fatal(self) }
     var doms = [Type]()
     var rets = [Type]()
     for member in members {
@@ -282,21 +282,21 @@ class Type: CustomStringConvertible, Hashable, Comparable, Encodable {
   var sigDom: Type {
     switch self.kind {
     case .sig(let dom, _): return dom
-    default: fatalError()
+    default: fatal(label: "non-sig type", self)
     }
   }
 
   var sigRet: Type {
     switch self.kind {
     case .sig(_, let ret): return ret
-    default: fatalError()
+    default: fatal(label: "non-sig type", self)
     }
   }
 
   var sigDomRet: (Type, Type) {
     switch self.kind {
     case .sig(let domRet): return domRet
-    default: fatalError()
+    default: fatal(label: "non-sig type", self)
     }
   }
 
