@@ -151,7 +151,7 @@ struct TypeCtx: Encodable {
 
     case (.free(let ia), _):
       // If expected is Never then it is ok to unify; the caller expects to never return.
-      unify(freeIndex: ia, to: exp);
+      unify(freeIndex: ia, to: exp)
       return true
 
     case (_, .free(let ie)):
@@ -411,7 +411,7 @@ struct TypeCtx: Encodable {
         try resolveSub(rel,
           actType: actVariant.type, actDesc: "variant",
           expType: expVariant.type, expDesc: "variant")
-      return true
+        return true
       }
     }
     throw rel.error({"\($0) variants do not contain \($1) variant label: `-\(expVariant.label)`"})
