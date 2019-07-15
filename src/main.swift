@@ -6,7 +6,7 @@ import Foundation
 let usageMsg = """
 Ploy compiler usage:
 
-ploy build lib-src-paths… -mapper mapper-path -main main-src-path -o out-path.
+ploy build -mapper mapper-path lib-src-paths… -main main-src-path -o out-path.
 
 ploy test-types src-type dst-type
 """
@@ -23,9 +23,10 @@ func main() {
 
   if processArguments.count < 2 { fail(usageMsg) }
 
+  let subcommand = processArguments[1]
   let args = Array(processArguments[2...])
 
-  switch processArguments[1] {
+  switch subcommand {
   case "build": ploy_build(args: args)
   case "test-types": ploy_test_types(args: args)
   default: fail(usageMsg)
