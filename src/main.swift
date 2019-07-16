@@ -140,11 +140,22 @@ func ploy_test_types(args:[String]) {
   let srcScope = LocalScope(parent: rootSpace)
   let dstScope = LocalScope(parent: rootSpace)
 
-  let src_type = src_expr.type(srcScope, "src")
-  let dst_type = dst_expr.type(dstScope, "dst")
+  let srcType = src_expr.type(srcScope, "src")
+  let dstType = dst_expr.type(dstScope, "dst")
 
-  outL(src_type)
-  outL(dst_type)
+  outL(srcType)
+  outL(dstType)
+
+  var typechecker = TypeChecker()
+
+  let comparison = typechecker.compare(src: srcType, dst: dstType)
+  switch comparison {
+    case .exact: outL("Exact.")
+    case .subtype: outL("Subtype.")
+    case .free: outL("Free.")
+    default:
+      outL("Incompatible: \(comparison): \(typechecker.incompatibilityPath)")
+  }
 }
 
 
