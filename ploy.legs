@@ -1,5 +1,7 @@
-// © 2017 George King. Permission to use this file is granted in license-quilt.txt.
+# License
+© 2017 George King. Permission to use this file is granted in license-quilt.txt.
 
+# Patterns
 
 newline: \n
 spaces: \s+
