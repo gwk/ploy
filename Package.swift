@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 // © 2016 George King. Permission to use this file is granted in license-ploy.txt.
 
 
